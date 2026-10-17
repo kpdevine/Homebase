@@ -34,7 +34,7 @@ Current branch: `codex/homebase-prototype`. Current tag: `homebase-review-motion
 
 Development remains local. No production framework, database, hosting, authentication, synchronization, or device platform has been selected. The GitHub backup repository is `kpdevine/Homebase`; the development branch is `codex/homebase-prototype`. Browser records remain local and are excluded from Git.
 
-GitHub backups currently use the authenticated connector because command-line Git has no saved login. The GitHub development branch contains a source snapshot based on the existing planning branch; earlier development history and checkpoint tags remain in this local checkout. Automatic approval review withheld the optional `docs/handwriting/specimen.png` image from the public repository. The local image remains intact. Do not upload that image, or push local history containing it, without the owner's explicit approval.
+GitHub backups currently use the authenticated connector because command-line Git has no saved login. The GitHub development branch contains a source snapshot based on the existing planning branch; earlier development history and checkpoint tags remain in this local checkout. On October 17, 2026, the owner gave standing authorization to upload project updates to `kpdevine/Homebase`, including the previously withheld `docs/handwriting/specimen.png` font specimen. The GitHub snapshot includes the application source, fonts, tests, planning files, and font specimens. Browser records remain local and excluded from Git.
 
 ## Verification and next work
 
