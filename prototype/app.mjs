@@ -35,6 +35,7 @@ let calendarMonth = selectedDate;
 let reviewSessionDate = null;
 let dragging = false;
 let recapDate = null;
+let targetScope=null,targetSignature='',targetDraft=new Map(),targetBaseline=[],targetDrag=null;
 let taskComposerTrigger;
 const expandedTasks = new Set();
 let displayName = 'Kieran';
@@ -238,6 +239,64 @@ sentimentMeter.addEventListener('keydown',event=>{
   else if(event.key==='Home'||event.key==='End') {event.preventDefault();updateSentiments({rating:event.key==='Home'?0:10});}
 });
 $('#clear-sentiments-rating').addEventListener('click',()=>{ $('#sentiments-rating').setCustomValidity('');updateSentiments({rating:null}); });
+function renderTargetEditor(week,reset=false) {
+  const values=[...GROUPS.map(group=>({...group,target:week.groups.find(item=>item.id===group.id)?.target??group.target})),...week.groups.filter(group=>!GROUPS.some(active=>active.id===group.id))];
+  const signature=JSON.stringify(week.groups.map(group=>[group.id,group.target]));
+  if(!reset&&targetScope===week.start&&targetSignature===signature)return;
+  targetScope=week.start;targetSignature=signature;targetBaseline=values;
+  targetDraft=new Map(values.map(group=>[group.id,Math.min(20,group.target)]));
+  $('#target-inputs').innerHTML=values.map(group=>`<div class="target-control"><h4 id="target-label-${group.id}">${escapeHtml(group.name)}</h4><div class="target-meter" data-target-meter="${group.id}" role="slider" tabindex="0" aria-label="${escapeHtml(group.name)} weekly set target" aria-describedby="target-meter-help" aria-valuemin="0" aria-valuemax="20"><svg viewBox="0 0 220 210" aria-hidden="true"><path class="meter-track" d="${meterPath()}"/><path class="meter-fill" d="${meterPath()}" pathLength="100"/><circle class="meter-knob" r="7"/></svg><div class="target-number" aria-hidden="true"><strong></strong><small>sets / week</small></div><span class="target-endpoint start" aria-hidden="true">0</span><span class="target-endpoint end" aria-hidden="true">20</span></div><div class="target-adjustments"><button type="button" class="adjust-button" data-adjust-target="${group.id}" data-direction="-1" aria-label="Decrease ${escapeHtml(group.name)} target">−</button><button type="button" class="adjust-button" data-adjust-target="${group.id}" data-direction="1" aria-label="Increase ${escapeHtml(group.name)} target">+</button></div></div>`).join('');
+  const larger=values.filter(group=>group.target>20);
+  $('#target-legacy-notice').hidden=!larger.length;
+  $('#target-legacy-notice').textContent=larger.length?`Previously saved: ${larger.map(group=>`${escapeHtml(group.name)} ${group.target}`).join(', ')}. These remain saved until you save the displayed 0–20 targets.`:'';
+  for(const group of values)paintTarget(group.id);
+}
+function paintTarget(id) {
+  const meter=$(`[data-target-meter="${id}"]`),value=targetDraft.get(id),point=meterPoint(1+value/20*9);
+  meter.setAttribute('aria-valuenow',value);meter.setAttribute('aria-valuetext',value===0?'0 sets. No goal for this muscle.':`${value} sets per week`);
+  meter.querySelector('.target-number strong').textContent=value;
+  setMeter(meter.querySelector('.meter-fill'),value*5,{immediate:targetDrag!==null});
+  const knob=meter.querySelector('.meter-knob');knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);
+  $(`[data-adjust-target="${id}"][data-direction="-1"]`).disabled=value===0;
+  $(`[data-adjust-target="${id}"][data-direction="1"]`).disabled=value===20;
+  const total=[...targetDraft.values()].reduce((sum,value)=>sum+value,0),dirty=targetBaseline.some(group=>group.target!==targetDraft.get(group.id));
+  $('#target-draft-status').textContent=`${total} goal sets per week · ${dirty?'Unsaved changes':'Targets ready to edit'}`;
+}
+function changeTarget(id,value) {targetDraft.set(id,Math.max(0,Math.min(20,Math.round(value))));paintTarget(id);}
+$('#target-inputs').addEventListener('click',event=>{
+  const button=event.target.closest('[data-adjust-target]');if(!button)return;
+  changeTarget(button.dataset.adjustTarget,targetDraft.get(button.dataset.adjustTarget)+Number(button.dataset.direction));
+});
+$('#target-inputs').addEventListener('keydown',event=>{
+  const meter=event.target.closest('[data-target-meter]');if(!meter||event.altKey||event.ctrlKey||event.metaKey)return;
+  const id=meter.dataset.targetMeter,direction={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[event.key];
+  if(direction){event.preventDefault();changeTarget(id,targetDraft.get(id)+direction);}
+  else if(event.key==='Home'||event.key==='End'){event.preventDefault();changeTarget(id,event.key==='Home'?0:20);}
+});
+function pointTarget(event,meter) {
+  const rect=meter.querySelector('svg').getBoundingClientRect();
+  return scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:20,step:1});
+}
+$('#target-inputs').addEventListener('pointerdown',event=>{
+  const meter=event.target.closest('[data-target-meter]');
+  if(!meter||!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
+  meter.focus({preventScroll:true});
+  const rect=meter.querySelector('svg').getBoundingClientRect();
+  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
+  event.preventDefault();targetDrag={id:meter.dataset.targetMeter,pointer:event.pointerId};meter.setPointerCapture(event.pointerId);meter.classList.add('dragging');
+  const value=pointTarget(event,meter);if(value!==null)changeTarget(targetDrag.id,value);
+});
+$('#target-inputs').addEventListener('pointermove',event=>{
+  if(!targetDrag||targetDrag.pointer!==event.pointerId)return;
+  const meter=$(`[data-target-meter="${targetDrag.id}"]`),value=pointTarget(event,meter);
+  if(value!==null&&value!==targetDraft.get(targetDrag.id))changeTarget(targetDrag.id,value);
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])$('#target-inputs').addEventListener(type,event=>{
+  if(!targetDrag||targetDrag.pointer!==event.pointerId)return;
+  const meter=$(`[data-target-meter="${targetDrag.id}"]`);targetDrag=null;meter.classList.remove('dragging');
+  if(meter.hasPointerCapture(event.pointerId))meter.releasePointerCapture(event.pointerId);
+});
+$('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.loadWeek(selectedDate),true);announce('Target edits discarded. Saved targets are unchanged.');});
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
@@ -248,8 +307,8 @@ function renderGym() {
   $('#gym-form').hidden=day.trainingMode!=='training';
   $('#training-rest-hint').textContent=entries.length?'Sets saved for this date. Remove them before switching to No.':day.trainingMode==='rest'?'Planned rest is saved and excluded from your daily average.':day.trainingMode==='unplanned-rest'?'No lifting recorded. Your gym score follows your weekly pace.':noLift?'Choose whether this rest was planned before confirming review.':day.trainingMode==='training'?'Log your sets below. Your score follows credited weekly progress.':'Answer Yes or No to log this day.';
   const expected=Math.round(pace.expected*10)/10;
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.planned?'Planned rest · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.credited} goal sets · ${pace.actual} total sets through ${shortDate(selectedDate)}</span><small>Day ${pace.elapsed} of 7 · ${expected} goal sets needed for a 10 · ${pace.target} weekly goal sets</small></div>`;
-  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining · ${group.credited}/${group.target}</small></span>`).join('')}</div><p>Based on progress through this date.${pace.planned?' Saved for your next lifting day.':''}</p>`:'<p>Every muscle target is met. Extra sets still stay in your log.</p>'}`;
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.planned?'Planned rest · not scored':pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.credited} goal sets · ${pace.actual} total sets through ${shortDate(selectedDate)}</span><small>${pace.target?`Day ${pace.elapsed} of 7 · ${expected} goal sets needed for a 10 · ${pace.target} weekly goal sets`:'Set muscle targets below to include gym in the daily average.'}</small></div>`;
+  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining · ${group.credited}/${group.target}</small></span>`).join('')}</div><p>Based on progress through this date.${pace.planned?' Saved for your next lifting day.':''}</p>`:pace.target?'<p>Every muscle target is met. Extra sets still stay in your log.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
   $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${entry.sets} sets · ${shortDate(entry.date)}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : `<div class="training-empty"><strong>${day.trainingMode === 'rest' ? 'Planned rest' : day.trainingMode === 'unplanned-rest' ? 'Unplanned rest' : 'No sets logged.'}</strong><p>${noLift ? 'No sets recorded for this date.' : 'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
   const weekCredit=week.groups.reduce((sum,group)=>sum+Math.min(group.completed,group.target),0);
@@ -260,7 +319,7 @@ function renderGym() {
   const volumeGroups=[...week.groups];
   for(const entry of week.entries) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
   $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
-  if (!$('#targets-form').contains(document.activeElement)) $('#target-inputs').innerHTML = GROUPS.map(group => `<label>${group.name}<input type="number" aria-label="${group.name} weekly set target" name="${group.id}" min="1" max="1000" step="1" value="${week.groups.find(item => item.id === group.id)?.target ?? group.target}" required></label>`).join('');
+  renderTargetEditor(week);
   $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${muscleName(entry.groupId)} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
 }
 function renderReview() {
@@ -575,7 +634,7 @@ function finishDragging(event) {
 }
 for (const type of ['pointerup','pointercancel','lostpointercapture']) nutritionMeter.addEventListener(type, finishDragging);
 
-$('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${group.name}</span></label>`).join('')}</div>`;
+$('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${escapeHtml(group.name)}</span></label>`).join('')}</div>`;
 function renderLogButton() { $('#log-sets').textContent=`+ Log ${muscleName($('[name="muscle-group"]:checked')?.value || '')} sets`; }
 $('#gym-muscles').addEventListener('change',renderLogButton);
 renderLogButton();
@@ -605,7 +664,7 @@ $('#toggle-gym-log').addEventListener('click', () => {
 });
 $('#targets-form').addEventListener('submit', event => {
   event.preventDefault();
-  const values = GROUPS.map(group => ({ id:group.id, target:Number($(`#targets-form [name="${group.id}"]`).value) }));
+  const values = [...targetDraft].map(([id,target])=>({id,target}));
   try { store.setWeekTargets(selectedDate, values); render(); announce('Targets saved. They repeat from this week until edited.'); }
   catch (error) { announce(error.message); }
 });

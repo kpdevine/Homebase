@@ -33,3 +33,9 @@ The suggestion box ranks unfinished muscles by the lowest completed fraction of 
 The small **i** beside Settings opens the full scoring explanation. Calendar daily/weekly/monthly rings, overview, final review, and recaps share the same calculation. Browser records stay local and out of Git.
 
 The weekly panel has separate Goal sets (credited / target) and Total sets (all actual sets) counters. The selected day also shows both totals through that date. Extra sets increase only Total sets after that muscle target is met.
+
+## Target circles
+
+Edit weekly targets opens one draggable circle for each active muscle, plus a circle for an existing legacy Legs goal. Circles snap to whole numbers 0–20; arrows and plus/minus adjust by one, Home selects zero, End selects 20. Changes remain a draft until Save; Discard restores the saved values. Zero removes that muscle from goal credit and suggestions while preserving logged sets. If every target is zero, answered gym days are excluded from the daily average. Old backups with targets above 20 still load unchanged; the editor identifies those saved values and presents a capped draft for explicit saving.
+
+Target circles all use one neutral ink color. Their arc length represents the selected number; color does not imply that a higher set goal is better.

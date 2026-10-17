@@ -21,13 +21,13 @@ export function moveMonth(key, amount) {
   date.setUTCMonth(date.getUTCMonth() + amount);
   return dateKey(date);
 }
-export function scoreFromPoint(x, y, centerX, centerY, {min=1,max=10}={}) {
+export function scoreFromPoint(x, y, centerX, centerY, {min=1,max=10,step=.1}={}) {
   if (Math.hypot(x - centerX, y - centerY) < 10) return null;
   const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
   let offset = (angle - 135 + 720) % 360;
   // The 90-degree gap at the bottom snaps to its nearest endpoint.
   if (offset > 270) offset = offset < 315 ? 270 : 0;
-  return Math.round((min + offset / 270 * (max-min)) * 10) / 10;
+  return Number((Math.round((min + offset / 270 * (max-min))/step)*step).toFixed(6));
 }
 export function meterPoint(score, radius = 82, center = 110) {
   const angle = (135 + (score - 1) / 9 * 270) * Math.PI / 180;
@@ -204,9 +204,10 @@ export function createStore(options = {}) {
       }
     },
     setWeekTargets(key, values) {
-      if (!Array.isArray(values) || values.length !== GROUPS.length || new Set(values.map(item => item.id)).size !== GROUPS.length || values.some(item => !GROUPS.some(group => group.id === item.id) || !Number.isInteger(item.target) || item.target < 1 || item.target > 1000)) throw new RangeError('Enter a whole target from 1 to 1000 for each muscle group.');
+      const legacyIds=effectiveTargets(key).groups.filter(group=>!GROUPS.some(active=>active.id===group.id)).map(group=>group.id);
+      if (!Array.isArray(values) || values.length < GROUPS.length || values.length > GROUPS.length+legacyIds.length || new Set(values.map(item => item.id)).size !== values.length || GROUPS.some(group=>!values.some(item=>item.id===group.id)) || values.some(item => !GROUPS.some(group => group.id === item.id)&&!legacyIds.includes(item.id) || !Number.isInteger(item.target) || item.target < 0 || item.target > 20)) throw new RangeError('Enter a whole target from 0 to 20 for each muscle group.');
       const before=trainingScores(),week=sampleWeekStart(key), legacy=effectiveTargets(key).groups.filter(group=>!GROUPS.some(active=>active.id===group.id));
-      targets.set(week, [...GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })), ...legacy]);
+      targets.set(week, [...GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })), ...legacy.map(group=>({...group,target:values.find(item=>item.id===group.id)?.target??group.target}))]);
       reopenChangedTraining(before);
     },
     loadWeek,

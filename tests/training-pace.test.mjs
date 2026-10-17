@@ -50,7 +50,8 @@ test('future logs cannot rewrite earlier scores; credit resets each Monday and c
   store.setTrainingMode(addDays(monday,7),'unplanned-rest');assert.equal(store.trainingProgress(addDays(monday,7)).score,0);
 });
 test('rounding cannot award a perfect score before meeting the pace target',()=>{
-  const store=fresh();store.setWeekTargets(monday,GROUPS.map(group=>({id:group.id,target:100})));
+  const snapshot=fresh().exportSnapshot();snapshot.targets[0][1].forEach(group=>group.target=100);
+  const store=createStore({seed:false,snapshot});
   const sunday=addDays(monday,6);
   for(const group of GROUPS)store.addGymEntry(sunday,group.id,group.id==='chest'?99:100);
   assert.equal(store.trainingProgress(sunday).score,9.9);

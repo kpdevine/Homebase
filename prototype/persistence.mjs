@@ -75,7 +75,7 @@ export function validateSnapshot(value) {
     assert(Array.isArray(pair) && pair.length === 2 && validDate(pair[0]) && !weeks.has(pair[0]) && Array.isArray(pair[1]), 'target week.'); weeks.add(pair[0]);
     const groups = new Set();
     return [pair[0], pair[1].map(group => {
-      assert(group && groupIds.includes(group.id) && !groups.has(group.id) && Number.isInteger(group.target) && group.target > 0 && group.target <= 1000 && typeof group.name === 'string' && group.name.length <= 50, 'target values.'); groups.add(group.id);
+      assert(group && groupIds.includes(group.id) && !groups.has(group.id) && Number.isInteger(group.target) && group.target >= 0 && group.target <= 1000 && typeof group.name === 'string' && group.name.length <= 50, 'target values.'); groups.add(group.id);
       return { id: group.id, name: group.name, target: group.target };
     })];
   });

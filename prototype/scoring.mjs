@@ -27,7 +27,7 @@ export function summarizeDay(day, trainingEntries = [], week) {
   const sections = [
     { id: 'nutrition', label: 'Nutrition', score: day.nutrition, detail: day.nutrition === null ? 'Not logged yet' : `${day.nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
     { id: 'training', label: 'Daily training', score: training.score, logged:training.logged, excluded:training.excluded,
-      detail:training.planned?'Planned rest · not scored':training.logged?`${training.credited} / ${training.target} goal sets · ${training.unplanned?'unplanned rest':'weekly pace'}`:'Answer lifting or rest' },
+      detail:training.planned?'Planned rest · not scored':training.logged&&!training.target?'No targets · not scored':training.logged?`${training.credited} / ${training.target} goal sets · ${training.unplanned?'unplanned rest':'weekly pace'}`:'Answer lifting or rest' },
     { id: 'checklists', label: 'Checklist', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
   ];
   const requiredLogged=sections.filter(section=>section.logged??section.score!==null).length;

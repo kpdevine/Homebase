@@ -118,7 +118,7 @@ test('target editing is per week and rejected targets leave the week intact', ()
   assert.deepEqual(store.loadWeek(DEMO_TODAY),before);
   assert.ok(store.loadWeek(next).groups.every(group=>group.target===8));
   assert.throws(()=>store.setWeekTargets(next,[{id:'chest',target:1}]));
-  assert.throws(()=>store.setWeekTargets(next,GROUPS.map(group=>({id:group.id,target:0}))));
+  assert.throws(()=>store.setWeekTargets(next,GROUPS.map(group=>({id:group.id,target:-1}))));
 });
 test('change hook emits a valid detached snapshot only after successful mutations', () => {
   const changes=[];const store=createStore({seed:false,onChange:snapshot=>changes.push(snapshot)});
