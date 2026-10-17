@@ -42,6 +42,32 @@
 .reset-message {font:400 11px/1.7 var(--font-ui);margin-top:12px}
 #confirm-reset {background:#49345f;border-color:#302143;color:#f1deee}
 #confirm-reset:hover {background:#5b3a6d}
+.sentiments-editor {display:grid;grid-template-columns:minmax(0,1.65fr) minmax(220px,1fr);gap:30px}
+.sentiments-editor label {display:block;font:400 15px/1.5 var(--font-display);margin-bottom:12px;text-transform:uppercase;letter-spacing:.035em}
+.sentiments-editor label span {font:400 11px var(--font-ui);text-transform:none;letter-spacing:0}
+.sentiments-editor textarea[data-notes] {width:100%;min-height:300px;font-size:20px;line-height:1.7}
+.sentiments-editor .hint {font:400 11px/1.7 var(--font-ui);margin:12px 0;color:var(--muted)}
+.sentiments-rating {border-left:1px solid var(--line);padding-left:28px}
+#sentiments-meter {position:relative;max-width:260px}
+.sentiment-endpoint {position:absolute;bottom:6%;font:400 12px var(--font-display);color:var(--muted);pointer-events:none}
+.sentiment-endpoint.start {left:20%}
+.sentiment-endpoint.end {right:18%}
+.sentiment-recap h4 {flex-wrap:wrap}
+.sentiment-recap .text-button {font:inherit;color:inherit;text-transform:uppercase;padding:0}
+.sentiment-recap h4 span {white-space:normal}
+@media(min-width:900px) and (max-height:650px) {
+  .breakdown-list:has(.sentiments) {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .breakdown-list:has(.sentiments) .breakdown-item {min-height:76px;padding:5px;gap:5px}
+  .breakdown-list:has(.sentiments) .score-circle {width:34px;height:34px;flex-basis:34px}
+  .breakdown-list:has(.sentiments) .score-circle>span {font-size:11px}
+  .breakdown-list:has(.sentiments) .breakdown-copy strong {font-size:10px}
+  .breakdown-list:has(.sentiments) .breakdown-copy small,.breakdown-list:has(.sentiments) .breakdown-state {font-size:8px}
+  .breakdown-list:has(.sentiments) .breakdown-chevron {display:none}
+}
+@media(max-width:899px) {
+  .sentiments-editor {grid-template-columns:1fr;gap:22px}
+  .sentiments-rating {border-left:0;border-top:1px solid var(--line);padding:22px 0 0}
+}
 @media(min-width:900px) and (max-height:850px) {
   .day-score .hero-meter {max-width:230px}.hero-score .meter-number {font-size:86px}
   .breakdown-item .score-circle {width:60px;height:60px;flex-basis:60px}.breakdown-item .score-circle>span {font-size:18px}

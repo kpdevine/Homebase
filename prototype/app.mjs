@@ -12,7 +12,7 @@ const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const refreshNoteCarets=handwritingCarets($$('[data-notes]'));
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[character]));
-const scoreText = score => score === null ? '—' : score.toFixed(2).replace(/(\.\d)0$/, '$1');
+const scoreText = score => score === null ? '—' : score === 10 ? '10' : score.toFixed(2).replace(/(\.\d)0$/, '$1');
 const scoreMarkup = score => { const [whole,fraction]=scoreText(score).split('.'); return `<span class="score-whole">${whole}</span>${fraction?`<span class="score-fraction">.${fraction}</span>`:''}`; };
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const timeZone = 'America/Chicago';
@@ -46,8 +46,8 @@ let store = createStore({ today: selectedDate, seed: preview, snapshot: loaded.s
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'Checklists', history:'Calendar' };
-const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', history:'history-view' };
+const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'Checklists', sentiments:'Sentiments', history:'Calendar' };
+const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view' };
 
 function queueSave(snapshot) {
   pendingSnapshot = snapshot;
@@ -150,9 +150,9 @@ function renderScore() {
   $('#day-gradient-start').setAttribute('stop-color',scoreColor(summary.score));
   $('#day-gradient-start').setAttribute('stop-opacity', '.45');
   $('#day-gradient-end').setAttribute('stop-color',scoreColor(summary.score));
-  meter.setAttribute('aria-label', summary.score === null ? 'No daily score yet. Log a category to get started.' : `${summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(summary.score)} out of 10. ${summary.logged} of 3 categories logged.`);
+  meter.setAttribute('aria-label', summary.score === null ? 'No daily score yet. Log a category to get started.' : `${summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(summary.score)} out of 10. ${summary.logged} of ${summary.sections.length} categories logged.`);
   const rewardLabel=reward?(summary.provisional?'High so far':summary.score===10?'Perfect score':'High score'):'';
-  $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/3 logged` : 'All categories logged'].filter(Boolean).join(' · ');
+  $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/${summary.sections.length} logged` : 'All categories logged'].filter(Boolean).join(' · ');
   $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of 3 section reviews confirmed.`;
   const button = $('#complete-day');
   const missing = progress.sections.find(section => !section.ready);
@@ -161,9 +161,9 @@ function renderScore() {
   button.classList.toggle('is-complete', !!day.completedAt);
   button.innerHTML = day.completedAt ? `View day summary ${icon('arrow')}` : progress.canComplete ? `Review full day ${icon('arrow')}` : `${progress.reviewedCount || reviewSessionDate === selectedDate ? 'Continue' : 'Start'} day review ${icon('arrow')}`;
   $('#overview-sections').innerHTML = summary.sections.map(section => {
-    const state = progress.sections.find(item => item.id === section.id);
+    const state = progress.sections.find(item => item.id === section.id) || {ready:true,reviewed:false};
     const missing = section.score === null || !state.ready;
-    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Needs review'}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(missing ? 'warning' : state.reviewed ? 'check' : 'arrow')}${missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Ready to review'}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
+    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${section.optional ? 'Optional rating included' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Needs review'}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(section.optional ? 'check' : missing ? 'warning' : state.reviewed ? 'check' : 'arrow')}${section.optional ? 'Included in score' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Ready to review'}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
   $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All three reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
 }
@@ -184,6 +184,60 @@ function renderRating() {
   $('#clear-rating').disabled = score === null;
   $('#rating-minus').disabled = score === 1; $('#rating-plus').disabled = score === 10;
 }
+function renderSentiments() {
+  const {rating}=store.loadDay(selectedDate).sentiments,input=$('#sentiments-rating'),meter=$('#sentiments-meter');
+  if(document.activeElement!==input)input.value=rating===null?'':rating;
+  meter.style.setProperty('--score-color',scoreColor(rating));
+  meter.querySelector('.meter-track').setAttribute('d',meterPath());
+  const fill=meter.querySelector('.meter-fill');fill.setAttribute('d',meterPath());
+  setMeter(fill,rating===null?0:rating*10,{immediate:sentimentPointer!==-1||document.activeElement===input});
+  const point=meterPoint(1+(rating??0)*.9),knob=meter.querySelector('.meter-knob');
+  knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.style.opacity=rating===null?'.4':'1';
+  meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
+  meter.querySelector('.meter-out-of').textContent=rating===null?'not rated yet':'out of 10';
+  meter.setAttribute('aria-valuenow',rating??0);meter.setAttribute('aria-valuetext',rating===null?'Not rated. Optional rating from 0 to 10.':`${scoreText(rating)} out of 10`);
+  $('#sentiments-minus').disabled=rating===0;$('#sentiments-plus').disabled=rating===10;
+  $('#clear-sentiments-rating').disabled=rating===null;
+  $('#sentiments-score-hint').textContent=rating===null?'Not rated · excluded from the daily score.':`${scoreText(rating)} / 10 · included in the daily score.`;
+}
+function updateSentiments(changes) {
+  store.updateSentiments(selectedDate,changes);
+  renderSentiments();renderScore();renderReview();renderHeader();
+}
+$('#sentiments-notes').addEventListener('input',event=>updateSentiments({notes:event.target.value}));
+$('#sentiments-rating').addEventListener('input',event=>{
+  const input=event.target;input.setCustomValidity('');
+  if(input.validity.valid)updateSentiments({rating:input.value===''?null:Number(input.value)});
+});
+$('#sentiments-rating').addEventListener('blur',()=>{
+  if(!$('#sentiments-rating').checkValidity()) {$('#sentiments-rating').value=store.loadDay(selectedDate).sentiments.rating??'';}
+});
+let sentimentPointer=-1;
+function adjustSentiments(direction) {const value=store.loadDay(selectedDate).sentiments.rating;updateSentiments({rating:value===null?0:Math.max(0,Math.min(10,Math.round(value*10+direction)/10))});}
+$('#sentiments-minus').addEventListener('click',()=>adjustSentiments(-1));
+$('#sentiments-plus').addEventListener('click',()=>adjustSentiments(1));
+const sentimentMeter=$('#sentiments-meter');
+function dragSentiments(event) {
+  const rect=sentimentMeter.querySelector('svg').getBoundingClientRect();
+  const score=scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:10});
+  if(score!==null&&score!==store.loadDay(selectedDate).sentiments.rating)updateSentiments({rating:score});
+}
+sentimentMeter.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
+  const rect=sentimentMeter.querySelector('svg').getBoundingClientRect();
+  sentimentMeter.focus({preventScroll:true});
+  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
+  event.preventDefault();sentimentPointer=event.pointerId;sentimentMeter.setPointerCapture(event.pointerId);sentimentMeter.classList.add('dragging');dragSentiments(event);
+});
+sentimentMeter.addEventListener('pointermove',event=>{if(sentimentPointer===event.pointerId)dragSentiments(event);});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])sentimentMeter.addEventListener(type,event=>{if(sentimentPointer!==event.pointerId)return;sentimentPointer=-1;sentimentMeter.classList.remove('dragging');if(sentimentMeter.hasPointerCapture(event.pointerId))sentimentMeter.releasePointerCapture(event.pointerId);});
+sentimentMeter.addEventListener('keydown',event=>{
+  if(event.altKey||event.ctrlKey||event.metaKey)return;
+  const direction={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[event.key];
+  if(direction) {event.preventDefault();adjustSentiments(direction);}
+  else if(event.key==='Home'||event.key==='End') {event.preventDefault();updateSentiments({rating:event.key==='Home'?0:10});}
+});
+$('#clear-sentiments-rating').addEventListener('click',()=>{ $('#sentiments-rating').setCustomValidity('');updateSentiments({rating:null}); });
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
@@ -221,10 +275,10 @@ function renderReview() {
 }
 function renderNotes() {
   const notes = store.loadDay(selectedDate).notes;
-  $$('[data-notes]').forEach(input => { const value=input.dataset.notes==='day'?store.loadDay(selectedDate).comment:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
+  $$('[data-notes]').forEach(input => { const value=input.dataset.notes==='day'?store.loadDay(selectedDate).comment:input.dataset.notes==='sentiments'?store.loadDay(selectedDate).sentiments.notes:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
   refreshNoteCarets();
 }
-$$('[data-notes]').filter(input=>input.dataset.notes!=='day').forEach(input => input.addEventListener('input', () => {
+$$('[data-notes]').filter(input=>!['day','sentiments'].includes(input.dataset.notes)).forEach(input => input.addEventListener('input', () => {
   store.updateNotes(selectedDate, input.dataset.notes, input.value);
   renderReview(); renderHeader(); renderScore();
 }));
@@ -258,7 +312,7 @@ function recapMarkup({final=false}={}) {
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
   return `
     <div class="recap-score" role="group" aria-label="${recap.score===null?'No daily score yet':`Daily score ${scoreText(recap.score)} out of 10`}">
-      ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of 3 logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
+      ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of ${recap.sections.length} logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
     </div>
     <div class="recap-metrics">
       <button data-open-section="nutrition" aria-label="Open nutrition for this day"><span>Nutrition</span><strong>${scoreText(day.nutrition)}<small>${day.nutrition===null?'':' / 10'}</small></strong></button>
@@ -269,6 +323,7 @@ function recapMarkup({final=false}={}) {
     ${recap.tasks.length?`<details class="recap-section" open><summary>Checklist <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
     ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
+    ${day.sentiments.notes.trim()||day.sentiments.rating!==null?`<section class="recap-section recap-note sentiment-recap"><h4><button class="text-button" data-open-section="sentiments">Sentiments</button><span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}
     ${!final&&day.comment?.trim()?`<section class="recap-section recap-note"><h4>Day comment</h4><p>${escapeHtml(day.comment)}</p></section>`:''}`;
 }
 function renderRecap() {
@@ -277,7 +332,7 @@ function renderRecap() {
   if(recapDate&&recapDate!==selectedDate)reveal($('#history-content'));
   recapDate=selectedDate;
 }
-function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); renderSaveStatus(); }
+function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); renderSaveStatus(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
   const changed=view!==next;

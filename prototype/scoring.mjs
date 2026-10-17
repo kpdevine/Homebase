@@ -27,9 +27,11 @@ export function summarizeDay(day, trainingEntries = []) {
     { id: 'training', label: 'Daily training', score: training, detail: day.trainingMode === 'rest' ? 'Rest day recorded' : trainingEntries.length ? `${trainingEntries.reduce((sum, entry) => sum + entry.sets, 0)} sets logged` : 'Log sets or a rest day' },
     { id: 'checklists', label: 'Checklist', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
   ];
+  const requiredLogged=sections.filter(section=>section.score!==null).length;
+  if(day.sentiments?.rating!==null && day.sentiments?.rating!==undefined) sections.push({id:'sentiments',label:'Sentiments',score:day.sentiments.rating,detail:`${day.sentiments.rating.toFixed(1)} out of 10 · optional`,optional:true});
   const available = sections.filter(section => section.score !== null);
   const score = available.length ? Math.round(available.reduce((sum, section) => sum + section.score, 0) / available.length * 10) / 10 : null;
-  return { score, sections, logged: available.length, provisional: available.length < sections.length, done, total };
+  return { score, sections, logged: available.length, requiredLogged, provisional: requiredLogged<3, done, total };
 }
 
 export function localDateKey(date = new Date(), timeZone = 'America/Chicago') {
@@ -51,8 +53,9 @@ export function timeGreeting(date=new Date(), timeZone='America/Chicago') {
 
 export function loggingStreak(today,getSummary) {
   const previous=date=>{const value=new Date(`${date}T12:00:00Z`);value.setUTCDate(value.getUTCDate()-1);return value.toISOString().slice(0,10);};
-  const includesToday=getSummary(today).logged===3;
+  const fullyLogged=date=>{const summary=getSummary(date);return (summary.requiredLogged??summary.logged)===3;};
+  const includesToday=fullyLogged(today);
   let date=includesToday?today:previous(today),count=0;
-  while(count<20000 && getSummary(date).logged===3) {count++;date=previous(date);}
+  while(count<20000 && fullyLogged(date)) {count++;date=previous(date);}
   return {count,includesToday,endDate:count?(includesToday?today:previous(today)):null};
 }

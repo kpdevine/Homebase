@@ -20,13 +20,13 @@ export function moveMonth(key, amount) {
   date.setUTCMonth(date.getUTCMonth() + amount);
   return dateKey(date);
 }
-export function scoreFromPoint(x, y, centerX, centerY) {
+export function scoreFromPoint(x, y, centerX, centerY, {min=1,max=10}={}) {
   if (Math.hypot(x - centerX, y - centerY) < 10) return null;
   const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
   let offset = (angle - 135 + 720) % 360;
   // The 90-degree gap at the bottom snaps to its nearest endpoint.
   if (offset > 270) offset = offset < 315 ? 270 : 0;
-  return Math.round((1 + offset / 270 * 9) * 10) / 10;
+  return Math.round((min + offset / 270 * (max-min)) * 10) / 10;
 }
 export function meterPoint(score, radius = 82, center = 110) {
   const angle = (135 + (score - 1) / 9 * 270) * Math.PI / 180;
@@ -52,7 +52,7 @@ export const DAY_SECTIONS = [
 ];
 
 function emptyDay(date) {
-  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' }, comment:'',
+  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' }, comment:'', sentiments:{notes:'',rating:null},
     checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
 }
 
@@ -135,6 +135,13 @@ export function createStore(options = {}) {
     updateDayComment(key, value) {
       if(typeof value!=='string'||value.length>5000)throw new RangeError('Use up to 5000 characters for your day comment.');
       writableDay(key).comment=value;
+    },
+    updateSentiments(key, changes) {
+      if(!changes||typeof changes!=='object'||Array.isArray(changes)||Object.keys(changes).some(key=>!['notes','rating'].includes(key)))throw new RangeError('Use sentiment notes and an optional rating.');
+      if('notes' in changes && (typeof changes.notes!=='string'||changes.notes.length>5000))throw new RangeError('Use up to 5000 characters for sentiments.');
+      if('rating' in changes && changes.rating!==null && (typeof changes.rating!=='number'||!Number.isFinite(changes.rating)||changes.rating<0||changes.rating>10||Math.abs(changes.rating*10-Math.round(changes.rating*10))>1e-8))throw new RangeError('Enter a sentiment rating from 0 to 10 in steps of 0.1, or leave it blank.');
+      const day=writableDay(key),next={...day.sentiments,...changes};
+      if(next.notes!==day.sentiments.notes||next.rating!==day.sentiments.rating) {day.sentiments=next;day.completedAt=null;}
     },
     addTask(key, name, options = {}) {
       const clean = String(name).trim();
@@ -235,7 +242,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateSentiments', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => { const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result; };
   }
