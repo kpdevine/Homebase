@@ -1,4 +1,27 @@
 /* Date context and the final, explicit review step. */
+.score-info-button {margin-left:auto;margin-right:8px;width:30px;height:30px;flex:none;font:700 15px var(--font-display);border:1px solid #243f7b80;border-radius:50%;background:#a6c9ee20;color:var(--ink)}
+.top-row .settings-button {margin-left:0}
+.training-pace {display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:14px 0}
+.training-pace .score-circle {width:68px;height:68px;flex-basis:68px}
+.training-pace .score-circle>span {font-size:22px}
+.training-pace div>strong,.training-pace div>span,.training-pace div>small {display:block}
+.training-pace strong {font:700 14px/1.5 var(--font-display)}
+.training-pace div>span,.training-pace small {font:400 10px/1.7 var(--font-ui);margin-top:4px}
+.muscle-suggestions {padding:13px 15px;margin:0 0 20px;border:1px solid #304e8580;background:#a6c9ee24}
+.muscle-suggestions h4 {font:700 12px/1.5 var(--font-display);text-transform:uppercase;margin:0 0 10px}
+.muscle-suggestions>div {display:flex;flex-wrap:wrap;gap:10px 18px}
+.muscle-suggestions strong {display:block;font:400 12px/1.5 var(--font-display)}
+.muscle-suggestions small,.muscle-suggestions p {font:400 10px/1.6 var(--font-ui);margin:7px 0 0}
+.gym-totals {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0 18px}
+.gym-totals>div {min-width:0;border:1px solid #304e8580;background:#a6c9ee24;padding:12px}
+.gym-totals span {display:block;font:700 10px/1.5 var(--font-ui);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.gym-totals strong {font:400 clamp(22px,2vw,30px)/1.2 var(--font-display);white-space:nowrap}
+.rest-choice {margin-top:15px}
+.scoring-dialog {width:min(720px,calc(100vw - 32px));max-width:none;max-height:85dvh;overflow:auto;scrollbar-width:thin}
+.scoring-dialog p,.scoring-dialog li {font:400 12px/1.8 var(--font-ui)}
+.scoring-dialog .scoring-explanation strong {font-size:14px;line-height:1.6}
+.scoring-example {padding:14px;border:1px solid var(--line);background:#a6c9ee24;margin:18px 0}
+.scoring-example strong {font:700 14px var(--font-display)}
 #breakdown-title,#clock-time small {font-weight:700}
 .breakdown-item .score-circle {width:64px;height:64px;flex-basis:64px}
 .breakdown-item .score-circle>span {font-size:19px}

@@ -80,7 +80,7 @@ function announce(message, undo = null) {
   $('#status').classList.add('visible');
   toastTimer = setTimeout(() => { $('#status').classList.remove('visible'); undoAction = null; }, undo ? 12000 : 3200);
 }
-function summaryFor(date = selectedDate) { return summarizeDay(store.loadDay(date), store.loadTrainingDay(date)); }
+function summaryFor(date = selectedDate) { return summarizeDay(store.loadDay(date), store.loadTrainingDay(date),store.loadWeek(date)); }
 function circle(score,reward=false) {
   return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<circle class="score-circle-track" cx="24" cy="24" r="20"/><circle class="score-circle-fill" cx="24" cy="24" r="20" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100" transform="rotate(-90 24 24)"/></svg><span>${scoreText(score)}</span></span>`;
 }
@@ -162,7 +162,7 @@ function renderScore() {
   button.innerHTML = day.completedAt ? `View day summary ${icon('arrow')}` : progress.canComplete ? `Review full day ${icon('arrow')}` : `${progress.reviewedCount || reviewSessionDate === selectedDate ? 'Continue' : 'Start'} day review ${icon('arrow')}`;
   $('#overview-sections').innerHTML = summary.sections.map(section => {
     const state = progress.sections.find(item => item.id === section.id) || {ready:true,reviewed:false};
-    const missing = section.score === null || !state.ready;
+    const missing = section.score === null&&!section.excluded || !state.ready;
     return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${section.optional ? 'Optional rating included' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Needs review'}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(section.optional ? 'check' : missing ? 'warning' : state.reviewed ? 'check' : 'arrow')}${section.optional ? 'Included in score' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Ready to review'}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
   $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All three reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
@@ -239,14 +239,24 @@ sentimentMeter.addEventListener('keydown',event=>{
 });
 $('#clear-sentiments-rating').addEventListener('click',()=>{ $('#sentiments-rating').setCustomValidity('');updateSentiments({rating:null}); });
 function renderGym() {
-  const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate);
+  const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
-  $$('[name="training-mode"]').forEach(input => { input.checked = input.value === day.trainingMode; input.disabled = input.value === 'rest' && entries.length > 0; });
-  $('#training-rest-hint').textContent = entries.length ? 'To switch to a rest day, remove this date’s set entries first.' : day.trainingMode === 'rest' ? 'Rest day recorded. You can still log sets if your plans change.' : 'Log sets or choose Rest day before reviewing this section.';
-  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${entry.sets} sets · ${shortDate(entry.date)}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : `<div class="training-empty"><strong>${day.trainingMode === 'rest' ? 'Rest day' : 'No sets logged.'}</strong><p>${day.trainingMode === 'rest' ? 'No sets needed for a rest day.' : 'Add sets above.'}</p></div>`;
+  const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
+  $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
+  $('#rest-choice').hidden=!noLift;
+  $$('[name="rest-type"]').forEach(input=>{input.checked=input.value===day.trainingMode;});
+  $('#gym-form').hidden=day.trainingMode!=='training';
+  $('#training-rest-hint').textContent=entries.length?'Sets saved for this date. Remove them before switching to No.':day.trainingMode==='rest'?'Planned rest is saved and excluded from your daily average.':day.trainingMode==='unplanned-rest'?'No lifting recorded. Your gym score follows your weekly pace.':noLift?'Choose whether this rest was planned before confirming review.':day.trainingMode==='training'?'Log your sets below. Your score follows credited weekly progress.':'Answer Yes or No to log this day.';
+  const expected=Math.round(pace.expected*10)/10;
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.planned?'Planned rest · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.credited} goal sets · ${pace.actual} total sets through ${shortDate(selectedDate)}</span><small>Day ${pace.elapsed} of 7 · ${expected} goal sets needed for a 10 · ${pace.target} weekly goal sets</small></div>`;
+  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining · ${group.credited}/${group.target}</small></span>`).join('')}</div><p>Based on progress through this date.${pace.planned?' Saved for your next lifting day.':''}</p>`:'<p>Every muscle target is met. Extra sets still stay in your log.</p>'}`;
+  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${entry.sets} sets · ${shortDate(entry.date)}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : `<div class="training-empty"><strong>${day.trainingMode === 'rest' ? 'Planned rest' : day.trainingMode === 'unplanned-rest' ? 'Unplanned rest' : 'No sets logged.'}</strong><p>${noLift ? 'No sets recorded for this date.' : 'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
-  $('#gym-summary').textContent = target ? `${total} / ${target}` : `${total} sets`;
-  $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday`;
+  const weekCredit=week.groups.reduce((sum,group)=>sum+Math.min(group.completed,group.target),0);
+  $('#gym-summary').textContent = `${weekCredit} / ${target}`;
+  $('#gym-total-sets').textContent=total;
+  $('#gym-credit-summary').textContent=`${total} total sets logged · ${weekCredit} count toward muscle targets.${total>weekCredit?` ${total-weekCredit} extra or untargeted sets remain in your log.`:''}`;
+  $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday · ${week.targetSource?'targets repeat until edited':'default targets · edit below'}`;
   const volumeGroups=[...week.groups];
   for(const entry of week.entries) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
   $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
@@ -268,7 +278,7 @@ function renderReview() {
     button.textContent = section.reviewed ? `✓ ${label[0].toUpperCase()+label.slice(1)} reviewed` : `Confirm ${label} review${reviewing ? ' →' : ''}`;
     button.classList.toggle('is-reviewed', section.reviewed);
     const purpose = section.id === 'checklists' ? 'Unfinished tasks stay unchecked.' : 'Confirms this section’s review.';
-    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Log sets or choose Rest day first.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : 'A full-day summary comes before completion.'}`;
+    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Answer Yes and log sets, or No and choose planned or unplanned rest.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : 'A full-day summary comes before completion.'}`;
     $(`#tab-${section.id} .tab-check`).textContent = section.reviewed ? '✓' : '';
     $(`#tab-${section.id}`).setAttribute('aria-label', `${viewLabels[section.id]}${section.reviewed ? ', reviewed' : ''}`);
   }
@@ -305,9 +315,9 @@ function renderHistory() {
   renderRecap();
 }
 function recapMarkup({final=false}={}) {
-  const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate));
+  const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
-  const training=recap.training.rest?'Rest':recap.training.sets?`${recap.training.sets}<small> sets</small>`:'—';
+  const training=recap.training.planned?'Planned rest':recap.training.unplanned?`No lift<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.sets?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
   return `
@@ -577,8 +587,12 @@ $('#gym-form').addEventListener('submit', event => {
 });
 $('#gym-sets').addEventListener('input', event => event.target.setCustomValidity(''));
 $$('[name="training-mode"]').forEach(input => input.addEventListener('change', () => {
-  try { store.setTrainingMode(selectedDate, input.value); render(); }
+  try { store.setTrainingMode(selectedDate, input.value==='no'?'rest-unclassified':input.value); render(); }
   catch (error) { announce(error.message); renderGym(); }
+}));
+$$('[name="rest-type"]').forEach(input=>input.addEventListener('change',()=>{
+  try {store.setTrainingMode(selectedDate,input.value);render();}
+  catch(error){announce(error.message);renderGym();}
 }));
 for (const id of ['daily-training-entries','gym-log']) $('#' + id).addEventListener('click', event => {
   const button = event.target.closest('[data-remove-entry]'); if (!button) return;
@@ -592,7 +606,7 @@ $('#toggle-gym-log').addEventListener('click', () => {
 $('#targets-form').addEventListener('submit', event => {
   event.preventDefault();
   const values = GROUPS.map(group => ({ id:group.id, target:Number($(`#targets-form [name="${group.id}"]`).value) }));
-  try { store.setWeekTargets(selectedDate, values); renderGym(); announce('Targets saved for this week.'); }
+  try { store.setWeekTargets(selectedDate, values); render(); announce('Targets saved. They repeat from this week until edited.'); }
   catch (error) { announce(error.message); }
 });
 $('#complete-day').addEventListener('click', startCompletion);
@@ -620,6 +634,7 @@ function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog
 function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }
 $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => closeDialog(button.closest('dialog'))));
 $('#score-info').addEventListener('click', () => { closeDialog($('#settings-dialog')); showDialog($('#score-dialog')); });
+$('#open-score-info').addEventListener('click',()=>showDialog($('#score-dialog')));
 function openSettings() {
   $('#profile-name').value = displayName;
   $('#motion-setting').value=motionPreference;renderMotionSetting();

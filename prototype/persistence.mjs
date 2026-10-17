@@ -46,7 +46,7 @@ export function validateSnapshot(value) {
     const occurrences=tasks.filter(task=>task.templateId).map(task=>task.templateId);
     assert(new Set(occurrences).size===occurrences.length && occurrences.every(id=>!skippedTemplates.includes(id)),'duplicate recurring occurrence.');
     assert(validScore(day.nutrition) && validScore(day.sampleOverall ?? null), 'rating.');
-    assert(day.trainingMode === null || ['training', 'rest'].includes(day.trainingMode), 'day type.');
+    assert(day.trainingMode === null || ['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(day.trainingMode), 'day type.');
     assert(day.reviewed && sectionIds.every(id => typeof day.reviewed[id] === 'boolean'), 'review state.');
     assert(validTimestamp(day.completedAt), 'completion timestamp.');
     assert(!day.reviewed.nutrition || day.nutrition !== null, 'nutrition review without a rating.');
@@ -68,7 +68,7 @@ export function validateSnapshot(value) {
     const hasSets = entries.some(entry => entry.date === day.date);
     assert(!(day.trainingMode === 'rest' && hasSets), 'rest day with set entries.');
     assert(!hasSets || day.trainingMode === 'training', 'set entries without a training day.');
-    assert(!day.reviewed.training || day.trainingMode === 'rest' || hasSets, 'training review without a log.');
+    assert(!day.reviewed.training || ['rest','unplanned-rest'].includes(day.trainingMode) || hasSets, 'training review without a log.');
   }
   const weeks = new Set();
   const targets = value.targets.map(pair => {

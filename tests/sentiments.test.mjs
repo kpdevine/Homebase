@@ -12,18 +12,18 @@ test('all 101 sentiment positions round-trip on the zero-to-ten circular scale',
   for(let tenth=0;tenth<=100;tenth++){const point=meterPoint(1+tenth*.09);assert.equal(scoreFromPoint(point.x,point.y,110,110,{min:0,max:10}),tenth/10);}
   assert.equal(scoreFromPoint(110,110,110,110,{min:0,max:10}),null);
 });
-test('notes are unscored; an optional zero is a fourth equal component; removal restores the score',()=>{
+test('notes are unscored; an optional zero adds an equal component with planned rest excluded; removal restores the score',()=>{
   const store=logged(),original=summary(store).score;
   store.updateSentiments(date,{notes:'A quiet day.'});assert.equal(summary(store).score,original);
-  store.updateSentiments(date,{rating:0});assert.equal(summary(store).score,7);assert.equal(summary(store).logged,4);assert.equal(summary(store).provisional,false);
-  store.updateSentiments(date,{rating:8});assert.equal(summary(store).score,9);
+  store.updateSentiments(date,{rating:0});assert.equal(summary(store).score,6);assert.equal(summary(store).logged,4);assert.equal(summary(store).provisional,false);
+  store.updateSentiments(date,{rating:8});assert.equal(summary(store).score,8.7);
   store.updateSentiments(date,{rating:null});assert.equal(summary(store).score,original);
 });
 test('optional sentiments do not satisfy required logging or change streak requirements',()=>{
   const store=createStore({seed:false});store.updateSentiments(date,{rating:10});assert.equal(summary(store).provisional,true);
   assert.equal(loggingStreak(date,key=>summarizeDay(store.loadDay(key))).count,0);
   const full=logged();full.updateSentiments(date,{rating:0});assert.equal(loggingStreak(date,key=>summarizeDay(full.loadDay(key))).count,1);
-  assert.equal(averageDays([date],()=>summary(full)).score,7);
+  assert.equal(averageDays([date],()=>summary(full)).score,6);
 });
 test('sentiments persist per date, migrate old backups, and reopen only final completion',()=>{
   const store=logged();store.completeDay(date);store.updateSentiments(date,{notes:'Finished a project.',rating:7.3});

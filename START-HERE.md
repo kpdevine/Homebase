@@ -8,7 +8,7 @@ Saved October 17, 2026 (America/Chicago).
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs 62 checks.
+Open [Homebase](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs 73 checks.
 
 To continue: **Continue Homebase from START-HERE.md. Keep development local and technology choices open.**
 
@@ -32,7 +32,7 @@ Muscle logging uses seven direct choices: Chest, Back, Triceps, Biceps, Shoulder
 
 Entries stay in localStorage on this browser/origin/device. Settings downloads and restores validated JSON backups. Export before clearing browser data or changing devices. The root app starts empty; `?preview=1` uses separately saved synthetic history. Backups now use version 2 for schedules, child tasks, and checklist activity. Version-1 backups still load with their history preserved; migration is saved on the next change.
 
-Current branch: `codex/homebase-prototype`. Current tag: `homebase-sentiments-2026-10-17`. Previous tags, including `homebase-polished-2026-10-17`, remain available. Source ZIPs and screenshots are in this chat's local artifacts. Browser records are separate from Git and source ZIPs. An earlier code checkpoint may not understand newer backup formats.
+Current branch: `codex/homebase-prototype`. Current tag: `homebase-gym-pace-2026-10-17`. Previous tags, including `homebase-polished-2026-10-17`, remain available. Source ZIPs and screenshots are in this chat's local artifacts. Browser records are separate from Git and source ZIPs. An earlier code checkpoint may not understand newer backup formats.
 
 Development remains local. No production framework, database, hosting, authentication, synchronization, or device platform has been selected. The GitHub backup repository is `kpdevine/Homebase`; the development branch is `codex/homebase-prototype`. Browser records remain local and are excluded from Git.
 
@@ -42,16 +42,18 @@ Settings now includes Reset all data with an explicit confirmation, Cancel, and 
 
 ## Verification and next work
 
-- All 62 tests pass, covering read-only recaps, recurrence frequencies, date isolation, dependencies, skip/Undo, stopping routines, v1 migration/v2 round-trips, streaks, four greetings, reward boundaries, tenth controls, notes, averages, and existing reviews/training/storage behavior.
+- All 73 tests pass, covering read-only recaps, recurrence frequencies, date isolation, dependencies, skip/Undo, stopping routines, v1 migration/v2 round-trips, streaks, four greetings, reward boundaries, tenth controls, notes, averages, and existing reviews/training/storage behavior.
 - Browser checks cover task creation and custom-day validation, child completion, skipping/Undo, stopping schedules, real meter dragging to 6.4, tenth keyboard/button adjustment, both notes persisting on refresh, and review through day completion. The handwritten cursor was checked with multiline notes, long scrollable notes, selection, and both notes fields. Task/subtask fields show full descenders.
 - Overview fits measured 960×480, 1024×600, 1280×800, and 1920×1080. All five tabs fit the browser's current 480px minimum override without horizontal overflow. Narrower overrides are clamped by current desktop scaling; no new 320/390px visual claim is made.
 - Test entries were removed. Entries the owner created during testing were preserved. Original dated history and training entries remain. No application errors were reported.
 - Physical touch, screen readers, and intended display hardware remain untested.
 
-Production technology, final score formula, synchronization, richer schedule editing, and delivery to a landscape display remain open. The provisional daily score equally averages entered nutrition, checklist proportion, and training check-in. Monday–Sunday gym volume stays separate from Monday–Friday calendar averages.
+Production technology, final score formula, synchronization, richer schedule editing, and delivery to a landscape display remain open. The provisional daily score equally averages entered nutrition, checklist proportion, automatic weekly gym pace, and an optional Sentiments rating. Planned rest is excluded from the average. Monday–Sunday gym volume stays separate from Monday–Friday calendar averages.
 
 See [prototype guide](docs/prototype-guide.md) and [radio revision](docs/radio-revamp.md).
 
 The time-of-day greeting uses a real bold Radio Display face; the name stays regular. The previous homebase-routines-lcd-2026-10-17 checkpoint remains available.
 
-Sentiments is the fifth daily view: dated handwritten notes and an optional 0–10 circular rating in 0.1 steps. Notes alone never change the score. An entered rating, including zero, adds a fourth equal component; removing it restores the three-component formula. It appears in the overview breakdown, day review, and calendar recap. Three required reviews and the logging streak remain unchanged. Sentiment edits reopen final completion while preserving section reviews. Older backups receive empty sentiments.
+Sentiments is the fifth daily view: dated handwritten notes and an optional 0–10 circular rating in 0.1 steps. Notes alone never change the score. An entered rating, including zero, adds an equal component; removing it excludes that component. It appears in the overview breakdown, day review, and calendar recap. Three required reviews and the logging streak remain unchanged. Sentiment edits reopen final completion while preserving section reviews. Older backups receive empty sentiments.
+
+Gym now asks Did you lift today? Yes opens set logging; No asks Planned rest or Unplanned rest. Planned rest is excluded from the daily average but still counts for review and streaks. Unplanned rest is scored using strict weekly pace: credited sets through that date / (weekly goal × Monday-based day number / 7) × 10, capped at 10. Credit is capped separately per muscle; extra and untargeted sets remain in totals. 20/70 on Monday covers an unplanned Tuesday for a 10; 14/70 by Tuesday scores 7. Future logs cannot improve earlier scores. Targets repeat until edited, starting with visible default targets when none exist; edits apply from the selected Monday until the next saved change. Prior rest entries are preserved as planned rest. Backdated edits reopen later gym reviews when their score changes. A small i beside Settings explains the full policy. See [gym pace](docs/gym-pace.md).

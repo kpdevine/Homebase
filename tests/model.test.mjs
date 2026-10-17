@@ -104,7 +104,7 @@ test('gym totals use dated entries, preserve actual over-target totals, and can 
   for (const invalid of [0, -2, 2.5, 101]) assert.throws(() => store.addGymEntry(DEMO_TODAY, 'chest', invalid), RangeError);
   assert.throws(() => store.addGymEntry(DEMO_TODAY, 'unknown', 3), RangeError);
   store.addGymEntry('2026-10-19', 'chest', 3);
-  assert.equal(store.loadWeek('2026-10-19').groups.length, 0);
+  assert.equal(store.loadWeek('2026-10-19').groups.length, 7);
   assert.equal(store.loadTrainingDay('2026-10-19')[0].sets, 3);
   for (const entry of original.entries) store.removeGymEntry(entry.id);
   assert.equal(store.loadWeek(DEMO_TODAY).groups.length, 7);

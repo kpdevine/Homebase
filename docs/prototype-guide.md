@@ -49,3 +49,7 @@ Development remains local. Production technology, synchronization, score-policy 
 ## Sentiments
 
 The Sentiments tab saves optional handwritten notes for each date. Its circular meter matches Nutrition, with a 0–10 scale, dragging, arrow keys, plus/minus, direct entry in tenths, Home (0), and End (10). It starts unrated. Remove rating excludes it again. Notes without a rating leave scoring unchanged. An entered rating, including zero, contributes a fourth equal component. Sentiments appear in the overview breakdown and day recaps, and flow into calendar averages. Three regular section reviews and logging streak requirements remain unchanged. Editing sentiments reopens final completion but preserves those reviews. Existing backups load with empty sentiments.
+
+## Gym pace update
+
+See [gym pace](gym-pace.md) for the current policy, which replaces the previous flat 10 for a training/rest check-in. Planned rest is now excluded from the average. Targets carry forward, and unplanned rest uses strict cumulative weekly pacing.

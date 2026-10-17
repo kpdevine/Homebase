@@ -1,8 +1,8 @@
 import {summarizeDay} from './scoring.mjs';
 
 // Read-only presentation data. Opening a recap must never create a check-in.
-export function dailyRecap(day, entries=[]) {
-  const summary=summarizeDay(day,entries);
+export function dailyRecap(day, entries=[], week) {
+  const summary=summarizeDay(day,entries,week);
   const groups=new Map();
   for(const entry of entries)groups.set(entry.groupId,(groups.get(entry.groupId)||0)+entry.sets);
   const notes=['nutrition','training'].filter(section=>day.notes[section].trim()).map(section=>({section,text:day.notes[section]}));
@@ -14,7 +14,7 @@ export function dailyRecap(day, entries=[]) {
     hasActivity:summary.logged>0||notes.length>0||!!day.sentiments?.notes.trim(),
     checklistLogged:summary.sections.find(section=>section.id==='checklists').score!==null,
     tasks:day.tasks.map(task=>({name:task.name,done:task.done,recurring:!!task.templateId,children:(task.children||[]).map(child=>({name:child.name,done:child.done}))})),
-    training:{rest:day.trainingMode==='rest',sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:[...groups].map(([id,sets])=>({id,sets}))},
+    training:{rest:['rest','unplanned-rest'].includes(day.trainingMode),planned:day.trainingMode==='rest',unplanned:day.trainingMode==='unplanned-rest',score:summary.sections.find(section=>section.id==='training').score,sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:[...groups].map(([id,sets])=>({id,sets}))},
     notes,
   };
 }

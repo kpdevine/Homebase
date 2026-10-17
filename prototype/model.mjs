@@ -2,6 +2,7 @@
 // never to infer the date of a personal record from an event timestamp.
 export const DEMO_TODAY = '2026-10-15';
 import { GROUPS, ALL_GROUPS } from './muscles.mjs';
+import {trainingProgress} from './training.mjs';
 export { GROUPS } from './muscles.mjs';
 
 export function dateKey(date) { return date.toISOString().slice(0, 10); }
@@ -108,6 +109,19 @@ export function createStore(options = {}) {
     return day;
   }
   function writableDay(key) { const day=loadDay(key); days.set(key,day); return day; }
+  function effectiveTargets(key) {
+    const start=sampleWeekStart(key),source=[...targets.keys()].filter(week=>week<=start).sort().at(-1);
+    return {source:source||null,groups:targets.get(source)||GROUPS};
+  }
+  function loadWeek(key) {
+    const start=sampleWeekStart(key),end=addDays(start,6),effective=effectiveTargets(key);
+    const weekEntries=entries.filter(entry=>entry.date>=start&&entry.date<=end);
+    return {start,end,targetSource:effective.source,groups:effective.groups.map(group=>({...group,completed:weekEntries.filter(entry=>entry.groupId===group.id).reduce((sum,entry)=>sum+entry.sets,0)})),entries:structuredClone(weekEntries)};
+  }
+  function trainingScores() {return new Map([...days.values()].map(day=>[day.date,trainingProgress(day,loadWeek(day.date)).score]));}
+  function reopenChangedTraining(before) {
+    for(const day of days.values())if(before.has(day.date)&&before.get(day.date)!==trainingProgress(day,loadWeek(day.date)).score)invalidateReview(day,'training');
+  }
   const store = {
     loadDay,
     exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial }); },
@@ -191,32 +205,30 @@ export function createStore(options = {}) {
     },
     setWeekTargets(key, values) {
       if (!Array.isArray(values) || values.length !== GROUPS.length || new Set(values.map(item => item.id)).size !== GROUPS.length || values.some(item => !GROUPS.some(group => group.id === item.id) || !Number.isInteger(item.target) || item.target < 1 || item.target > 1000)) throw new RangeError('Enter a whole target from 1 to 1000 for each muscle group.');
-      const week=sampleWeekStart(key), legacy=(targets.get(week)||[]).filter(group=>!GROUPS.some(active=>active.id===group.id));
+      const before=trainingScores(),week=sampleWeekStart(key), legacy=effectiveTargets(key).groups.filter(group=>!GROUPS.some(active=>active.id===group.id));
       targets.set(week, [...GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })), ...legacy]);
+      reopenChangedTraining(before);
     },
-    loadWeek(key) {
-      const start = sampleWeekStart(key);
-      const end = addDays(start, 6);
-      const weekEntries = entries.filter(entry => entry.date >= start && entry.date <= end);
-      return { start, end, groups: (targets.get(start) || []).map(group => ({ ...group, completed: weekEntries.filter(entry => entry.groupId === group.id).reduce((total, entry) => total + entry.sets, 0) })), entries: structuredClone(weekEntries) };
-    },
+    loadWeek,
+    trainingProgress(key) {return trainingProgress(loadDay(key),loadWeek(key));},
     addGymEntry(date, groupId, sets) {
       if (!ALL_GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
-      const entry = { id: `gym-${++serial}`, date, groupId, sets };
+      const before=trainingScores(),entry = { id: `gym-${++serial}`, date, groupId, sets };
       entries.push(entry);
       writableDay(date).trainingMode = 'training';
       invalidateReview(writableDay(date), 'training');
+      reopenChangedTraining(before);
       return entry.id;
     },
     removeGymEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
-      if (index >= 0) { const [entry] = entries.splice(index, 1); invalidateReview(writableDay(entry.date), 'training'); }
+      if (index >= 0) { const before=trainingScores(),[entry] = entries.splice(index, 1); invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before); }
     },
     loadTrainingDay(key) { return structuredClone(entries.filter(entry => entry.date === key)); },
     setTrainingMode(key, mode) {
-      if (!['training', 'rest'].includes(mode)) throw new RangeError('Choose a training day or a rest day.');
-      if (mode === 'rest' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a rest day.');
+      if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting, planned rest, or unplanned rest.');
+      if (mode !== 'training' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
       const day = writableDay(key);
       if (day.trainingMode !== mode) { day.trainingMode = mode; invalidateReview(day, 'training'); }
     },
@@ -224,7 +236,7 @@ export function createStore(options = {}) {
       const day = loadDay(key);
       const dailyEntries = this.loadTrainingDay(key);
       const ready = { nutrition: day.nutrition !== null,
-        training: day.trainingMode === 'rest' ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
+        training: ['rest','unplanned-rest'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
@@ -233,7 +245,7 @@ export function createStore(options = {}) {
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log at least one set or explicitly choose a rest day.');
+      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log sets or choose whether your no-lift day was planned.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },
