@@ -23,5 +23,6 @@ coverage/
 .DS_Store
 Thumbs.db
 .font-build/
+.local/
 __pycache__/
 *.pyc

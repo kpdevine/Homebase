@@ -4,6 +4,8 @@ Saved October 17, 2026 (America/Chicago).
 
 ## Run locally
 
+Windows: the **Homebase** desktop shortcut starts the background server and opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. See [desktop launcher](docs/desktop-launcher.md). Existing preview records at port 4174 remain separate. The shortcut opens a personal workspace; it does not migrate the preview or connect cloud storage.
+
 ```powershell
 npm.cmd run dev
 ```
