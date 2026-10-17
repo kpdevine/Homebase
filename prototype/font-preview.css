@@ -1,0 +1,55 @@
+@font-face {
+  font-family: "Kieran Handwriting";
+  src: url("./assets/fonts/KieranHandwriting-Regular.woff2?v=1.5") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Kieran Handwriting";
+  src: url("./assets/fonts/KieranHandwriting-Bold.woff2?v=1.5") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+:root { --font-handwriting: "Kieran Handwriting", "Inter", sans-serif; color-scheme: light; background: #f8f5ef; color: #282d29; }
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 14px; }
+main { max-width: 1100px; padding: 42px 48px 54px; margin: auto; }
+header { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 50px; }
+a { color: inherit; text-underline-offset: 4px; }
+.back { text-decoration: none; }
+.version, .label { font-size: 10px; letter-spacing: .12em; color: #626c62; }
+h1 { font-family: var(--font-handwriting); font-size: clamp(36px, 6vw, 66px); font-weight: 400; letter-spacing: 0; line-height: 1.35; margin: 0; }
+.intro { font-size: 15px; color: #626c62; margin: 12px 0 28px; }
+nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 38px; }
+.button { border: 1px solid #bcc5b9; border-radius: 7px; padding: 11px 16px; text-decoration: none; }
+.primary { background: #344e3c; color: #fff; border-color: #344e3c; }
+.button:hover { background: #e2e8de; color: #28362c; }
+:focus-visible { outline: 3px solid #567c5e; outline-offset: 4px; }
+.paper { border: 1px solid #d8d9cc; border-radius: 12px; padding: 24px; background: #fffdf7; }
+.controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; font-size: 12px; color: #626c62; }
+.weight-button { background: transparent; color: #344e3c; border: 1px solid #bcc5b9; border-radius: 5px; padding: 7px 12px; font: 700 12px var(--font-ui); cursor: pointer; }
+.weight-button[aria-pressed="true"] { background: #344e3c; color: white; border-color: #344e3c; }
+.characters .bold-sample { font-weight: 700; }
+.size-control { display: flex; align-items: center; gap: 12px; }
+output { min-width: 38px; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 115px; accent-color: #344e3c; }
+textarea { display: block; border: 0; padding: 0; width: 100%; min-height: 240px; resize: vertical; background: transparent; color: inherit; font: 400 48px/2.15 var(--font-handwriting); }
+h2 { margin: 0 0 20px; font: 500 13px var(--font-ui); letter-spacing: 0; color: #626c62; }
+.characters { padding: 36px 0; }
+.characters p { margin: 10px 0; overflow-wrap: anywhere; font: 400 clamp(21px, 3.2vw, 37px)/1.65 var(--font-handwriting); }
+.characters .punctuation { font-size: 29px; }
+.application { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; padding: 28px; border-radius: 12px; background: #e8eddf; }
+.application p { margin: 15px 0 0; font: 400 clamp(25px, 4vw, 42px)/1.4 var(--font-handwriting); }
+.application .score { font-size: 70px; }
+.score span { font-size: 24px; color: #626c62; }
+footer { margin-top: 32px; max-width: 750px; font-size: 12px; color: #626c62; line-height: 1.8; }
+@media (max-width: 600px) {
+  main { padding: 24px 20px 36px; }
+  header { align-items: flex-start; margin-bottom: 34px; }
+  .version { max-width: 155px; text-align: right; }
+  .paper { padding: 18px; }
+  textarea { font-size: 32px; min-height: 285px; }
+  .application { grid-template-columns: 1fr; }
+}

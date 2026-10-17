@@ -1,0 +1,2196 @@
+{
+  "family": "Kieran Handwriting",
+  "version": "1.500",
+  "targetStroke": 70.0,
+  "glyphs": [
+    {
+      "character": "A",
+      "codepoint": "U+0041",
+      "crop": [
+        70,
+        90,
+        165,
+        190
+      ],
+      "advance": 699,
+      "scaleX": 8.75,
+      "scaleY": 8.75,
+      "baselineInSource": 80,
+      "sourceSize": [
+        73,
+        80
+      ],
+      "stroke": {
+        "before": 82.29,
+        "after": 70.72,
+        "outlineOffset": 6.14
+      },
+      "components": 1
+    },
+    {
+      "character": "a",
+      "codepoint": "U+0061",
+      "crop": [
+        190,
+        115,
+        259,
+        185
+      ],
+      "advance": 456,
+      "scaleX": 8.6,
+      "scaleY": 8.6,
+      "baselineInSource": 50,
+      "sourceSize": [
+        47,
+        50
+      ],
+      "stroke": {
+        "before": 88.69,
+        "after": 70.93,
+        "outlineOffset": 10.34
+      },
+      "components": 1
+    },
+    {
+      "character": "B",
+      "codepoint": "U+0042",
+      "crop": [
+        350,
+        82,
+        430,
+        190
+      ],
+      "advance": 532,
+      "scaleX": 7.69230769,
+      "scaleY": 7.69230769,
+      "baselineInSource": 91,
+      "sourceSize": [
+        60,
+        91
+      ],
+      "stroke": {
+        "before": 71.41,
+        "after": 68.96,
+        "outlineOffset": 1.7
+      },
+      "components": 1
+    },
+    {
+      "character": "b",
+      "codepoint": "U+0062",
+      "crop": [
+        442,
+        94,
+        516,
+        188
+      ],
+      "advance": 564,
+      "scaleX": 9.5890411,
+      "scaleY": 9.5890411,
+      "baselineInSource": 73,
+      "sourceSize": [
+        54,
+        73
+      ],
+      "stroke": {
+        "before": 95.51,
+        "after": 70.0,
+        "outlineOffset": 13.76
+      },
+      "components": 1
+    },
+    {
+      "character": "C",
+      "codepoint": "U+0043",
+      "crop": [
+        590,
+        82,
+        666,
+        185
+      ],
+      "advance": 522,
+      "scaleX": 8.43373494,
+      "scaleY": 8.43373494,
+      "baselineInSource": 83,
+      "sourceSize": [
+        55,
+        83
+      ],
+      "stroke": {
+        "before": 85.0,
+        "after": 70.95,
+        "outlineOffset": 7.5
+      },
+      "components": 1
+    },
+    {
+      "character": "c",
+      "codepoint": "U+0063",
+      "crop": [
+        670,
+        110,
+        730,
+        180
+      ],
+      "advance": 398,
+      "scaleX": 9.14893617,
+      "scaleY": 9.14893617,
+      "baselineInSource": 47,
+      "sourceSize": [
+        38,
+        47
+      ],
+      "stroke": {
+        "before": 90.79,
+        "after": 70.22,
+        "outlineOffset": 11.4
+      },
+      "components": 1
+    },
+    {
+      "character": "D",
+      "codepoint": "U+0044",
+      "crop": [
+        799,
+        70,
+        900,
+        185
+      ],
+      "advance": 653,
+      "scaleX": 7.29166667,
+      "scaleY": 7.29166667,
+      "baselineInSource": 96,
+      "sourceSize": [
+        80,
+        96
+      ],
+      "stroke": {
+        "before": 73.0,
+        "after": 70.82,
+        "outlineOffset": 1.5
+      },
+      "components": 1
+    },
+    {
+      "character": "d",
+      "codepoint": "U+0064",
+      "crop": [
+        900,
+        80,
+        976,
+        180
+      ],
+      "advance": 562,
+      "scaleX": 8.97435897,
+      "scaleY": 8.97435897,
+      "baselineInSource": 78,
+      "sourceSize": [
+        57,
+        78
+      ],
+      "stroke": {
+        "before": 91.01,
+        "after": 70.25,
+        "outlineOffset": 11.5
+      },
+      "components": 1
+    },
+    {
+      "character": "E",
+      "codepoint": "U+0045",
+      "crop": [
+        1018,
+        65,
+        1119,
+        183
+      ],
+      "advance": 667,
+      "scaleX": 7.21649485,
+      "scaleY": 7.21649485,
+      "baselineInSource": 97,
+      "sourceSize": [
+        83,
+        97
+      ],
+      "stroke": {
+        "before": 74.17,
+        "after": 70.86,
+        "outlineOffset": 2.08
+      },
+      "components": 1
+    },
+    {
+      "character": "e",
+      "codepoint": "U+0065",
+      "crop": [
+        1118,
+        104,
+        1188,
+        180
+      ],
+      "advance": 426,
+      "scaleX": 7.96296296,
+      "scaleY": 7.96296296,
+      "baselineInSource": 54,
+      "sourceSize": [
+        46,
+        54
+      ],
+      "stroke": {
+        "before": 81.0,
+        "after": 69.48,
+        "outlineOffset": 6.5
+      },
+      "components": 1
+    },
+    {
+      "character": "F",
+      "codepoint": "U+0046",
+      "crop": [
+        1260,
+        57,
+        1361,
+        192
+      ],
+      "advance": 543,
+      "scaleX": 5.93220339,
+      "scaleY": 5.93220339,
+      "baselineInSource": 118,
+      "sourceSize": [
+        78,
+        118
+      ],
+      "stroke": {
+        "before": 61.0,
+        "after": 69.0,
+        "outlineOffset": -4.5
+      },
+      "components": 1
+    },
+    {
+      "character": "f",
+      "codepoint": "U+0066",
+      "crop": [
+        1360,
+        75,
+        1460,
+        195
+      ],
+      "advance": 605,
+      "scaleX": 7.07070707,
+      "scaleY": 7.07070707,
+      "baselineInSource": 99,
+      "sourceSize": [
+        76,
+        99
+      ],
+      "stroke": {
+        "before": 74.53,
+        "after": 71.0,
+        "outlineOffset": 2.27
+      },
+      "components": 1
+    },
+    {
+      "character": "G",
+      "codepoint": "U+0047",
+      "crop": [
+        55,
+        230,
+        157,
+        372
+      ],
+      "advance": 537,
+      "scaleX": 5.83333333,
+      "scaleY": 5.83333333,
+      "baselineInSource": 120,
+      "sourceSize": [
+        78,
+        120
+      ],
+      "stroke": {
+        "before": 58.06,
+        "after": 69.0,
+        "outlineOffset": -5.97
+      },
+      "components": 1
+    },
+    {
+      "character": "g",
+      "codepoint": "U+0067",
+      "crop": [
+        169,
+        285,
+        246,
+        420
+      ],
+      "advance": 705,
+      "scaleX": 12.98764361,
+      "scaleY": 12.98764361,
+      "baselineInSource": 35.239,
+      "sourceSize": [
+        54,
+        117
+      ],
+      "stroke": {
+        "before": 129.0,
+        "after": 71.0,
+        "outlineOffset": 29.5
+      },
+      "components": 1,
+      "bodyInkHeight": 428.67
+    },
+    {
+      "character": "H",
+      "codepoint": "U+0048",
+      "crop": [
+        344,
+        245,
+        432,
+        354
+      ],
+      "advance": 601,
+      "scaleX": 8.04597701,
+      "scaleY": 8.04597701,
+      "baselineInSource": 87,
+      "sourceSize": [
+        67,
+        87
+      ],
+      "stroke": {
+        "before": 80.96,
+        "after": 71.0,
+        "outlineOffset": 5.48
+      },
+      "components": 1
+    },
+    {
+      "character": "h",
+      "codepoint": "U+0068",
+      "crop": [
+        431,
+        249,
+        508,
+        350
+      ],
+      "advance": 600,
+      "scaleX": 8.97435897,
+      "scaleY": 8.97435897,
+      "baselineInSource": 78,
+      "sourceSize": [
+        62,
+        78
+      ],
+      "stroke": {
+        "before": 91.0,
+        "after": 70.87,
+        "outlineOffset": 11.5
+      },
+      "components": 1
+    },
+    {
+      "character": "I",
+      "codepoint": "U+0049",
+      "crop": [
+        629,
+        233,
+        691,
+        341
+      ],
+      "advance": 394,
+      "scaleX": 7.86516854,
+      "scaleY": 7.86516854,
+      "baselineInSource": 89,
+      "sourceSize": [
+        42,
+        89
+      ],
+      "stroke": {
+        "before": 79.0,
+        "after": 71.0,
+        "outlineOffset": 4.5
+      },
+      "components": 1
+    },
+    {
+      "character": "i",
+      "codepoint": "U+0069",
+      "crop": [
+        699,
+        246,
+        739,
+        334
+      ],
+      "advance": 210,
+      "scaleX": 9.26470588,
+      "scaleY": 9.26470588,
+      "baselineInSource": 68,
+      "sourceSize": [
+        17,
+        68
+      ],
+      "stroke": {
+        "before": 91.01,
+        "after": 71.0,
+        "outlineOffset": 10.51
+      },
+      "components": 2
+    },
+    {
+      "character": "J",
+      "codepoint": "U+004A",
+      "crop": [
+        821,
+        235,
+        918,
+        343
+      ],
+      "advance": 692,
+      "scaleX": 8.04597701,
+      "scaleY": 8.04597701,
+      "baselineInSource": 87,
+      "sourceSize": [
+        78,
+        87
+      ],
+      "stroke": {
+        "before": 79.0,
+        "after": 71.0,
+        "outlineOffset": 4.5
+      },
+      "components": 1
+    },
+    {
+      "character": "j",
+      "codepoint": "U+006A",
+      "crop": [
+        910,
+        251,
+        984,
+        394
+      ],
+      "advance": 648,
+      "scaleX": 11.73785989,
+      "scaleY": 11.73785989,
+      "baselineInSource": 64.424,
+      "sourceSize": [
+        53,
+        122
+      ],
+      "stroke": {
+        "before": 115.32,
+        "after": 71.0,
+        "outlineOffset": 23.66
+      },
+      "components": 2,
+      "bodyInkHeight": 428.2
+    },
+    {
+      "character": "K",
+      "codepoint": "U+004B",
+      "crop": [
+        1040,
+        230,
+        1148,
+        351
+      ],
+      "advance": 683,
+      "scaleX": 6.8627451,
+      "scaleY": 6.8627451,
+      "baselineInSource": 102,
+      "sourceSize": [
+        89,
+        102
+      ],
+      "stroke": {
+        "before": 69.0,
+        "after": 69.0,
+        "outlineOffset": 0.0
+      },
+      "components": 1
+    },
+    {
+      "character": "k",
+      "codepoint": "U+006B",
+      "crop": [
+        1135,
+        243,
+        1210,
+        350
+      ],
+      "advance": 550,
+      "scaleX": 7.77777778,
+      "scaleY": 7.77777778,
+      "baselineInSource": 90,
+      "sourceSize": [
+        63,
+        90
+      ],
+      "stroke": {
+        "before": 81.86,
+        "after": 69.9,
+        "outlineOffset": 6.93
+      },
+      "components": 1
+    },
+    {
+      "character": "L",
+      "codepoint": "U+004C",
+      "crop": [
+        1251,
+        235,
+        1336,
+        347
+      ],
+      "advance": 543,
+      "scaleX": 7.36842105,
+      "scaleY": 7.36842105,
+      "baselineInSource": 95,
+      "sourceSize": [
+        65,
+        95
+      ],
+      "stroke": {
+        "before": 79.0,
+        "after": 70.76,
+        "outlineOffset": 4.5
+      },
+      "components": 1
+    },
+    {
+      "character": "l",
+      "codepoint": "U+006C",
+      "crop": [
+        1332,
+        236,
+        1370,
+        345
+      ],
+      "advance": 207,
+      "scaleX": 7.95454545,
+      "scaleY": 7.95454545,
+      "baselineInSource": 88,
+      "sourceSize": [
+        18,
+        88
+      ],
+      "stroke": {
+        "before": 79.32,
+        "after": 71.09,
+        "outlineOffset": 4.66
+      },
+      "components": 1
+    },
+    {
+      "character": "M",
+      "codepoint": "U+004D",
+      "crop": [
+        53,
+        417,
+        169,
+        555
+      ],
+      "advance": 640,
+      "scaleX": 5.98290598,
+      "scaleY": 5.98290598,
+      "baselineInSource": 117,
+      "sourceSize": [
+        93,
+        117
+      ],
+      "stroke": {
+        "before": 57.0,
+        "after": 70.39,
+        "outlineOffset": -6.5
+      },
+      "components": 1
+    },
+    {
+      "character": "m",
+      "codepoint": "U+006D",
+      "crop": [
+        180,
+        474,
+        298,
+        550
+      ],
+      "advance": 770,
+      "scaleX": 7.4137931,
+      "scaleY": 7.4137931,
+      "baselineInSource": 58,
+      "sourceSize": [
+        95,
+        58
+      ],
+      "stroke": {
+        "before": 76.28,
+        "after": 70.84,
+        "outlineOffset": 3.14
+      },
+      "components": 1
+    },
+    {
+      "character": "N",
+      "codepoint": "U+004E",
+      "crop": [
+        369,
+        398,
+        470,
+        545
+      ],
+      "advance": 547,
+      "scaleX": 5.6,
+      "scaleY": 5.6,
+      "baselineInSource": 125,
+      "sourceSize": [
+        82,
+        125
+      ],
+      "stroke": {
+        "before": 52.21,
+        "after": 69.65,
+        "outlineOffset": -8.89
+      },
+      "components": 1
+    },
+    {
+      "character": "n",
+      "codepoint": "U+006E",
+      "crop": [
+        477,
+        465,
+        549,
+        535
+      ],
+      "advance": 521,
+      "scaleX": 8.7755102,
+      "scaleY": 8.7755102,
+      "baselineInSource": 49,
+      "sourceSize": [
+        53,
+        49
+      ],
+      "stroke": {
+        "before": 86.58,
+        "after": 71.0,
+        "outlineOffset": 8.29
+      },
+      "components": 1
+    },
+    {
+      "character": "O",
+      "codepoint": "U+004F",
+      "crop": [
+        641,
+        403,
+        738,
+        522
+      ],
+      "advance": 607,
+      "scaleX": 7.0,
+      "scaleY": 7.0,
+      "baselineInSource": 100,
+      "sourceSize": [
+        77,
+        100
+      ],
+      "stroke": {
+        "before": 74.1,
+        "after": 71.0,
+        "outlineOffset": 2.05
+      },
+      "components": 1
+    },
+    {
+      "character": "o",
+      "codepoint": "U+006F",
+      "crop": [
+        750,
+        452,
+        813,
+        515
+      ],
+      "advance": 460,
+      "scaleX": 10.23809524,
+      "scaleY": 10.23809524,
+      "baselineInSource": 42,
+      "sourceSize": [
+        44,
+        42
+      ],
+      "stroke": {
+        "before": 109.05,
+        "after": 69.36,
+        "outlineOffset": 21.52
+      },
+      "components": 1
+    },
+    {
+      "character": "P",
+      "codepoint": "U+0050",
+      "crop": [
+        898,
+        395,
+        998,
+        517
+      ],
+      "advance": 640,
+      "scaleX": 6.93069307,
+      "scaleY": 6.93069307,
+      "baselineInSource": 101,
+      "sourceSize": [
+        82,
+        101
+      ],
+      "stroke": {
+        "before": 71.0,
+        "after": 71.0,
+        "outlineOffset": 0.0
+      },
+      "components": 1
+    },
+    {
+      "character": "p",
+      "codepoint": "U+0070",
+      "crop": [
+        990,
+        445,
+        1059,
+        553
+      ],
+      "advance": 631,
+      "scaleX": 10.93596764,
+      "scaleY": 10.93596764,
+      "baselineInSource": 41.25,
+      "sourceSize": [
+        55,
+        94
+      ],
+      "stroke": {
+        "before": 111.0,
+        "after": 71.0,
+        "outlineOffset": 21.5
+      },
+      "components": 1,
+      "bodyInkHeight": 430.11
+    },
+    {
+      "character": "Q",
+      "codepoint": "U+0051",
+      "crop": [
+        1126,
+        381,
+        1231,
+        502
+      ],
+      "advance": 659,
+      "scaleX": 7.14285714,
+      "scaleY": 7.14285714,
+      "baselineInSource": 98,
+      "sourceSize": [
+        83,
+        98
+      ],
+      "stroke": {
+        "before": 76.65,
+        "after": 70.7,
+        "outlineOffset": 3.33
+      },
+      "components": 1
+    },
+    {
+      "character": "q",
+      "codepoint": "U+0071",
+      "crop": [
+        1224,
+        434,
+        1299,
+        552
+      ],
+      "advance": 703,
+      "scaleX": 13.25418531,
+      "scaleY": 13.25418531,
+      "baselineInSource": 35.25,
+      "sourceSize": [
+        54,
+        99
+      ],
+      "stroke": {
+        "before": 143.36,
+        "after": 70.73,
+        "outlineOffset": 38.68
+      },
+      "components": 1,
+      "bodyInkHeight": 429.21
+    },
+    {
+      "character": "R",
+      "codepoint": "U+0052",
+      "crop": [
+        1362,
+        369,
+        1461,
+        504
+      ],
+      "advance": 563,
+      "scaleX": 6.08695652,
+      "scaleY": 6.08695652,
+      "baselineInSource": 115,
+      "sourceSize": [
+        80,
+        115
+      ],
+      "stroke": {
+        "before": 64.39,
+        "after": 69.0,
+        "outlineOffset": -2.81
+      },
+      "components": 1
+    },
+    {
+      "character": "r",
+      "codepoint": "U+0072",
+      "crop": [
+        1464,
+        429,
+        1532,
+        501
+      ],
+      "advance": 464,
+      "scaleX": 9.34782609,
+      "scaleY": 9.34782609,
+      "baselineInSource": 46,
+      "sourceSize": [
+        46,
+        46
+      ],
+      "stroke": {
+        "before": 107.68,
+        "after": 71.24,
+        "outlineOffset": 19.84
+      },
+      "components": 1
+    },
+    {
+      "character": "S",
+      "codepoint": "U+0053",
+      "crop": [
+        45,
+        595,
+        137,
+        704
+      ],
+      "advance": 621,
+      "scaleX": 7.95454545,
+      "scaleY": 7.95454545,
+      "baselineInSource": 88,
+      "sourceSize": [
+        70,
+        88
+      ],
+      "stroke": {
+        "before": 79.06,
+        "after": 70.73,
+        "outlineOffset": 4.53
+      },
+      "components": 1
+    },
+    {
+      "character": "s",
+      "codepoint": "U+0073",
+      "crop": [
+        153,
+        633,
+        213,
+        700
+      ],
+      "advance": 396,
+      "scaleX": 9.14893617,
+      "scaleY": 9.14893617,
+      "baselineInSource": 47,
+      "sourceSize": [
+        38,
+        47
+      ],
+      "stroke": {
+        "before": 95.89,
+        "after": 71.22,
+        "outlineOffset": 12.94
+      },
+      "components": 1
+    },
+    {
+      "character": "T",
+      "codepoint": "U+0054",
+      "crop": [
+        335,
+        582,
+        478,
+        705
+      ],
+      "advance": 893,
+      "scaleX": 6.73076923,
+      "scaleY": 6.73076923,
+      "baselineInSource": 104,
+      "sourceSize": [
+        122,
+        104
+      ],
+      "stroke": {
+        "before": 69.07,
+        "after": 69.07,
+        "outlineOffset": 0.0
+      },
+      "components": 1
+    },
+    {
+      "character": "t",
+      "codepoint": "U+0074",
+      "crop": [
+        483,
+        601,
+        558,
+        697
+      ],
+      "advance": 491,
+      "scaleX": 7.76315789,
+      "scaleY": 7.76315789,
+      "baselineInSource": 76,
+      "sourceSize": [
+        55,
+        76
+      ],
+      "stroke": {
+        "before": 78.3,
+        "after": 71.0,
+        "outlineOffset": 4.15
+      },
+      "components": 1
+    },
+    {
+      "character": "U",
+      "codepoint": "U+0055",
+      "crop": [
+        692,
+        572,
+        781,
+        683
+      ],
+      "advance": 597,
+      "scaleX": 7.69230769,
+      "scaleY": 7.69230769,
+      "baselineInSource": 91,
+      "sourceSize": [
+        69,
+        91
+      ],
+      "stroke": {
+        "before": 77.84,
+        "after": 71.01,
+        "outlineOffset": 3.92
+      },
+      "components": 1
+    },
+    {
+      "character": "u",
+      "codepoint": "U+0075",
+      "crop": [
+        788,
+        603,
+        861,
+        679
+      ],
+      "advance": 475,
+      "scaleX": 7.67857143,
+      "scaleY": 7.67857143,
+      "baselineInSource": 56,
+      "sourceSize": [
+        54,
+        56
+      ],
+      "stroke": {
+        "before": 80.98,
+        "after": 69.69,
+        "outlineOffset": 6.49
+      },
+      "components": 1
+    },
+    {
+      "character": "V",
+      "codepoint": "U+0056",
+      "crop": [
+        930,
+        554,
+        1029,
+        687
+      ],
+      "advance": 578,
+      "scaleX": 6.25,
+      "scaleY": 6.25,
+      "baselineInSource": 112,
+      "sourceSize": [
+        80,
+        112
+      ],
+      "stroke": {
+        "before": 62.38,
+        "after": 69.36,
+        "outlineOffset": -3.81
+      },
+      "components": 1
+    },
+    {
+      "character": "v",
+      "codepoint": "U+0076",
+      "crop": [
+        1029,
+        611,
+        1097,
+        681
+      ],
+      "advance": 462,
+      "scaleX": 8.7755102,
+      "scaleY": 8.7755102,
+      "baselineInSource": 49,
+      "sourceSize": [
+        47,
+        49
+      ],
+      "stroke": {
+        "before": 93.44,
+        "after": 70.73,
+        "outlineOffset": 11.72
+      },
+      "components": 1
+    },
+    {
+      "character": "W",
+      "codepoint": "U+0057",
+      "crop": [
+        1187,
+        555,
+        1308,
+        685
+      ],
+      "advance": 700,
+      "scaleX": 6.30630631,
+      "scaleY": 6.30630631,
+      "baselineInSource": 111,
+      "sourceSize": [
+        99,
+        111
+      ],
+      "stroke": {
+        "before": 64.8,
+        "after": 69.07,
+        "outlineOffset": -2.6
+      },
+      "components": 1
+    },
+    {
+      "character": "w",
+      "codepoint": "U+0077",
+      "crop": [
+        1318,
+        604,
+        1424,
+        676
+      ],
+      "advance": 750,
+      "scaleX": 8.43137255,
+      "scaleY": 8.43137255,
+      "baselineInSource": 51,
+      "sourceSize": [
+        83,
+        51
+      ],
+      "stroke": {
+        "before": 91.0,
+        "after": 70.0,
+        "outlineOffset": 11.5
+      },
+      "components": 1
+    },
+    {
+      "character": "X",
+      "codepoint": "U+0058",
+      "crop": [
+        41,
+        739,
+        159,
+        864
+      ],
+      "advance": 717,
+      "scaleX": 6.60377358,
+      "scaleY": 6.60377358,
+      "baselineInSource": 106,
+      "sourceSize": [
+        97,
+        106
+      ],
+      "stroke": {
+        "before": 64.89,
+        "after": 69.6,
+        "outlineOffset": -2.55
+      },
+      "components": 1
+    },
+    {
+      "character": "x",
+      "codepoint": "U+0078",
+      "crop": [
+        177,
+        781,
+        240,
+        851
+      ],
+      "advance": 414,
+      "scaleX": 9.14893617,
+      "scaleY": 9.14893617,
+      "baselineInSource": 47,
+      "sourceSize": [
+        40,
+        47
+      ],
+      "stroke": {
+        "before": 91.93,
+        "after": 69.3,
+        "outlineOffset": 12.96
+      },
+      "components": 1
+    },
+    {
+      "character": "Y",
+      "codepoint": "U+0059",
+      "crop": [
+        341,
+        715,
+        445,
+        838
+      ],
+      "advance": 647,
+      "scaleX": 6.93069307,
+      "scaleY": 6.93069307,
+      "baselineInSource": 101,
+      "sourceSize": [
+        83,
+        101
+      ],
+      "stroke": {
+        "before": 70.72,
+        "after": 70.72,
+        "outlineOffset": 0.0
+      },
+      "components": 1
+    },
+    {
+      "character": "y",
+      "codepoint": "U+0079",
+      "crop": [
+        450,
+        768,
+        533,
+        908
+      ],
+      "advance": 845,
+      "scaleX": 13.46876407,
+      "scaleY": 13.46876407,
+      "baselineInSource": 34.239,
+      "sourceSize": [
+        62,
+        121
+      ],
+      "stroke": {
+        "before": 131.56,
+        "after": 71.0,
+        "outlineOffset": 31.78
+      },
+      "components": 1,
+      "bodyInkHeight": 430.16
+    },
+    {
+      "character": "Z",
+      "codepoint": "U+005A",
+      "crop": [
+        605,
+        719,
+        713,
+        845
+      ],
+      "advance": 655,
+      "scaleX": 6.60377358,
+      "scaleY": 6.60377358,
+      "baselineInSource": 106,
+      "sourceSize": [
+        88,
+        106
+      ],
+      "stroke": {
+        "before": 69.2,
+        "after": 70.34,
+        "outlineOffset": -1.4
+      },
+      "components": 1
+    },
+    {
+      "character": "z",
+      "codepoint": "U+007A",
+      "crop": [
+        718,
+        777,
+        797,
+        849
+      ],
+      "advance": 552,
+      "scaleX": 8.26923077,
+      "scaleY": 8.26923077,
+      "baselineInSource": 52,
+      "sourceSize": [
+        60,
+        52
+      ],
+      "stroke": {
+        "before": 87.24,
+        "after": 71.18,
+        "outlineOffset": 8.62
+      },
+      "components": 1
+    },
+    {
+      "character": "0",
+      "codepoint": "U+0030",
+      "crop": [
+        24,
+        1097,
+        104,
+        1186
+      ],
+      "advance": 614,
+      "scaleX": 10.0,
+      "scaleY": 10.0,
+      "baselineInSource": 70,
+      "sourceSize": [
+        57,
+        70
+      ],
+      "stroke": {
+        "before": 99.0,
+        "after": 71.0,
+        "outlineOffset": 14.5
+      },
+      "components": 1
+    },
+    {
+      "character": "1",
+      "codepoint": "U+0031",
+      "crop": [
+        148,
+        1098,
+        219,
+        1182
+      ],
+      "advance": 560,
+      "scaleX": 11.47540984,
+      "scaleY": 11.47540984,
+      "baselineInSource": 61,
+      "sourceSize": [
+        48,
+        61
+      ],
+      "stroke": {
+        "before": 124.82,
+        "after": 71.0,
+        "outlineOffset": 28.41
+      },
+      "components": 1
+    },
+    {
+      "character": "2",
+      "codepoint": "U+0032",
+      "crop": [
+        252,
+        1099,
+        312,
+        1178
+      ],
+      "advance": 448,
+      "scaleX": 12.06896552,
+      "scaleY": 12.06896552,
+      "baselineInSource": 58,
+      "sourceSize": [
+        36,
+        58
+      ],
+      "stroke": {
+        "before": 127.44,
+        "after": 70.62,
+        "outlineOffset": 29.72
+      },
+      "components": 1
+    },
+    {
+      "character": "3",
+      "codepoint": "U+0033",
+      "crop": [
+        346,
+        1099,
+        412,
+        1182
+      ],
+      "advance": 492,
+      "scaleX": 11.47540984,
+      "scaleY": 11.47540984,
+      "baselineInSource": 61,
+      "sourceSize": [
+        41,
+        61
+      ],
+      "stroke": {
+        "before": 117.01,
+        "after": 70.02,
+        "outlineOffset": 25.5
+      },
+      "components": 1
+    },
+    {
+      "character": "4",
+      "codepoint": "U+0034",
+      "crop": [
+        419,
+        1095,
+        495,
+        1180
+      ],
+      "advance": 644,
+      "scaleX": 11.66666667,
+      "scaleY": 11.66666667,
+      "baselineInSource": 60,
+      "sourceSize": [
+        54,
+        60
+      ],
+      "stroke": {
+        "before": 123.98,
+        "after": 70.22,
+        "outlineOffset": 28.99
+      },
+      "components": 1
+    },
+    {
+      "character": "5",
+      "codepoint": "U+0035",
+      "crop": [
+        507,
+        1096,
+        584,
+        1174
+      ],
+      "advance": 690,
+      "scaleX": 12.06896552,
+      "scaleY": 12.06896552,
+      "baselineInSource": 58,
+      "sourceSize": [
+        56,
+        58
+      ],
+      "stroke": {
+        "before": 124.78,
+        "after": 70.04,
+        "outlineOffset": 28.39
+      },
+      "components": 1
+    },
+    {
+      "character": "6",
+      "codepoint": "U+0036",
+      "crop": [
+        615,
+        1096,
+        687,
+        1174
+      ],
+      "advance": 600,
+      "scaleX": 12.72727273,
+      "scaleY": 12.72727273,
+      "baselineInSource": 55,
+      "sourceSize": [
+        47,
+        55
+      ],
+      "stroke": {
+        "before": 139.58,
+        "after": 70.91,
+        "outlineOffset": 35.79
+      },
+      "components": 1
+    },
+    {
+      "character": "7",
+      "codepoint": "U+0037",
+      "crop": [
+        694,
+        1095,
+        763,
+        1171
+      ],
+      "advance": 570,
+      "scaleX": 12.96296296,
+      "scaleY": 12.96296296,
+      "baselineInSource": 54,
+      "sourceSize": [
+        44,
+        54
+      ],
+      "stroke": {
+        "before": 134.83,
+        "after": 69.36,
+        "outlineOffset": 36.41
+      },
+      "components": 1
+    },
+    {
+      "character": "8",
+      "codepoint": "U+0038",
+      "crop": [
+        774,
+        1090,
+        843,
+        1176
+      ],
+      "advance": 499,
+      "scaleX": 10.60606061,
+      "scaleY": 10.60606061,
+      "baselineInSource": 66,
+      "sourceSize": [
+        44,
+        66
+      ],
+      "stroke": {
+        "before": 107.31,
+        "after": 69.3,
+        "outlineOffset": 20.65
+      },
+      "components": 1
+    },
+    {
+      "character": "9",
+      "codepoint": "U+0039",
+      "crop": [
+        853,
+        1089,
+        917,
+        1177
+      ],
+      "advance": 447,
+      "scaleX": 10.29411765,
+      "scaleY": 10.29411765,
+      "baselineInSource": 68,
+      "sourceSize": [
+        41,
+        68
+      ],
+      "stroke": {
+        "before": 113.0,
+        "after": 71.39,
+        "outlineOffset": 21.5
+      },
+      "components": 1
+    },
+    {
+      "character": ",",
+      "codepoint": "U+002C",
+      "crop": [
+        1198,
+        806,
+        1238,
+        854
+      ],
+      "advance": 203,
+      "scaleX": 7.0,
+      "scaleY": 7.0,
+      "baselineInSource": 30,
+      "sourceSize": [
+        17,
+        30
+      ],
+      "stroke": {
+        "before": 70.31,
+        "after": 70.31,
+        "outlineOffset": 0.0
+      },
+      "components": 1
+    },
+    {
+      "character": ".",
+      "codepoint": "U+002E",
+      "crop": [
+        912,
+        800,
+        953,
+        840
+      ],
+      "advance": 178,
+      "scaleX": 5.0,
+      "scaleY": 5.0,
+      "baselineInSource": 18,
+      "sourceSize": [
+        22,
+        18
+      ],
+      "stroke": {
+        "before": 84.85,
+        "after": 70.71,
+        "outlineOffset": 7.43
+      },
+      "components": 1
+    },
+    {
+      "character": "!",
+      "codepoint": "U+0021",
+      "crop": [
+        1046,
+        726,
+        1094,
+        844
+      ],
+      "advance": 281,
+      "scaleX": 7.07070707,
+      "scaleY": 7.07070707,
+      "baselineInSource": 99,
+      "sourceSize": [
+        29,
+        99
+      ],
+      "stroke": {
+        "before": 79.0,
+        "after": 71.0,
+        "outlineOffset": 4.5
+      },
+      "components": 2
+    },
+    {
+      "character": ";",
+      "codepoint": "U+003B",
+      "crop": [
+        1185,
+        745,
+        1238,
+        854
+      ],
+      "advance": 283,
+      "scaleX": 6.47727273,
+      "scaleY": 6.47727273,
+      "baselineInSource": 88,
+      "sourceSize": [
+        31,
+        88
+      ],
+      "stroke": {
+        "before": 71.15,
+        "after": 69.01,
+        "outlineOffset": 1.58
+      },
+      "components": 2
+    },
+    {
+      "character": ":",
+      "codepoint": "U+003A",
+      "crop": [
+        1279,
+        748,
+        1326,
+        844
+      ],
+      "advance": 201,
+      "scaleX": 6.66666667,
+      "scaleY": 6.66666667,
+      "baselineInSource": 75,
+      "sourceSize": [
+        25,
+        75
+      ],
+      "stroke": {
+        "before": 113.36,
+        "after": 70.66,
+        "outlineOffset": 21.68
+      },
+      "components": 2
+    },
+    {
+      "character": "-",
+      "codepoint": "U+002D",
+      "crop": [
+        1368,
+        781,
+        1428,
+        814
+      ],
+      "advance": 364,
+      "scaleX": 6.78571429,
+      "scaleY": 6.78571429,
+      "baselineInSource": 14,
+      "sourceSize": [
+        41,
+        14
+      ],
+      "stroke": {
+        "before": 68.2,
+        "after": 70.73,
+        "outlineOffset": -1.9
+      },
+      "components": 1
+    },
+    {
+      "character": "?",
+      "codepoint": "U+003F",
+      "crop": [
+        1470,
+        735,
+        1540,
+        871
+      ],
+      "advance": 367,
+      "scaleX": 6.19469027,
+      "scaleY": 6.19469027,
+      "baselineInSource": 113,
+      "sourceSize": [
+        45,
+        113
+      ],
+      "stroke": {
+        "before": 65.76,
+        "after": 69.56,
+        "outlineOffset": -2.12
+      },
+      "components": 2
+    },
+    {
+      "character": "_",
+      "codepoint": "U+005F",
+      "crop": [
+        1557,
+        833,
+        1676,
+        866
+      ],
+      "advance": 645,
+      "scaleX": 5.66666667,
+      "scaleY": 5.66666667,
+      "baselineInSource": 15,
+      "sourceSize": [
+        98,
+        15
+      ],
+      "stroke": {
+        "before": 63.0,
+        "after": 69.0,
+        "outlineOffset": -3.5
+      },
+      "components": 1
+    },
+    {
+      "character": "“",
+      "codepoint": "U+201C",
+      "crop": [
+        42,
+        908,
+        98,
+        963
+      ],
+      "advance": 317,
+      "scaleX": 6.36363636,
+      "scaleY": 6.36363636,
+      "baselineInSource": 33,
+      "sourceSize": [
+        36,
+        33
+      ],
+      "stroke": {
+        "before": 67.0,
+        "after": 71.0,
+        "outlineOffset": -2.5
+      },
+      "components": 2
+    },
+    {
+      "character": "”",
+      "codepoint": "U+201D",
+      "crop": [
+        236,
+        907,
+        299,
+        962
+      ],
+      "advance": 333,
+      "scaleX": 5.83333333,
+      "scaleY": 5.83333333,
+      "baselineInSource": 36,
+      "sourceSize": [
+        41,
+        36
+      ],
+      "stroke": {
+        "before": 59.31,
+        "after": 69.65,
+        "outlineOffset": -5.35
+      },
+      "components": 2
+    },
+    {
+      "character": "(",
+      "codepoint": "U+0028",
+      "crop": [
+        430,
+        900,
+        480,
+        1036
+      ],
+      "advance": 281,
+      "scaleX": 7.32758621,
+      "scaleY": 7.32758621,
+      "baselineInSource": 116,
+      "sourceSize": [
+        28,
+        116
+      ],
+      "stroke": {
+        "before": 79.32,
+        "after": 71.0,
+        "outlineOffset": 4.66
+      },
+      "components": 1
+    },
+    {
+      "character": ")",
+      "codepoint": "U+0029",
+      "crop": [
+        551,
+        897,
+        598,
+        1035
+      ],
+      "advance": 262,
+      "scaleX": 7.14285714,
+      "scaleY": 7.14285714,
+      "baselineInSource": 119,
+      "sourceSize": [
+        26,
+        119
+      ],
+      "stroke": {
+        "before": 78.88,
+        "after": 71.0,
+        "outlineOffset": 4.44
+      },
+      "components": 1
+    },
+    {
+      "character": "[",
+      "codepoint": "U+005B",
+      "crop": [
+        660,
+        889,
+        709,
+        1029
+      ],
+      "advance": 288,
+      "scaleX": 7.14285714,
+      "scaleY": 7.14285714,
+      "baselineInSource": 119,
+      "sourceSize": [
+        30,
+        119
+      ],
+      "stroke": {
+        "before": 80.81,
+        "after": 70.27,
+        "outlineOffset": 5.4
+      },
+      "components": 1
+    },
+    {
+      "character": "]",
+      "codepoint": "U+005D",
+      "crop": [
+        751,
+        888,
+        804,
+        1028
+      ],
+      "advance": 301,
+      "scaleX": 7.08333333,
+      "scaleY": 7.08333333,
+      "baselineInSource": 120,
+      "sourceSize": [
+        32,
+        120
+      ],
+      "stroke": {
+        "before": 79.03,
+        "after": 71.0,
+        "outlineOffset": 4.51
+      },
+      "components": 1
+    },
+    {
+      "character": "~",
+      "codepoint": "U+007E",
+      "crop": [
+        882,
+        931,
+        962,
+        974
+      ],
+      "advance": 488,
+      "scaleX": 6.66666667,
+      "scaleY": 6.66666667,
+      "baselineInSource": 21,
+      "sourceSize": [
+        60,
+        21
+      ],
+      "stroke": {
+        "before": 66.48,
+        "after": 70.22,
+        "outlineOffset": -2.76
+      },
+      "components": 1
+    },
+    {
+      "character": "<",
+      "codepoint": "U+003C",
+      "crop": [
+        1060,
+        910,
+        1148,
+        1017
+      ],
+      "advance": 504,
+      "scaleX": 6.0,
+      "scaleY": 6.0,
+      "baselineInSource": 85,
+      "sourceSize": [
+        68,
+        85
+      ],
+      "stroke": {
+        "before": 56.31,
+        "after": 70.01,
+        "outlineOffset": -6.84
+      },
+      "components": 1
+    },
+    {
+      "character": ">",
+      "codepoint": "U+003E",
+      "crop": [
+        1211,
+        907,
+        1294,
+        1027
+      ],
+      "advance": 421,
+      "scaleX": 5.15151515,
+      "scaleY": 5.15151515,
+      "baselineInSource": 99,
+      "sourceSize": [
+        63,
+        99
+      ],
+      "stroke": {
+        "before": 56.74,
+        "after": 69.53,
+        "outlineOffset": -6.63
+      },
+      "components": 1
+    },
+    {
+      "character": "*",
+      "codepoint": "U+002A",
+      "crop": [
+        1383,
+        922,
+        1471,
+        1004
+      ],
+      "advance": 551,
+      "scaleX": 7.04918033,
+      "scaleY": 7.04918033,
+      "baselineInSource": 61,
+      "sourceSize": [
+        68,
+        61
+      ],
+      "stroke": {
+        "before": 83.61,
+        "after": 71.5,
+        "outlineOffset": 6.81
+      },
+      "components": 1
+    },
+    {
+      "character": "+",
+      "codepoint": "U+002B",
+      "crop": [
+        1546,
+        927,
+        1629,
+        1002
+      ],
+      "advance": 584,
+      "scaleX": 8.54545455,
+      "scaleY": 8.54545455,
+      "baselineInSource": 55,
+      "sourceSize": [
+        62,
+        55
+      ],
+      "stroke": {
+        "before": 97.75,
+        "after": 69.62,
+        "outlineOffset": 15.87
+      },
+      "components": 1
+    },
+    {
+      "character": "#",
+      "codepoint": "U+0023",
+      "crop": [
+        1110,
+        1065,
+        1222,
+        1170
+      ],
+      "advance": 821,
+      "scaleX": 8.23529412,
+      "scaleY": 8.23529412,
+      "baselineInSource": 85,
+      "sourceSize": [
+        92,
+        85
+      ],
+      "stroke": {
+        "before": 91.0,
+        "after": 71.35,
+        "outlineOffset": 10.5
+      },
+      "components": 1
+    },
+    {
+      "character": "=",
+      "codepoint": "U+003D",
+      "crop": [
+        1292,
+        1088,
+        1357,
+        1150
+      ],
+      "advance": 384,
+      "scaleX": 6.97674419,
+      "scaleY": 6.97674419,
+      "baselineInSource": 43,
+      "sourceSize": [
+        45,
+        43
+      ],
+      "stroke": {
+        "before": 85.0,
+        "after": 71.0,
+        "outlineOffset": 7.5
+      },
+      "components": 2
+    },
+    {
+      "character": "‘",
+      "codepoint": "U+2018",
+      "crop": [
+        1477,
+        1047,
+        1515,
+        1100
+      ],
+      "advance": 199,
+      "scaleX": 6.36363636,
+      "scaleY": 6.36363636,
+      "baselineInSource": 33,
+      "sourceSize": [
+        19,
+        33
+      ],
+      "stroke": {
+        "before": 75.0,
+        "after": 71.15,
+        "outlineOffset": 3.5
+      },
+      "components": 1
+    },
+    {
+      "character": "’",
+      "codepoint": "U+2019",
+      "crop": [
+        1604,
+        1047,
+        1638,
+        1098
+      ],
+      "advance": 198,
+      "scaleX": 6.5625,
+      "scaleY": 6.5625,
+      "baselineInSource": 32,
+      "sourceSize": [
+        17,
+        32
+      ],
+      "stroke": {
+        "before": 68.43,
+        "after": 71.29,
+        "outlineOffset": -1.78
+      },
+      "components": 1
+    },
+    {
+      "character": "/",
+      "codepoint": "U+002F",
+      "crop": [
+        26,
+        1269,
+        140,
+        1385
+      ],
+      "advance": 818,
+      "scaleX": 7.91666667,
+      "scaleY": 7.91666667,
+      "baselineInSource": 96,
+      "sourceSize": [
+        95,
+        96
+      ],
+      "stroke": {
+        "before": 88.78,
+        "after": 70.46,
+        "outlineOffset": 9.39
+      },
+      "components": 1
+    },
+    {
+      "character": "\\",
+      "codepoint": "U+005C",
+      "crop": [
+        166,
+        1269,
+        266,
+        1397
+      ],
+      "advance": 656,
+      "scaleX": 7.16981132,
+      "scaleY": 7.16981132,
+      "baselineInSource": 106,
+      "sourceSize": [
+        80,
+        106
+      ],
+      "stroke": {
+        "before": 73.4,
+        "after": 70.72,
+        "outlineOffset": 1.7
+      },
+      "components": 1
+    },
+    {
+      "character": "|",
+      "codepoint": "U+007C",
+      "crop": [
+        373,
+        1251,
+        410,
+        1391
+      ],
+      "advance": 189,
+      "scaleX": 6.96721311,
+      "scaleY": 6.96721311,
+      "baselineInSource": 122,
+      "sourceSize": [
+        16,
+        122
+      ],
+      "stroke": {
+        "before": 77.0,
+        "after": 69.0,
+        "outlineOffset": 3.5
+      },
+      "components": 1
+    },
+    {
+      "character": "@",
+      "codepoint": "U+0040",
+      "crop": [
+        501,
+        1253,
+        612,
+        1373
+      ],
+      "advance": 791,
+      "scaleX": 7.83505155,
+      "scaleY": 7.83505155,
+      "baselineInSource": 97,
+      "sourceSize": [
+        91,
+        97
+      ],
+      "stroke": {
+        "before": 77.94,
+        "after": 71.18,
+        "outlineOffset": 3.97
+      },
+      "components": 1
+    },
+    {
+      "character": "&",
+      "codepoint": "U+0026",
+      "crop": [
+        727,
+        1264,
+        811,
+        1367
+      ],
+      "advance": 600,
+      "scaleX": 8.64197531,
+      "scaleY": 8.64197531,
+      "baselineInSource": 81,
+      "sourceSize": [
+        62,
+        81
+      ],
+      "stroke": {
+        "before": 91.22,
+        "after": 71.35,
+        "outlineOffset": 10.61
+      },
+      "components": 1
+    },
+    {
+      "character": "$",
+      "codepoint": "U+0024",
+      "crop": [
+        877,
+        1263,
+        951,
+        1357
+      ],
+      "advance": 593,
+      "scaleX": 10.37974684,
+      "scaleY": 10.37974684,
+      "baselineInSource": 79,
+      "sourceSize": [
+        54,
+        79
+      ],
+      "stroke": {
+        "before": 115.22,
+        "after": 71.49,
+        "outlineOffset": 23.61
+      },
+      "components": 1
+    }
+  ]
+}

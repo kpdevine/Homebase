@@ -1,37 +1,33 @@
 # Homebase
 
-A personal performance dashboard for daily tasks, nutrition self-ratings, weekly gym progress, and historical review.
+A local dashboard for dated tasks, recurring routines, nutrition ratings, training, and history. The interface follows the owner's car radio: dark blue backlighting, indigo ink, a charcoal frame, slightly pixelated type, and a large clock. The owner's handwriting appears in tasks, notes, and the notes cursor.
 
-## Current decisions
+**Resume:** [START-HERE.md](START-HERE.md).
 
-- GitHub repository: https://github.com/kpdevine/Homebase
-- Develop and preview locally. No deployment or cloud resources yet.
-- Use sample information for the first interactive prototype.
-- Explore a soft dark appearance, with legibility and interactions taking priority over visual refinement.
-- Laptop and phone come first. Echo Show compatibility will be investigated later.
+```powershell
+npm.cmd run dev
+```
 
-The repository URL above records the intended destination. It does not mean this local folder has been connected or pushed.
+Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 47 tests.
 
-## Decisions still open
+The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Records do not sync between devices.
 
-- Prototype implementation tools: plain HTML/CSS/JavaScript was discussed; confirm before application implementation.
-- Database engine, cloud provider, data region, authentication, and synchronization.
-- Scoring formula, category weights, week boundaries, and missing-score behavior.
+## Features
 
-## First milestone
+- Overview, Nutrition, Daily training, Checklists, and Calendar tabs, compact reviews, and a guided day-completion flow.
+- Dated one-time or recurring tasks: daily, weekdays, weekly, or selected weekdays. Expandable parents depend on all subtasks. Individual occurrences support removal/Undo; schedules can stop after today.
+- Nutrition dragging/buttons/arrows in 0.1 steps, direct entry to two decimal places, and optional handwritten notes. Training has dated set/rest logs, weekly targets, and the same notes treatment. Notes have a small cursor made from the owner's rotated slash.
+- Consistent LCD panels, numbered navigation, inset inputs, brief stepped transitions, and reduced-motion support. Dense tasks, a direct overview add button, aligned checkboxes, bold handwritten task headings, and entry underlines that accommodate descenders without shifting the layout. A time-based Chicago greeting, centered score with raised decimals, and a large corner clock.
+- Blue/indigo meters coded by amount, larger missing-input warnings, gradually brighter rings with a slight bias toward higher scores, white accents at 9.2+, and a second halo at 10. Calendar daily, Monday–Friday weekly, and monthly rings plus a logging streak. Blanks are omitted; provisional state is explicit.
+- Read-only daily recaps with score/status, tasks and subtasks, dated training totals, and full handwritten notes. Category shortcuts and keyboard calendar navigation make earlier days easier to revisit.
+- Local persistence, backup export/import, storage recovery, and conflicting-tab protection. Version-1 backups migrate to version 2 without losing history.
 
-1. Build and test the reusable circular score meter: scores 1–10, mouse and touch dragging, integer snapping, immediate feedback, accessible alternatives, and a matching read-only state.
-2. Assemble a landscape dashboard and responsive phone layout with sample checklist items, nutrition scoring, a labeled sample overall score, muscle-group set progress, and calendar/history navigation.
-3. Report tested behavior and limitations, then gather feedback before expanding scope.
+Daily score provisionally averages entered nutrition, checklist completion, and training check-in. Subtasks count once; parents are not double-counted. Merely scheduled tasks do not create scores or streaks before a checklist check-in. A reviewed empty checklist counts as no tasks due. Settings explains the policy.
 
-No calories, food logs, device integrations, or real synchronization belong to this milestone.
+## Development boundary
 
-## Data planning
+Keep development local and production technology open. This buildless HTML/CSS/JavaScript prototype does not choose a production framework, database, hosting service, authentication, synchronization, or screen platform. Prioritize landscape displays.
 
-See [the proposed data model](docs/data-design.md). This is a reviewable design proposal, not an implemented database or an approved technology choice.
+Original planning files were uploaded to [kpdevine/Homebase](https://github.com/kpdevine/Homebase). This checkout has no remote configured; current work is saved locally. Personal records and credentials stay out of Git.
 
-Version control should hold application source, documentation, synthetic sample data, and eventual schema migrations. Personal records, database files, exports, and credentials should stay outside version control.
-
-## Status
-
-Planning only. No runnable application or automated tests have been created yet.
+See [prototype guide](docs/prototype-guide.md), [app polish](docs/app-polish.md), [radio revision](docs/radio-revamp.md), and [data design proposal](docs/data-design.md).

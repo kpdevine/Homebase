@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kieran Handwriting · Font specimen</title>
+    <link rel="preload" href="./assets/fonts/KieranHandwriting-Regular.woff2?v=1.5" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="./typography.css">
+    <link rel="stylesheet" href="./font-preview.css">
+    <script type="module" src="./font-preview.mjs"></script>
+  </head>
+  <body>
+    <main>
+      <header><a class="back" href="./">← Overview</a><span class="version">YOUR HANDWRITING · VERSION 1.5</span></header>
+      <h1>Kieran Handwriting</h1>
+      <p class="intro">Drawn by you. Ready to type.</p>
+      <nav aria-label="Font actions"><a class="button primary" href="./assets/fonts/KieranHandwriting-v1.5.zip" download>Download Regular + Bold</a><a class="button" href="./assets/fonts/KieranHandwriting-Regular-v1.5.ttf" download>Regular TTF</a><a class="button" href="./assets/fonts/KieranHandwriting-Bold-v1.5.ttf" download>Bold TTF</a></nav>
+      <section class="paper" aria-labelledby="try-title">
+        <div class="controls"><label id="try-title" for="sample">Try your font</label><button type="button" id="font-style" class="weight-button" aria-pressed="false">Bold</button><label class="size-control" for="font-size">Size <output id="size-label" for="font-size">48 px</output><input id="font-size" type="range" min="18" max="80" value="48"></label></div>
+        <textarea id="sample" spellcheck="false" rows="4">Enjoy a little progress, every day.
+Today: 7.8 / 10
+Your homebase. Your handwriting.</textarea>
+      </section>
+      <section class="characters" aria-labelledby="characters-title"><h2 id="characters-title">Your character set</h2><p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p><p>abcdefghijklmnopqrstuvwxyz</p><p>0123456789</p><p>g j p q y · K k P p</p><p class="punctuation">! ? . , ; : - _ “ ” ‘ ’ ( ) [ ] ~ &lt; &gt; * + # = / \ | @ &amp; $</p><h2>Regular and bold</h2><p>enjoy major project you Tom</p><p class="bold-sample">enjoy major project you Tom</p></section>
+      <section class="application" aria-label="Example dashboard text"><div><span class="label">DAILY CHECK-IN</span><p>Make room for<br>the little wins.</p></div><div><span class="label">TODAY’S SCORE</span><p class="score">7.8 <span>/ 10</span></p></div></section>
+      <footer>Regular and Bold, based on your drawings. Install both TTF files to use the Bold button in desktop apps. The comma comes from your semicolon; straight quotes share your drawn quote shapes. Other characters use a fallback font.</footer>
+    </main>
+  </body>
+</html>

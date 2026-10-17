@@ -1,0 +1,58 @@
+// A reversible local scoring policy. Keep it independent of rendering/storage.
+import { taskProgress } from './tasks.mjs';
+// A slight visual bias toward the top end; logged scores and ring fill stay exact.
+function rewardLevel(score) { return 10*(Math.max(0,Math.min(10,score))/10)**1.2; }
+export function scoreColor(score) {
+  if (score === null || !Number.isFinite(score)) return '#6682b5';
+  const value = rewardLevel(score);
+  const stops = [[0,[28,40,94]],[3,[52,61,133]],[5,[49,88,168]],[6,[59,123,203]],[7,[114,179,235]],[8,[175,217,248]],[9,[228,248,255]],[10,[248,253,255]]];
+  const index=Math.min(stops.length-2,stops.findIndex((stop,i)=>i<stops.length-1&&value<=stops[i+1][0]));
+  const [start,from]=stops[index],[end,to]=stops[index+1],amount=(value-start)/(end-start);
+  return '#'+from.map((part,channel)=>Math.round(part+(to[channel]-part)*amount).toString(16).padStart(2,'0')).join('');
+}
+
+export function scoreGlow(score) { return score===null || !Number.isFinite(score)?0:Math.round((rewardLevel(score)/10)**4*700)/100; }
+
+export function scoreReward(score) {
+  return typeof score!=='number' || !Number.isFinite(score) || score<9.2 ? '' : score>=10 ? 'score-high score-perfect' : 'score-high';
+}
+
+export function summarizeDay(day, trainingEntries = []) {
+  const {done,total} = taskProgress(day.tasks);
+  const touched=day.checklistTouched??total>0;
+  const checklist = total && touched ? done / total * 10 : day.reviewed.checklists ? 10 : null;
+  const training = day.trainingMode === 'rest' || trainingEntries.length > 0 ? 10 : null;
+  const sections = [
+    { id: 'nutrition', label: 'Nutrition', score: day.nutrition, detail: day.nutrition === null ? 'Not logged yet' : `${day.nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
+    { id: 'training', label: 'Daily training', score: training, detail: day.trainingMode === 'rest' ? 'Rest day recorded' : trainingEntries.length ? `${trainingEntries.reduce((sum, entry) => sum + entry.sets, 0)} sets logged` : 'Log sets or a rest day' },
+    { id: 'checklists', label: 'Checklist', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
+  ];
+  const available = sections.filter(section => section.score !== null);
+  const score = available.length ? Math.round(available.reduce((sum, section) => sum + section.score, 0) / available.length * 10) / 10 : null;
+  return { score, sections, logged: available.length, provisional: available.length < sections.length, done, total };
+}
+
+export function localDateKey(date = new Date(), timeZone = 'America/Chicago') {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+  const part = type => parts.find(item => item.type === type).value;
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+export function averageDays(dates, getSummary) {
+  const values = dates.map(getSummary).filter(day => day.score !== null);
+  return { score:values.length ? Math.round(values.reduce((sum, day) => sum + day.score, 0) / values.length * 10) / 10 : null,
+    count:values.length, total:dates.length, provisional:values.length < dates.length || values.some(day => day.provisional) };
+}
+
+export function timeGreeting(date=new Date(), timeZone='America/Chicago') {
+  const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(date));
+  return hour<5 || hour>=21 ? 'Good night' : hour<12 ? 'Good morning' : hour<17 ? 'Good afternoon' : 'Good evening';
+}
+
+export function loggingStreak(today,getSummary) {
+  const previous=date=>{const value=new Date(`${date}T12:00:00Z`);value.setUTCDate(value.getUTCDate()-1);return value.toISOString().slice(0,10);};
+  const includesToday=getSummary(today).logged===3;
+  let date=includesToday?today:previous(today),count=0;
+  while(count<20000 && getSummary(date).logged===3) {count++;date=previous(date);}
+  return {count,includesToday,endDate:count?(includesToday?today:previous(today)):null};
+}

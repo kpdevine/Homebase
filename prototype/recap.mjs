@@ -1,0 +1,20 @@
+import {summarizeDay} from './scoring.mjs';
+
+// Read-only presentation data. Opening a recap must never create a check-in.
+export function dailyRecap(day, entries=[]) {
+  const summary=summarizeDay(day,entries);
+  const groups=new Map();
+  for(const entry of entries)groups.set(entry.groupId,(groups.get(entry.groupId)||0)+entry.sets);
+  const notes=['nutrition','training'].filter(section=>day.notes[section].trim()).map(section=>({section,text:day.notes[section]}));
+  return {
+    ...summary,
+    completed:!!day.completedAt,
+    reviewed:Object.values(day.reviewed).filter(Boolean).length,
+    state:day.completedAt?'Day complete':summary.logged===3?'All categories logged':summary.logged?'Partly logged':'Not logged',
+    hasActivity:summary.logged>0||notes.length>0,
+    checklistLogged:summary.sections.find(section=>section.id==='checklists').score!==null,
+    tasks:day.tasks.map(task=>({name:task.name,done:task.done,recurring:!!task.templateId,children:(task.children||[]).map(child=>({name:child.name,done:child.done}))})),
+    training:{rest:day.trainingMode==='rest',sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:[...groups].map(([id,sets])=>({id,sets}))},
+    notes,
+  };
+}

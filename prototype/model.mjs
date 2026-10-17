@@ -1,0 +1,242 @@
+// Calendar keys stay YYYY-MM-DD. UTC is used only for calendar arithmetic,
+// never to infer the date of a personal record from an event timestamp.
+export const DEMO_TODAY = '2026-10-15';
+export const GROUPS = [
+  { id: 'chest', name: 'Chest', color: 'mint', target: 12 },
+  { id: 'back', name: 'Back', color: 'sand', target: 14 },
+  { id: 'legs', name: 'Legs', color: 'lilac', target: 16 },
+  { id: 'shoulders', name: 'Shoulders', color: 'peach', target: 10 },
+];
+
+export function dateKey(date) { return date.toISOString().slice(0, 10); }
+export function addDays(key, amount) { const date = new Date(`${key}T12:00:00Z`); date.setUTCDate(date.getUTCDate() + amount); return dateKey(date); }
+export function sampleWeekStart(key) { const day = new Date(`${key}T12:00:00Z`).getUTCDay(); return addDays(key, -((day + 6) % 7)); }
+export function monthGrid(key) {
+  const first = `${key.slice(0, 7)}-01`;
+  const start = sampleWeekStart(first);
+  const leadingDays = (new Date(`${first}T12:00:00Z`).getUTCDay() + 6) % 7;
+  const daysInMonth = Number(addDays(moveMonth(first, 1), -1).slice(-2));
+  const length = Math.ceil((leadingDays + daysInMonth) / 7) * 7;
+  return Array.from({ length }, (_, index) => addDays(start, index));
+}
+export function moveMonth(key, amount) {
+  const date = new Date(`${key.slice(0, 7)}-01T12:00:00Z`);
+  date.setUTCMonth(date.getUTCMonth() + amount);
+  return dateKey(date);
+}
+export function scoreFromPoint(x, y, centerX, centerY) {
+  if (Math.hypot(x - centerX, y - centerY) < 10) return null;
+  const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+  let offset = (angle - 135 + 720) % 360;
+  // The 90-degree gap at the bottom snaps to its nearest endpoint.
+  if (offset > 270) offset = offset < 315 ? 270 : 0;
+  return Math.round((1 + offset / 270 * 9) * 10) / 10;
+}
+export function meterPoint(score, radius = 82, center = 110) {
+  const angle = (135 + (score - 1) / 9 * 270) * Math.PI / 180;
+  return { x: center + radius * Math.cos(angle), y: center + radius * Math.sin(angle) };
+}
+export function meterPath(radius = 82, center = 110) {
+  const first = meterPoint(1, radius, center);
+  const last = meterPoint(10, radius, center);
+  return `M ${first.x} ${first.y} A ${radius} ${radius} 0 1 1 ${last.x} ${last.y}`;
+}
+export function validateScore(score) { return typeof score === 'number' && Number.isFinite(score) && score >= 1 && score <= 10 && Math.abs(score * 100 - Math.round(score * 100)) < 1e-8; }
+export function adjustScore(score, direction) { return score === null ? 1 : Math.max(1, Math.min(10, (direction > 0 ? Math.floor(score * 10 + 1e-8) + 1 : Math.ceil(score * 10 - 1e-8) - 1) / 10)); }
+export function scorePercent(score) { return score === null ? null : score * 10; }
+// Shared by score rings and completion bars. Missing values remain neutral.
+export function progressColor(percent) {
+  return scoreColor(percent===null?null:percent/10);
+}
+const checklist = ['Read for 20 minutes', 'Get outside for a walk', 'Take a stretch break', 'Plan tomorrow'];
+export const DAY_SECTIONS = [
+  { id: 'nutrition', label: 'Nutrition' },
+  { id: 'training', label: 'Daily training' },
+  { id: 'checklists', label: 'Checklists' },
+];
+
+function emptyDay(date) {
+  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' },
+    checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
+}
+
+function invalidateReview(day, section) {
+  day.reviewed[section] = false;
+  day.completedAt = null;
+}
+
+import { validateSnapshot } from './persistence.mjs';
+import { FREQUENCIES, isDue, occurrence } from './tasks.mjs';
+import { scoreColor } from './scoring.mjs';
+
+export function createStore(options = {}) {
+  const days = new Map();
+  const entries = [];
+  const targets = new Map();
+  const templates = [];
+  const sampleScores = [7.4, 6.8, 8.2, 7.1, 8.8, 8, 6.5, null, 6, 8, 7, null, 7, 8, 7];
+  const sampleDailyScores = [7.1, 6.9, 8.4, 7.8, 8.6, 8, 7.3, null, 6.4, 7.2, 7, null, 7.5, 8.1, 7.6];
+  let serial = 0;
+  const today = options.today || DEMO_TODAY;
+  for (let index = 0; options.seed !== false && index < sampleScores.length; index++) {
+    const key = addDays(today, index - sampleScores.length + 1);
+    days.set(key, {
+      ...emptyDay(key),
+      nutrition: sampleScores[index],
+      // Illustrative only: this is intentionally independent of checklist/rating edits.
+      sampleOverall: sampleDailyScores[index],
+      checklistTouched:true,
+      tasks: checklist.map((name, taskIndex) => ({ id: `sample-${index}-${taskIndex}`, name, done: index === sampleScores.length - 1 ? taskIndex < 2 : taskIndex < (index % 4) + 1, children:[] })),
+    });
+  }
+  const week = sampleWeekStart(today);
+  if (options.seed !== false) targets.set(week, GROUPS.map(group => ({ ...group })));
+  for (const [index, group] of (options.seed === false ? [] : GROUPS).entries()) {
+    entries.push({ id: `gym-${++serial}`, date: addDays(week, 1), groupId: group.id, sets: [5, 6, 8, 4][index] });
+    entries.push({ id: `gym-${++serial}`, date: addDays(week, 2), groupId: group.id, sets: [3, 4, 4, 2][index] });
+  }
+  for (const entry of entries) {
+    if (!days.has(entry.date)) days.set(entry.date, emptyDay(entry.date));
+    days.get(entry.date).trainingMode = 'training';
+  }
+  if (options.snapshot) {
+    const snapshot = validateSnapshot(options.snapshot);
+    days.clear(); targets.clear(); entries.length = 0;
+    for (const day of snapshot.days) days.set(day.date, day);
+    for (const [key, groups] of snapshot.targets) targets.set(key, groups);
+    entries.push(...snapshot.entries); templates.push(...snapshot.templates); serial = snapshot.serial;
+  }
+  function loadDay(key) {
+    const day = structuredClone(days.get(key) || emptyDay(key));
+    for (const template of templates) if (isDue(template,key) && !day.skippedTemplates.includes(template.id) && !day.tasks.some(task=>task.templateId===template.id)) day.tasks.push(occurrence(template,key));
+    return day;
+  }
+  function writableDay(key) { const day=loadDay(key); days.set(key,day); return day; }
+  const store = {
+    loadDay,
+    exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial }); },
+    loadTemplates() { return structuredClone(templates); },
+    hasEntry(key) { return days.has(key) || entries.some(entry => entry.date === key); },
+    updateRating(key, score) {
+      if (score !== null && !validateScore(score)) throw new RangeError('Enter a rating from 1 to 10 with at most two decimal places, or leave it unentered.');
+      const day = writableDay(key);
+      if (day.nutrition !== score) { day.nutrition = score; invalidateReview(day, 'nutrition'); }
+    },
+    toggleTask(key, id) {
+      const day = writableDay(key), parent=day.tasks.find(task=>task.id===id || task.children.some(child=>child.id===id));
+      if (!parent) throw new Error('Task not found.');
+      if (parent.id===id && parent.children.length) throw new Error('Complete each subtask first.');
+      const task=parent.id===id ? parent : parent.children.find(child=>child.id===id);
+      task.done=!task.done;
+      if(parent.children.length) parent.done=parent.children.every(child=>child.done);
+      day.checklistTouched=true; invalidateReview(day,'checklists');
+    },
+    updateNotes(key, section, value) {
+      if (!['nutrition','training'].includes(section) || typeof value !== 'string' || value.length > 5000) throw new RangeError('Use up to 5000 characters for nutrition or training notes.');
+      const day = writableDay(key);
+      if (day.notes[section] !== value) { day.notes[section] = value; invalidateReview(day, section); }
+    },
+    addTask(key, name, options = {}) {
+      const clean = String(name).trim();
+      if (!clean || clean.length > 100) throw new RangeError('Use a task name between 1 and 100 characters.');
+      const children=options.children || [];
+      if(!Array.isArray(children) || children.length>20 || children.some(name=>typeof name!=='string' || !name.trim() || name.trim().length>100)) throw new RangeError('Use up to 20 subtasks, each with a name of 1–100 characters.');
+      const recurrence=options.recurrence;
+      if(recurrence && (!FREQUENCIES.includes(recurrence.frequency) || !Array.isArray(recurrence.weekdays) || recurrence.weekdays.some(day=>!Number.isInteger(day)||day<1||day>7) || recurrence.frequency==='custom'&&!recurrence.weekdays.length)) throw new RangeError('Choose a frequency and at least one day for a custom schedule.');
+      if(loadDay(key).tasks.length>=1000 || recurrence&&templates.length>=5000) throw new RangeError('Task limit reached.');
+      let task;
+      if(recurrence) {
+        const template={id:`routine-${++serial}`,name:clean,children:children.map(name=>({id:`child-${++serial}`,name:name.trim()})),startDate:key,endDate:null,frequency:recurrence.frequency,weekdays:[...new Set(recurrence.weekdays)].sort()};
+        templates.push(template);
+        // A new schedule affects existing open/future records, never earlier history.
+        for(const day of days.values()) if(isDue(template,day.date)) invalidateReview(day,'checklists');
+        task=isDue(template,key)?occurrence(template,key):null;
+      } else task={id:`task-${++serial}`,name:clean,done:false,children:children.map(name=>({id:`task-${++serial}`,name:name.trim(),done:false,children:[]}))};
+      const day=writableDay(key);
+      if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
+      if(task) { day.checklistTouched=true; invalidateReview(day,'checklists'); }
+      return task?.id ?? null;
+    },
+    removeTask(key, id) {
+      const day = writableDay(key);
+      const index = day.tasks.findIndex(task => task.id === id);
+      if (index < 0) throw new Error('Task not found.');
+      const [task] = day.tasks.splice(index, 1);
+      if(task.templateId) day.skippedTemplates.push(task.templateId);
+      day.checklistTouched=true; invalidateReview(day, 'checklists');
+      return { task: structuredClone(task), index };
+    },
+    restoreTask(key, task, index) {
+      if (!task || typeof task.id !== 'string' || typeof task.name !== 'string' || !task.name.trim() || task.name.length > 100 || typeof task.done !== 'boolean') throw new Error('Invalid task.');
+      if ([...days.values()].some(day => day.tasks.some(item => item.id === task.id))) throw new Error('Task already exists.');
+      const day = writableDay(key);
+      if(task.templateId) { day.skippedTemplates=day.skippedTemplates.filter(id=>id!==task.templateId); day.tasks=day.tasks.filter(item=>item.templateId!==task.templateId); }
+      day.tasks.splice(Math.max(0, Math.min(day.tasks.length, index)), 0, structuredClone(task));
+      day.checklistTouched=true; invalidateReview(day, 'checklists');
+    },
+    stopTemplate(id, afterDate) {
+      const template=templates.find(item=>item.id===id);
+      if(!template) throw new Error('Recurring task not found.');
+      template.endDate=afterDate;
+      for(const day of days.values()) if(day.date>afterDate && day.tasks.some(task=>task.templateId===id)) {
+        day.tasks=day.tasks.filter(task=>task.templateId!==id);invalidateReview(day,'checklists');
+      }
+    },
+    setWeekTargets(key, values) {
+      if (!Array.isArray(values) || values.length !== GROUPS.length || new Set(values.map(item => item.id)).size !== GROUPS.length || values.some(item => !GROUPS.some(group => group.id === item.id) || !Number.isInteger(item.target) || item.target < 1 || item.target > 1000)) throw new RangeError('Enter a whole target from 1 to 1000 for each muscle group.');
+      targets.set(sampleWeekStart(key), GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })));
+    },
+    loadWeek(key) {
+      const start = sampleWeekStart(key);
+      const end = addDays(start, 6);
+      const weekEntries = entries.filter(entry => entry.date >= start && entry.date <= end);
+      return { start, end, groups: (targets.get(start) || []).map(group => ({ ...group, completed: weekEntries.filter(entry => entry.groupId === group.id).reduce((total, entry) => total + entry.sets, 0) })), entries: structuredClone(weekEntries) };
+    },
+    addGymEntry(date, groupId, sets) {
+      if (!GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
+      if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
+      const entry = { id: `gym-${++serial}`, date, groupId, sets };
+      entries.push(entry);
+      writableDay(date).trainingMode = 'training';
+      invalidateReview(writableDay(date), 'training');
+      return entry.id;
+    },
+    removeGymEntry(id) {
+      const index = entries.findIndex(entry => entry.id === id);
+      if (index >= 0) { const [entry] = entries.splice(index, 1); invalidateReview(writableDay(entry.date), 'training'); }
+    },
+    loadTrainingDay(key) { return structuredClone(entries.filter(entry => entry.date === key)); },
+    setTrainingMode(key, mode) {
+      if (!['training', 'rest'].includes(mode)) throw new RangeError('Choose a training day or a rest day.');
+      if (mode === 'rest' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a rest day.');
+      const day = writableDay(key);
+      if (day.trainingMode !== mode) { day.trainingMode = mode; invalidateReview(day, 'training'); }
+    },
+    dayProgress(key) {
+      const day = loadDay(key);
+      const dailyEntries = this.loadTrainingDay(key);
+      const ready = { nutrition: day.nutrition !== null,
+        training: day.trainingMode === 'rest' ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
+        checklists: true };
+      const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
+      return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
+        canComplete: sections.every(section => section.reviewed), completedAt: day.completedAt };
+    },
+    confirmSection(key, section) {
+      const progress = this.dayProgress(key).sections.find(item => item.id === section);
+      if (!progress) throw new Error('Unknown day section.');
+      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log at least one set or explicitly choose a rest day.');
+      writableDay(key).reviewed[section] = true;
+      if(section==='checklists') writableDay(key).checklistTouched=true;
+    },
+    completeDay(key) {
+      if (!this.dayProgress(key).canComplete) throw new Error('Review Nutrition, Daily training, and Checklists before completing this day.');
+      writableDay(key).completedAt = new Date().toISOString();
+    },
+  };
+  for (const method of ['updateRating', 'updateNotes', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+    const original = store[method];
+    store[method] = (...args) => { const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result; };
+  }
+  return store;
+}

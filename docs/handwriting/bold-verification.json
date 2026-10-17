@@ -1,0 +1,560 @@
+{
+  "family": "Kieran Handwriting",
+  "style": "Bold",
+  "version": "1.500",
+  "weightClass": 700,
+  "glyphs": [
+    {
+      "glyph": ".notdef",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0041",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0061",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0042",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0062",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0043",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0063",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0044",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0064",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0045",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0065",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0046",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0066",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0047",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0067",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0048",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0068",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0049",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0069",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004A",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni006A",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004B",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni006B",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni006C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004D",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni006D",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004E",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni006E",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni004F",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni006F",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0050",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0070",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0051",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0071",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0052",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0072",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0053",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0073",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0054",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0074",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0055",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0075",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0056",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0076",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0057",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0077",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0058",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0078",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0059",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0079",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni005A",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni007A",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0030",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0031",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0032",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0033",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0034",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0035",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0036",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0037",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0038",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 2
+    },
+    {
+      "glyph": "uni0039",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni002C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni002E",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0021",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni003B",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni003A",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni002D",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni003F",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni005F",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni201C",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni201D",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0028",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0029",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni005B",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni005D",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni007E",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni003C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni003E",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni002A",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni002B",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0023",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni003D",
+      "outlineExpansion": 18,
+      "components": 2,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni2018",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni2019",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni002F",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni005C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni007C",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 0
+    },
+    {
+      "glyph": "uni0040",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 1
+    },
+    {
+      "glyph": "uni0026",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 2
+    },
+    {
+      "glyph": "uni0024",
+      "outlineExpansion": 18,
+      "components": 1,
+      "countersRetained": 2
+    }
+  ]
+}

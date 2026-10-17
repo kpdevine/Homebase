@@ -1,0 +1,104 @@
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/fonts/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/SpaceGrotesk.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kieran Handwriting";
+  src: url("./assets/fonts/KieranHandwriting-Regular.woff2?v=1.5") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "Inter", "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-handwriting: "Kieran Handwriting", "Inter", "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
+  font-optical-sizing: auto;
+}
+
+body { line-height: 1.55; }
+button, input, select { font-family: var(--font-ui); }
+
+h1, h2, .meter-number, .score-circle > span,
+.training-total, .history-detail dd, .rating-controls input {
+  font-family: var(--font-display);
+}
+
+h1 { font-size: clamp(40px, 3.6vw, 52px); font-weight: 600; line-height: 1.08; letter-spacing: -.055em; }
+h2 { font-size: 22px; font-weight: 600; line-height: 1.2; letter-spacing: -.035em; }
+.page-subtitle { font-size: 13px; letter-spacing: -.015em; line-height: 1.65; }
+.page-header .eyebrow { font-weight: 450; letter-spacing: -.015em; }
+.nav-button { font-weight: 500; letter-spacing: -.015em; }
+.workspace-label { font-weight: 550; letter-spacing: .12em; }
+.card-heading .eyebrow { font-size: 10px; font-weight: 500; letter-spacing: .10em; }
+.local-badge { font-size: 9px; font-weight: 500; letter-spacing: .08em; }
+.sample-label, .sample-pill, .count-pill, .scale-pill { font-weight: 500; }
+.card-description { font-size: 13px; letter-spacing: -.015em; line-height: 1.65; }
+.task-list label { font-size: 14px; font-weight: 400; letter-spacing: -.018em; }
+.add-task-form input { font-size: 13px; letter-spacing: -.015em; }
+.task-list label > span, .add-task-form input {
+  font-family: var(--font-handwriting);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0;
+  font-kerning: normal;
+}
+.task-list label { align-items: flex-start; }
+.task-list input { margin-top: 3px; }
+.add-task-form { align-items: baseline; }
+.add-task-form input { line-height: 1.9; }
+.today-button, .secondary-button, .primary-button, .add-task-button { font-weight: 550; letter-spacing: -.015em; }
+.card-footnote, .overall-note { font-size: 11px; letter-spacing: -.01em; }
+.meter-help { font-size: 10px; letter-spacing: -.015em; }
+.sample-notice p { font-size: 11px; letter-spacing: -.015em; }
+
+.meter-number, .overall-card .meter-number {
+  font-weight: 500;
+  letter-spacing: -.06em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.meter-out-of { font-size: 11px; font-weight: 400; letter-spacing: -.01em; }
+.meter-endpoint { font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
+.rating-controls input { font-weight: 500; letter-spacing: -.025em; }
+.training-total { font-weight: 500; letter-spacing: -.045em; }
+.training-total small, .history-detail dd small { font-family: var(--font-ui); font-weight: 400; letter-spacing: -.015em; }
+.gym-group-heading, .gym-group-heading > span:last-child { font-size: 13px; letter-spacing: -.015em; }
+.gym-group-heading small { font-size: 11px; }
+.history-detail dd { font-weight: 500; letter-spacing: -.035em; }
+.score-circle > span { font-weight: 500; letter-spacing: -.035em; font-variant-numeric: lining-nums tabular-nums; }
+.chart-day .score-circle > span { font-size: 10px; }
+.calendar-day .score-circle > span { font-size: 12px; }
+.calendar-date { font-size: 12px; font-weight: 500; }
+.calendar-weekdays { font-weight: 500; letter-spacing: -.02em; }
+.selected-score .score-circle > span { font-size: 26px; }
+
+@media (max-width: 560px) {
+  .card-description { font-size: 13px; }
+  .local-badge { font-size: 8px; letter-spacing: .05em; }
+  .card-heading .eyebrow { font-size: 10px; }
+  .calendar-date { font-size: 11px; }
+  .calendar-day .score-circle > span { font-size: 11px; }
+  .history-detail .selected-score .score-circle > span { font-size: 25px; }
+}
+
+@media (max-width: 360px) {
+  .calendar-day .score-circle > span { font-size: 10px; }
+  .calendar-card h2 { font-size: 19px; }
+  .local-badge { font-size: 7px; }
+  .meter-help { font-size: 9px; }
+}

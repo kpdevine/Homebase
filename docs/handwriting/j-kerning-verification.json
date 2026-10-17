@@ -1,0 +1,281 @@
+{
+  "fontVersion": "1.500",
+  "unchangedGlyphCoordinates": true,
+  "unchangedAdvances": true,
+  "pairs": {
+    "aj": {
+      "kerning": -405,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 81
+    },
+    "bj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "cj": {
+      "kerning": -360,
+      "regularMinimumInkGap": 87,
+      "boldMinimumInkGap": 84
+    },
+    "dj": {
+      "kerning": -400,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "ej": {
+      "kerning": -380,
+      "regularMinimumInkGap": 85,
+      "boldMinimumInkGap": 84
+    },
+    "fj": {
+      "kerning": -375,
+      "regularMinimumInkGap": 86,
+      "boldMinimumInkGap": 83
+    },
+    "gj": {
+      "kerning": -65,
+      "regularMinimumInkGap": 40,
+      "boldMinimumInkGap": 39
+    },
+    "hj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 80
+    },
+    "ij": {
+      "kerning": -385,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "jj": {
+      "kerning": -35,
+      "regularMinimumInkGap": 39,
+      "boldMinimumInkGap": 41
+    },
+    "kj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 83
+    },
+    "lj": {
+      "kerning": -375,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 85
+    },
+    "mj": {
+      "kerning": -405,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 83
+    },
+    "nj": {
+      "kerning": -410,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 80
+    },
+    "oj": {
+      "kerning": -380,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 82
+    },
+    "pj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 85
+    },
+    "qj": {
+      "kerning": -100,
+      "regularMinimumInkGap": 37,
+      "boldMinimumInkGap": 36
+    },
+    "rj": {
+      "kerning": -365,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 81
+    },
+    "sj": {
+      "kerning": -365,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 80
+    },
+    "tj": {
+      "kerning": -345,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 83
+    },
+    "uj": {
+      "kerning": -410,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 81
+    },
+    "vj": {
+      "kerning": -345,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "wj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "xj": {
+      "kerning": -355,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 81
+    },
+    "yj": {
+      "kerning": -110,
+      "regularMinimumInkGap": 57,
+      "boldMinimumInkGap": 36
+    },
+    "zj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 83
+    },
+    "Aj": {
+      "kerning": -370,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 81
+    },
+    "Bj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 81
+    },
+    "Cj": {
+      "kerning": -405,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 64
+    },
+    "Dj": {
+      "kerning": -345,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 83
+    },
+    "Ej": {
+      "kerning": -375,
+      "regularMinimumInkGap": 40,
+      "boldMinimumInkGap": 35
+    },
+    "Fj": {
+      "kerning": -370,
+      "regularMinimumInkGap": 40,
+      "boldMinimumInkGap": 37
+    },
+    "Gj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 82
+    },
+    "Hj": {
+      "kerning": -400,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 80
+    },
+    "Ij": {
+      "kerning": -385,
+      "regularMinimumInkGap": 41,
+      "boldMinimumInkGap": 35
+    },
+    "Jj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 49,
+      "boldMinimumInkGap": 36
+    },
+    "Kj": {
+      "kerning": -405,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 83
+    },
+    "Lj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 83
+    },
+    "Mj": {
+      "kerning": -395,
+      "regularMinimumInkGap": 84,
+      "boldMinimumInkGap": 86
+    },
+    "Nj": {
+      "kerning": -355,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 79
+    },
+    "Oj": {
+      "kerning": -345,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 84
+    },
+    "Pj": {
+      "kerning": -370,
+      "regularMinimumInkGap": 81,
+      "boldMinimumInkGap": 83
+    },
+    "Qj": {
+      "kerning": -355,
+      "regularMinimumInkGap": 80,
+      "boldMinimumInkGap": 80
+    },
+    "Rj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 84
+    },
+    "Sj": {
+      "kerning": -395,
+      "regularMinimumInkGap": 87,
+      "boldMinimumInkGap": 84
+    },
+    "Tj": {
+      "kerning": -380,
+      "regularMinimumInkGap": 40,
+      "boldMinimumInkGap": 35
+    },
+    "Uj": {
+      "kerning": -355,
+      "regularMinimumInkGap": 83,
+      "boldMinimumInkGap": 83
+    },
+    "Vj": {
+      "kerning": -380,
+      "regularMinimumInkGap": 41,
+      "boldMinimumInkGap": 35
+    },
+    "Wj": {
+      "kerning": -375,
+      "regularMinimumInkGap": 45,
+      "boldMinimumInkGap": 39
+    },
+    "Xj": {
+      "kerning": -405,
+      "regularMinimumInkGap": 70,
+      "boldMinimumInkGap": 67
+    },
+    "Yj": {
+      "kerning": -390,
+      "regularMinimumInkGap": 44,
+      "boldMinimumInkGap": 35
+    },
+    "Zj": {
+      "kerning": -415,
+      "regularMinimumInkGap": 82,
+      "boldMinimumInkGap": 73
+    }
+  },
+  "browserMeasuredAt100px": {
+    "Regular": {
+      "nj": -41,
+      "aj": -40.5,
+      "oj": -38,
+      "gj": -6.5
+    },
+    "Bold": {
+      "nj": -41,
+      "aj": -40.5,
+      "oj": -38,
+      "gj": -6.5
+    }
+  }
+}

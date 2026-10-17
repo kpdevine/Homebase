@@ -1,0 +1,13 @@
+{
+  "fontVersion": "1.400",
+  "fontSizePx": 100,
+  "regular": {
+    "yo": -9.5,
+    "To": -10
+  },
+  "bold": {
+    "yo": -9.5,
+    "To": -10
+  },
+  "measuredInBrowser": true
+}

@@ -5,7 +5,7 @@ Status: proposed for discussion. No database, provider, or region is selected or
 ## Separate the three storage decisions
 
 1. GitHub stores source code and the instructions that describe the database structure.
-2. The prototype uses synthetic sample information locally. Persistence can be decided when it becomes useful.
+2. The prototype now saves version-1 snapshots in browser localStorage on this device, with validated JSON backup/restore. The normal app starts empty; `?preview=1` isolates synthetic sample history. This does not select a production database.
 3. A future database stores actual personal records and supports access from multiple devices. Its host can be chosen independently of where the interface is hosted.
 
 ## Proposed records
@@ -17,14 +17,18 @@ These are logical records; they do not require a particular database engine.
 | Task definition | Stable ID, name, active/archived state | Archiving a task preserves recorded daily instances |
 | Task schedule version | Task ID, recurrence rule, effective date interval | A new schedule version changes future occurrences |
 | Daily task instance | Task ID, local date, task name snapshot, completion state and timestamp, source schedule version if recurring | A unique instance records what was due and what happened on that date; one-time tasks need no recurring schedule |
-| Daily rating | Category ID, local date, integer score 1–10, created/updated timestamps | One score per category and date; missing remains absent rather than becoming 1 |
+| Daily rating | Category ID, local date, score 1–10 in 0.1 increments, created/updated timestamps | One score per category and date; missing remains absent rather than becoming 1 |
 | Muscle group | Stable ID, name, active/archived state | Retiring a group preserves earlier training records |
 | Weekly target | Muscle group ID, week start date, target set count, name snapshot | Each recorded week retains its own target; changing defaults affects future weeks |
 | Gym entry | Stable ID, activity date, muscle group ID, set count, timestamps | Weekly totals are calculated from dated entries rather than stored as the only evidence |
+| Daily training state | Local date, training/rest selection | Rest is explicit and cannot coexist with set entries for that date |
+| Daily review | Local date, confirmation state for each section, day completion timestamp | Every section must be confirmed before completion; editing a section clears its confirmation and reopens that day |
 | Scoring policy version | Stable ID, effective dates, category weights, rules, rounding and missing-input policy | Earlier days keep their original scoring policy |
 | Daily summary | Local date, policy version, input snapshot, calculated overall score, calculation timestamp | A summary can be reproduced and is refreshed deliberately when that day's inputs are edited |
 
-The daily summary and scoring policy are later implementation work. The prototype can show a clearly labeled sample overall score.
+The prototype now calculates a live, provisional equal-average score from nutrition, checklist completion, and training check-in. Missing sections are omitted and flagged. Explicit rest or logged sets earns training check-in credit; weekly volume stays separate. A reviewed empty checklist means no tasks due. See [the prototype guide](prototype-guide.md). Persistent scoring-policy versions and input revisions remain future work: current summaries are recalculated from their day's inputs using the current prototype policy.
+
+The local prototype persists daily inputs, weekly targets, review confirmations, and completion timestamps in a validated browser snapshot. Nutrition requires a rating; training requires a dated entry or explicit rest; checklists require review even if empty or partly unfinished. Final completion is separate after all three confirmations. Changing dates pauses the guide while retaining confirmations. Edits invalidate the affected review; conflicting tabs block overwrites. Future shared records should associate confirmations with an input revision so stale confirmations cannot survive concurrent edits.
 
 ## Protect history without preventing corrections
 
@@ -41,7 +45,7 @@ The daily summary and scoring policy are later implementation work. The prototyp
 - Store the intended calendar date explicitly, for example `2026-10-15`. A daily record must not move dates because a UTC timestamp crosses midnight.
 - Store event timestamps separately in UTC, with the relevant named timezone where needed. America/Chicago is the initial planning context; travel behavior remains a product decision.
 - Agree on the week start before implementing gym aggregation. Save the week start with each target so a later preference change cannot silently regroup old targets.
-- Subjective ratings are integers from 1 through 10. Set counts and targets retain their actual units.
+- Subjective ratings range from 1 through 10 in 0.1 increments. Store and validate that precision explicitly. Set counts and targets remain whole numbers in their actual units.
 - An unentered score is missing, never an automatic 1 or 0. Treatment in the overall score is still undecided.
 - Weekly gym completion, elapsed time in a week, and rest days need an explicit policy before gym contributes to a daily score.
 
@@ -84,3 +88,14 @@ Commit synthetic samples and eventual schema migrations. Exclude credentials, pe
 - Supabase region migration: https://supabase.com/docs/guides/troubleshooting/change-project-region-eWJo5Z
 - Firestore data model: https://firebase.google.com/docs/firestore/data-model
 - Firestore locations: https://firebase.google.com/docs/firestore/locations
+
+## October 17 local additions
+
+Version-1 browser snapshots now include optional per-day `notes.nutrition` and `notes.training` strings (maximum 5000 characters). Older snapshots without the notes object gain empty fields during validation. Note edits invalidate the associated review; notes are not score inputs. Nutrition values support up to two decimal places to retain old tenths while allowing quarter-point controls. Calendar weekly averages use Monday–Friday; monthly averages use entered dates in the displayed month, including weekends. Empty dates are omitted, and partial/provisional status is explicit. These are current prototype rules, not a production schema or permanent score-policy decision.
+
+
+## October 17 recurrence and display checkpoint
+
+The local prototype now writes version-2 snapshots while retaining the original storage key and accepting version-1 imports. Recurring definitions contain immutable names/children, a start date, optional stop date, daily/weekday/weekly/custom frequency, and weekday selections. Deterministic per-date occurrences support unopened dates without materializing saved logs. Existing dated instances retain their own completion; skipped occurrences are explicitly suppressed and support Undo. A checklist-activity flag prevents automatically due tasks from creating zero scores or streaks before a check-in. One level of child dependencies is supported, and scores count leaf actions once.
+
+Nutrition adjustments now use 0.1 steps again; existing hundredths are preserved. A logging streak requires all three categories logged, with grace for an unfinished today. Score glow is presentation only and does not change score, provisional state, review, or completion. This is still a local interaction prototype, not a production schema or synchronization decision.
