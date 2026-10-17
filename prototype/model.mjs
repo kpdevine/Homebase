@@ -1,12 +1,8 @@
 // Calendar keys stay YYYY-MM-DD. UTC is used only for calendar arithmetic,
 // never to infer the date of a personal record from an event timestamp.
 export const DEMO_TODAY = '2026-10-15';
-export const GROUPS = [
-  { id: 'chest', name: 'Chest', color: 'mint', target: 12 },
-  { id: 'back', name: 'Back', color: 'sand', target: 14 },
-  { id: 'legs', name: 'Legs', color: 'lilac', target: 16 },
-  { id: 'shoulders', name: 'Shoulders', color: 'peach', target: 10 },
-];
+import { GROUPS, ALL_GROUPS } from './muscles.mjs';
+export { GROUPS } from './muscles.mjs';
 
 export function dateKey(date) { return date.toISOString().slice(0, 10); }
 export function addDays(key, amount) { const date = new Date(`${key}T12:00:00Z`); date.setUTCDate(date.getUTCDate() + amount); return dateKey(date); }
@@ -56,7 +52,7 @@ export const DAY_SECTIONS = [
 ];
 
 function emptyDay(date) {
-  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' },
+  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' }, comment:'',
     checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
 }
 
@@ -92,8 +88,8 @@ export function createStore(options = {}) {
   const week = sampleWeekStart(today);
   if (options.seed !== false) targets.set(week, GROUPS.map(group => ({ ...group })));
   for (const [index, group] of (options.seed === false ? [] : GROUPS).entries()) {
-    entries.push({ id: `gym-${++serial}`, date: addDays(week, 1), groupId: group.id, sets: [5, 6, 8, 4][index] });
-    entries.push({ id: `gym-${++serial}`, date: addDays(week, 2), groupId: group.id, sets: [3, 4, 4, 2][index] });
+    entries.push({ id: `gym-${++serial}`, date: addDays(week, 1), groupId: group.id, sets: [5, 6, 3, 3, 4, 5, 3][index] });
+    entries.push({ id: `gym-${++serial}`, date: addDays(week, 2), groupId: group.id, sets: [3, 4, 2, 2, 2, 3, 3][index] });
   }
   for (const entry of entries) {
     if (!days.has(entry.date)) days.set(entry.date, emptyDay(entry.date));
@@ -135,6 +131,10 @@ export function createStore(options = {}) {
       if (!['nutrition','training'].includes(section) || typeof value !== 'string' || value.length > 5000) throw new RangeError('Use up to 5000 characters for nutrition or training notes.');
       const day = writableDay(key);
       if (day.notes[section] !== value) { day.notes[section] = value; invalidateReview(day, section); }
+    },
+    updateDayComment(key, value) {
+      if(typeof value!=='string'||value.length>5000)throw new RangeError('Use up to 5000 characters for your day comment.');
+      writableDay(key).comment=value;
     },
     addTask(key, name, options = {}) {
       const clean = String(name).trim();
@@ -184,7 +184,8 @@ export function createStore(options = {}) {
     },
     setWeekTargets(key, values) {
       if (!Array.isArray(values) || values.length !== GROUPS.length || new Set(values.map(item => item.id)).size !== GROUPS.length || values.some(item => !GROUPS.some(group => group.id === item.id) || !Number.isInteger(item.target) || item.target < 1 || item.target > 1000)) throw new RangeError('Enter a whole target from 1 to 1000 for each muscle group.');
-      targets.set(sampleWeekStart(key), GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })));
+      const week=sampleWeekStart(key), legacy=(targets.get(week)||[]).filter(group=>!GROUPS.some(active=>active.id===group.id));
+      targets.set(week, [...GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })), ...legacy]);
     },
     loadWeek(key) {
       const start = sampleWeekStart(key);
@@ -193,7 +194,7 @@ export function createStore(options = {}) {
       return { start, end, groups: (targets.get(start) || []).map(group => ({ ...group, completed: weekEntries.filter(entry => entry.groupId === group.id).reduce((total, entry) => total + entry.sets, 0) })), entries: structuredClone(weekEntries) };
     },
     addGymEntry(date, groupId, sets) {
-      if (!GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
+      if (!ALL_GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
       const entry = { id: `gym-${++serial}`, date, groupId, sets };
       entries.push(entry);
@@ -234,7 +235,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => { const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result; };
   }

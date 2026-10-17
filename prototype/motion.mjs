@@ -41,7 +41,7 @@ export function setMeter(path,percent,{immediate=false}={}) {
 }
 export function reveal(element) {
   play(element,[{opacity:.2},{opacity:1}],300);
-  if(element?.matches('[role="tabpanel"],#history-content,.motion-preview'))sweepRings(element);
+  if(element?.matches('[role="tabpanel"],#history-view,#history-content,.motion-preview'))sweepRings(element);
 }
 export function acknowledge(element) {
   play(element,[{backgroundColor:'#bce8ff88',boxShadow:'inset 3px 0 #bce8ff'},{backgroundColor:'transparent',boxShadow:'inset 0 0 transparent'}],580);

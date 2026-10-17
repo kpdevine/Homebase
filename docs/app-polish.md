@@ -10,7 +10,7 @@ Tab and recap changes use a 300 ms stepped fade without moving the panel. Entry 
 
 Review hover changes appearance only. Removing hover from the primary button's sizing rule prevents the score column from recentering. Actual pointer-hover checks at 1280×800 and 960×480 show zero changes to the score and button geometry.
 
-Task checkboxes check off individual actions. Section buttons say Confirm nutrition/training/checklist review, with a distinct reviewed state. Start/Continue day review guides the unreviewed sections. Confirming a checklist leaves unfinished tasks unchecked. Only Complete entire day on Overview finalizes the day; section-header review links only navigate, including when all three reviews are already confirmed. Pause review keeps entries saved.
+Task checkboxes check off individual actions. Section buttons say Confirm nutrition/training/checklist review, with a distinct reviewed state. Start/Continue day review guides the unreviewed sections. Confirming a checklist leaves unfinished tasks unchecked. The last confirmation opens a full-day summary; only Complete entire day inside that card finalizes the day. Nutrition notes are omitted from the card. A separate handwritten Day comment saves with the day and appears in its calendar recap. Completed days can reopen the summary without completing twice. Pause review keeps entries saved. See [day review and controls](day-review-and-controls.md) for the latest controls and verification.
 
 ## Daily recap
 

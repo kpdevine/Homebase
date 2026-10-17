@@ -4,8 +4,9 @@ import { summarizeDay, scoreColor, scoreGlow, scoreReward, localDateKey, average
 import { taskProgress, scheduleLabel } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
+import { muscleName } from './muscles.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
-import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot } from './persistence.mjs';
+import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -88,6 +89,11 @@ function renderHeader() {
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);
   const isToday = selectedDate === localDateKey(now, timeZone);
+  const past = selectedDate < localDateKey(now, timeZone);
+  document.body.classList.toggle('viewing-other-day',!isToday);
+  $('#selected-day-notice').hidden=isToday;
+  $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
+  $('#selected-day-help').textContent=`Entries on this screen belong to ${shortDate(selectedDate)}.`;
   $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>, ${escapeHtml(displayName)}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
   $('#greeting-date').textContent = longDate(selectedDate);
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
@@ -103,7 +109,7 @@ function renderHeader() {
   for (const [key, panel] of Object.entries(panelIds)) $('#' + panel).hidden = view !== key;
   $$('[data-tab]').forEach(button => {
     const active = button.dataset.tab === view;
-    button.setAttribute('aria-selected', String(active)); button.tabIndex = active ? 0 : -1;
+    button.setAttribute('aria-selected', String(active)); button.tabIndex = active || view==='history'&&button.dataset.tab==='today' ? 0 : -1;
   });
 }
 function renderTasks() {
@@ -150,16 +156,16 @@ function renderScore() {
   $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of 3 section reviews confirmed.`;
   const button = $('#complete-day');
   const missing = progress.sections.find(section => !section.ready);
-  button.disabled = !!day.completedAt;
+  button.disabled = false;
   button.classList.toggle('needs-input', !day.completedAt && !!missing);
   button.classList.toggle('is-complete', !!day.completedAt);
-  button.innerHTML = day.completedAt ? `${icon('check')} Day complete` : progress.canComplete ? `${icon('check')} Complete entire day` : `${progress.reviewedCount || reviewSessionDate === selectedDate ? 'Continue' : 'Start'} day review ${icon('arrow')}`;
+  button.innerHTML = day.completedAt ? `View day summary ${icon('arrow')}` : progress.canComplete ? `Review full day ${icon('arrow')}` : `${progress.reviewedCount || reviewSessionDate === selectedDate ? 'Continue' : 'Start'} day review ${icon('arrow')}`;
   $('#overview-sections').innerHTML = summary.sections.map(section => {
     const state = progress.sections.find(item => item.id === section.id);
     const missing = section.score === null || !state.ready;
     return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Needs review'}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(missing ? 'warning' : state.reviewed ? 'check' : 'arrow')}${missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Ready to review'}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
-  $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All three reviews confirmed. Complete entire day is the final step.' : 'Check off individual tasks, confirm each section’s review, then complete the day.';
+  $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All three reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
 }
 function renderRating() {
   const score = store.loadDay(selectedDate).nutrition, meter = $('#nutrition-meter');
@@ -183,21 +189,23 @@ function renderGym() {
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
   $$('[name="training-mode"]').forEach(input => { input.checked = input.value === day.trainingMode; input.disabled = input.value === 'rest' && entries.length > 0; });
   $('#training-rest-hint').textContent = entries.length ? 'To switch to a rest day, remove this date’s set entries first.' : day.trainingMode === 'rest' ? 'Rest day recorded. You can still log sets if your plans change.' : 'Log sets or choose Rest day before reviewing this section.';
-  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => `<li><span><strong>${GROUPS.find(group => group.id === entry.groupId).name}</strong><small>${entry.sets} sets · ${shortDate(entry.date)}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : `<div class="training-empty"><strong>${day.trainingMode === 'rest' ? 'Rest day' : 'No sets logged.'}</strong><p>${day.trainingMode === 'rest' ? 'No sets needed for a rest day.' : 'Add sets above.'}</p></div>`;
+  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${entry.sets} sets · ${shortDate(entry.date)}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : `<div class="training-empty"><strong>${day.trainingMode === 'rest' ? 'Rest day' : 'No sets logged.'}</strong><p>${day.trainingMode === 'rest' ? 'No sets needed for a rest day.' : 'Add sets above.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
   $('#gym-summary').textContent = target ? `${total} / ${target}` : `${total} sets`;
   $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday`;
-  $('#gym-groups').innerHTML = week.groups.length ? week.groups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>/ ${group.target} sets</small></span></div><div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
+  const volumeGroups=[...week.groups];
+  for(const entry of week.entries) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
+  $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
   if (!$('#targets-form').contains(document.activeElement)) $('#target-inputs').innerHTML = GROUPS.map(group => `<label>${group.name}<input type="number" aria-label="${group.name} weekly set target" name="${group.id}" min="1" max="1000" step="1" value="${week.groups.find(item => item.id === group.id)?.target ?? group.target}" required></label>`).join('');
-  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${GROUPS.find(group => group.id === entry.groupId).name} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
+  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${muscleName(entry.groupId)} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
 }
 function renderReview() {
   const progress = store.dayProgress(selectedDate), reviewing = reviewSessionDate === selectedDate && !progress.completedAt;
   $('#review-banner').hidden = !reviewing || view === 'history' || view === 'today';
   $('#review-title').textContent = progress.canComplete ? 'All section reviews confirmed' : 'Review each section';
-  $('#review-description').textContent = `${shortDate(selectedDate)} · ${progress.reviewedCount} of 3 confirmed. Complete the day on Overview.`;
+  $('#review-description').textContent = `${shortDate(selectedDate)} · ${progress.reviewedCount} of 3 confirmed. Full-day summary follows.`;
   $('#review-steps').innerHTML = progress.sections.map((section, index) => `<button data-open-section="${section.id}" class="review-step ${section.reviewed ? 'reviewed' : ''} ${view === section.id ? 'current' : ''}"><span>${section.reviewed ? '✓' : index + 1}</span>${section.label}</button>`).join('');
-  $$('[data-start-review]').forEach(button => { button.textContent = progress.canComplete || progress.completedAt ? 'Back to day overview →' : `${progress.reviewedCount || reviewing ? 'Continue' : 'Start'} day review →`; });
+  $$('[data-start-review]').forEach(button => { button.textContent = progress.completedAt ? 'View day summary →' : progress.canComplete ? 'Review full day →' : `${progress.reviewedCount || reviewing ? 'Continue' : 'Start'} day review →`; });
   for (const section of progress.sections) {
     const button = $(`[data-confirm="${section.id}"]`), invalidRating = section.id === 'nutrition' && !$('#rating-value').validity.valid;
     const label = {nutrition:'nutrition',training:'training',checklists:'checklist'}[section.id];
@@ -206,17 +214,17 @@ function renderReview() {
     button.textContent = section.reviewed ? `✓ ${label[0].toUpperCase()+label.slice(1)} reviewed` : `Confirm ${label} review${reviewing ? ' →' : ''}`;
     button.classList.toggle('is-reviewed', section.reviewed);
     const purpose = section.id === 'checklists' ? 'Unfinished tasks stay unchecked.' : 'Confirms this section’s review.';
-    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Log sets or choose Rest day first.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: Overview to complete the day.' : 'Complete the whole day on Overview.'}`;
+    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Log sets or choose Rest day first.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : 'A full-day summary comes before completion.'}`;
     $(`#tab-${section.id} .tab-check`).textContent = section.reviewed ? '✓' : '';
     $(`#tab-${section.id}`).setAttribute('aria-label', `${viewLabels[section.id]}${section.reviewed ? ', reviewed' : ''}`);
   }
 }
 function renderNotes() {
   const notes = store.loadDay(selectedDate).notes;
-  $$('[data-notes]').forEach(input => { if (input.value !== notes[input.dataset.notes]) input.value = notes[input.dataset.notes]; });
+  $$('[data-notes]').forEach(input => { const value=input.dataset.notes==='day'?store.loadDay(selectedDate).comment:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
   refreshNoteCarets();
 }
-$$('[data-notes]').forEach(input => input.addEventListener('input', () => {
+$$('[data-notes]').filter(input=>input.dataset.notes!=='day').forEach(input => input.addEventListener('input', () => {
   store.updateNotes(selectedDate, input.dataset.notes, input.value);
   renderReview(); renderHeader(); renderScore();
 }));
@@ -242,14 +250,13 @@ function renderHistory() {
   }).join('');
   renderRecap();
 }
-function renderRecap() {
+function recapMarkup({final=false}={}) {
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate));
-  $('#history-date').textContent=dateFormat(selectedDate,{weekday:'short',month:'short',day:'numeric'});
   const status=recap.completed?'✓ '+recap.state:recap.state;
   const training=recap.training.rest?'Rest':recap.training.sets?`${recap.training.sets}<small> sets</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
-  $('#history-content').innerHTML=`
+  return `
     <div class="recap-score" role="group" aria-label="${recap.score===null?'No daily score yet':`Daily score ${scoreText(recap.score)} out of 10`}">
       ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of 3 logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
     </div>
@@ -260,8 +267,13 @@ function renderRecap() {
     </div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>Open the day to add an entry.${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${recap.tasks.length?`<details class="recap-section" open><summary>Checklist <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
-    ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(GROUPS.find(item=>item.id===group.id)?.name||group.id)}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
-    ${recap.notes.map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
+    ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
+    ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
+    ${!final&&day.comment?.trim()?`<section class="recap-section recap-note"><h4>Day comment</h4><p>${escapeHtml(day.comment)}</p></section>`:''}`;
+}
+function renderRecap() {
+  $('#history-date').textContent=dateFormat(selectedDate,{weekday:'short',month:'short',day:'numeric'});
+  $('#history-content').innerHTML=recapMarkup();
   if(recapDate&&recapDate!==selectedDate)reveal($('#history-content'));
   recapDate=selectedDate;
 }
@@ -272,7 +284,7 @@ function setView(next, focus = false) {
   view = next; render();
   if(changed)reveal($('#'+panelIds[view]));
   window.scrollTo({ top:0, behavior:'auto' });
-  if (focus) $('#tab-' + view).focus({preventScroll:true});
+  if (focus) ($('#tab-' + view)||$('#main')).focus({preventScroll:true});
 }
 function navigateDay(date, changeMonth = true) {
   if (date !== selectedDate) reviewSessionDate = null;
@@ -283,16 +295,29 @@ function navigateDay(date, changeMonth = true) {
 }
 function startReview() {
   const progress = store.dayProgress(selectedDate);
-  if (progress.completedAt || progress.canComplete) { setView('today', true); return; }
+  if (progress.completedAt) { showFinalReview(); return; }
+  if (progress.canComplete) { showFinalReview(); return; }
   reviewSessionDate = selectedDate;
   setView((progress.sections.find(section => !section.ready) || progress.sections.find(section => !section.reviewed)).id, true);
 }
 function startCompletion() {
   const progress = store.dayProgress(selectedDate);
-  if (progress.completedAt) return;
+  if (progress.completedAt) { showFinalReview(); return; }
   if (!progress.canComplete) { startReview(); return; }
-  store.completeDay(selectedDate); reviewSessionDate = null; setView('today', true);
-  announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
+  showFinalReview();
+}
+function showFinalReview() {
+  const progress=store.dayProgress(selectedDate);
+  if(!progress.canComplete)return;
+  setView('today');
+  $('#final-review-date').textContent=longDate(selectedDate);
+  $('#final-review-content').innerHTML=recapMarkup({final:true});
+  $('#day-comment').value=store.loadDay(selectedDate).comment;
+  $('#submit-day').disabled=!!progress.completedAt;
+  $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
+  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. Day comments save as you type. Tap a category to make a change.':'All three section reviews are confirmed. Take one last look. Tap a category to make a change.';
+  showDialog($('#final-review-dialog'));
+  refreshNoteCarets();
 }
 function updateRating(score, notify = false) {
   store.updateRating(selectedDate, score);
@@ -324,6 +349,7 @@ $$('[data-tab]').forEach(button => {
 $('#previous-day').addEventListener('click', () => navigateDay(addDays(selectedDate, -1)));
 $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate, 1)));
 $('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
+$('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
 $('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#open-selected-day').addEventListener('click', () => setView('today', true));
@@ -343,8 +369,9 @@ $('#calendar').addEventListener('keydown',event=>{
   event.preventDefault();navigateDay(addDays(button.dataset.calendarDate,offset));
   $(`[data-calendar-date="${selectedDate}"]`).focus({preventScroll:true});
 });
-for (const id of ['overview-sections', 'review-steps','history-content']) $('#' + id).addEventListener('click', event => {
-  const button = event.target.closest('[data-open-section]'); if (button) setView(button.dataset.openSection, true);
+for (const id of ['overview-sections', 'review-steps','history-content','final-review-content']) $('#' + id).addEventListener('click', event => {
+  const button = event.target.closest('[data-open-section]');
+  if(button) { if(id==='final-review-content')closeDialog($('#final-review-dialog'));setView(button.dataset.openSection, true); }
 });
 $('#open-checklist').addEventListener('click', () => { setView('checklists'); $('#open-task-composer').focus(); });
 for (const id of ['overview-task-list', 'task-list']) $('#' + id).addEventListener('click',event=>{
@@ -483,10 +510,13 @@ function finishDragging(event) {
 }
 for (const type of ['pointerup','pointercancel','lostpointercapture']) nutritionMeter.addEventListener(type, finishDragging);
 
-$('#gym-muscle').innerHTML = GROUPS.map(group => `<option value="${group.id}">${group.name}</option>`).join('');
+$('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${group.name}</span></label>`).join('')}</div>`;
+function renderLogButton() { $('#log-sets').textContent=`+ Log ${muscleName($('[name="muscle-group"]:checked')?.value || '')} sets`; }
+$('#gym-muscles').addEventListener('change',renderLogButton);
+renderLogButton();
 $('#gym-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#gym-sets');
-  try { store.addGymEntry(selectedDate, $('#gym-muscle').value, Number(input.value)); }
+  try { store.addGymEntry(selectedDate, $('[name="muscle-group"]:checked')?.value, Number(input.value)); }
   catch (error) { input.setCustomValidity(error.message); input.reportValidity(); return; }
   render(); announce(`${input.value} sets logged for ${shortDate(selectedDate)}.`);
 });
@@ -520,8 +550,16 @@ $$('[data-confirm]').forEach(button => button.addEventListener('click', () => {
   catch (error) { announce(error.message); return; }
   if (reviewSessionDate === selectedDate) setView(store.dayProgress(selectedDate).sections.find(item => !item.reviewed)?.id || 'today', true);
   else render();
-  announce(store.dayProgress(selectedDate).canComplete ? 'All section reviews confirmed. Choose Complete entire day on Overview.' : `${viewLabels[section]} review confirmed.`);
+  if(store.dayProgress(selectedDate).canComplete) { showFinalReview(); announce('All sections reviewed. Check the full-day summary before completing the day.'); }
+  else announce(`${viewLabels[section]} review confirmed.`);
 }));
+$('#submit-day').addEventListener('click',()=>{
+  try { store.completeDay(selectedDate); }
+  catch(error) { closeDialog($('#final-review-dialog'));render();announce(error.message);return; }
+  closeDialog($('#final-review-dialog'));reviewSessionDate=null;setView('today',true);
+  announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
+});
+$('#day-comment').addEventListener('input',()=>store.updateDayComment(selectedDate,$('#day-comment').value));
 
 function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open','');reveal(dialog); }
 function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }
@@ -559,13 +597,39 @@ $('#motion-setting').addEventListener('change',event=>{
   reveal($('#motion-preview'));
 });
 $('#preview-motion').addEventListener('click',()=>reveal($('#motion-preview')));
-$('#export-backup').addEventListener('click', () => {
+function downloadBackup() {
   flushSave();
   const content = JSON.stringify(store.exportSnapshot(), null, 2);
   const url = URL.createObjectURL(new Blob([content], { type:'application/json' }));
   const anchor = document.createElement('a'); anchor.href = url; anchor.download = `homebase-backup-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
   $('#settings-message').textContent = 'Backup download requested. Keep the file somewhere you can find again.';
+}
+$('#export-backup').addEventListener('click',downloadBackup);
+$('#reset-backup').addEventListener('click',()=>{downloadBackup();$('#reset-message').textContent='Backup download requested. Confirm that you have the file before resetting.';});
+$('#open-reset').addEventListener('click',()=>{
+  $('#reset-scope').textContent=preview?'This resets preview data only. Personal Homebase data is separate.':'This resets Homebase data in this browser on this device.';
+  $('#reset-message').textContent='';
+  showDialog($('#reset-dialog'));
+});
+$('#confirm-reset').addEventListener('click',()=>{
+  let reset;
+  try {reset=resetLocal(localStorage,{suffix,expectedRaw:lastSavedRaw});}
+  catch(error) {$('#reset-message').textContent=`Reset failed. ${error.message}`;return;}
+  clearTimeout(saveTimer);pendingSnapshot=null;pendingImport=null;
+  store=createStore({snapshot:reset.snapshot,seed:false,onChange:queueSave});
+  lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
+  loaded.raw=null;loaded.error=null;loaded.snapshot=null;
+  preferences={};displayName='Kieran';motionPreference=setMotionPreference('system');
+  reviewSessionDate=null;recapDate=null;expandedTasks.clear();undoAction=null;
+  $('#import-preview').hidden=true;$('#import-file').value='';$('#export-recovery').hidden=true;
+  $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#custom-weekdays').hidden=true;
+  $$('input,textarea').forEach(input=>input.setCustomValidity(''));$('#gym-sets').value='3';$('#task-composer-error').textContent='';
+  $$('details').forEach(details=>details.open=false);$('#gym-log').hidden=true;$('#toggle-gym-log').setAttribute('aria-expanded','false');$('#toggle-gym-log').textContent="View week's entries";
+  closeDialog($('#reset-dialog'));closeDialog($('#settings-dialog'));
+  selectedDate=localDateKey(new Date(),timeZone);calendarMonth=selectedDate;
+  setView('today',true);
+  announce(`All ${preview?'preview':'Homebase'} data and preferences reset on this device.`);
 });
 $('#export-recovery').addEventListener('click', () => {
   if (!loaded.raw) return;

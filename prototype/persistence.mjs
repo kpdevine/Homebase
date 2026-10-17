@@ -1,6 +1,7 @@
 import { FREQUENCIES } from './tasks.mjs';
+import { ALL_GROUPS } from './muscles.mjs';
 export const STORAGE_KEY = 'homebase.local.v1'; // Keep the storage key so v1 data migrates in place.
-const groupIds = ['chest', 'back', 'legs', 'shoulders'];
+const groupIds = ALL_GROUPS.map(group=>group.id);
 const sectionIds = ['nutrition', 'training', 'checklists'];
 const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
 const validId = value => typeof value === 'string' && value.length > 0 && value.length <= 100 && /^[A-Za-z0-9_-]+$/.test(value);
@@ -52,7 +53,9 @@ export function validateSnapshot(value) {
     assert(!day.completedAt || sectionIds.every(id => day.reviewed[id]), 'incomplete section reviews.');
     const notes = day.notes === undefined ? { nutrition:'', training:'' } : day.notes;
     assert(notes && ['nutrition','training'].every(id => typeof notes[id] === 'string' && notes[id].length <= 5000), 'notes.');
-    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, reviewed: Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])), completedAt: day.completedAt };
+    const comment=day.comment??'';
+    assert(typeof comment==='string'&&comment.length<=5000,'day comment.');
+    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, reviewed: Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])), completedAt: day.completedAt };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);
@@ -91,4 +94,25 @@ export function writeLocal(storage, snapshot) {
   const serialized = JSON.stringify(validateSnapshot(snapshot));
   storage.setItem(STORAGE_KEY, serialized);
   return serialized;
+}
+
+// Called only after the UI's explicit destructive confirmation. Keep an empty
+// snapshot so a reset preview stays empty instead of reseeding on refresh.
+export function resetLocal(storage, { suffix='', expectedRaw }={}) {
+  const key=STORAGE_KEY+suffix, preferenceKey=`homebase.preferences.v1${suffix}`;
+  const before=storage.getItem(key), preferences=storage.getItem(preferenceKey);
+  if(before!==expectedRaw)throw new Error('Another tab changed the saved data. Reload before resetting.');
+  const snapshot=validateSnapshot({version:2,days:[],entries:[],targets:[],templates:[],serial:0});
+  const raw=JSON.stringify(snapshot);
+  try {
+    storage.setItem(key,raw);
+    storage.removeItem(preferenceKey);
+  } catch(error) {
+    try {
+      if(before===null)storage.removeItem(key);else storage.setItem(key,before);
+      if(preferences===null)storage.removeItem(preferenceKey);else storage.setItem(preferenceKey,preferences);
+    } catch { /* The original error is shown; no in-memory records are replaced. */ }
+    throw error;
+  }
+  return {snapshot,raw};
 }

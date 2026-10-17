@@ -107,7 +107,7 @@ test('gym totals use dated entries, preserve actual over-target totals, and can 
   assert.equal(store.loadWeek('2026-10-19').groups.length, 0);
   assert.equal(store.loadTrainingDay('2026-10-19')[0].sets, 3);
   for (const entry of original.entries) store.removeGymEntry(entry.id);
-  assert.equal(store.loadWeek(DEMO_TODAY).groups.length, 4);
+  assert.equal(store.loadWeek(DEMO_TODAY).groups.length, 7);
   assert.ok(store.loadWeek(DEMO_TODAY).groups.every(group => group.completed === 0));
 });
 
