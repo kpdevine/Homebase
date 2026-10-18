@@ -74,6 +74,8 @@ export function createStore(options = {}) {
   const sampleScores = [7.4, 6.8, 8.2, 7.1, 8.8, 8, 6.5, null, 6, 8, 7, null, 7, 8, 7];
   const sampleDailyScores = [7.1, 6.9, 8.4, 7.8, 8.6, 8, 7.3, null, 6.4, 7.2, 7, null, 7.5, 8.1, 7.6];
   let serial = 0;
+  if(options.clientId&&!/^[A-Za-z0-9_-]{1,32}$/.test(options.clientId))throw new Error('Invalid device ID.');
+  const nextId=prefix=>{serial++;return options.clientId?`${prefix}-${options.clientId}-${serial}`:`${prefix}-${serial}`;};
   const today = options.today || DEMO_TODAY;
   for (let index = 0; options.seed !== false && index < sampleScores.length; index++) {
     const key = addDays(today, index - sampleScores.length + 1);
@@ -89,8 +91,8 @@ export function createStore(options = {}) {
   const week = sampleWeekStart(today);
   if (options.seed !== false) targets.set(week, GROUPS.map(group => ({ ...group })));
   for (const [index, group] of (options.seed === false ? [] : GROUPS).entries()) {
-    entries.push({ id: `gym-${++serial}`, date: addDays(week, 1), groupId: group.id, sets: [5, 6, 3, 3, 4, 5, 3][index] });
-    entries.push({ id: `gym-${++serial}`, date: addDays(week, 2), groupId: group.id, sets: [3, 4, 2, 2, 2, 3, 3][index] });
+    entries.push({ id: nextId('gym'), date: addDays(week, 1), groupId: group.id, sets: [5, 6, 3, 3, 4, 5, 3][index] });
+    entries.push({ id: nextId('gym'), date: addDays(week, 2), groupId: group.id, sets: [3, 4, 2, 2, 2, 3, 3][index] });
   }
   for (const entry of entries) {
     if (!days.has(entry.date)) days.set(entry.date, emptyDay(entry.date));
@@ -167,12 +169,12 @@ export function createStore(options = {}) {
       if(loadDay(key).tasks.length>=1000 || recurrence&&templates.length>=5000) throw new RangeError('Task limit reached.');
       let task;
       if(recurrence) {
-        const template={id:`routine-${++serial}`,name:clean,children:children.map(name=>({id:`child-${++serial}`,name:name.trim()})),startDate:key,endDate:null,frequency:recurrence.frequency,weekdays:[...new Set(recurrence.weekdays)].sort()};
+        const template={id:nextId('routine'),name:clean,children:children.map(name=>({id:nextId('child'),name:name.trim()})),startDate:key,endDate:null,frequency:recurrence.frequency,weekdays:[...new Set(recurrence.weekdays)].sort()};
         templates.push(template);
         // A new schedule affects existing open/future records, never earlier history.
         for(const day of days.values()) if(isDue(template,day.date)) invalidateReview(day,'checklists');
         task=isDue(template,key)?occurrence(template,key):null;
-      } else task={id:`task-${++serial}`,name:clean,done:false,children:children.map(name=>({id:`task-${++serial}`,name:name.trim(),done:false,children:[]}))};
+      } else task={id:nextId('task'),name:clean,done:false,children:children.map(name=>({id:nextId('task'),name:name.trim(),done:false,children:[]}))};
       const day=writableDay(key);
       if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
       if(task) { day.checklistTouched=true; invalidateReview(day,'checklists'); }
@@ -215,7 +217,7 @@ export function createStore(options = {}) {
     addGymEntry(date, groupId, sets) {
       if (!ALL_GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
-      const before=trainingScores(),entry = { id: `gym-${++serial}`, date, groupId, sets };
+      const before=trainingScores(),entry = { id: nextId('gym'), date, groupId, sets };
       entries.push(entry);
       writableDay(date).trainingMode = 'training';
       invalidateReview(writableDay(date), 'training');

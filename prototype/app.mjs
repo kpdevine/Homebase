@@ -4,6 +4,7 @@ import { summarizeDay, scoreColor, scoreGlow, scoreReward, localDateKey, average
 import { taskProgress, scheduleLabel } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
+import { mountCloud } from './cloud-ui.mjs';
 import { muscleName } from './muscles.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
@@ -29,6 +30,8 @@ let saveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
+let cloud=null,cloudLabel='';
+const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
 let selectedDate = localDateKey(new Date(), timeZone);
 let calendarMonth = selectedDate;
@@ -43,7 +46,7 @@ let preferences={},motionPreference='system';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
 if(typeof preferences.name==='string'&&preferences.name.trim()&&preferences.name.length<=30)displayName=preferences.name;
 motionPreference=setMotionPreference(preferences.motion);
-let store = createStore({ today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
+let store = createStore({ clientId, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
@@ -58,7 +61,7 @@ function queueSave(snapshot) {
 }
 function renderSaveStatus() {
   $('#save-status').classList.toggle('has-error', !!storageError);
-  $('#save-message').textContent = storageError ? 'Changes not saved · see backups' : pendingSnapshot ? 'Saving on this device…' : preview ? 'Preview · saved separately' : 'Saved on this device';
+  $('#save-message').textContent = storageError ? 'Changes not saved · see backups' : pendingSnapshot ? 'Saving on this device…' : preview ? 'Preview · saved separately' : cloudLabel||'Saved on this device';
   $('#storage-warning').hidden = !storageError;
   $('#storage-warning').textContent = storageError ? `Local saving needs attention. ${storageError} Your current changes remain in this tab; open Settings to download a backup.` : '';
 }
@@ -70,7 +73,7 @@ function flushSave() {
       blockedSave = true; throw new Error('Another tab changed the saved data. Export this tab’s changes before reloading.');
     }
     lastSavedRaw = writeLocal(storage, pendingSnapshot);
-    pendingSnapshot = null; storageError = null;
+    pendingSnapshot = null; storageError = null; cloud?.changed();cloud?.resume();
   } catch (error) { storageError = error.message; }
   renderSaveStatus();
 }
@@ -296,7 +299,7 @@ for(const type of ['pointerup','pointercancel','lostpointercapture'])$('#target-
   const meter=$(`[data-target-meter="${targetDrag.id}"]`);targetDrag=null;meter.classList.remove('dragging');
   if(meter.hasPointerCapture(event.pointerId))meter.releasePointerCapture(event.pointerId);
 });
-$('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.loadWeek(selectedDate),true);announce('Target edits discarded. Saved targets are unchanged.');});
+$('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.loadWeek(selectedDate),true);cloud?.resume();announce('Target edits discarded. Saved targets are unchanged.');});
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
@@ -737,7 +740,7 @@ function downloadBackup() {
 $('#export-backup').addEventListener('click',downloadBackup);
 $('#reset-backup').addEventListener('click',()=>{downloadBackup();$('#reset-message').textContent='Backup download requested. Confirm that you have the file before resetting.';});
 $('#open-reset').addEventListener('click',()=>{
-  $('#reset-scope').textContent=preview?'This resets preview data only. Personal Homebase data is separate.':'This resets Homebase data in this browser on this device.';
+  $('#reset-scope').textContent=preview?'This resets preview data only. Personal Homebase data is separate.':cloud?.isEnabled()?'This clears your personal records here and syncs the reset to Firebase and your other signed-in devices.':'This resets Homebase data in this browser on this device.';
   $('#reset-message').textContent='';
   showDialog($('#reset-dialog'));
 });
@@ -746,7 +749,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   try {reset=resetLocal(localStorage,{suffix,expectedRaw:lastSavedRaw});}
   catch(error) {$('#reset-message').textContent=`Reset failed. ${error.message}`;return;}
   clearTimeout(saveTimer);pendingSnapshot=null;pendingImport=null;
-  store=createStore({snapshot:reset.snapshot,seed:false,onChange:queueSave});
+  store=createStore({clientId,snapshot:reset.snapshot,seed:false,onChange:queueSave});
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
   preferences={};displayName='Kieran';motionPreference=setMotionPreference('system');
@@ -758,7 +761,8 @@ $('#confirm-reset').addEventListener('click',()=>{
   closeDialog($('#reset-dialog'));closeDialog($('#settings-dialog'));
   selectedDate=localDateKey(new Date(),timeZone);calendarMonth=selectedDate;
   setView('today',true);
-  announce(`All ${preview?'preview':'Homebase'} data and preferences reset on this device.`);
+  cloud?.changed();
+  announce(`All ${preview?'preview':'Homebase'} data and preferences reset${cloud?.isEnabled()?' and queued to sync':' on this device'}.`);
 });
 $('#export-recovery').addEventListener('click', () => {
   if (!loaded.raw) return;
@@ -773,7 +777,7 @@ $('#import-file').addEventListener('change', async event => {
   try {
     if (file.size > 10 * 1024 * 1024) throw new Error('Choose a backup smaller than 10 MB.');
     pendingImport = validateSnapshot(JSON.parse(await file.text()));
-    $('#import-summary').textContent = `${pendingImport.days.length} days, ${pendingImport.entries.length} training entries, and ${pendingImport.templates.length} recurring schedules. Import replaces this browser’s local records. Download your current backup first.`;
+    $('#import-summary').textContent = `${pendingImport.days.length} days, ${pendingImport.entries.length} training entries, and ${pendingImport.templates.length} recurring schedules. Import replaces this browser’s local records${cloud?.isEnabled()?' and syncs that replacement to your other devices':''}. Download your current backup first.`;
     $('#import-preview').hidden = false; $('#settings-message').textContent = '';
   } catch (error) { $('#settings-message').textContent = `Backup not imported. ${error.message}`; }
 });
@@ -783,9 +787,10 @@ $('#confirm-import').addEventListener('click', () => {
   try {
     clearTimeout(saveTimer);
     lastSavedRaw = writeLocal(storage, pendingImport);
-    store = createStore({ snapshot:pendingImport, seed:false, onChange:queueSave });
+    store = createStore({ clientId, snapshot:pendingImport, seed:false, onChange:queueSave });
     loaded.error = null; loaded.raw = null; storageError = null; blockedSave = false; pendingSnapshot = null; pendingImport = null;
     $('#import-preview').hidden = true; $('#import-file').value = ''; reviewSessionDate = null;
+    cloud?.changed();
     $('#settings-message').textContent = 'Backup restored and saved on this device.';
     $('#export-backup').textContent = 'Download local backup';
     $('#export-recovery').hidden = true;
@@ -804,3 +809,16 @@ setInterval(() => { updateClock(); renderHeader(); }, 15000);
 render();
 reveal($('#'+panelIds[view]));
 if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
+
+cloud=mountCloud({
+  preview,readLocal:()=>store.exportSnapshot(),
+  flushLocal:()=>{flushSave();return !storageError&&!blockedSave;},
+  canApply:()=>!blockedSave&&!pendingSnapshot&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
+  applyLocal:snapshot=>{
+    if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
+    const raw=writeLocal(storage,snapshot);
+    store=createStore({clientId,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
+    closeDialog($('#final-review-dialog'));reviewSessionDate=null;render();
+  },
+  onStatus:state=>{cloudLabel=state.label;renderSaveStatus();}
+});

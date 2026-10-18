@@ -8,9 +8,9 @@ A local dashboard for dated tasks, recurring routines, nutrition ratings, traini
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 47 tests.
+Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 92 tests.
 
-The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Records do not sync between devices.
+The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Settings → Cloud sync connects personal records across devices through Google sign-in and Firebase. Open [shared Homebase](https://homebase-d3c6c.firebaseapp.com/) on your phone and display. See [Firebase setup and sync](docs/firebase-sync.md).
 
 ## Features
 
@@ -26,8 +26,8 @@ Daily score provisionally averages entered nutrition, checklist completion, and 
 
 ## Development boundary
 
-Keep development local and production technology open. This buildless HTML/CSS/JavaScript prototype does not choose a production framework, database, hosting service, authentication, synchronization, or screen platform. Prioritize landscape displays.
+Keep development local. Firebase provides Firestore, Google Authentication, and classic Hosting on Spark with no billing. This buildless HTML/CSS/JavaScript app leaves the production framework and screen platform open. Prioritize landscape displays.
 
-Original planning files were uploaded to [kpdevine/Homebase](https://github.com/kpdevine/Homebase). This checkout has no remote configured; current work is saved locally. Personal records and credentials stay out of Git.
+Original planning files were uploaded to [kpdevine/Homebase](https://github.com/kpdevine/Homebase). The development branch is `codex/homebase-prototype`; source checkpoints are saved locally and uploaded to GitHub. Personal records and credentials stay out of Git.
 
 See [prototype guide](docs/prototype-guide.md), [app polish](docs/app-polish.md), [radio revision](docs/radio-revamp.md), and [data design proposal](docs/data-design.md).

@@ -1,7 +1,7 @@
 {
   "name": "homebase-local-prototype",
   "private": true,
-  "description": "A disposable local interaction prototype for Homebase; no production stack is selected.",
+  "description": "Homebase dashboard with local saving and optional private Firebase sync.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs"

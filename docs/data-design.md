@@ -1,6 +1,6 @@
 # Data design proposal
 
-Status: proposed for discussion. No database, provider, or region is selected or provisioned.
+Historical design proposal. On October 17, 2026, the owner selected Firebase and provisioned Firestore Standard in us-central1. The implemented document schema and security/sync behavior are documented in [Firebase sync](firebase-sync.md); older proposals below are not the deployment specification.
 
 ## Separate the three storage decisions
 

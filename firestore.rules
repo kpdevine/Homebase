@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/records/{recordId} {
+      function owner() { return request.auth != null && request.auth.uid == userId; }
+      function supportedId() { return recordId.matches('settings|day_[0-9]{4}-[0-9]{2}-[0-9]{2}|targets_[0-9]{4}-[0-9]{2}-[0-9]{2}|routine_[A-Za-z0-9_-]+'); }
+      allow read: if owner();
+      allow create, update: if owner() && supportedId()
+        && request.resource.data.keys().hasOnly(['format', 'payload', 'updatedAt'])
+        && request.resource.data.format == 1
+        && request.resource.data.payload is string
+        && request.resource.data.payload.size() <= 850000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if owner();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

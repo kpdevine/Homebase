@@ -1,4 +1,10 @@
 /* Date context and the final, explicit review step. */
+.cloud-settings p {font:400 11px/1.7 var(--font-ui);overflow-wrap:anywhere}
+.cloud-actions {display:flex;flex-wrap:wrap;gap:8px 15px;align-items:center}
+.cloud-actions button {font-size:12px}
+.cloud-conflicts {border:1px solid var(--line);background:#243b751a;padding:14px;margin-top:14px}
+.cloud-conflicts strong {font:700 13px var(--font-display)}
+.cloud-conflicts button {display:block;width:100%;margin-top:9px;font-size:11px}
 .score-info-button {margin-left:auto;margin-right:8px;width:30px;height:30px;flex:none;font:700 15px var(--font-display);border:1px solid #243f7b80;border-radius:50%;background:#a6c9ee20;color:var(--ink)}
 .top-row .settings-button {margin-left:0}
 .training-pace {display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:14px 0}

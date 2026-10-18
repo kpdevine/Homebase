@@ -24,5 +24,6 @@ coverage/
 Thumbs.db
 .font-build/
 .local/
+.firebase/
 __pycache__/
 *.pyc

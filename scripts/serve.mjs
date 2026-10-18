@@ -5,6 +5,7 @@ import path from 'node:path';
 
 const root = fileURLToPath(new URL('../prototype/', import.meta.url));
 const port = Number(process.env.PORT || 4173);
+const contentPolicy = "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.gstatic.com https://apis.google.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; frame-src https://homebase-d3c6c.firebaseapp.com https://accounts.google.com https://apis.google.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 const types = { '.html': 'text/html', '.css': 'text/css', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.txt': 'text/plain' };
 const server = createServer(async (request, response) => {
   if (!['GET', 'HEAD'].includes(request.method)) {
@@ -24,7 +25,7 @@ const server = createServer(async (request, response) => {
       'Content-Type': `${types[path.extname(target)] || 'application/octet-stream'}; charset=utf-8`,
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff',
-      'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      'Content-Security-Policy': contentPolicy,
     });
     response.end(request.method === 'HEAD' ? undefined : data);
   } catch {
