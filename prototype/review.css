@@ -153,7 +153,7 @@
 html,body {height:100%;overflow:hidden}
 .app-shell,.is-overview .app-shell {height:calc(100dvh - 24px);min-height:0;overflow:hidden}
 .app-header,.display-footer {flex:0 0 auto}
-.app-shell>main {flex:1 1 0;min-height:0;overflow:auto;scrollbar-gutter:stable;overscroll-behavior:contain;scroll-behavior:auto}
+.app-shell>main {flex:1 1 0;min-height:0;overflow:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#274579 transparent;overscroll-behavior:contain;scroll-behavior:auto}
 .greeting-row>div {min-width:0;flex:1}
 #page-title {height:1.2em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .day-tabs {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));width:1000px;max-width:100%}
