@@ -106,17 +106,17 @@ function circle(score,reward=false) {
   const arc=`d="${meterPath(20,24)}" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100"`;
   return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<path class="score-circle-track" d="${meterPath(20,24)}"/><path class="score-circle-fill score-circle-outline" ${arc}/><path class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
 }
+function renderHeaderShortcuts() {
+  const settings=$('#settings-dialog').hasAttribute('open'),info=$('#score-dialog').hasAttribute('open'),modal=settings||info;
+  for(const [id,active] of [['open-home',view==='today'&&!modal],['mobile-calendar',view==='history'&&!modal],['open-achievements',view==='achievements'&&!modal],['open-settings',settings],['open-score-info',info]])
+    $('#'+id).setAttribute('aria-pressed',String(active));
+}
 function renderHeader() {
   const archived=archivedDay();
   if(archived&&view!=='achievements')view='history';
   document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
-  const calendarLabel=view==='history'?'Overview':'Calendar';
-  $('#mobile-calendar .calendar-button-label').textContent=calendarLabel;
-  $('#mobile-calendar').setAttribute('aria-label',calendarLabel);
-  $('#mobile-calendar').title=calendarLabel;
-  $('#mobile-calendar use').setAttribute('href',view==='history'?'#i-overview':'#i-calendar');
-  $('#open-achievements').setAttribute('aria-pressed',String(view==='achievements'));
+  renderHeaderShortcuts();
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);
   const isToday = selectedDate === localDateKey(now, timeZone);
@@ -551,18 +551,14 @@ $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate,
 $('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 function returnToOverview() {if(archivedDay())navigateDay(editableToday());setView('today',true);}
+$('#open-home').addEventListener('click',returnToOverview);
 $('#open-achievements').addEventListener('click',()=>view==='achievements'?returnToOverview():setView('achievements',true));
 $('#achievements-overview').addEventListener('click',returnToOverview);
 $('#achievement-filters').addEventListener('click',event=>{const button=event.target.closest('[data-achievement-filter]');if(!button)return;achievementFilter=button.dataset.achievementFilter;renderAchievements(false);});
 $('#achievement-unlocked-only').addEventListener('click',()=>{unlockedOnly=!unlockedOnly;renderAchievements(false);});
 for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
 $('#mobile-calendar').addEventListener('click', () => {
-  if(view==='history') {
-    if(archivedDay())navigateDay(editableToday());
-    setView('today',true);
-  } else {
-    calendarMonth=selectedDate;setView('history',true);
-  }
+  calendarMonth=selectedDate;setView('history',true);
 });
 $('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#calendar-filters').addEventListener('click',event=>{const button=event.target.closest('[data-calendar-filter]');if(button&&Object.hasOwn(categoryLabels,button.dataset.calendarFilter)){calendarFilter=button.dataset.calendarFilter;renderHistory();}});
@@ -831,8 +827,9 @@ function queueAchievementCelebration(earned) {
 $('#dismiss-achievement-unlock').addEventListener('click',closeAchievementCelebration);
 $('#view-unlocked-achievements').addEventListener('click',()=>{closeAchievementCelebration();achievementFilter='all';unlockedOnly=true;setView('achievements',true);});
 
-function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open','');reveal(dialog); }
-function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }
+function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open','');reveal(dialog);renderHeaderShortcuts(); }
+function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open');renderHeaderShortcuts(); }
+$$('dialog').forEach(dialog=>dialog.addEventListener('close',renderHeaderShortcuts));
 $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => closeDialog(button.closest('dialog'))));
 $('#score-info').addEventListener('click', () => { closeDialog($('#settings-dialog')); showDialog($('#score-dialog')); });
 $('#open-score-info').addEventListener('click',()=>showDialog($('#score-dialog')));

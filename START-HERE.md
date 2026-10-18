@@ -20,7 +20,9 @@ Whenever uploading source changes to GitHub, deploy the same working version to 
 
 Latest requirements are consolidated in [the app PRD](docs/product-requirements.md). Achievements opens from the trophy beside Settings and has 55 compact badges with individual icons, category/unlocked filters, repeat counts, and current/best streaks. Score awards use finalized recorded scores; gym awards require lifting sets. Streak blocks and milestones derive from synced history without extra cloud writes. Award notifications follow both the day-complete animation and its save notice. History edits and resets recalculate badges.
 
-Header refinement: Calendar, trophy, and Settings now form a tight group of matching icon-only buttons on desktop and both phone orientations. Each target is 40px with a 21px icon and a 6px gap. Calendar remains available on Overview too and changes to a home icon labeled Overview while viewing Calendar. Tooltips and accessible names preserve each button's purpose.
+Header refinement: Home, Calendar, trophy, and Settings form a tight group of matching icon-only buttons on desktop and both phone orientations. Each target is 40px with a 21px icon and a 6px gap. Home has its own permanent button and returns to Overview; Calendar always opens Calendar. Tooltips and accessible names preserve each button's purpose. From an archived date, Home returns to today's editable Overview.
+
+Home, Calendar, trophy, Settings, and scoring-info show a dark selected surface with pale ink and an inset indicator for the active menu. Settings/info track their dialog state, including Escape closing; closing restores the underlying view's active indicator. Accessible pressed states follow the same behavior.
 
 The achievement catalog scrolls in the full main area instead of a shallow nested window, with sticky category controls. Selected filters are pale with dark text; inactive filters are dark with pale text. Wide desktop has four compact card columns. Unrated labels fit inside compact meters.
 
