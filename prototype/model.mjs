@@ -118,7 +118,7 @@ export function createStore(options = {}) {
   function loadWeek(key) {
     const start=sampleWeekStart(key),end=addDays(start,6),effective=effectiveTargets(key);
     const weekEntries=entries.filter(entry=>entry.date>=start&&entry.date<=end);
-    return {start,end,targetSource:effective.source,groups:effective.groups.map(group=>({...group,completed:weekEntries.filter(entry=>entry.groupId===group.id).reduce((sum,entry)=>sum+entry.sets,0)})),entries:structuredClone(weekEntries)};
+    return {start,end,targetSource:effective.source,groups:effective.groups.map(group=>({...group,completed:weekEntries.filter(entry=>entry.groupId===group.id).reduce((sum,entry)=>sum+entry.sets,0)})),entries:structuredClone(weekEntries),days:structuredClone([...days.values()].filter(day=>day.date>=start&&day.date<=end))};
   }
   function trainingScores() {return new Map([...days.values()].map(day=>[day.date,trainingProgress(day,loadWeek(day.date)).score]));}
   function reopenChangedTraining(before) {
@@ -226,20 +226,20 @@ export function createStore(options = {}) {
     },
     removeGymEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
-      if (index >= 0) { const before=trainingScores(),[entry] = entries.splice(index, 1); invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before); }
+      if (index >= 0) { const before=trainingScores(),[entry] = entries.splice(index, 1); if(!entries.some(value=>value.date===entry.date))writableDay(entry.date).trainingMode='rest';invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before); }
     },
     loadTrainingDay(key) { return structuredClone(entries.filter(entry => entry.date === key)); },
     setTrainingMode(key, mode) {
-      if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting, planned rest, or unplanned rest.');
+      if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting or rest.');
       if (mode !== 'training' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
-      const day = writableDay(key);
-      if (day.trainingMode !== mode) { day.trainingMode = mode; invalidateReview(day, 'training'); }
+      const before=trainingScores(),day = writableDay(key);
+      if (day.trainingMode !== mode) { day.trainingMode = mode; invalidateReview(day, 'training');reopenChangedTraining(before); }
     },
     dayProgress(key) {
       const day = loadDay(key);
       const dailyEntries = this.loadTrainingDay(key);
       const ready = { nutrition: day.nutrition !== null,
-        training: ['rest','unplanned-rest'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
+        training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
@@ -248,7 +248,7 @@ export function createStore(options = {}) {
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log sets or choose whether your no-lift day was planned.');
+      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log sets or mark this as a rest day.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },

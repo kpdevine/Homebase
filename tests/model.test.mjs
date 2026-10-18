@@ -100,7 +100,8 @@ test('gym totals use dated entries, preserve actual over-target totals, and can 
   assert.equal(current.entries.at(-1).date, DEMO_TODAY);
   assert.equal(store.loadWeek('2026-10-19').entries.length, 0);
   store.removeGymEntry(entryId);
-  assert.deepEqual(store.loadWeek(DEMO_TODAY), original);
+  assert.deepEqual(store.loadWeek(DEMO_TODAY).entries, original.entries);
+  assert.deepEqual(store.loadWeek(DEMO_TODAY).groups, original.groups);
   for (const invalid of [0, -2, 2.5, 101]) assert.throws(() => store.addGymEntry(DEMO_TODAY, 'chest', invalid), RangeError);
   assert.throws(() => store.addGymEntry(DEMO_TODAY, 'unknown', 3), RangeError);
   store.addGymEntry('2026-10-19', 'chest', 3);
@@ -164,7 +165,7 @@ test('removing the last workout entry invalidates training review and completion
   store.completeDay(DEMO_TODAY);
   store.removeGymEntry(id);
   assert.equal(store.loadDay(DEMO_TODAY).completedAt, null);
-  assert.equal(store.dayProgress(DEMO_TODAY).sections.find(section => section.id === 'training').ready, false);
+  assert.equal(store.dayProgress(DEMO_TODAY).sections.find(section => section.id === 'training').ready, true);
   assert.throws(() => store.completeDay(DEMO_TODAY));
 });
 

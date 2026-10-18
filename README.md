@@ -8,7 +8,7 @@ A local dashboard for dated tasks, recurring routines, nutrition ratings, traini
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 92 tests.
+Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 97 tests.
 
 The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Settings → Cloud sync connects personal records across devices through Google sign-in and Firebase. Open [shared Homebase](https://homebase-d3c6c.firebaseapp.com/) on your phone and display. See [Firebase setup and sync](docs/firebase-sync.md).
 
@@ -22,7 +22,7 @@ The root app starts empty and saves on this browser/device. [The synthetic previ
 - Read-only daily recaps with score/status, tasks and subtasks, dated training totals, and full handwritten notes. Category shortcuts and keyboard calendar navigation make earlier days easier to revisit.
 - Local persistence, backup export/import, storage recovery, and conflicting-tab protection. Version-1 backups migrate to version 2 without losing history.
 
-Daily score provisionally averages entered nutrition, checklist completion, and training check-in. Subtasks count once; parents are not double-counted. Merely scheduled tasks do not create scores or streaks before a checklist check-in. A reviewed empty checklist counts as no tasks due. Settings explains the policy.
+Daily score provisionally averages entered nutrition, checklist completion, automatic gym scoring, and an optional Sentiments rating. Gym uses weekly goals ÷ 5 as a fixed daily workout target, full credit for useful sets, quarter credit for extra sets, and two flexible rest credits. Subtasks count once; parents are not double-counted. Merely scheduled tasks do not create scores or streaks before a checklist check-in. A reviewed empty checklist counts as no tasks due. Settings explains the policy.
 
 ## Development boundary
 

@@ -68,7 +68,7 @@ export function validateSnapshot(value) {
     const hasSets = entries.some(entry => entry.date === day.date);
     assert(!(day.trainingMode === 'rest' && hasSets), 'rest day with set entries.');
     assert(!hasSets || day.trainingMode === 'training', 'set entries without a training day.');
-    assert(!day.reviewed.training || ['rest','unplanned-rest'].includes(day.trainingMode) || hasSets, 'training review without a log.');
+    assert(!day.reviewed.training || ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) || hasSets, 'training review without a log.');
   }
   const weeks = new Set();
   const targets = value.targets.map(pair => {

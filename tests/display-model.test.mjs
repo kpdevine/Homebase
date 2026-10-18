@@ -20,7 +20,7 @@ test('daily score uses entered sections and explicitly labels partial input', ()
   assert.equal(summary.score, 6.8); assert.equal(summary.logged, 2);
   store.setTrainingMode(DEMO_TODAY, 'rest');
   summary = summarizeDay(store.loadDay(DEMO_TODAY), []);
-  assert.equal(summary.score, 6.8); assert.equal(summary.logged, 3); assert.equal(summary.provisional, false);
+  assert.equal(summary.score, 7.9); assert.equal(summary.logged, 3); assert.equal(summary.provisional, false);
 });
 test('perfect day is ten, unfinished tasks lower it, and an empty checklist needs review', () => {
   const store = createStore({ seed:false });
@@ -29,18 +29,18 @@ test('perfect day is ten, unfinished tasks lower it, and an empty checklist need
   store.confirmSection(DEMO_TODAY, 'checklists');
   assert.equal(summarizeDay(store.loadDay(DEMO_TODAY), []).score, 10);
   store.addTask(DEMO_TODAY, 'Unfinished');
-  assert.equal(summarizeDay(store.loadDay(DEMO_TODAY), []).score, 5);
+  assert.equal(summarizeDay(store.loadDay(DEMO_TODAY), []).score, 6.7);
   store.toggleTask(DEMO_TODAY, store.loadDay(DEMO_TODAY).tasks[0].id);
   assert.equal(summarizeDay(store.loadDay(DEMO_TODAY), []).score, 10);
 });
-test('a training log earns proportional weekly-pace credit and removal makes the score provisional', () => {
+test('a training log earns daily useful-set credit and removing its last entry records rest', () => {
   const store = createStore({ seed:false });
   const id = store.addGymEntry(DEMO_TODAY, 'chest', 3);
   let summary = summarizeDay(store.loadDay(DEMO_TODAY), store.loadTrainingDay(DEMO_TODAY));
-  assert.equal(summary.sections[1].score, 0.8); assert.equal(summary.score, 0.8); assert.ok(summary.provisional);
+  assert.equal(summary.sections[1].score, 2.2); assert.equal(summary.score, 2.2); assert.ok(summary.provisional);
   store.removeGymEntry(id);
   summary = summarizeDay(store.loadDay(DEMO_TODAY), store.loadTrainingDay(DEMO_TODAY));
-  assert.equal(summary.sections[1].score, null); assert.equal(summary.score, null);
+  assert.equal(summary.sections[1].score, 10); assert.equal(summary.score, 10);
 });
 test('continuous LCD palette brightens from indigo through blue to ice without threshold jumps', () => {
   assert.equal(scoreColor(0), '#1c285e'); assert.equal(scoreColor(10), '#f8fdff');

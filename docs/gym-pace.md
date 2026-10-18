@@ -1,38 +1,39 @@
-# Gym scoring and rest
+# Gym daily scoring and flexible rest
 
-The owner chose **strict 10/day pacing for a 70-set week** on October 17, 2026. Gym asks “Did you lift today?” with Yes/No. No requires Planned rest or Unplanned rest before review. Yes requires a dated set entry. Existing rest entries remain planned rest.
-
-For the selected date, Monday is day 1 and Sunday day 7:
+This policy replaces cumulative weekly pacing. It uses dated workouts and weekly muscle goals; the seven current muscle choices and historical combined Legs entries remain intact.
 
 ```
-credited sets = sum over muscles of min(sets through selected date, muscle target)
-pace target = sum of muscle targets × day number / 7
-gym score = min(10, credited sets / pace target × 10)
+daily set target = sum of weekly muscle goals / 5
+useful sets = today's sets that fill a muscle's remaining weekly goal
+extra sets = today's remaining sets, including muscles with no goal
+weighted sets = useful sets + extra sets * 0.25
+workout score = min(10, weighted sets / daily set target * 10)
 ```
 
-Scores display one decimal. Values below the pace target are held below 10 even when rounding would reach 10. Actual set totals include every logged set, including extra and untargeted sets. Goal credit does not include those extras. Monday begins a new set total; targets carry forward.
+The denominator is fixed throughout each Monday–Sunday week. A previous shortfall does not reduce another day's score. Weekly goal sets remain capped per muscle and tracked separately from actual total sets. Daily scores show tenths, held below ten until the target is actually met. Same-day entries retain their saved order; dates, rather than entry-creation order, determine which day's sets get useful credit first.
 
-| Example for a 70-set goal | Gym score |
-| --- | --- |
-| 10 credited sets by Monday | 10 |
-| 20 by Monday, unplanned rest Tuesday | 10 on Tuesday |
-| 14 by Tuesday, unplanned rest Tuesday | 7 on Tuesday |
-| 10 by Tuesday, plus 15 extra sets on an already completed muscle | 5 on Tuesday |
-| Planned rest | Excluded from daily average |
-| Unplanned rest with no weekly credit | 0 |
-| No answer / unclassified rest / Yes without sets | Unlogged |
+For a 50-set week, the daily target is 10:
 
-Planned rest counts as a required check-in and can be reviewed/completed without adding a scored component. The remaining entered categories are averaged equally. Sentiments remains optional and joins that average only with a rating.
+| Useful | Extra | Daily score |
+| --- | --- | --- |
+| 10 | 0 | 10 |
+| 8 | 0 | 8 |
+| 5 | 10 | 7.5 |
+| 0 | 10 | 2.5 |
+| 0 | 20 | 5 |
+| 10 | 10 | 10 |
 
-Scores use entries dated Monday through the selected date. Later workouts cannot rewrite earlier scores. Backdated additions/removals can change later scores in that week, reopening their gym review and final completion when the score changes. Target edits likewise reopen affected gym reviews when scores change. Other section reviews stay confirmed.
+Each week starts with two flexible rest credits. Choosing **No** to Did you lift today? records rest immediately; advance planning is unnecessary. In date order, each logged rest day earns ten and uses one credit while credits remain. Subsequent rest days earn zero. After all weekly muscle goals are met, rest earns ten without consuming a credit, even when both credits have already been used. Rest is included in the daily average. A workout made entirely of extra sets still receives quarter credit and consumes no rest credit.
 
-Saved muscle targets repeat until edited. Editing applies from the selected Monday until the next explicit saved target change; earlier weeks are preserved. Weeks with no saved target history use the visible defaults. Legacy combined Legs goals and logs remain supported; untargeted new groups remain logged without credit until their targets are set. JSON backup version 2 preserves rest choices and dated target changes; older checkpoints may not understand new rest states.
+Unanswered dates stay unlogged and do not consume credits; selecting Yes without entering sets is also unfinished. Removing a workout's last set entry turns it into rest, reallocates credits, and reopens its review. Changing that rest back to a workout releases its credit. With every target set to zero, answered gym days remain unscored rather than dividing by zero. Existing planned/unplanned/unclassified rest records all participate in flexible rest without deleting or changing their saved legacy labels.
 
-The suggestion box ranks unfinished muscles by the lowest completed fraction of their target through the selected date, breaking ties by remaining sets. Completed muscles disappear from suggestions. The weekly panel shows the whole week's volume; the day score and suggestions show progress only through the selected date.
+Progress is replayed from Monday through the selected date. Future workouts cannot upgrade earlier days or make an earlier zero-credit rest perfect. Backdated edits/deletions, rest changes, and target edits recalculate useful/extra classifications, daily scores, and rest usage for affected dates. When another day's gym score changes, its gym review and final completion reopen; other section reviews are preserved. Monday resets volume and credits, while targets inherit the latest saved configuration until edited. An explicit target change applies to its whole week and following weeks until the next change.
 
-The small **i** beside Settings opens the full scoring explanation. Calendar daily/weekly/monthly rings, overview, final review, and recaps share the same calculation. Browser records stay local and out of Git.
+The gym panel shows useful sets, extra sets, weighted sets, the fixed target, credits remaining through the selected date, and weekly goal/actual totals. Individual logs show their useful/extra split. Suggestions rank unfinished muscles by the lowest completed fraction of their target through the selected date. Calendar rings, overview, final review, and recaps share this calculation. The small **i** beside Settings explains the policy in the app.
 
-The weekly panel has separate Goal sets (credited / target) and Total sets (all actual sets) counters. The selected day also shows both totals through that date. Extra sets increase only Total sets after that muscle target is met.
+Set totals, classifications, scores, and rest credits are derived from saved targets, dated entries, and day records; no duplicate score counters are persisted. Backup format remains version 2. Firebase sync carries backdated review invalidations as normal changed daily records. Source and browser/Firebase personal data remain separate.
+
+Browser verification used an isolated empty workspace: 8 chest sets Monday followed by 6 Tuesday against a 10-set chest goal yielded 2 useful + 4 extra = 3 weighted, scoring 3/10. Removing Tuesday's entry marked rest, Wednesday used the second credit, and Thursday scored zero. Completing the remaining weekly goals Friday made Saturday's rest score ten without spending a credit. Existing user records were untouched. Automated cases cover every proposed example, rest reset/goal completion, legacy rest, zero targets, reverse entry order, backdated deletions, and review invalidation.
 
 ## Target circles
 
