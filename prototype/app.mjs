@@ -111,7 +111,11 @@ function renderHeader() {
   if(archived&&view!=='achievements')view='history';
   document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
-  $('#mobile-calendar').textContent = view === 'history' ? 'Overview' : 'Calendar';
+  const calendarLabel=view==='history'?'Overview':'Calendar';
+  $('#mobile-calendar .calendar-button-label').textContent=calendarLabel;
+  $('#mobile-calendar').setAttribute('aria-label',calendarLabel);
+  $('#mobile-calendar').title=calendarLabel;
+  $('#mobile-calendar use').setAttribute('href',view==='history'?'#i-overview':'#i-calendar');
   $('#open-achievements').setAttribute('aria-pressed',String(view==='achievements'));
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);

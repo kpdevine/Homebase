@@ -2,6 +2,11 @@
 .achievements-button .icon {width:21px;height:21px}
 .achievements-button[aria-pressed='true'] {background:#233e7c;color:#e2f5ff;border-color:#c1e3ff;box-shadow:0 0 8px #d0f1ff44}
 .top-row .achievements-button+.settings-button {margin-left:0}
+.header-shortcuts {display:flex;align-items:center;gap:6px;flex:none}
+.top-row .header-shortcuts>.icon-button,.top-row .header-shortcuts>.mobile-calendar {width:40px;height:40px;min-height:40px;margin:0;padding:0;border:1px solid var(--line);border-radius:4px;flex:none}
+.top-row .header-shortcuts>.mobile-calendar {display:inline-flex;align-items:center;justify-content:center;background:#a8d0f01a}
+.header-shortcuts>.icon-button>.icon,.header-shortcuts .mobile-calendar>.icon {display:block;width:21px;height:21px}
+.header-shortcuts .calendar-button-label {display:none}
 .achievements-view {display:flex;flex-direction:column;gap:14px}
 .achievements-view>.detail-heading {margin-bottom:0}
 .achievements-summary {display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;flex:none}
@@ -94,16 +99,11 @@ body:not(.is-overview) .mobile-calendar {display:inline-flex;align-items:center;
   .achievement-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:767px), (max-width:1000px) and (max-height:600px) and (orientation:landscape) {
-  .top-row {grid-template-columns:minmax(0,1fr) auto 30px 32px 40px;gap:6px}
-  .top-row .achievements-button {width:32px;height:36px;min-height:36px;margin:0}
-  .top-row .achievements-button .icon {width:20px;height:20px}
+  .top-row {grid-template-columns:minmax(0,1fr) 40px auto;gap:6px}
   .top-row .day-navigation {grid-row:1;grid-column:1/-1}
-  .top-row .mobile-calendar {grid-row:2;grid-column:1}
-  .top-row #save-status {grid-row:2;grid-column:2}
-  .top-row .score-info-button {grid-row:2;grid-column:3}
-  .top-row .achievements-button {grid-row:2;grid-column:4}
-  .top-row .settings-button {grid-row:2;grid-column:5}
-  .top-row #save-status {max-width:94px;font-size:8px}
+  .top-row #save-status {grid-row:2;grid-column:1;justify-self:start;max-width:none;margin:0;text-align:left;font-size:8px}
+  .top-row .score-info-button {grid-row:2;grid-column:2;width:40px;height:40px;margin:0}
+  .top-row .header-shortcuts {grid-row:2;grid-column:3;justify-self:end}
   .achievements-view {gap:12px}
   .achievements-summary {grid-template-columns:1fr 1fr;gap:8px}
   .achievements-summary>div {padding:12px}
@@ -130,13 +130,11 @@ body:not(.is-overview) .mobile-calendar {display:inline-flex;align-items:center;
   .achievement-unlock-badges {grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:8px}
 }
 @media(max-width:1000px) and (max-height:600px) and (orientation:landscape) {
-  .top-row {grid-template-columns:minmax(185px,1fr) minmax(0,auto) 30px auto 32px 36px;gap:6px}
+  .top-row {grid-template-columns:minmax(185px,1fr) minmax(0,auto) 40px auto;gap:6px}
   .top-row .day-navigation {grid-row:1;grid-column:1}
   .top-row #save-status {grid-row:1;grid-column:2}
   .top-row .score-info-button {grid-row:1;grid-column:3}
-  .top-row .mobile-calendar {grid-row:1;grid-column:4}
-  .top-row .achievements-button {grid-row:1;grid-column:5}
-  .top-row .settings-button {grid-row:1;grid-column:6}
+  .top-row .header-shortcuts {grid-row:1;grid-column:4}
   .top-row #save-status {max-width:130px}
   .achievements-summary {grid-template-columns:1.5fr 1fr 1fr}
   .achievements-summary .achievement-total {grid-column:auto}
