@@ -152,7 +152,7 @@ function renderScore() {
   meter.querySelector('.meter-number').innerHTML = scoreMarkup(summary.score);
   meter.style.setProperty('--score-soft', summary.score === null ? '#f2f4ef' : `${scoreColor(summary.score)}0a`);
   $('#day-gradient-start').setAttribute('stop-color',scoreColor(summary.score));
-  $('#day-gradient-start').setAttribute('stop-opacity', '.45');
+  $('#day-gradient-start').setAttribute('stop-opacity', '1');
   $('#day-gradient-end').setAttribute('stop-color',scoreColor(summary.score));
   meter.setAttribute('aria-label', summary.score === null ? 'No daily score yet. Log a category to get started.' : `${summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(summary.score)} out of 10. ${summary.logged} of ${summary.sections.length} categories logged.`);
   const rewardLabel=reward?(summary.provisional?'High so far':summary.score===10?'Perfect score':'High score'):'';
