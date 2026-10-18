@@ -82,4 +82,8 @@ Shared meter contrast: the ring gradient is fully opaque and has a dark LCD keyl
 
 Sentiments with both a note and rating now joins the daily review as an optional fourth section. Confirm Sentiments to reach the full-day review; changing either input reopens it. Days with only one input keep the three required reviews. Older completed records with both inputs preserve their completed state. Top tab checks are larger, and after 9 p.m. unlogged required sections show a warning; Sentiments never does. The review form no longer repeats “Next” hints. All 101 tests pass.
 
-The active section's Confirm button lives in the day-review strip and confirmation advances to the next unfinished section. Final review has editable Sentiments notes and a 0–10 rating in place of Day comment; changing a rated note requires confirming Sentiments again before completing. Older day comments remain in backups but no longer appear in the interface. Completing a day plays a short LCD-blue score celebration when motion is enabled. All 101 tests pass.
+The active section's Confirm button lives in the day-review strip and confirmation advances to the next unfinished section. Final review has editable Sentiments notes and a 0–10 rating in place of Day comment. Older day comments remain in backups but no longer appear in the interface. Completing a day plays a short LCD-blue score celebration when motion is enabled. All 101 tests pass.
+
+Final-review Sentiments rating uses the same draggable 0–10 circle and 0.1 increments as the Sentiments tab, with arrow keys and Home/End for accessibility. Notes and rating edits in the final review save immediately and mark the Sentiments section reviewed without an extra confirmation button; Complete entire day remains the last action.
+
+The final-review rating circle is compact and has no on-screen drag instructions; its accessible slider label and keyboard controls remain.

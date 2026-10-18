@@ -75,17 +75,17 @@
 .final-review-content .recap-section {margin-top:20px}
 .final-review-content .recap-note p {max-height:none;font-size:19px;line-height:1.7}
 .final-review-sentiments {margin-top:22px;padding:18px 20px;border:1px solid #315795;background:#b6d9fa1f}
-.final-sentiments-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}
-.final-sentiments-heading h3 {margin:0;font:400 19px var(--font-display);text-transform:uppercase}
-.final-sentiments-heading .score-circle {width:58px;height:58px}
+.final-review-sentiments h3 {margin:0 0 15px;font:400 19px var(--font-display);text-transform:uppercase}
 .final-review-sentiments label {display:block;font:400 13px var(--font-display);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
 .final-review-sentiments label span {font:400 10px var(--font-ui);text-transform:none;letter-spacing:0}
 .final-review-sentiments textarea[data-notes] {width:100%;min-height:125px;font-size:19px;line-height:1.7}
-.final-sentiments-rating {display:flex;align-items:center;gap:15px;margin-top:14px}
-.final-sentiments-rating label {margin:0}
-.final-sentiments-rating input {width:85px;min-height:42px;padding:5px 8px;background:#8dc4f3;border:1px solid #315795;color:var(--ink);font:400 20px var(--font-display);text-align:center}
-#final-sentiments-status {margin:10px 0 0}
-#final-confirm-sentiments {margin-top:12px}
+.final-sentiments-rating {margin-top:14px}
+.final-rating-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid #315795;padding-top:10px;font:400 13px var(--font-display);text-transform:uppercase;letter-spacing:.04em}
+#final-sentiments-meter {width:min(155px,45%);margin:0;flex:0 0 auto}
+#final-sentiments-meter .meter-number {font-size:54px}
+#final-sentiments-meter .meter-out-of {font-size:10px;margin-top:4px}
+#final-sentiments-meter .sentiment-endpoint {font-size:10px}
+#final-clear-sentiments-rating {min-height:38px;text-transform:none;letter-spacing:0;font:400 12px var(--font-ui)}
 .day-complete-overlay {position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;pointer-events:none;background:radial-gradient(circle,#9bdcffdb 0,#579cebdf 30%,#203d80ed 78%);color:#f5fcff;text-align:center;text-shadow:0 0 12px #d6f6ffbb;animation:completion-wash 1800ms steps(18,end) both}
 .day-complete-overlay::after {content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,#10265940 0 1px,transparent 1px 4px);pointer-events:none}
 .completion-rings {position:absolute;width:min(68vw,650px);aspect-ratio:1;display:grid;place-items:center}

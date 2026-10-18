@@ -450,22 +450,27 @@ function showFinalReview() {
   $('#final-review-content').innerHTML=recapMarkup({final:true});
   const sentiments=store.loadDay(selectedDate).sentiments;
   $('#final-sentiments-notes').value=sentiments.notes;
-  $('#final-sentiments-rating').value=sentiments.rating??'';
   renderFinalSentimentsState();
   showDialog($('#final-review-dialog'));
   refreshNoteCarets();
 }
 function renderFinalSentimentsState() {
   const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
-  $('#final-sentiments-circle').innerHTML=circle(rating,true);
-  const needsReview=progress.sections.some(section=>section.id==='sentiments'&&!section.reviewed);
-  const valid=$('#final-sentiments-rating').checkValidity();
-  $('#final-confirm-sentiments').hidden=!needsReview;
-  $('#final-confirm-sentiments').disabled=!valid;
-  $('#final-sentiments-status').textContent=!valid?'Enter a rating from 0 to 10 in steps of 0.1.':needsReview?'Confirm your updated Sentiments before completing the day.':rating===null?'Rating optional. Notes save as you type.':'Notes and rating save as you type.';
-  $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete||!valid;
+  const meter=$('#final-sentiments-meter');
+  meter.style.setProperty('--score-color',scoreColor(rating));
+  meter.querySelector('.meter-track').setAttribute('d',meterPath());
+  const fill=meter.querySelector('.meter-fill');fill.setAttribute('d',meterPath());
+  setMeter(fill,rating===null?0:rating*10,{immediate:finalSentimentPointer!==-1});
+  const point=meterPoint(1+(rating??0)*.9),knob=meter.querySelector('.meter-knob');
+  knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.style.opacity=rating===null?'.4':'1';
+  meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
+  meter.querySelector('.meter-out-of').textContent=rating===null?'not rated yet':'out of 10';
+  meter.setAttribute('aria-valuenow',rating??0);
+  meter.setAttribute('aria-valuetext',rating===null?'Not rated. Drag for a score from 0 to 10.':`${scoreText(rating)} out of 10`);
+  $('#final-clear-sentiments-rating').disabled=rating===null;
+  $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete;
   $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
-  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':needsReview?'Sentiments changed. Confirm them below to finish this day.':'All section reviews are confirmed. Take one last look.';
+  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':'All section reviews are confirmed. Take one last look.';
   $('#final-review-content').innerHTML=recapMarkup({final:true});
 }
 function updateRating(score, notify = false) {
@@ -711,22 +716,34 @@ $('#submit-day').addEventListener('click',()=>{
   celebrateDayCompletion();
   announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
 });
-$('#final-sentiments-notes').addEventListener('input',event=>{
-  updateSentiments({notes:event.target.value});renderFinalSentimentsState();
+function updateFinalSentiments(changes){
+  store.updateSentiments(selectedDate,changes);
+  if(store.dayProgress(selectedDate).sections.some(section=>section.id==='sentiments'))store.confirmSection(selectedDate,'sentiments');
+  renderSentiments();renderScore();renderReview();renderHeader();renderNotes();renderFinalSentimentsState();
+}
+$('#final-sentiments-notes').addEventListener('input',event=>updateFinalSentiments({notes:event.target.value}));
+$('#final-clear-sentiments-rating').addEventListener('click',()=>updateFinalSentiments({rating:null}));
+let finalSentimentPointer=-1;
+const finalSentimentMeter=$('#final-sentiments-meter');
+function dragFinalSentiments(event){
+  const rect=finalSentimentMeter.querySelector('svg').getBoundingClientRect();
+  const score=scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:10});
+  if(score!==null&&score!==store.loadDay(selectedDate).sentiments.rating)updateFinalSentiments({rating:score});
+}
+finalSentimentMeter.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
+  const rect=finalSentimentMeter.querySelector('svg').getBoundingClientRect();
+  finalSentimentMeter.focus({preventScroll:true});
+  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
+  event.preventDefault();finalSentimentPointer=event.pointerId;finalSentimentMeter.setPointerCapture(event.pointerId);finalSentimentMeter.classList.add('dragging');dragFinalSentiments(event);
 });
-$('#final-sentiments-rating').addEventListener('input',event=>{
-  if(event.target.checkValidity())updateSentiments({rating:event.target.value===''?null:Number(event.target.value)});
-  renderFinalSentimentsState();
-});
-$('#final-sentiments-rating').addEventListener('blur',event=>{
-  if(!event.target.checkValidity())event.target.value=store.loadDay(selectedDate).sentiments.rating??'';
-  renderFinalSentimentsState();
-});
-$('#final-confirm-sentiments').addEventListener('click',()=>{
-  if(!$('#final-sentiments-rating').reportValidity())return;
-  try {store.confirmSection(selectedDate,'sentiments');}
-  catch(error){announce(error.message);return;}
-  render();renderFinalSentimentsState();
+finalSentimentMeter.addEventListener('pointermove',event=>{if(finalSentimentPointer===event.pointerId)dragFinalSentiments(event);});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])finalSentimentMeter.addEventListener(type,event=>{if(finalSentimentPointer!==event.pointerId)return;finalSentimentPointer=-1;finalSentimentMeter.classList.remove('dragging');if(finalSentimentMeter.hasPointerCapture(event.pointerId))finalSentimentMeter.releasePointerCapture(event.pointerId);});
+finalSentimentMeter.addEventListener('keydown',event=>{
+  if(event.altKey||event.ctrlKey||event.metaKey)return;
+  const direction={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[event.key];
+  if(direction){event.preventDefault();const rating=store.loadDay(selectedDate).sentiments.rating;updateFinalSentiments({rating:rating===null?0:Math.max(0,Math.min(10,Math.round(rating*10+direction)/10))});}
+  else if(event.key==='Home'||event.key==='End'){event.preventDefault();updateFinalSentiments({rating:event.key==='Home'?0:10});}
 });
 let completionAnimationTimer;
 function celebrateDayCompletion(){
