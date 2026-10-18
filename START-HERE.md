@@ -18,7 +18,7 @@ Whenever uploading source changes to GitHub, deploy the same working version to 
 
 ## October 18 update
 
-Meters now share a 330-degree arc, filling clockwise from 6:30 to 5:30, with endpoint numbers in reserved space below the ring. Tabs use fixed columns for their number, name, and check/warning. Cloud-save status lives beside Settings. Portrait phones have a separate layout, normal vertical page scrolling, compact touch navigation, and no clock/footer bar; Calendar is available in the header.
+Meters now share a 330-degree arc, filling clockwise from 6:30 to 5:30, with endpoint numbers in reserved space below the ring. Tabs use fixed columns for their number, name, and check/warning. Cloud-save status lives beside Settings. Phones have separate portrait and short landscape layouts, normal vertical page scrolling, all section tabs visible without sideways scrolling, and no clock/footer bar; Calendar is available in the header and changes to Overview when viewing the calendar. Landscape phones use a compact header and a horizontal score card above the tasks and breakdown, so the score remains visible.
 
 To-do list replaces the task/checklist labels. One-time tasks appear before recurring tasks. The task editor offers Today, Tomorrow, and an explicit date. Plan tomorrow opens that editor with tomorrow selected; a tomorrow panel shows scheduled tasks without leaving the current day. Creating, removing, or scheduling a task alone does not log the list. Checking an action or explicitly confirming the to-do review does. While today is open and its list is logged, the main score assumes remaining tasks get done, with an “as low as” value for leaving them unchecked. Final review, history, and averages retain recorded scores.
 
