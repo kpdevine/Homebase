@@ -10,7 +10,7 @@ import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
-import {weightHistory,weightPlot} from './weight-history.mjs';
+import {weightHistory,weightPlot,weightPointContext} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -54,10 +54,16 @@ let taskComposeDate;
 let taskEdit=null;
 let weightHistoryDays=90;
 let weightChartUnit='lb';
-$('#body-weight-form').insertAdjacentHTML('afterbegin','<div class="weight-highlight"><div><span>Body weight</span><strong id="body-weight-current">—</strong></div><button id="open-weight-history" type="button" class="quiet-button">Weight graph ↗</button></div>');
+let weightPointPinned=false;
+$('#body-weight-form').insertAdjacentHTML('afterbegin','<div class="weight-highlight"><div><span>Body weight</span><strong id="body-weight-current">—</strong></div></div>');
+const calendarTools=document.createElement('div');calendarTools.className='calendar-tools';
+$('#calendar-filters').before(calendarTools);calendarTools.append($('#calendar-filters'));
+calendarTools.insertAdjacentHTML('beforeend','<button id="open-weight-history" type="button" class="calendar-weight-launch quiet-button" hidden>Weight graph ↗</button>');
 $('#body-weight-form>label').innerHTML='Log weight <small>(optional)</small>';
 $('#training-pace').after($('#body-weight-form'));
 $('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button">+ Plan a task</button></div></section>');
+const todayTaskHeading=document.createElement('div');
+$('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="tasks-date" class="eyebrow"></p>';todayTaskHeading.append($('#tasks-title'));
 $('.task-date-shortcuts').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-task-when="2" aria-pressed="false">Later this week</button>');
 $('.task-date-shortcuts').insertAdjacentHTML('afterend','<div id="task-week-options" class="task-week-options" role="group" aria-label="Choose a date later this week" hidden></div>');
 const expandedTasks = new Set();
@@ -174,6 +180,7 @@ function renderTasks() {
   $('#task-progress-fill').style.backgroundColor = scoreColor(fraction * 10);
   const today=localDateKey(new Date(),timeZone),templates=store.loadTemplates();
   $('#tasks-title').textContent=selectedDate===today?'TODAY':shortDate(selectedDate);
+  $('#tasks-date').textContent=longDate(selectedDate);
   $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}${template.endDate?` · ends ${shortDate(template.endDate)}`:''}</small></span>${!template.endDate?`<button class="text-button" data-stop-template="${template.id}">Stop after ${shortDate(today)}</button>`:'<small>Stopped</small>'}</li>`).join(''):'<li class="hint">Your recurring tasks will appear here.</li>';
   $('#routine-count').textContent=templates.filter(template=>!template.endDate).length;
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
@@ -395,6 +402,7 @@ $$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset
   renderReview(); renderHeader(); renderScore();
 }));
 function renderHistory() {
+  $('#open-weight-history').hidden=calendarFilter!=='training';
   $('#calendar-month').textContent = dateFormat(calendarMonth, { month:'long', year:'numeric' });
   const today = localDateKey(new Date(), timeZone);
   const dates = monthGrid(calendarMonth);
@@ -773,6 +781,7 @@ $$('[name="weight-unit"]').forEach(input=>input.addEventListener('change',()=>{
 }));
 $('#remove-body-weight').addEventListener('click',()=>{store.updateBodyWeight(selectedDate,null);render();announce('Body weight removed.');});
 function renderWeightHistory() {
+  weightPointPinned=false;
   const points=weightHistory(store.exportSnapshot(),{unit:weightChartUnit,through:editableToday(),days:weightHistoryDays}),plot=weightPlot(points);
   $$('[data-weight-range]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.weightRange)===weightHistoryDays)));
   $$('[data-chart-unit]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.chartUnit===weightChartUnit)));
@@ -781,9 +790,46 @@ function renderWeightHistory() {
   $('.weight-chart-data').hidden=!points.length;
   if(!plot){$('#weight-chart').innerHTML='<p class="weight-chart-empty">Log your body weight on the training tab to start your graph.</p>';return;}
   const ticks=Array.from({length:5},(_,index)=>({value:plot.min+(plot.max-plot.min)*index/4,y:225-index*190/4}));
-  $('#weight-chart').innerHTML=`<svg viewBox="0 0 700 280" role="img" aria-labelledby="weight-plot-title"><title id="weight-plot-title">Body weight in ${weightChartUnit}, ${shortDate(points[0].date)} to ${shortDate(points.at(-1).date)}. ${points.length} recorded weights.</title>${ticks.map(tick=>`<line class="weight-gridline" x1="70" x2="630" y1="${tick.y}" y2="${tick.y}"/><text x="58" y="${tick.y+4}" text-anchor="end">${tick.value.toFixed(1)}</text>`).join('')}<polyline class="weight-line" points="${plot.points.map(point=>`${point.x},${point.y}`).join(' ')}"/>${plot.points.map(point=>`<circle class="weight-point" cx="${point.x}" cy="${point.y}" r="4"><title>${shortDate(point.date)}: ${point.value.toFixed(1)} ${weightChartUnit}</title></circle>`).join('')}<text x="70" y="255">${shortDate(points[0].date)}</text>${points.length>1?`<text x="630" y="255" text-anchor="end">${shortDate(points.at(-1).date)}</text>`:''}<text x="630" y="20" text-anchor="end">${weightChartUnit}</text></svg>`;
+  $('#weight-chart').innerHTML=`<svg viewBox="0 0 700 280" role="group" aria-labelledby="weight-plot-title"><title id="weight-plot-title">Body weight in ${weightChartUnit}, ${shortDate(points[0].date)} to ${shortDate(points.at(-1).date)}. Hover, focus, or tap a reading for the previous day's nutrition and training.</title>${ticks.map(tick=>`<line class="weight-gridline" x1="70" x2="630" y1="${tick.y}" y2="${tick.y}"/><text x="58" y="${tick.y+4}" text-anchor="end">${tick.value.toFixed(1)}</text>`).join('')}<polyline class="weight-line" points="${plot.points.map(point=>`${point.x},${point.y}`).join(' ')}"/>${plot.points.map(point=>`<g class="weight-reading" data-weight-date="${point.date}" tabindex="0" role="button" aria-label="${longDate(point.date)}, ${point.value.toFixed(1)} ${weightChartUnit}. Show previous day's scores."><circle class="weight-hit-area" cx="${point.x}" cy="${point.y}" r="4"/><circle class="weight-point" cx="${point.x}" cy="${point.y}" r="4"/></g>`).join('')}<text x="70" y="255">${shortDate(points[0].date)}</text>${points.length>1?`<text x="630" y="255" text-anchor="end">${shortDate(points.at(-1).date)}</text>`:''}<text x="630" y="20" text-anchor="end">${weightChartUnit}</text></svg><div id="weight-day-card" class="weight-day-card" role="status" aria-live="polite" hidden></div>`;
 }
 $('#open-weight-history').addEventListener('click',()=>{weightChartUnit=bodyWeightUnit;renderWeightHistory();showDialog($('#weight-history-dialog'));});
+function hideWeightPointCard() {
+  const card=$('#weight-day-card');if(card)card.hidden=true;weightPointPinned=false;
+  $$('#weight-chart [data-weight-date]').forEach(point=>{point.classList.remove('is-active');point.setAttribute('aria-expanded','false');});
+}
+function showWeightPointCard(point) {
+  const card=$('#weight-day-card');if(!card||!point)return;
+  const context=weightPointContext(point.dataset.weightDate,summaryFor);
+  $$('#weight-chart [data-weight-date]').forEach(item=>{item.classList.toggle('is-active',item===point);item.setAttribute('aria-expanded',String(item===point));});
+  card.innerHTML=`<strong>${dateFormat(context.date,{month:'short',day:'numeric',year:'numeric'})} weigh-in</strong><span>Previous day · ${shortDate(context.previousDate)}</span><div class="weight-day-scores">${[['Nutrition',context.nutrition],['Training',context.training]].map(([label,score])=>`<div>${circle(score,true)}<strong>${label}</strong><small>${score===null?'Not logged':'out of 10'}</small></div>`).join('')}</div>`;
+  card.hidden=false;
+  const chart=$('#weight-chart'),origin=chart.getBoundingClientRect(),anchor=point.querySelector('.weight-point').getBoundingClientRect(),scale=origin.width/chart.offsetWidth;
+  const x=(anchor.left+anchor.width/2-origin.left)/scale-chart.clientLeft,y=(anchor.top+anchor.height/2-origin.top)/scale-chart.clientTop;
+  card.style.left=`${Math.max(8,Math.min(chart.clientWidth-card.offsetWidth-8,x-card.offsetWidth/2))}px`;
+  const preferred=y-card.offsetHeight-14;
+  card.style.top=`${Math.max(8,Math.min(chart.clientHeight-card.offsetHeight-8,preferred>=8?preferred:y+14))}px`;
+}
+$('#weight-chart').addEventListener('pointerover',event=>{
+  const point=event.target.closest('[data-weight-date]');if(!point||event.pointerType==='touch')return;
+  weightPointPinned=false;showWeightPointCard(point);
+});
+$('#weight-chart').addEventListener('pointerout',event=>{
+  const point=event.target.closest('[data-weight-date]');if(!point||weightPointPinned||point.contains(event.relatedTarget))return;
+  hideWeightPointCard();
+});
+$('#weight-chart').addEventListener('pointerdown',event=>{
+  const point=event.target.closest('[data-weight-date]');if(!point)return;
+  weightPointPinned=event.pointerType!=='mouse';showWeightPointCard(point);
+});
+$('#weight-chart').addEventListener('focusin',event=>{const point=event.target.closest('[data-weight-date]');if(point)showWeightPointCard(point);});
+$('#weight-chart').addEventListener('focusout',event=>{if(!weightPointPinned&&!event.relatedTarget?.closest?.('[data-weight-date]'))hideWeightPointCard();});
+$('#weight-chart').addEventListener('keydown',event=>{
+  const point=event.target.closest('[data-weight-date]');if(!point)return;
+  if(event.key==='Escape'){event.preventDefault();event.stopPropagation();hideWeightPointCard();}
+  else if(event.key==='Enter'||event.key===' '){event.preventDefault();weightPointPinned=true;showWeightPointCard(point);}
+});
+document.addEventListener('pointerdown',event=>{if(!event.target.closest('#weight-chart [data-weight-date]'))hideWeightPointCard();});
+$('#weight-history-dialog').addEventListener('close',hideWeightPointCard);
 $$('[data-weight-range]').forEach(button=>button.addEventListener('click',()=>{weightHistoryDays=Number(button.dataset.weightRange);renderWeightHistory();}));
 $$('[data-chart-unit]').forEach(button=>button.addEventListener('click',()=>{weightChartUnit=button.dataset.chartUnit;renderWeightHistory();}));
 $('#recurring-tasks').addEventListener('click',event=>{

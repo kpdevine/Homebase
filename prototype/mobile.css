@@ -62,8 +62,11 @@
   .weight-highlight strong {font-size:32px}
   .weight-chart-tools button {min-height:44px}
   #weight-chart {padding-left:16px}
-  #weight-chart svg {overflow:visible}
+  #weight-chart>svg {overflow:visible}
   #weight-chart text {font-size:24px}
+  .calendar-tools {flex-wrap:wrap;margin-bottom:12px}
+  .calendar-tools #calendar-filters {flex:1 0 100%;margin-bottom:0}
+  .calendar-tools #open-weight-history {width:100%;min-height:44px;margin:0}
   .task-list .recurring-label {font-size:7px;letter-spacing:0}
   .child-tasks {padding-left:14px;margin-left:8px}
   .task-card-actions {gap:12px;flex-wrap:wrap}

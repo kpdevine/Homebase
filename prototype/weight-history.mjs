@@ -11,3 +11,8 @@ export function weightPlot(points) {
   const min=low-padding,max=high+padding,first=Date.parse(points[0].date+'T12:00:00Z'),last=Date.parse(points.at(-1).date+'T12:00:00Z');
   return {min,max,points:points.map(point=>({...point,x:points.length===1?350:70+(Date.parse(point.date+'T12:00:00Z')-first)/(last-first)*560,y:225-(point.value-min)/(max-min)*190}))};
 }
+
+export function weightPointContext(date,readSummary) {
+  const previousDate=addDays(date,-1),summary=readSummary(previousDate);
+  return {date,previousDate,nutrition:summary.sections.find(section=>section.id==='nutrition')?.score??null,training:summary.sections.find(section=>section.id==='training')?.score??null};
+}

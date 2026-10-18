@@ -32,12 +32,28 @@
 .weight-chart-tools button {font-size:12px;min-height:40px;padding:8px 12px}
 .weight-chart-tools button[aria-pressed='true'] {background:#233e7c;color:#ecf9ff;border-color:#d4f0ff}
 .weight-chart-summary {font:700 14px/1.6 var(--font-display);margin:20px 0 10px}
-#weight-chart {border:1px solid #b6d9fa;background:#29487d;padding:8px;border-radius:3px}
-#weight-chart svg {display:block;width:100%;height:auto;min-height:170px}
+#weight-chart {position:relative;border:1px solid #b6d9fa;background:#29487d;padding:8px;border-radius:3px}
+#weight-chart>svg {display:block;width:100%;height:auto;min-height:170px}
 #weight-chart text {font:400 12px var(--font-ui);fill:#dff3ff}
 .weight-gridline {stroke:#badcf54a;stroke-width:1}
 .weight-line {fill:none;stroke:#d9f4ff;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .weight-point {fill:#f4fcff;stroke:#284477;stroke-width:1.5}
+.calendar-tools {display:flex;align-items:flex-start;gap:10px;flex:none;margin-bottom:18px}
+.calendar-tools #calendar-filters {min-width:0;flex:1;margin-bottom:0}
+.calendar-tools #open-weight-history {margin-left:auto;background:#233e7c;color:#e2f5ff;border-color:#b6ddf7;white-space:nowrap;min-height:40px;font-size:12px}
+.weight-reading {cursor:pointer;outline:none}
+.weight-reading:focus-visible {outline:none}
+.weight-hit-area {fill:transparent;stroke:transparent;stroke-width:40px;vector-effect:non-scaling-stroke;pointer-events:all}
+.weight-reading:is(.is-active,:focus-visible) .weight-point {stroke:#d4f3ff;stroke-width:3;fill:#29487d;filter:drop-shadow(0 0 3px #c7ecff)}
+.weight-day-card {position:absolute;z-index:2;width:250px;max-width:calc(100% - 16px);padding:12px;background:linear-gradient(145deg,#7fa7dc,#638ac3);border:1px solid #d6efff;border-radius:4px;box-shadow:0 4px 16px #0a1d4e88;pointer-events:none;color:#102450;text-shadow:none}
+.weight-day-card>strong {display:block;font:700 12px/1.4 var(--font-display)}
+.weight-day-card>span {display:block;font:400 10px/1.4 var(--font-ui);margin-top:3px}
+.weight-day-scores {display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
+.weight-day-scores>div {display:flex;flex-direction:column;align-items:center;gap:4px}
+.weight-day-scores .score-circle {width:60px;height:60px;flex-basis:60px}
+.weight-day-scores .score-circle>span {font-size:20px}
+.weight-day-scores strong {font:700 11px var(--font-display)}
+.weight-day-scores small {font:400 9px var(--font-ui)}
 .weight-chart-empty {color:#e0f3ff;font:400 13px/1.7 var(--font-ui);padding:22px}
 .weight-chart-data {margin-top:16px}
 .weight-chart-data table {width:100%;border-collapse:collapse;font:400 11px/1.5 var(--font-ui);text-align:left}
