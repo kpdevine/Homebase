@@ -28,6 +28,8 @@ All editable circles support ring clicking/dragging with mouse or touch, plus re
 
 Handwritten task entry uses fixed descender allowance instead of changing height for each letter; wrapping adds lines, with tighter line spacing in task rows and notes. The new body-weight field is optional in older backups and cloud records.
 
+Desktop tabs use the available main-panel height. Overview scales its ring and number together so its heading and controls stay inside the score card. Nutrition and Sentiments fit their controls and notes beside each other; To-do list and Tomorrow sit side by side. Training puts set entry before optional body weight and notes. Longer training panels, task lists, and calendar recaps scroll inside their cards while the page navigation stays in place. Calendar rows compress to keep the month visible.
+
 ## Current interface
 
 The owner's car radio is the reference: a darker blue LCD, indigo ink, charcoal frame, fine scan texture, and slight pixelation. The final palette is darker and a little less saturated than the bright electric-blue iteration. Radio Display handles headings and numbers; Radio UI is a stepped Inter derivative for supporting text. Kieran Handwriting LCD keeps the owner's handwriting with subtle pixel edges. Original font files and specimens remain available. No logo is displayed.

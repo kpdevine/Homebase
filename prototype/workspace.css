@@ -77,3 +77,83 @@
 .ideal-workout p {font:400 10px/1.6 var(--font-ui);margin:12px 0 0}
 
 .nutrition-meter,.target-meter {user-select:none;-webkit-user-select:none}
+
+/* Desktop panels share the available height; long records scroll within a panel. */
+@media(min-width:1001px) {
+  .app-shell>main {display:flex;flex-direction:column;container-type:size}
+  .app-shell>main>.detail-view {flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 0}
+  .detail-heading {flex:none;min-height:40px;margin-bottom:12px}
+  .day-score {container-type:size;justify-content:safe center;overflow:auto;min-height:0}
+  .day-score>* {flex-shrink:0}
+  .day-score .hero-meter {width:min(100%,clamp(60px,calc(100cqh - 182px),285px));max-width:285px;container-type:inline-size}
+  .day-score .hero-score .meter-number {font-size:clamp(28px,37cqw,105px)}
+  .day-score .hero-score .meter-out-of {font-size:clamp(8px,6cqw,13px)}
+  .nutrition-editor {flex:1;min-height:0;width:100%;display:grid;align-items:center;padding:18px;container-type:size;overflow:auto}
+  .nutrition-body {width:100%;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:30px;padding:0}
+  #nutrition-meter {width:min(100%,clamp(120px,calc(100cqh - 116px),300px))}
+  .nutrition-meter {container-type:inline-size}
+  .nutrition-score .meter-number {font-size:clamp(32px,34cqw,88px)}
+  .nutrition-notes textarea[data-notes] {height:clamp(110px,50cqh,240px);min-height:110px;max-height:calc(100cqh - 110px)}
+  .nutrition-body .meter-help {margin-bottom:0}
+  .training-grid {flex:1;min-height:0;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:stretch}
+  .training-grid>.panel {position:relative;min-height:0;overflow:auto;overscroll-behavior:contain;padding:16px}
+  .daily-training-card {display:flex;flex-direction:column}
+  .daily-training-card>* {flex-shrink:0}
+  .daily-training-card .gym-form {margin-bottom:16px}
+  .training-choice label {min-height:48px;padding:10px 14px}
+  .training-choice legend {margin-bottom:9px}
+  .training-pace {padding:12px 0;margin-bottom:12px}
+  .body-weight-form {padding:10px;margin-bottom:12px}
+  .body-weight-form>label {margin-bottom:6px}
+  .muscle-suggestions,.ideal-workout {padding:12px;margin-bottom:12px}
+  .ideal-workout ul {margin-top:8px;gap:5px 14px}
+  .ideal-workout li {padding:5px 0}
+  .gym-form {margin-top:12px;padding-top:12px}
+  .training-notes textarea[data-notes] {min-height:110px;height:110px}
+  .weekly-training .gym-groups {grid-template-columns:1fr 1fr;gap:14px 20px;margin:18px 0}
+  .gym-group-heading {font-size:11px;margin-bottom:7px}
+  .gym-totals strong {font-size:25px}
+  .gym-totals>div {padding:10px}
+  .weekly-rest-credits {padding:10px;margin:12px 0}
+  .weekly-rest-credits strong {font-size:28px}
+  .app-shell>main>#checklists-view {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px 20px}
+  #checklists-view>.detail-heading {grid-column:1/-1;margin:0}
+  .checklist-editor,.tomorrow-plan {position:relative;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:18px}
+  .checklist-editor .panel-heading,.checklist-editor .task-tools,.checklist-editor .routine-manager {flex:none}
+  .checklist-editor .task-progress {flex:none;margin-top:12px}
+  .checklist-editor .task-list {min-height:0;flex:1;overflow:auto}
+  #task-summary {margin:10px 0}
+  .tomorrow-plan {margin:0}
+  #tomorrow-tasks {min-height:0;flex:1;max-height:none}
+  .sentiments-editor {flex:1;min-height:0;container-type:size;padding:18px;overflow:auto;grid-template-columns:minmax(0,1.65fr) minmax(220px,1fr);align-items:start}
+  .sentiments-editor textarea[data-notes] {height:calc(100cqh - 80px);min-height:110px;font-size:18px;line-height:1.3}
+  #sentiments-meter {width:min(100%,clamp(100px,calc(100cqh - 235px),230px))}
+  .sentiments-rating .hint {font-size:10px;line-height:1.5;margin:8px 0}
+  .sentiments-editor label {font-size:13px;margin-bottom:9px}
+  .history-grid {flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:minmax(0,1fr);align-items:stretch}
+  .calendar-card {min-height:0;display:flex;flex-direction:column;overflow:auto;padding:12px}
+  #history-view>.detail-heading {min-height:54px}
+  .monthly-score,.calendar-streak {padding:8px 12px}
+  .monthly-score>.score-circle {width:44px;height:44px;flex-basis:44px}
+  .calendar-filters {flex:none;margin-bottom:10px;gap:6px}
+  .calendar-filters button {min-height:36px;padding:7px 12px}
+  .calendar-card>.panel-heading {flex:none;min-height:32px}
+  .calendar-card h3 {font-size:21px}
+  .calendar-card .month-navigation .icon-button {width:34px;height:32px}
+  .calendar-weekdays {flex:none;margin:8px 0 6px;font-size:9px}
+  .calendar-weekdays .week-average-heading {font-size:9px}
+  .calendar-weekdays .week-average-heading small {font-size:7px}
+  #calendar {flex:1;min-height:0;grid-auto-rows:minmax(44px,1fr);gap:3px}
+  .calendar-day {min-height:0;padding:2px 0;gap:2px}
+  .calendar-date {font-size:10px}
+  .calendar-day .score-circle,.calendar-week-score .score-circle {width:30px;height:30px;flex-basis:30px}
+  .calendar-day .score-circle>span,.calendar-week-score .score-circle>span {font-size:10px}
+  .calendar-week-score {padding:2px 0;gap:2px}
+  .calendar-week-score>small {font-size:7px}
+  .calendar-weight {font-size:8px}
+  .calendar-legend {flex:none;margin-top:8px;padding-top:8px;font-size:9px}
+  .history-detail {min-height:0;overflow:hidden;padding:16px}
+  .history-detail h3 {margin-bottom:12px}
+  #history-content {position:relative;min-height:0;overflow:auto;overscroll-behavior:contain}
+  .history-detail>.primary-button {flex:none;margin-top:12px}
+}
