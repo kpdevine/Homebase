@@ -57,7 +57,12 @@ export function validateSnapshot(value) {
     assert(typeof comment==='string'&&comment.length<=5000,'day comment.');
     const sentiments=day.sentiments===undefined?{notes:'',rating:null}:day.sentiments;
     assert(sentiments&&typeof sentiments.notes==='string'&&sentiments.notes.length<=5000&&(sentiments.rating===null||typeof sentiments.rating==='number'&&Number.isFinite(sentiments.rating)&&sentiments.rating>=0&&sentiments.rating<=10&&Math.abs(sentiments.rating*10-Math.round(sentiments.rating*10))<1e-8),'sentiments.');
-    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed: Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])), completedAt: day.completedAt };
+    const sentimentsReady=!!sentiments.notes.trim()&&sentiments.rating!==null;
+    assert(day.reviewed.sentiments===undefined||typeof day.reviewed.sentiments==='boolean','sentiments review state.');
+    assert(!day.reviewed.sentiments||sentimentsReady,'sentiments review without notes and a rating.');
+    assert(!day.completedAt||!sentimentsReady||day.reviewed.sentiments!==false,'incomplete sentiments review.');
+    const reviewed={...Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])),...(day.reviewed.sentiments!==undefined?{sentiments:day.reviewed.sentiments}:day.completedAt&&sentimentsReady?{sentiments:true}:{})};
+    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);

@@ -42,3 +42,32 @@ test('notes-only recaps show activity without inventing a rating',()=>{
   const store=createStore({seed:false});store.updateSentiments(date,{notes:'Something to remember.'});
   assert.equal(dailyRecap(store.loadDay(date)).hasActivity,true);assert.equal(summary(store).score,null);
 });
+
+test('notes and a rating add a sentiments review before full-day completion',()=>{
+  const store=logged();
+  store.updateSentiments(date,{rating:7});
+  assert.equal(store.dayProgress(date).sections.length,3);
+  store.updateSentiments(date,{notes:'Felt strong today.'});
+  assert.deepEqual(store.dayProgress(date).sections.at(-1),{id:'sentiments',label:'Sentiments',ready:true,reviewed:false});
+  assert.equal(store.dayProgress(date).canComplete,false);
+  assert.throws(()=>store.completeDay(date));
+  store.confirmSection(date,'sentiments');
+  assert.equal(store.dayProgress(date).canComplete,true);
+  store.completeDay(date);
+  const restored=createStore({seed:false,snapshot:store.exportSnapshot()});
+  assert.equal(restored.dayProgress(date).sections.at(-1).reviewed,true);
+  restored.updateSentiments(date,{rating:8});
+  assert.equal(restored.dayProgress(date).canComplete,false);
+  assert.equal(restored.loadDay(date).completedAt,null);
+  restored.updateSentiments(date,{notes:''});
+  assert.equal(restored.dayProgress(date).sections.length,3);
+  assert.equal(restored.dayProgress(date).canComplete,true);
+});
+
+test('older completed days with rated sentiments keep their completed review',()=>{
+  const store=logged();store.updateSentiments(date,{notes:'A good day.',rating:9});
+  const old=store.exportSnapshot();old.days[0].completedAt=new Date().toISOString();
+  const restored=createStore({seed:false,snapshot:old});
+  assert.equal(restored.dayProgress(date).completedAt,old.days[0].completedAt);
+  assert.equal(restored.dayProgress(date).sections.at(-1).reviewed,true);
+});

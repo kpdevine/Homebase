@@ -158,7 +158,7 @@ function renderScore() {
   meter.setAttribute('aria-label', summary.score === null ? 'No daily score yet. Log a category to get started.' : `${summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(summary.score)} out of 10. ${summary.logged} of ${summary.sections.length} categories logged.`);
   const rewardLabel=reward?(summary.provisional?'High so far':summary.score===10?'Perfect score':'High score'):'';
   $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/${summary.sections.length} logged` : 'All categories logged'].filter(Boolean).join(' · ');
-  $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of 3 section reviews confirmed.`;
+  $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of ${progress.sections.length} section reviews confirmed.`;
   const button = $('#complete-day');
   const missing = progress.sections.find(section => !section.ready);
   button.disabled = false;
@@ -168,9 +168,10 @@ function renderScore() {
   $('#overview-sections').innerHTML = summary.sections.map(section => {
     const state = progress.sections.find(item => item.id === section.id) || {ready:true,reviewed:false};
     const missing = section.score === null&&!section.excluded || !state.ready;
-    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${section.optional ? 'Optional rating included' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Needs review'}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(section.optional ? 'check' : missing ? 'warning' : state.reviewed ? 'check' : 'arrow')}${section.optional ? 'Included in score' : missing ? 'Not logged yet' : state.reviewed ? 'Reviewed' : 'Ready to review'}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
+    const status=section.optional && !progress.sections.some(item=>item.id===section.id)?'Included in score':missing?'Not logged yet':state.reviewed?'Reviewed':'Ready to review';
+    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${status}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(status==='Included in score'||state.reviewed?'check':missing?'warning':'arrow')}${status}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
-  $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All three reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
+  $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All section reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
 }
 function renderRating() {
   const score = store.loadDay(selectedDate).nutrition, meter = $('#nutrition-meter');
@@ -207,7 +208,7 @@ function renderSentiments() {
 }
 function updateSentiments(changes) {
   store.updateSentiments(selectedDate,changes);
-  renderSentiments();renderScore();renderReview();renderHeader();
+  renderSentiments();renderScore();renderReview();renderHeader();renderNotes();
 }
 $('#sentiments-notes').addEventListener('input',event=>updateSentiments({notes:event.target.value}));
 $('#sentiments-rating').addEventListener('input',event=>{
@@ -328,24 +329,35 @@ function renderReview() {
   const progress = store.dayProgress(selectedDate), reviewing = reviewSessionDate === selectedDate && !progress.completedAt;
   $('#review-banner').hidden = !reviewing || view === 'history' || view === 'today';
   $('#review-title').textContent = progress.canComplete ? 'All section reviews confirmed' : 'Review each section';
-  $('#review-description').textContent = `${shortDate(selectedDate)} · ${progress.reviewedCount} of 3 confirmed. Full-day summary follows.`;
+  $('#review-description').textContent = `${shortDate(selectedDate)} · ${progress.reviewedCount} of ${progress.sections.length} confirmed.`;
   $('#review-steps').innerHTML = progress.sections.map((section, index) => `<button data-open-section="${section.id}" class="review-step ${section.reviewed ? 'reviewed' : ''} ${view === section.id ? 'current' : ''}"><span>${section.reviewed ? '✓' : index + 1}</span>${section.label}</button>`).join('');
-  $$('[data-start-review]').forEach(button => { button.textContent = progress.completedAt ? 'View day summary →' : progress.canComplete ? 'Review full day →' : `${progress.reviewedCount || reviewing ? 'Continue' : 'Start'} day review →`; });
+  $$('[data-start-review]').forEach(button => { button.hidden=reviewing;button.textContent = progress.completedAt ? 'View day summary →' : progress.canComplete ? 'Review full day →' : `${progress.reviewedCount ? 'Continue' : 'Start'} day review →`; });
+  const current=progress.sections.find(section=>section.id===view);
+  const invalidRating=current?.id==='nutrition'&&!$('#rating-value').validity.valid||current?.id==='sentiments'&&!$('#sentiments-rating').validity.valid;
+  const primary=$('#review-primary');
+  primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'checklist':current.id==='training'?'training':current.id} review`:'Continue day review →';
+  primary.disabled=!!current&&!current.reviewed&&(!current.ready||invalidRating);
+  $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Enter a nutrition rating first.':'Log lifting or rest first.':'';
+  const now=new Date(),today=localDateKey(now,timeZone);
+  const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(now));
+  const showLateWarnings=selectedDate<today || selectedDate===today&&hour>=21;
+  const scoreSections=summaryFor().sections;
   for (const section of progress.sections) {
-    const button = $(`[data-confirm="${section.id}"]`), invalidRating = section.id === 'nutrition' && !$('#rating-value').validity.valid;
-    const label = {nutrition:'nutrition',training:'training',checklists:'checklist'}[section.id];
-    const next = progress.sections.find(item => item.id !== section.id && !item.reviewed);
-    button.disabled = !section.ready || section.reviewed || invalidRating;
-    button.textContent = section.reviewed ? `✓ ${label[0].toUpperCase()+label.slice(1)} reviewed` : `Confirm ${label} review${reviewing ? ' →' : ''}`;
-    button.classList.toggle('is-reviewed', section.reviewed);
-    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Answer Yes to record gym attendance, or No to record rest.' : reviewing && !section.reviewed ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : '';
-    $(`#tab-${section.id} .tab-check`).textContent = section.reviewed ? '✓' : '';
-    $(`#tab-${section.id}`).setAttribute('aria-label', `${viewLabels[section.id]}${section.reviewed ? ', reviewed' : ''}`);
+    const logged=scoreSections.find(item=>item.id===section.id),warn=section.id!=='sentiments'&&showLateWarnings&&!(logged?.logged??logged?.score!==null);
+    const marker=$(`#tab-${section.id} .tab-check`);
+    marker.innerHTML=section.reviewed?icon('check'):warn?icon('warning'):'';
+    marker.classList.toggle('late-warning',!section.reviewed&&warn);
+    $(`#tab-${section.id}`).setAttribute('aria-label', `${viewLabels[section.id]}${section.reviewed ? ', reviewed' : warn ? ', not logged' : ''}`);
+  }
+  if(!progress.sections.some(section=>section.id==='sentiments')) {
+    $('#tab-sentiments .tab-check').textContent='';
+    $('#tab-sentiments .tab-check').classList.remove('late-warning');
+    $('#tab-sentiments').setAttribute('aria-label','Sentiments');
   }
 }
 function renderNotes() {
   const notes = store.loadDay(selectedDate).notes;
-  $$('[data-notes]').forEach(input => { const value=input.dataset.notes==='day'?store.loadDay(selectedDate).comment:input.dataset.notes==='sentiments'?store.loadDay(selectedDate).sentiments.notes:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
+  $$('[data-notes]').forEach(input => { const value=input.dataset.notes.startsWith('sentiments')?store.loadDay(selectedDate).sentiments.notes:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
   refreshNoteCarets();
 }
 $$('[data-notes]').filter(input=>!['day','sentiments'].includes(input.dataset.notes)).forEach(input => input.addEventListener('input', () => {
@@ -393,8 +405,7 @@ function recapMarkup({final=false}={}) {
     ${recap.tasks.length?`<details class="recap-section" open><summary>Checklist <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
     ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
-    ${day.sentiments.notes.trim()||day.sentiments.rating!==null?`<section class="recap-section recap-note sentiment-recap"><h4><button class="text-button" data-open-section="sentiments">Sentiments</button><span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}
-    ${!final&&day.comment?.trim()?`<section class="recap-section recap-note"><h4>Day comment</h4><p>${escapeHtml(day.comment)}</p></section>`:''}`;
+    ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4><button class="text-button" data-open-section="sentiments">Sentiments</button><span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
 }
 function renderRecap() {
   $('#history-date').textContent=dateFormat(selectedDate,{weekday:'short',month:'short',day:'numeric'});
@@ -437,12 +448,25 @@ function showFinalReview() {
   setView('today');
   $('#final-review-date').textContent=longDate(selectedDate);
   $('#final-review-content').innerHTML=recapMarkup({final:true});
-  $('#day-comment').value=store.loadDay(selectedDate).comment;
-  $('#submit-day').disabled=!!progress.completedAt;
-  $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
-  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. Day comments save as you type. Tap a category to make a change.':'All three section reviews are confirmed. Take one last look. Tap a category to make a change.';
+  const sentiments=store.loadDay(selectedDate).sentiments;
+  $('#final-sentiments-notes').value=sentiments.notes;
+  $('#final-sentiments-rating').value=sentiments.rating??'';
+  renderFinalSentimentsState();
   showDialog($('#final-review-dialog'));
   refreshNoteCarets();
+}
+function renderFinalSentimentsState() {
+  const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
+  $('#final-sentiments-circle').innerHTML=circle(rating,true);
+  const needsReview=progress.sections.some(section=>section.id==='sentiments'&&!section.reviewed);
+  const valid=$('#final-sentiments-rating').checkValidity();
+  $('#final-confirm-sentiments').hidden=!needsReview;
+  $('#final-confirm-sentiments').disabled=!valid;
+  $('#final-sentiments-status').textContent=!valid?'Enter a rating from 0 to 10 in steps of 0.1.':needsReview?'Confirm your updated Sentiments before completing the day.':rating===null?'Rating optional. Notes save as you type.':'Notes and rating save as you type.';
+  $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete||!valid;
+  $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
+  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':needsReview?'Sentiments changed. Confirm them below to finish this day.':'All section reviews are confirmed. Take one last look.';
+  $('#final-review-content').innerHTML=recapMarkup({final:true});
 }
 function updateRating(score, notify = false) {
   store.updateRating(selectedDate, score);
@@ -668,23 +692,50 @@ $('#targets-form').addEventListener('submit', event => {
 $('#complete-day').addEventListener('click', startCompletion);
 $$('[data-start-review]').forEach(button => button.addEventListener('click', startReview));
 $('#finish-later').addEventListener('click', () => { reviewSessionDate = null; renderReview(); announce('Review paused. Your entries are saved.'); });
-$$('[data-confirm]').forEach(button => button.addEventListener('click', () => {
-  const section = button.dataset.confirm;
-  if (section === 'nutrition' && !$('#rating-value').checkValidity()) { $('#rating-value').reportValidity(); return; }
-  try { store.confirmSection(selectedDate, section); }
+$('#review-primary').addEventListener('click', () => {
+  const progress=store.dayProgress(selectedDate),section=progress.sections.find(item=>item.id===view);
+  if(!section||section.reviewed){startReview();return;}
+  if (section.id === 'nutrition' && !$('#rating-value').checkValidity()) { $('#rating-value').reportValidity(); return; }
+  if (section.id === 'sentiments' && !$('#sentiments-rating').checkValidity()) { $('#sentiments-rating').reportValidity(); return; }
+  try { store.confirmSection(selectedDate, section.id); }
   catch (error) { announce(error.message); return; }
   if (reviewSessionDate === selectedDate) setView(store.dayProgress(selectedDate).sections.find(item => !item.reviewed)?.id || 'today', true);
   else render();
   if(store.dayProgress(selectedDate).canComplete) { showFinalReview(); announce('All sections reviewed. Check the full-day summary before completing the day.'); }
-  else announce(`${viewLabels[section]} review confirmed.`);
-}));
+  else announce(`${viewLabels[section.id]} review confirmed.`);
+});
 $('#submit-day').addEventListener('click',()=>{
   try { store.completeDay(selectedDate); }
   catch(error) { closeDialog($('#final-review-dialog'));render();announce(error.message);return; }
   closeDialog($('#final-review-dialog'));reviewSessionDate=null;setView('today',true);
+  celebrateDayCompletion();
   announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
 });
-$('#day-comment').addEventListener('input',()=>store.updateDayComment(selectedDate,$('#day-comment').value));
+$('#final-sentiments-notes').addEventListener('input',event=>{
+  updateSentiments({notes:event.target.value});renderFinalSentimentsState();
+});
+$('#final-sentiments-rating').addEventListener('input',event=>{
+  if(event.target.checkValidity())updateSentiments({rating:event.target.value===''?null:Number(event.target.value)});
+  renderFinalSentimentsState();
+});
+$('#final-sentiments-rating').addEventListener('blur',event=>{
+  if(!event.target.checkValidity())event.target.value=store.loadDay(selectedDate).sentiments.rating??'';
+  renderFinalSentimentsState();
+});
+$('#final-confirm-sentiments').addEventListener('click',()=>{
+  if(!$('#final-sentiments-rating').reportValidity())return;
+  try {store.confirmSection(selectedDate,'sentiments');}
+  catch(error){announce(error.message);return;}
+  render();renderFinalSentimentsState();
+});
+let completionAnimationTimer;
+function celebrateDayCompletion(){
+  const overlay=$('#day-complete-overlay');
+  clearTimeout(completionAnimationTimer);
+  $('#completion-score').textContent=`${scoreText(summaryFor().score)} / 10`;
+  overlay.hidden=true;void overlay.offsetWidth;overlay.hidden=false;
+  completionAnimationTimer=setTimeout(()=>{overlay.hidden=true;},document.documentElement.dataset.motion==='reduced'?1100:1850);
+}
 
 function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open','');reveal(dialog); }
 function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }
@@ -799,7 +850,13 @@ window.addEventListener('storage', event => {
 window.addEventListener('pagehide', flushSave);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
 updateClock();
-setInterval(() => { updateClock(); renderHeader(); }, 15000);
+const clockStart=new Date();
+let reviewClockPhase=`${localDateKey(clockStart,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(clockStart))>=21}`;
+setInterval(() => {
+  updateClock();renderHeader();
+  const now=new Date(),phase=`${localDateKey(now,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(now))>=21}`;
+  if(phase!==reviewClockPhase){reviewClockPhase=phase;renderReview();}
+}, 15000);
 render();
 reveal($('#'+panelIds[view]));
 if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());

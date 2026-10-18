@@ -158,7 +158,7 @@ export function createStore(options = {}) {
       if('notes' in changes && (typeof changes.notes!=='string'||changes.notes.length>5000))throw new RangeError('Use up to 5000 characters for sentiments.');
       if('rating' in changes && changes.rating!==null && (typeof changes.rating!=='number'||!Number.isFinite(changes.rating)||changes.rating<0||changes.rating>10||Math.abs(changes.rating*10-Math.round(changes.rating*10))>1e-8))throw new RangeError('Enter a sentiment rating from 0 to 10 in steps of 0.1, or leave it blank.');
       const day=writableDay(key),next={...day.sentiments,...changes};
-      if(next.notes!==day.sentiments.notes||next.rating!==day.sentiments.rating) {day.sentiments=next;day.completedAt=null;}
+      if(next.notes!==day.sentiments.notes||next.rating!==day.sentiments.rating) {day.sentiments=next;delete day.reviewed.sentiments;day.completedAt=null;}
     },
     addTask(key, name, options = {}) {
       const clean = String(name).trim();
@@ -243,6 +243,7 @@ export function createStore(options = {}) {
         training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training',
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
+      if(day.sentiments.notes.trim() && day.sentiments.rating!==null) sections.push({id:'sentiments',label:'Sentiments',ready:true,reviewed:day.reviewed.sentiments===true});
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
         canComplete: sections.every(section => section.reviewed), completedAt: day.completedAt };
     },
@@ -254,7 +255,7 @@ export function createStore(options = {}) {
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },
     completeDay(key) {
-      if (!this.dayProgress(key).canComplete) throw new Error('Review Nutrition, Daily training, and Checklists before completing this day.');
+      if (!this.dayProgress(key).canComplete) throw new Error('Confirm every active section review before completing this day.');
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
