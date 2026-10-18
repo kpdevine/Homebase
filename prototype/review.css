@@ -34,8 +34,9 @@
 .target-number {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:5%;pointer-events:none}
 .target-number strong {font:400 clamp(27px,2.5vw,39px)/1 var(--font-display)}
 .target-number small {font:400 8px/1.5 var(--font-ui);margin-top:4px}
-.target-endpoint {position:absolute;bottom:5%;font:400 9px var(--font-display);pointer-events:none}
-.target-endpoint.start {left:20%}.target-endpoint.end {right:18%}
+.target-endpoint {position:absolute;font:400 9px var(--font-display);pointer-events:none}
+.target-endpoint.start {left:50%;bottom:0;transform:translateX(-50%)}
+.target-endpoint.end {right:0;top:52%;transform:translateY(-50%)}
 .target-adjustments {display:flex;justify-content:center;gap:8px;margin-top:4px}
 .target-adjustments .adjust-button {width:36px;height:36px;font-size:20px}
 .target-editor-actions {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
@@ -128,9 +129,9 @@ html[data-motion='reduced'] .completion-rings {display:none}
 .sentiments-editor .hint {font:400 11px/1.7 var(--font-ui);margin:12px 0;color:var(--muted)}
 .sentiments-rating {border-left:1px solid var(--line);padding-left:28px}
 #sentiments-meter {position:relative;max-width:260px}
-.sentiment-endpoint {position:absolute;bottom:6%;font:400 12px var(--font-display);color:var(--muted);pointer-events:none}
-.sentiment-endpoint.start {left:20%}
-.sentiment-endpoint.end {right:18%}
+.sentiment-endpoint {position:absolute;font:400 12px var(--font-display);color:var(--muted);pointer-events:none}
+.sentiment-endpoint.start {left:50%;bottom:0;transform:translateX(-50%)}
+.sentiment-endpoint.end {right:0;top:52%;transform:translateY(-50%)}
 .sentiment-recap h4 {flex-wrap:wrap}
 .sentiment-recap .text-button {font:inherit;color:inherit;text-transform:uppercase;padding:0}
 .sentiment-recap h4 span {white-space:normal}
@@ -200,6 +201,9 @@ body:not(.is-overview) .display-footer {height:76px;min-height:76px;padding:0}
 .score-circle .score-circle-fill,.score-circle.score-high .score-circle-fill {filter:none}
 .score-circle .score-circle-outline,.score-circle.score-high .score-circle-outline {stroke:#14275d;stroke-width:4.2;filter:none}
 #overall-meter .meter-number,.nutrition-score .meter-number,.score-circle>span,.target-number strong {color:#102450;text-shadow:1px 1px 0 #b2d5f480}
+#overall-meter .meter-endpoint {font:700 clamp(10px,.9vw,13px)/1 var(--font-ui);color:#102450;text-shadow:0 1px 0 #c9e6ff;z-index:2}
+#overall-meter .meter-endpoint.start {left:50%;right:auto;top:auto;bottom:0;transform:translateX(-50%)}
+#overall-meter .meter-endpoint.end {left:auto;right:0;top:52%;bottom:auto;transform:translateY(-50%)}
 #overall-meter.score-high .meter-number,.score-circle.score-high>span {color:#f2fbff;-webkit-text-stroke:1px #14275d;paint-order:stroke fill;text-shadow:0 1px 0 #14275d,0 0 5px #d2f7ff88}
 .score-circle.score-high>span {-webkit-text-stroke-width:.5px}
 .app-shell>main {flex:1 1 0;min-height:0;overflow:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#274579 transparent;overscroll-behavior:contain;scroll-behavior:auto}

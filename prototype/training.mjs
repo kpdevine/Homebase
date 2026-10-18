@@ -1,6 +1,19 @@
 import {GROUPS} from './muscles.mjs';
 
 export const REST_MODES=['rest','unplanned-rest','rest-unclassified'];
+export function idealWorkout(progress) {
+  const needed=Math.ceil(Math.max(0,progress.dailyTarget-(progress.weighted||0))),available=progress.groups.filter(group=>group.remaining>0);
+  const ordered=[...available].sort((a,b)=>a.credited/a.target-b.credited/b.target||b.remaining-a.remaining||a.id.localeCompare(b.id));
+  const budget=Math.min(needed,available.reduce((sum,group)=>sum+group.remaining,0));
+  let count=Math.min(3,ordered.length);
+  while(count<ordered.length&&ordered.slice(0,count).reduce((sum,group)=>sum+group.remaining,0)<budget)count++;
+  const groups=ordered.slice(0,count).map(group=>({...group,sets:0}));
+  for(let set=0;set<budget;set++) {
+    const next=groups.filter(group=>group.sets<group.remaining).sort((a,b)=>(a.credited+a.sets)/a.target-(b.credited+b.sets)/b.target||(b.remaining-b.sets)-(a.remaining-a.sets)||a.id.localeCompare(b.id))[0];
+    if(next)next.sets++;
+  }
+  return {sets:budget,groups:groups.filter(group=>group.sets),targetMet:progress.target>0&&needed===0,goalsMet:progress.target>0&&!available.length};
+}
 // Derived from dated records: backdated edits replay the week, never future days.
 export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
   const weekday=(new Date(`${day.date}T12:00:00Z`).getUTCDay()+6)%7;

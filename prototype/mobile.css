@@ -1,0 +1,228 @@
+/* A portrait layout with normal page scrolling and touch-sized controls. */
+@media(max-width:767px) {
+  html {scroll-padding-top:12px}
+  body {padding:0;min-height:100dvh;background:#243454}
+  .app-shell,.is-overview .app-shell {display:block;width:100%;height:auto;min-height:100dvh;padding:0 16px;border:0;border-radius:0;box-shadow:none;overflow:visible;background:linear-gradient(165deg,#6289ce,#4c74bc 65%,#4265a9)}
+  .app-shell::before {border-radius:0;box-shadow:inset 0 0 25px #18366020}
+  .app-shell>main {display:block;overflow:visible;height:auto;min-height:0;scrollbar-gutter:auto;padding-bottom:max(24px,env(safe-area-inset-bottom))}
+  .top-row {display:grid;grid-template-columns:minmax(0,1fr) auto 36px 42px;height:auto;min-height:0;padding:12px 0;gap:8px;align-items:center}
+  .day-navigation {grid-column:1/-1;order:initial;display:grid;grid-template-columns:40px minmax(0,1fr) 40px auto;width:100%;padding:3px;gap:0;min-width:0}
+  .day-navigation .icon-button {width:40px;height:40px;min-height:40px}
+  .day-navigation .date-button {min-width:0;min-height:40px;padding:6px 2px;font-size:12px;letter-spacing:0}
+  .day-navigation .quiet-button {min-height:40px;margin:0;padding:8px 10px;font-size:11px}
+  .mobile-calendar {display:inline-flex;align-items:center;justify-content:center;justify-self:start;min-height:40px;padding:8px 12px;font-size:12px}
+  .top-row #save-status {justify-content:center;min-height:40px;max-width:110px;padding:4px;font-size:9px;white-space:normal;text-align:right;line-height:1.35}
+  .save-dot {flex:none}
+  .top-row .score-info-button {width:32px;height:32px;margin:0;justify-self:center}
+  .top-row .settings-button {order:initial;width:42px;height:40px;margin:0}
+  .greeting-row {display:flex;flex-direction:row;align-items:flex-start;gap:10px;padding:14px 0 12px;min-height:113px}
+  .greeting-row>div {width:auto;min-width:0}
+  .greeting-row .eyebrow {display:block;font-size:9px;line-height:1.4;margin-bottom:8px;letter-spacing:.06em}
+  #page-title {height:auto;min-height:34px;font-size:clamp(23px,6.7vw,32px);line-height:1.15;letter-spacing:0;white-space:normal;overflow:visible;text-overflow:clip}
+  .greeting-row .state-pill {font-size:8px;line-height:1.4;max-width:86px;padding:5px 6px;flex:none;margin-top:3px;white-space:normal;text-align:center}
+  .day-tabs {display:flex;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:#c0dcff55 transparent;width:100%;max-width:100%;gap:6px;padding:2px 0 12px;scroll-snap-type:x proximity;grid-auto-rows:initial}
+  .day-tabs>button:is(#tab-today,#tab-nutrition,#tab-training,#tab-checklists,#tab-sentiments) {flex:0 0 170px;display:grid;grid-template-columns:18px minmax(0,1fr) 18px;align-items:center;min-height:46px;padding:9px 11px;font-size:12px;line-height:1.2;white-space:nowrap;gap:6px;scroll-snap-align:start;text-align:left}
+  .day-tabs>button small {font-size:8px}
+  .day-tabs .tab-check {font-size:15px;margin:0;flex-basis:1em;width:1em;height:1em}
+  .day-tabs .tab-check:empty {display:inline-grid;visibility:hidden}
+  .display-footer,.is-overview .display-footer,body:not(.is-overview) .display-footer {display:none}
+  .overview-board {display:flex;flex-direction:column;gap:16px;padding:18px 0 0;min-height:0;align-items:stretch}
+  .panel {padding:18px;border-radius:5px;background:linear-gradient(135deg,#b0cef426,#315a9d26);border-color:#294d8b99}
+  .day-score {order:0;display:flex;align-items:center;padding:23px 18px;border:1px solid #294d8b99;border-radius:5px;background:linear-gradient(145deg,#9ebee733,#345a9c26)}
+  .score-heading h2 {font-size:24px;margin:0 0 4px}
+  .day-score .hero-meter {width:210px;max-width:100%;margin:0 0 36px}
+  .hero-score .meter-number {font-size:82px}
+  #overall-meter .meter-endpoint {font-size:12px}
+  .score-caption {min-height:0;margin:0}
+  #score-status {font-size:11px;line-height:1.5}
+  .score-range {font-size:10px;max-width:250px;margin:0 0 7px}
+  .score-range strong {font-size:15px}
+  .score-description {display:block;font-size:12px;margin:8px 0 15px;line-height:1.5;max-width:none}
+  .score-action {width:100%;min-width:0;min-height:48px;margin:0;font-size:14px}
+  .overview-tasks {order:1;padding:18px;min-height:0;max-height:none}
+  .overview-tasks .task-scroll {max-height:none;min-height:0;overflow:visible;flex:initial;margin-top:14px;padding-bottom:12px}
+  #overview-tasks-title,.checklist-editor .panel-heading h3 {font-size:27px;line-height:1.15;padding:3px 0 6px}
+  .overview-tasks .panel-heading {align-items:center}
+  #overview-add-task {min-width:40px;width:40px;min-height:40px;height:40px;font-size:25px}
+  .count-pill {min-width:34px;font-size:11px;padding:6px 8px}
+  .task-list label>span,.overview-tasks .task-list label>span,.editable-task-list label>span {font-size:17px;line-height:1.15}
+  .task-list label,.overview-tasks .task-list label,.editable-task-list label {min-height:35px;padding:6px 0;gap:10px}
+  .task-list input {width:20px;height:20px;flex-basis:20px;margin-top:1px}
+  .task-list .child-tasks label {min-height:31px;padding:4px 0}
+  .task-list .child-tasks label>span {font-size:16px;line-height:1.15}
+  .task-row {gap:4px;align-items:center}
+  .task-row .remove-task,.task-row .expand-task {min-width:32px;min-height:35px;margin:0;padding:4px;font-size:19px}
+  .task-list .recurring-label {font-size:7px;letter-spacing:0}
+  .child-tasks {padding-left:14px;margin-left:8px}
+  .task-card-actions {gap:12px;flex-wrap:wrap}
+  .task-card-actions .panel-link {width:auto;flex:1;min-height:44px;font-size:12px}
+  .task-card-actions .text-button {min-height:44px;font-size:12px}
+  .breakdown-panel {order:2;padding:3px 0 0}
+  .breakdown-panel .panel-heading {margin-bottom:12px;align-items:center}
+  .breakdown-panel .panel-heading h2 {font-size:23px}
+  .breakdown-list,.breakdown-list:has(.sentiments) {display:grid;grid-template-columns:1fr;gap:9px}
+  .breakdown-item,.breakdown-item.nutrition,.breakdown-item.training,.breakdown-item.checklists,.breakdown-list:has(.sentiments) .breakdown-item {padding:12px;min-height:87px;gap:13px}
+  .breakdown-item .score-circle,.breakdown-list:has(.sentiments) .score-circle {width:54px;height:54px;flex-basis:54px}
+  .breakdown-item .score-circle>span,.breakdown-list:has(.sentiments) .score-circle>span {font-size:18px}
+  .breakdown-copy strong,.breakdown-list:has(.sentiments) .breakdown-copy strong {font-size:14px}
+  .breakdown-copy small,.breakdown-list:has(.sentiments) .breakdown-copy small {font-size:11px;line-height:1.45}
+  .breakdown-state,.breakdown-state.is-missing,.breakdown-list:has(.sentiments) .breakdown-state {font-size:10px;margin-top:6px}
+  .breakdown-state.is-missing .icon {width:18px;height:18px}
+  .daily-note {display:none}
+  .detail-view {width:100%;padding:18px 0 0}
+  .detail-heading {display:flex;flex-direction:column;align-items:stretch;gap:12px;min-height:0;margin-bottom:16px}
+  .section-instruction {font-size:12px;line-height:1.5}
+  .detail-heading .quiet-button {min-height:44px;font-size:12px;align-self:flex-start}
+  .nutrition-body {display:flex;flex-direction:column;gap:20px;padding:0}
+  .nutrition-body>div {width:100%}
+  .nutrition-meter,#sentiments-meter {width:230px;max-width:100%;margin:0 auto}
+  #sentiments-meter,#final-sentiments-meter {margin-bottom:30px}
+  .nutrition-score .meter-number {font-size:78px}
+  .rating-controls {gap:14px;margin-top:6px}
+  .rating-controls input {height:46px;font-size:22px;width:94px}
+  .adjust-button {width:46px;height:46px;min-height:46px}
+  .nutrition-notes {max-width:none;width:100%;padding:18px 0 0;border-top:1px solid var(--line)}
+  .notes-input-shell {width:100%}
+  textarea[data-notes],.sentiments-editor textarea[data-notes],.final-review-sentiments textarea[data-notes] {font-size:19px;line-height:1.3;min-height:190px;padding:12px 12px 22px}
+  .training-grid,.sentiments-editor {display:grid;grid-template-columns:1fr;gap:16px}
+  .training-choice {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .training-choice legend {font-size:17px;margin-bottom:12px}
+  .training-choice label {min-height:50px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+  .training-choice label span {font-size:15px}
+  .training-pace {gap:14px;padding:15px 0}
+  .training-pace .score-circle {width:66px;height:66px;flex-basis:66px}
+  .training-pace strong {font-size:14px}
+  .training-pace div>span,.training-pace small {font-size:11px;line-height:1.5}
+  .muscle-suggestions {padding:13px;margin-bottom:18px}
+  .muscle-suggestions>div {gap:12px 18px}
+  .ideal-workout {padding:13px;margin-bottom:18px}
+  .ideal-workout-heading {align-items:flex-start;flex-direction:column;gap:5px}
+  .ideal-workout ul {gap:6px 14px}
+  .ideal-workout li {font-size:12px}
+  .gym-form {display:grid;grid-template-columns:minmax(0,1fr) 80px;gap:12px;margin-top:18px}
+  .gym-form .muscle-picker {grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .muscle-picker legend {margin-bottom:10px}
+  .muscle-picker label span {min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12px;padding:8px}
+  .gym-form>div {grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .gym-form>div label {margin:0}
+  .gym-form>div input {width:90px}
+  .gym-form .primary-button {grid-column:1/-1;min-height:46px;font-size:13px}
+  .gym-form input,.name-control input,input[type='date'],input[type='number'],select {font-size:16px;min-height:44px}
+  .weekly-training .gym-groups {grid-template-columns:1fr;gap:18px}
+  .gym-totals strong {font-size:27px}
+  .weekly-rest-credits strong {font-size:28px}
+  #target-inputs {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .target-control {padding:12px 4px}
+  .target-control h4 {font-size:13px}
+  .target-number strong {font-size:38px}
+  .target-adjustments .adjust-button {width:44px;height:44px;min-height:44px}
+  .sentiments-rating {border-left:0;border-top:1px solid var(--line);padding:20px 0 0}
+  .sentiments-editor label {font-size:14px}
+  .sentiments-editor textarea[data-notes] {min-height:240px}
+  .task-tools {flex-wrap:wrap;align-items:center;gap:10px;padding-top:14px;margin-top:16px}
+  .task-tools>span {font-size:10px;line-height:1.5}
+  .task-tools .quiet-button {min-height:44px;font-size:13px}
+  .routine-manager li {align-items:flex-start;gap:10px;padding-block:12px}
+  .routine-manager strong {font-size:17px;line-height:1.2}
+  .routine-manager .text-button {font-size:10px;max-width:100px;min-height:44px}
+  .tomorrow-plan {margin-top:16px}
+  #tomorrow-tasks li {font-size:17px;line-height:1.2;padding:10px 0}
+  .tomorrow-actions {align-items:stretch;gap:10px}
+  .tomorrow-actions button {min-height:44px;font-size:12px}
+  .selected-day-notice {padding:14px;gap:12px;margin:16px 0 0;align-items:flex-start;flex-direction:column}
+  .selected-day-notice strong {font-size:13px}
+  .selected-day-notice span {font-size:11px;line-height:1.5}
+  .selected-day-notice .quiet-button {min-height:40px;font-size:12px}
+  .history-grid {display:grid;grid-template-columns:1fr;gap:16px}
+  .calendar-summary {display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .monthly-score,.calendar-streak {min-width:0;display:flex;align-items:center;padding:12px 9px;gap:8px}
+  .monthly-score strong,.calendar-streak>span {font-size:10px;line-height:1.4}
+  .monthly-score small,.calendar-streak>span>small {font-size:8px;line-height:1.4}
+  .monthly-score>.score-circle {width:43px;height:43px;flex-basis:43px}
+  .monthly-score .score-circle>span {font-size:15px}
+  .calendar-streak>strong {font-size:27px}
+  .calendar-streak>strong small {font-size:9px}
+  .calendar-card {padding:15px 8px}
+  .calendar-filters {display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin}
+  .calendar-filters button {flex:none;min-height:44px;font-size:12px;padding:9px 12px}
+  .calendar-weight {font-size:7px;letter-spacing:-.04em}
+  .body-weight-form {padding:13px;margin-bottom:16px}
+  .body-weight-controls {flex-wrap:wrap;gap:8px}
+  #body-weight {flex:1;width:100px;font-size:20px;min-height:46px}
+  .weight-unit span {min-height:46px;min-width:42px;font-size:14px}
+  .body-weight-controls .quiet-button {min-height:46px;width:100%;margin:0;font-size:13px}
+  .body-weight-status {align-items:flex-start}
+  .body-weight-status .hint {font-size:10px;line-height:1.5}
+  .body-weight-status .text-button {min-height:40px;font-size:11px}
+  .calendar-card .panel-heading {padding-inline:3px;gap:5px}
+  .calendar-card h3 {font-size:21px}
+  .month-navigation {gap:5px}
+  .month-navigation .icon-button {width:38px;height:40px}
+  .calendar-weekdays,.calendar {grid-template-columns:repeat(7,minmax(0,1fr)) 38px;gap:2px}
+  .calendar-weekdays {font-size:8px;margin:18px 0 8px}
+  .week-average-heading {font-size:8px}
+  .week-average-heading small {font-size:6px}
+  .calendar-day {min-height:75px;padding:6px 0;gap:6px;min-width:0}
+  .calendar-date {font-size:10px}
+  .calendar-day .score-circle {width:min(31px,98%);height:auto;aspect-ratio:1}
+  .calendar-day .score-circle>span {font-size:9px}
+  .calendar-week-score {padding:6px 0;gap:5px}
+  .calendar-week-score .score-circle {width:29px;height:29px}
+  .calendar-week-score .score-circle>span {font-size:9px}
+  .calendar-week-score>small {font-size:6px}
+  .calendar-complete {top:2px;right:1px;font-size:8px}
+  .calendar-legend {font-size:8px;margin:12px 4px 0;padding-top:12px;gap:8px}
+  .history-detail {display:block;padding:18px}
+  .history-detail h3 {font-size:24px;margin-bottom:15px}
+  .recap-score {gap:12px}
+  .recap-score>.score-circle {width:72px;height:72px;flex-basis:72px}
+  .recap-score>.score-circle>span {font-size:24px}
+  .recap-metrics {max-width:none;width:100%;margin-bottom:16px}
+  .recap-metrics button {padding:12px 7px;min-height:74px}
+  .recap-metrics strong {font-size:22px;white-space:normal;line-height:1.2}
+  .recap-metrics strong small {font-size:9px;white-space:normal}
+  .recap-metrics button>span {font-size:10px}
+  .recap-tasks {max-height:none;overflow:visible}
+  .recap-note p,.final-review-content .recap-note p {font-size:17px;line-height:1.3;max-height:none}
+  .history-detail>.primary-button {min-height:46px;margin-top:18px}
+  .review-banner {display:flex;flex-direction:column;align-items:stretch;padding:15px;margin-top:17px;gap:12px}
+  .review-banner[hidden] {display:none}
+  .review-banner>div>span {font-size:11px;line-height:1.5}
+  .review-steps {display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .review-step {min-height:40px;padding:7px;font-size:10px;gap:6px}
+  .review-banner-actions {display:flex;flex-wrap:wrap;gap:8px}
+  .review-banner-actions .review-button {min-height:46px;flex:1;font-size:12px;white-space:normal}
+  .review-banner-actions .quiet-button {min-height:44px;font-size:11px}
+  dialog,#task-dialog,.final-review-dialog,.scoring-dialog {width:calc(100% - 16px);max-width:none;max-height:calc(100dvh - 24px);padding:20px;margin:auto;border-radius:6px;overflow:auto}
+  .dialog-heading {gap:10px;align-items:flex-start;margin-bottom:18px}
+  .dialog-heading h2 {font-size:24px;line-height:1.2}
+  .dialog-heading .icon-button {width:40px;height:40px;min-height:40px;flex:none}
+  .task-composer .handwriting-input,.task-composer [data-child-name] {font-size:20px}
+  .task-date-shortcuts {display:grid;grid-template-columns:1fr 1fr}
+  #task-date {grid-column:1/-1;width:100%;min-width:0;font-size:16px}
+  .task-date-shortcuts button {min-height:44px}
+  .task-schedule {display:block}
+  .task-schedule select {width:100%;font-size:16px}
+  .task-schedule p {font-size:11px;line-height:1.5;margin-top:10px}
+  .weekday-choices {gap:5px}
+  .weekday-choices label span {min-width:37px;min-height:40px;font-size:10px;padding:8px}
+  .subtask-input-row {gap:6px;margin-top:14px}
+  .subtask-input-row .remove-task {width:36px;min-height:44px;margin:0}
+  .composer-actions {display:flex;gap:10px;padding-top:18px}
+  .composer-actions button {flex:1;min-height:46px;font-size:13px}
+  .final-review-content .recap-metrics button {min-height:75px}
+  .final-review-sentiments {padding:15px;margin-top:18px}
+  .final-sentiments-body {grid-template-columns:1fr;gap:18px}
+  .final-sentiments-rating {align-items:center}
+  .final-rating-heading {text-align:center}
+  #final-sentiments-meter {width:155px}
+  .final-review-actions {position:static;padding:18px 0 0;margin:0;background:none;gap:9px}
+  .final-review-actions button {flex:1;min-height:48px;font-size:12px;padding:10px}
+  .settings-section p,.scoring-dialog p,.scoring-dialog li {font-size:12px;line-height:1.65}
+  .name-control {flex-wrap:wrap}
+  .name-control input {min-width:0;width:100%;font-size:16px}
+  .cloud-actions {gap:10px}
+  .cloud-actions button {min-height:44px;font-size:12px}
+  .status-toast {bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100% - 24px);font-size:12px;padding:12px 14px;line-height:1.5}
+  .status-toast button {min-height:36px}
+}

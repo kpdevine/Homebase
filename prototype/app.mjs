@@ -1,11 +1,13 @@
 
-import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
-import { summarizeDay, scoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
-import { taskProgress, scheduleLabel } from './tasks.mjs';
+import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
+import { summarizeDay, taskScoreRange, categorySummary, scoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
+import { taskProgress, scheduleLabel, orderedTasks } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
 import { mountCloud } from './cloud-ui.mjs';
 import { muscleName } from './muscles.mjs';
+import { idealWorkout } from './training.mjs';
+import { bindMeterDrag } from './meter-drag.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -36,22 +38,28 @@ const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value
 let view = 'today';
 let selectedDate = localDateKey(new Date(), timeZone);
 let calendarMonth = selectedDate;
+let calendarFilter='all',bodyWeightUnit='lb';
+const categoryLabels={all:'Overall',nutrition:'Nutrition',training:'Training',checklists:'To-do list',sentiments:'Sentiments'};
+const weightText=weight=>weight?`${weight.value} ${weight.unit}`:'';
 let reviewSessionDate = null;
 let dragging = false;
 let recapDate = null;
 let targetScope=null,targetSignature='',targetDraft=new Map(),targetBaseline=[],targetDrag=null;
 let taskComposerTrigger;
+let taskComposeDate;
 const expandedTasks = new Set();
 let displayName = 'Kieran';
 let preferences={},motionPreference='system';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
 if(typeof preferences.name==='string'&&preferences.name.trim()&&preferences.name.length<=30)displayName=preferences.name;
 motionPreference=setMotionPreference(preferences.motion);
-let store = createStore({ clientId, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
+const editableToday=()=>localDateKey(new Date(),timeZone);
+const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
+let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'Checklists', sentiments:'Sentiments', history:'Calendar' };
+const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar' };
 const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view' };
 
 function queueSave(snapshot) {
@@ -92,10 +100,13 @@ function announce(message, undo = null) {
 }
 function summaryFor(date = selectedDate) { return summarizeDay(store.loadDay(date), store.loadTrainingDay(date),store.loadWeek(date)); }
 function circle(score,reward=false) {
-  const arc=`cx="24" cy="24" r="20" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100" transform="rotate(-90 24 24)"`;
-  return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<circle class="score-circle-track" cx="24" cy="24" r="20"/><circle class="score-circle-fill score-circle-outline" ${arc}/><circle class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
+  const arc=`d="${meterPath(20,24)}" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100"`;
+  return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<path class="score-circle-track" d="${meterPath(20,24)}"/><path class="score-circle-fill score-circle-outline" ${arc}/><path class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
 }
 function renderHeader() {
+  const archived=archivedDay();
+  if(archived)view='history';
+  document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);
@@ -104,28 +115,29 @@ function renderHeader() {
   document.body.classList.toggle('viewing-other-day',!isToday);
   $('#selected-day-notice').hidden=isToday;
   $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
-  $('#selected-day-help').textContent=`Entries on this screen belong to ${shortDate(selectedDate)}.`;
+  $('#selected-day-help').textContent=archived?'Summary only · days more than a week ago cannot be edited.':`Entries on this screen belong to ${shortDate(selectedDate)}.`;
   $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>, ${escapeHtml(displayName)}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
   $('#greeting-date').textContent = longDate(selectedDate);
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
   $('#date-short').setAttribute('aria-label', `Choose date. Selected ${longDate(selectedDate)}`);
   const completed = !!store.loadDay(selectedDate).completedAt;
-  $('#day-state').textContent = completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
+  $('#day-state').textContent = archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
   $('#day-state').classList.toggle('complete', completed);
   $('#calendar-day-number').textContent = Number(selectedDate.slice(-2));
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
-  $('#overview-tasks-title').textContent = isToday ? "TODAY'S TASKS" : 'DAILY TASKS';
-  $('#tasks-title').textContent = isToday ? "TODAY'S TASKS" : 'DAILY TASKS';
+  $('#overview-tasks-title').textContent = 'TO-DO LIST';
+  $('#tasks-title').textContent = 'TO-DO LIST';
   document.title = `Homebase · ${viewLabels[view]}`;
   for (const [key, panel] of Object.entries(panelIds)) $('#' + panel).hidden = view !== key;
   $$('[data-tab]').forEach(button => {
+    button.disabled=archived;
     const active = button.dataset.tab === view;
     button.setAttribute('aria-selected', String(active)); button.tabIndex = active || view==='history'&&button.dataset.tab==='today' ? 0 : -1;
   });
 }
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
-  const taskHtml = editable => day.tasks.length ? day.tasks.map(task => {
+  const taskHtml = editable => day.tasks.length ? orderedTasks(day.tasks).map(task => {
     const children=task.children||[], expanded=expandedTasks.has(task.id), listId=`subtasks-${editable?'edit':'home'}-${task.id}`;
     const progress=taskProgress([task]);
     return `<li class="task-group"><div class="task-row"><label class="${children.length?'parent-task':''}" ${children.length?`data-expand-task="${task.id}"`:''}><input type="checkbox" data-task-id="${task.id}" ${task.done?'checked':''} ${children.length?'disabled':''}><span>${escapeHtml(task.name)}${task.templateId?'<small class="recurring-label">Repeats</small>':''}</span></label>${children.length?`<button class="expand-task" data-expand-task="${task.id}" aria-expanded="${expanded}" aria-controls="${listId}" aria-label="${expanded?'Collapse':'Expand'} ${escapeHtml(task.name)} subtasks"><span>${progress.done}/${progress.total}</span> ${expanded?'▾':'▸'}</button>`:''}${editable?`<button class="remove-task" data-remove-task="${task.id}" aria-label="Remove task${task.templateId?' for this day':''}: ${escapeHtml(task.name)}">×</button>`:''}</div>${children.length?`<ul id="${listId}" class="child-tasks" ${expanded?'':'hidden'}>${children.map(child=>`<li><label><input type="checkbox" data-task-id="${child.id}" ${child.done?'checked':''}><span>${escapeHtml(child.name)}</span></label></li>`).join('')}</ul>`:''}</li>`;
@@ -143,26 +155,34 @@ function renderTasks() {
   const today=localDateKey(new Date(),timeZone),templates=store.loadTemplates();
   $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}${template.endDate?` · ends ${shortDate(template.endDate)}`:''}</small></span>${!template.endDate?`<button class="text-button" data-stop-template="${template.id}">Stop after ${shortDate(today)}</button>`:'<small>Stopped</small>'}</li>`).join(''):'<li class="hint">Your recurring tasks will appear here.</li>';
   $('#routine-count').textContent=templates.filter(template=>!template.endDate).length;
+  const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
+  $('#tomorrow-date').textContent=longDate(tomorrow);
+  $('#tomorrow-count').textContent=`${planned.length} task${planned.length===1?'':'s'}`;
+  $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>`<li>${escapeHtml(task.name)}${task.templateId?'<small>Repeats</small>':''}</li>`).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
+  $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} tasks scheduled`);
 }
 function renderScore() {
   const summary = summaryFor();
   const day = store.loadDay(selectedDate), progress = store.dayProgress(selectedDate);
+  const range=selectedDate===editableToday()&&!day.completedAt?taskScoreRange(summary):{score:summary.score,low:summary.score,projected:false},displayScore=range.score;
   const meter = $('#overall-meter');
-  const reward=scoreReward(summary.score);
+  const reward=scoreReward(displayScore);
   meter.classList.toggle('score-high',!!reward);
-  meter.classList.toggle('score-perfect',summary.score===10);
-  meter.style.setProperty('--score-glow',`${scoreGlow(summary.score)}px`);
-  const path = meterPath(93, 120);
+  meter.classList.toggle('score-perfect',displayScore===10);
+  meter.style.setProperty('--score-glow',`${scoreGlow(displayScore)}px`);
+  const path = meterPath(86, 120);
   meter.querySelector('.meter-track').setAttribute('d', path);
   meter.querySelector('.meter-fill').setAttribute('d', path);
-  setMeter(meter.querySelector('.meter-fill'),summary.score===null?0:summary.score*10,{immediate:dragging||document.activeElement===$('#rating-value')});
-  meter.querySelector('.meter-number').innerHTML = scoreMarkup(summary.score);
-  meter.style.setProperty('--score-soft', summary.score === null ? '#f2f4ef' : `${scoreColor(summary.score)}0a`);
-  $('#day-gradient-start').setAttribute('stop-color',scoreColor(summary.score));
+  setMeter(meter.querySelector('.meter-fill'),displayScore===null?0:displayScore*10,{immediate:dragging||document.activeElement===$('#rating-value')});
+  meter.querySelector('.meter-number').innerHTML = scoreMarkup(displayScore);
+  meter.style.setProperty('--score-soft', displayScore === null ? '#f2f4ef' : `${scoreColor(displayScore)}0a`);
+  $('#day-gradient-start').setAttribute('stop-color',scoreColor(displayScore));
   $('#day-gradient-start').setAttribute('stop-opacity', '1');
-  $('#day-gradient-end').setAttribute('stop-color',scoreColor(summary.score));
-  meter.setAttribute('aria-label', summary.score === null ? 'No daily score yet. Log a category to get started.' : `${summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(summary.score)} out of 10. ${summary.logged} of ${summary.sections.length} categories logged.`);
-  const rewardLabel=reward?(summary.provisional?'High so far':summary.score===10?'Perfect score':'High score'):'';
+  $('#day-gradient-end').setAttribute('stop-color',scoreColor(displayScore));
+  meter.setAttribute('aria-label', displayScore === null ? 'No daily score yet. Log a category to get started.' : `${range.projected?'Projected ':summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(displayScore)} out of 10.${range.projected?` Assuming all tasks completed; as low as ${scoreText(range.low)} if remaining tasks stay unchecked.`:''} ${summary.logged} of ${summary.sections.length} categories logged.`);
+  $('#score-range').hidden=!range.projected;
+  $('#score-range').innerHTML=range.projected?`As low as <strong>${scoreText(range.low)}</strong><span> if remaining tasks stay unchecked</span>`:'';
+  const rewardLabel=range.projected?'With all tasks done':reward?(summary.provisional?'High so far':displayScore===10?'Perfect score':'High score'):'';
   $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/${summary.sections.length} logged` : 'All categories logged'].filter(Boolean).join(' · ');
   $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of ${progress.sections.length} section reviews confirmed.`;
   const button = $('#complete-day');
@@ -229,20 +249,7 @@ function adjustSentiments(direction) {const value=store.loadDay(selectedDate).se
 $('#sentiments-minus').addEventListener('click',()=>adjustSentiments(-1));
 $('#sentiments-plus').addEventListener('click',()=>adjustSentiments(1));
 const sentimentMeter=$('#sentiments-meter');
-function dragSentiments(event) {
-  const rect=sentimentMeter.querySelector('svg').getBoundingClientRect();
-  const score=scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:10});
-  if(score!==null&&score!==store.loadDay(selectedDate).sentiments.rating)updateSentiments({rating:score});
-}
-sentimentMeter.addEventListener('pointerdown',event=>{
-  if(!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
-  const rect=sentimentMeter.querySelector('svg').getBoundingClientRect();
-  sentimentMeter.focus({preventScroll:true});
-  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
-  event.preventDefault();sentimentPointer=event.pointerId;sentimentMeter.setPointerCapture(event.pointerId);sentimentMeter.classList.add('dragging');dragSentiments(event);
-});
-sentimentMeter.addEventListener('pointermove',event=>{if(sentimentPointer===event.pointerId)dragSentiments(event);});
-for(const type of ['pointerup','pointercancel','lostpointercapture'])sentimentMeter.addEventListener(type,event=>{if(sentimentPointer!==event.pointerId)return;sentimentPointer=-1;sentimentMeter.classList.remove('dragging');if(sentimentMeter.hasPointerCapture(event.pointerId))sentimentMeter.releasePointerCapture(event.pointerId);});
+bindMeterDrag(sentimentMeter,{read:()=>store.loadDay(selectedDate).sentiments.rating,change:rating=>updateSentiments({rating}),onStart:()=>sentimentPointer=1,onEnd:()=>sentimentPointer=-1});
 sentimentMeter.addEventListener('keydown',event=>{
   if(event.altKey||event.ctrlKey||event.metaKey)return;
   const direction={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[event.key];
@@ -260,7 +267,10 @@ function renderTargetEditor(week,reset=false) {
   const larger=values.filter(group=>group.target>20);
   $('#target-legacy-notice').hidden=!larger.length;
   $('#target-legacy-notice').textContent=larger.length?`Previously saved: ${larger.map(group=>`${escapeHtml(group.name)} ${group.target}`).join(', ')}. These remain saved until you save the displayed 0–20 targets.`:'';
-  for(const group of values)paintTarget(group.id);
+  for(const group of values) {
+    paintTarget(group.id);
+    bindMeterDrag($('[data-target-meter="'+group.id+'"]'),{read:()=>targetDraft.get(group.id),change:value=>changeTarget(group.id,value),max:20,step:1,onStart:()=>targetDrag=group.id,onEnd:()=>targetDrag=null});
+  }
 }
 function paintTarget(id) {
   const meter=$(`[data-target-meter="${id}"]`),value=targetDraft.get(id),point=meterPoint(1+value/20*9);
@@ -284,39 +294,25 @@ $('#target-inputs').addEventListener('keydown',event=>{
   if(direction){event.preventDefault();changeTarget(id,targetDraft.get(id)+direction);}
   else if(event.key==='Home'||event.key==='End'){event.preventDefault();changeTarget(id,event.key==='Home'?0:20);}
 });
-function pointTarget(event,meter) {
-  const rect=meter.querySelector('svg').getBoundingClientRect();
-  return scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:20,step:1});
-}
-$('#target-inputs').addEventListener('pointerdown',event=>{
-  const meter=event.target.closest('[data-target-meter]');
-  if(!meter||!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
-  meter.focus({preventScroll:true});
-  const rect=meter.querySelector('svg').getBoundingClientRect();
-  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
-  event.preventDefault();targetDrag={id:meter.dataset.targetMeter,pointer:event.pointerId};meter.setPointerCapture(event.pointerId);meter.classList.add('dragging');
-  const value=pointTarget(event,meter);if(value!==null)changeTarget(targetDrag.id,value);
-});
-$('#target-inputs').addEventListener('pointermove',event=>{
-  if(!targetDrag||targetDrag.pointer!==event.pointerId)return;
-  const meter=$(`[data-target-meter="${targetDrag.id}"]`),value=pointTarget(event,meter);
-  if(value!==null&&value!==targetDraft.get(targetDrag.id))changeTarget(targetDrag.id,value);
-});
-for(const type of ['pointerup','pointercancel','lostpointercapture'])$('#target-inputs').addEventListener(type,event=>{
-  if(!targetDrag||targetDrag.pointer!==event.pointerId)return;
-  const meter=$(`[data-target-meter="${targetDrag.id}"]`);targetDrag=null;meter.classList.remove('dragging');
-  if(meter.hasPointerCapture(event.pointerId))meter.releasePointerCapture(event.pointerId);
-});
 $('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.loadWeek(selectedDate),true);cloud?.resume();announce('Target edits discarded. Saved targets are unchanged.');});
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
+  if(!$('#body-weight-form').contains(document.activeElement)) {
+    $('#body-weight').value=day.bodyWeight?.value??'';bodyWeightUnit=day.bodyWeight?.unit??'lb';
+    $$('[name="weight-unit"]').forEach(input=>input.checked=input.value===bodyWeightUnit);
+    $('#body-weight').max=bodyWeightUnit==='kg'?700:1500;
+  }
+  $('#body-weight-status').textContent=day.bodyWeight?`${weightText(day.bodyWeight)} saved for ${shortDate(selectedDate)}`:'Separate from your gym score.';
+  $('#remove-body-weight').hidden=!day.bodyWeight;
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
   $('#gym-form').hidden=day.trainingMode!=='training';
   const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
   $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set muscle targets below to include gym in the daily average.'}</small></div>`;
   $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
+  const workout=idealWorkout(pace);
+  $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets${pace.dailySets?' remaining today':''}</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul><p>Based on your daily target and the weekly goals still open. Updates as you log sets.</p>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
   $('#daily-training-entries').hidden=noLift;
   $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
@@ -330,6 +326,7 @@ function renderGym() {
   $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
   renderTargetEditor(week);
   $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${muscleName(entry.groupId)} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
+  $$('[data-remove-entry]').forEach(button=>{const entry=week.entries.find(value=>value.id===button.dataset.removeEntry);button.disabled=!!entry&&archivedDay(entry.date);});
 }
 function renderReview() {
   const progress = store.dayProgress(selectedDate), reviewing = reviewSessionDate === selectedDate && !progress.completedAt;
@@ -341,7 +338,7 @@ function renderReview() {
   const current=progress.sections.find(section=>section.id===view);
   const invalidRating=current?.id==='nutrition'&&!$('#rating-value').validity.valid||current?.id==='sentiments'&&!$('#sentiments-rating').validity.valid;
   const primary=$('#review-primary');
-  primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'checklist':current.id==='training'?'training':current.id} review`:'Continue day review →';
+  primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'to-do list':current.id==='training'?'training':current.id} review`:'Continue day review →';
   primary.disabled=!!current&&!current.reviewed&&(!current.ready||invalidRating);
   $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Enter a nutrition rating first.':'Log lifting or rest first.':'';
   const now=new Date(),today=localDateKey(now,timeZone);
@@ -366,7 +363,7 @@ function renderNotes() {
   $$('[data-notes]').forEach(input => { const value=input.dataset.notes.startsWith('sentiments')?store.loadDay(selectedDate).sentiments.notes:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
   refreshNoteCarets();
 }
-$$('[data-notes]').filter(input=>!['day','sentiments'].includes(input.dataset.notes)).forEach(input => input.addEventListener('input', () => {
+$$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset.notes)).forEach(input => input.addEventListener('input', () => {
   store.updateNotes(selectedDate, input.dataset.notes, input.value);
   renderReview(); renderHeader(); renderScore();
 }));
@@ -375,17 +372,21 @@ function renderHistory() {
   const today = localDateKey(new Date(), timeZone);
   const dates = monthGrid(calendarMonth);
   const monthDates = dates.filter(date => date.slice(0,7) === calendarMonth.slice(0,7));
-  const monthly = averageDays(monthDates, summaryFor);
-  $('#monthly-score').innerHTML = circle(monthly.score,true)+`<span><strong>Month average</strong><small>${monthly.count} of ${monthly.total} days logged${monthly.provisional?' · partial':''}</small></span>`;
-  $('#monthly-score').setAttribute('aria-label',`Month average ${scoreText(monthly.score)} out of 10. ${monthly.count} of ${monthly.total} days logged${monthly.provisional?', partial':''}.`);
+  const filteredSummary=date=>categorySummary(summaryFor(date),calendarFilter),filterLabel=categoryLabels[calendarFilter];
+  $$('[data-calendar-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.calendarFilter===calendarFilter)));
+  const monthly = averageDays(monthDates, filteredSummary);
+  $('#monthly-score').innerHTML = circle(monthly.score,true)+`<span><strong>Month average</strong><small>${filterLabel} · ${monthly.count}/${monthly.total} days${monthly.provisional?' · partial':''}</small></span>`;
+  $('#monthly-score').setAttribute('aria-label',`${filterLabel} month average ${scoreText(monthly.score)} out of 10. ${monthly.count} of ${monthly.total} days logged${monthly.provisional?', partial':''}.`);
   const streak=loggingStreak(today,summaryFor);
   $('#calendar-streak').innerHTML=`<strong>${streak.count}<small> day${streak.count===1?'':'s'}</small></strong><span>Logging streak<small>All 3 categories logged${streak.count&&!streak.includesToday?' · through yesterday':''}</small></span>`;
   $('#calendar').innerHTML = dates.map((date, index) => {
-    const summary = summaryFor(date), day = store.loadDay(date), reward=scoreReward(summary.score);
+    const summary = filteredSummary(date), day = store.loadDay(date), reward=scoreReward(summary.score);
     let cell = `<button class="calendar-day ${reward} ${date.slice(0,7) === calendarMonth.slice(0,7) ? '' : 'outside-month'} ${date === selectedDate ? 'selected' : ''} ${date === today ? 'is-today' : ''}" data-calendar-date="${date}" aria-label="${longDate(date)}, ${summary.score === null ? 'no score' : `${summary.provisional ? 'provisional ' : ''}daily score ${scoreText(summary.score)} out of 10${reward?summary.score===10?', perfect score':', high score':''}`}${day.completedAt ? ', day complete' : ''}" aria-pressed="${date === selectedDate}" ${date === today ? 'aria-current="date"' : ''}><span class="calendar-date">${Number(date.slice(-2))}</span>${circle(summary.score,true)}${day.completedAt ? '<span class="calendar-complete" aria-hidden="true">✓</span>' : ''}</button>`
+    cell=cell.replace('daily score ',`${filterLabel.toLowerCase()} score `);
+    if(calendarFilter==='training'&&day.bodyWeight)cell=cell.replace('</button>',`<small class="calendar-weight">${weightText(day.bodyWeight)}</small></button>`).replace('aria-label="',`aria-label="${weightText(day.bodyWeight)}, `);
     if (index % 7 === 6) {
       const weekDates = dates.slice(index - 6, index + 1);
-      const weekly = averageDays(weekDates, summaryFor);
+      const weekly = averageDays(weekDates, filteredSummary);
       cell += '<div class="calendar-week-score" role="img" aria-label="Week of ' + shortDate(weekDates[0]) + ', Monday to Sunday average ' + scoreText(weekly.score) + ' out of 10, ' + weekly.count + ' of 7 days logged' + (weekly.provisional ? ', partial' : '') + '">' + circle(weekly.score,true) + '<small>' + weekly.count + '/7' + (weekly.provisional ? ' · partial' : '') + '</small></div>';
     }
     return cell;
@@ -393,6 +394,7 @@ function renderHistory() {
   renderRecap();
 }
 function recapMarkup({final=false}={}) {
+  const archived=archivedDay(),openSection=id=>archived?'disabled':`data-open-section="${id}"`;
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
   const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
@@ -403,17 +405,19 @@ function recapMarkup({final=false}={}) {
       ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of ${recap.sections.length} logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
     </div>
     <div class="recap-metrics">
-      <button data-open-section="nutrition" aria-label="Open nutrition for this day"><span>Nutrition</span><strong>${scoreText(day.nutrition)}<small>${day.nutrition===null?'':' / 10'}</small></strong></button>
-      <button data-open-section="training" aria-label="Open daily training for this day"><span>Training</span><strong>${training}</strong></button>
-      <button data-open-section="checklists" aria-label="Open checklist for this day"><span>Tasks</span><strong>${tasks}</strong></button>
+      <button ${openSection('nutrition')} aria-label="Nutrition${archived?' summary':' for this day'}"><span>Nutrition</span><strong>${scoreText(day.nutrition)}<small>${day.nutrition===null?'':' / 10'}</small></strong></button>
+      <button ${openSection('training')} aria-label="Training${archived?' summary':' for this day'}"><span>Training</span><strong>${training}</strong></button>
+      <button ${openSection('checklists')} aria-label="To-do list${archived?' summary':' for this day'}"><span>To-do list</span><strong>${tasks}</strong></button>
     </div>
-    ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>Open the day to add an entry.${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
+    ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${recap.tasks.length?`<details class="recap-section" open><summary>Checklist <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
+    ${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}
     ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
-    ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4><button class="text-button" data-open-section="sentiments">Sentiments</button><span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
+    ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
 }
 function renderRecap() {
+  $('#open-selected-day').hidden=archivedDay();
   $('#history-date').textContent=dateFormat(selectedDate,{weekday:'short',month:'short',day:'numeric'});
   $('#history-content').innerHTML=recapMarkup();
   if(recapDate&&recapDate!==selectedDate)reveal($('#history-content'));
@@ -422,13 +426,20 @@ function renderRecap() {
 function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); renderSaveStatus(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
+  if(archivedDay())next='history';
   const changed=view!==next;
   view = next; render();
+  if(matchMedia('(max-width:767px)').matches&&view!=='history') {
+    const nav=$('.day-tabs'),tab=$('#tab-'+view),left=tab.offsetLeft-nav.offsetLeft;
+    if(left<nav.scrollLeft)nav.scrollLeft=left;
+    else if(left+tab.offsetWidth>nav.scrollLeft+nav.clientWidth)nav.scrollLeft=left+tab.offsetWidth-nav.clientWidth;
+  }
   if(changed)reveal($('#'+panelIds[view]));
   $('#main').scrollTo({top:0,behavior:'instant'});
   if (focus) ($('#tab-' + view)||$('#main')).focus({preventScroll:true});
 }
 function navigateDay(date, changeMonth = true) {
+  flushSave();
   if (date !== selectedDate) reviewSessionDate = null;
   selectedDate = date; if (changeMonth) calendarMonth = date;
   $('#task-name').value = ''; $('#rating-value').setCustomValidity(''); $('#gym-sets').setCustomValidity('');
@@ -436,6 +447,7 @@ function navigateDay(date, changeMonth = true) {
   render();
 }
 function startReview() {
+  if(archivedDay()){setView('history');return;}
   const progress = store.dayProgress(selectedDate);
   if (progress.completedAt) { showFinalReview(); return; }
   if (progress.canComplete) { showFinalReview(); return; }
@@ -443,12 +455,14 @@ function startReview() {
   setView((progress.sections.find(section => !section.ready) || progress.sections.find(section => !section.reviewed)).id, true);
 }
 function startCompletion() {
+  if(archivedDay()){setView('history');return;}
   const progress = store.dayProgress(selectedDate);
   if (progress.completedAt) { showFinalReview(); return; }
   if (!progress.canComplete) { startReview(); return; }
   showFinalReview();
 }
 function showFinalReview() {
+  if(archivedDay()){setView('history');return;}
   const progress=store.dayProgress(selectedDate);
   if(!progress.canComplete)return;
   setView('today');
@@ -510,8 +524,9 @@ $('#previous-day').addEventListener('click', () => navigateDay(addDays(selectedD
 $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate, 1)));
 $('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
-for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
+for (const id of ['date-short', 'open-calendar','mobile-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
 $('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
+$('#calendar-filters').addEventListener('click',event=>{const button=event.target.closest('[data-calendar-filter]');if(button&&Object.hasOwn(categoryLabels,button.dataset.calendarFilter)){calendarFilter=button.dataset.calendarFilter;renderHistory();}});
 $('#open-selected-day').addEventListener('click', () => setView('today', true));
 $('#previous-month').addEventListener('click', () => { calendarMonth = moveMonth(calendarMonth, -1); renderHistory(); });
 $('#next-month').addEventListener('click', () => { calendarMonth = moveMonth(calendarMonth, 1); renderHistory(); });
@@ -560,7 +575,7 @@ function fitTaskField(field) {
   if(!field.clientWidth)return;
   const style=getComputedStyle(field),size=Number.parseFloat(style.fontSize);
   if(taskTextMeasure)taskTextMeasure.font=`${style.fontStyle} ${style.fontWeight} ${size}px ${style.fontFamily}`;
-  const metrics=taskTextMeasure?.measureText(field.value||field.placeholder||'M');
+  const metrics=taskTextMeasure?.measureText('Agypqj');
   const caps=taskTextMeasure?.measureText('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
   const fontAscent=metrics?.fontBoundingBoxAscent??size*.75,fontDescent=metrics?.fontBoundingBoxDescent??size*.25;
   const ascent=caps?.actualBoundingBoxAscent??size*.7,descent=metrics?.actualBoundingBoxDescent??size*1.15;
@@ -576,8 +591,7 @@ function fitTaskField(field) {
     field.style.height='0px';
     return {height:Math.ceil(field.scrollHeight+borders),lines:Math.round((field.scrollHeight-top-bottom)/lineHeight)};
   }
-  let fitted=measure(size);
-  if(fitted.lines>1)fitted=measure(Math.ceil(size*1.5));
+  const fitted=measure(Math.ceil(size*1.12));
   field.style.height=`${fitted.height}px`;
 }
 function fitTaskFields() { if($('#task-dialog').open)$$('#task-name,[data-child-name]').forEach(fitTaskField); }
@@ -586,12 +600,25 @@ document.fonts.addEventListener('loadingdone',fitTaskFields);
 window.addEventListener('resize',fitTaskFields);
 function updateFrequency() { $('#custom-weekdays').hidden=$('#task-frequency').value!=='custom';fitTaskFields(); }
 $('#task-frequency').addEventListener('change',updateFrequency);
-for(const id of ['open-task-composer','overview-add-task'])$('#'+id).addEventListener('click',event=>{
-  taskComposerTrigger=event.currentTarget;
+function renderTaskDate() {
+  const date=$('#task-date').value,today=editableToday();
+  taskComposeDate=date;
+  $('#task-start-date').textContent=date?longDate(date):'Choose a date';
+  $$('[data-task-when]').forEach(button=>button.setAttribute('aria-pressed',String(date===addDays(today,Number(button.dataset.taskWhen)))));
+  $('#task-submit').textContent=date===addDays(today,1)?'Add for tomorrow':'Add task';
+}
+function openTaskComposer(trigger,date=selectedDate) {
+  taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
-  $('#task-start-date').textContent=longDate(selectedDate);updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
-});
+  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').value=date;renderTaskDate();
+  updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
+}
+for(const id of ['open-task-composer','overview-add-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget));
+for(const id of ['plan-tomorrow','add-tomorrow-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget,addDays(editableToday(),1)));
+$('#view-tomorrow').addEventListener('click',()=>{navigateDay(addDays(editableToday(),1));setView('checklists',true);});
+$$('[data-task-when]').forEach(button=>button.addEventListener('click',()=>{$('#task-date').value=addDays(editableToday(),Number(button.dataset.taskWhen));renderTaskDate();}));
+$('#task-date').addEventListener('change',renderTaskDate);
 $('#cancel-task').addEventListener('click',()=>closeDialog($('#task-dialog')));
 $('#add-subtask').addEventListener('click',()=>{
   if($$('[data-child-name]').length>=20){$('#task-composer-error').textContent='Use up to 20 subtasks.';return;}
@@ -613,11 +640,24 @@ $('#add-task-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#task-name');
   const frequency=$('#task-frequency').value;
   const options={children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
-  try { const id=store.addTask(selectedDate,input.value,options);if(id&&options.children.length)expandedTasks.add(id); }
+  if(!$('#task-date').checkValidity()){ $('#task-date').reportValidity();return; }
+  try { const id=store.addTask(taskComposeDate,input.value,options);if(id&&options.children.length)expandedTasks.add(id); }
   catch(error){$('#task-composer-error').textContent=error.message;return;}
-  closeDialog($('#task-dialog'));render();taskComposerTrigger.focus({preventScroll:true});acknowledge($(view==='today'?'.overview-tasks':'.checklist-editor'));announce(frequency==='once'?'Task added for this day.':'Recurring task added.');
+  closeDialog($('#task-dialog'));render();taskComposerTrigger.focus({preventScroll:true});acknowledge($(view==='today'?'.overview-tasks':'.checklist-editor'));announce(`${frequency==='once'?'Task':'Recurring task'} added ${taskComposeDate===addDays(editableToday(),1)?'for tomorrow':`for ${shortDate(taskComposeDate)}`}.`);
 });
 $('#task-name').addEventListener('input', event => event.target.setCustomValidity(''));
+$('#body-weight-form').addEventListener('submit',event=>{
+  event.preventDefault();const input=$('#body-weight');
+  if(!input.checkValidity()){input.reportValidity();return;}
+  try {store.updateBodyWeight(selectedDate,{value:Number(input.value),unit:bodyWeightUnit});render();announce('Body weight saved.');}
+  catch(error){announce(error.message);}
+});
+$$('[name="weight-unit"]').forEach(input=>input.addEventListener('change',()=>{
+  const field=$('#body-weight'),value=Number(field.value),unit=input.value;
+  if(field.value&&Number.isFinite(value)&&unit!==bodyWeightUnit)field.value=(unit==='kg'?value/2.2046226218:value*2.2046226218).toFixed(1);
+  bodyWeightUnit=unit;field.max=unit==='kg'?700:1500;
+}));
+$('#remove-body-weight').addEventListener('click',()=>{store.updateBodyWeight(selectedDate,null);render();announce('Body weight removed.');});
 $('#recurring-tasks').addEventListener('click',event=>{
   const button=event.target.closest('[data-stop-template]');if(!button)return;
   store.stopTemplate(button.dataset.stopTemplate,localDateKey(new Date(),timeZone));render();announce('Recurring task stopped after today. Earlier days are kept.');
@@ -648,27 +688,11 @@ nutritionMeter.addEventListener('keydown', event => {
   else return;
   event.preventDefault(); updateRating(next);
 });
-function pointRating(event) {
-  const rectangle = nutritionMeter.querySelector('svg').getBoundingClientRect();
-  const value = scoreFromPoint((event.clientX - rectangle.left) * 220 / rectangle.width, (event.clientY - rectangle.top) * 210 / rectangle.height, 110, 110);
-  if (value !== null && store.loadDay(selectedDate).nutrition !== value) updateRating(value);
-}
-nutritionMeter.addEventListener('pointerdown', event => {
-  if (!event.isPrimary || event.pointerType === 'mouse' && event.button !== 0) return;
-  const rectangle = nutritionMeter.querySelector('svg').getBoundingClientRect();
-  const distance = Math.hypot((event.clientX - rectangle.left) * 220 / rectangle.width - 110, (event.clientY - rectangle.top) * 210 / rectangle.height - 110);
-  if (distance < 43) { nutritionMeter.focus({preventScroll:true}); return; }
-  event.preventDefault(); dragging = true; nutritionMeter.classList.add('dragging'); nutritionMeter.setPointerCapture(event.pointerId); nutritionMeter.focus({preventScroll:true}); pointRating(event);
-});
-nutritionMeter.addEventListener('pointermove', event => { if (dragging && nutritionMeter.hasPointerCapture(event.pointerId)) pointRating(event); });
-function finishDragging(event) {
-  if (!dragging) return;
-  dragging = false; nutritionMeter.classList.remove('dragging');
-  if (nutritionMeter.hasPointerCapture(event.pointerId)) nutritionMeter.releasePointerCapture(event.pointerId);
-  const score = store.loadDay(selectedDate).nutrition;
-  if (score !== null) announce(`Nutrition set to ${scoreText(score)}.`);
-}
-for (const type of ['pointerup','pointercancel','lostpointercapture']) nutritionMeter.addEventListener(type, finishDragging);
+bindMeterDrag(nutritionMeter,{min:1,read:()=>store.loadDay(selectedDate).nutrition,change:updateRating,onStart:()=>dragging=true,onEnd:()=>{
+  dragging=false;
+  const score=store.loadDay(selectedDate).nutrition;
+  if(score!==null)announce(`Nutrition set to ${scoreText(score)}.`);
+}});
 
 $('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${escapeHtml(group.name)}</span></label>`).join('')}</div>`;
 function renderLogButton() { $('#log-sets').textContent=`+ Log ${muscleName($('[name="muscle-group"]:checked')?.value || '')} sets`; }
@@ -731,20 +755,7 @@ $('#final-sentiments-notes').addEventListener('input',event=>updateFinalSentimen
 $('#final-clear-sentiments-rating').addEventListener('click',()=>updateFinalSentiments({rating:null}));
 let finalSentimentPointer=-1;
 const finalSentimentMeter=$('#final-sentiments-meter');
-function dragFinalSentiments(event){
-  const rect=finalSentimentMeter.querySelector('svg').getBoundingClientRect();
-  const score=scoreFromPoint((event.clientX-rect.left)*220/rect.width,(event.clientY-rect.top)*210/rect.height,110,110,{min:0,max:10});
-  if(score!==null&&score!==store.loadDay(selectedDate).sentiments.rating)updateFinalSentiments({rating:score});
-}
-finalSentimentMeter.addEventListener('pointerdown',event=>{
-  if(!event.isPrimary||event.pointerType==='mouse'&&event.button!==0)return;
-  const rect=finalSentimentMeter.querySelector('svg').getBoundingClientRect();
-  finalSentimentMeter.focus({preventScroll:true});
-  if(Math.hypot((event.clientX-rect.left)*220/rect.width-110,(event.clientY-rect.top)*210/rect.height-110)<43)return;
-  event.preventDefault();finalSentimentPointer=event.pointerId;finalSentimentMeter.setPointerCapture(event.pointerId);finalSentimentMeter.classList.add('dragging');dragFinalSentiments(event);
-});
-finalSentimentMeter.addEventListener('pointermove',event=>{if(finalSentimentPointer===event.pointerId)dragFinalSentiments(event);});
-for(const type of ['pointerup','pointercancel','lostpointercapture'])finalSentimentMeter.addEventListener(type,event=>{if(finalSentimentPointer!==event.pointerId)return;finalSentimentPointer=-1;finalSentimentMeter.classList.remove('dragging');if(finalSentimentMeter.hasPointerCapture(event.pointerId))finalSentimentMeter.releasePointerCapture(event.pointerId);});
+bindMeterDrag(finalSentimentMeter,{read:()=>store.loadDay(selectedDate).sentiments.rating,change:rating=>updateFinalSentiments({rating}),onStart:()=>finalSentimentPointer=1,onEnd:()=>finalSentimentPointer=-1});
 finalSentimentMeter.addEventListener('keydown',event=>{
   if(event.altKey||event.ctrlKey||event.metaKey)return;
   const direction={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1}[event.key];
@@ -817,7 +828,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   try {reset=resetLocal(localStorage,{suffix,expectedRaw:lastSavedRaw});}
   catch(error) {$('#reset-message').textContent=`Reset failed. ${error.message}`;return;}
   clearTimeout(saveTimer);pendingSnapshot=null;pendingImport=null;
-  store=createStore({clientId,snapshot:reset.snapshot,seed:false,onChange:queueSave});
+  store=createStore({clientId,editableToday,snapshot:reset.snapshot,seed:false,onChange:queueSave});
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
   preferences={};displayName='Kieran';motionPreference=setMotionPreference('system');
@@ -855,7 +866,7 @@ $('#confirm-import').addEventListener('click', () => {
   try {
     clearTimeout(saveTimer);
     lastSavedRaw = writeLocal(storage, pendingImport);
-    store = createStore({ clientId, snapshot:pendingImport, seed:false, onChange:queueSave });
+    store = createStore({ clientId, editableToday, snapshot:pendingImport, seed:false, onChange:queueSave });
     loaded.error = null; loaded.raw = null; storageError = null; blockedSave = false; pendingSnapshot = null; pendingImport = null;
     $('#import-preview').hidden = true; $('#import-file').value = ''; reviewSessionDate = null;
     cloud?.changed();
@@ -879,8 +890,9 @@ let reviewClockPhase=`${localDateKey(clockStart,timeZone)}:${Number(new Intl.Dat
 setInterval(() => {
   updateClock();renderHeader();
   const now=new Date(),phase=`${localDateKey(now,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(now))>=21}`;
-  if(phase!==reviewClockPhase){reviewClockPhase=phase;renderReview();}
+  if(phase!==reviewClockPhase){reviewClockPhase=phase;render();}
 }, 15000);
+$('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';
 render();
 reveal($('#'+panelIds[view]));
 if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
@@ -892,7 +904,7 @@ cloud=mountCloud({
   applyLocal:snapshot=>{
     if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
     const raw=writeLocal(storage,snapshot);
-    store=createStore({clientId,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
+    store=createStore({clientId,editableToday,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
     closeDialog($('#final-review-dialog'));reviewSessionDate=null;render();
   },
   onStatus:state=>{cloudLabel=state.label;renderSaveStatus();}

@@ -1,6 +1,6 @@
 # Homebase — resume here
 
-Saved October 17, 2026 (America/Chicago).
+Saved October 18, 2026 (America/Chicago).
 
 ## Run locally
 
@@ -10,9 +10,23 @@ Windows: the **Homebase** desktop shortcut starts the background server and open
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs 99 checks.
+Open [Homebase](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs the model, persistence, sync, and UI-policy checks.
 
 To continue: **Continue Homebase from START-HERE.md. Keep development local. Firebase is selected for authentication, sync, and hosting; the production framework and device platform remain open.**
+
+Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
+
+## October 18 update
+
+Meters now share a 330-degree arc, filling clockwise from 6:30 to 5:30, with endpoint numbers in reserved space below the ring. Tabs use fixed columns for their number, name, and check/warning. Cloud-save status lives beside Settings. Portrait phones have a separate layout, normal vertical page scrolling, compact touch navigation, and no clock/footer bar; Calendar is available in the header.
+
+To-do list replaces the task/checklist labels. One-time tasks appear before recurring tasks. The task editor offers Today, Tomorrow, and an explicit date. Plan tomorrow opens that editor with tomorrow selected; a tomorrow panel shows scheduled tasks without leaving the current day. Creating, removing, or scheduling a task alone does not log the list. Checking an action or explicitly confirming the to-do review does. While today is open and its list is logged, the main score assumes remaining tasks get done, with an “as low as” value for leaving them unchecked. Final review, history, and averages retain recorded scores.
+
+Today and the previous seven calendar dates remain editable. Earlier dates are summary only, enforced in both navigation and store mutations. Optional daily body weight (lb/kg, 0.1 steps) persists in the day document and does not affect gym scoring. The calendar filters Overall, Nutrition, Training, To-do list, and Sentiments, including filtered weekly/monthly averages. Training also displays recorded body weights. The ideal workout suggestion distributes whole useful sets among the muscles most behind, toward the remaining daily target, never exceeding unmet weekly goals. It updates as sets are logged.
+
+All editable circles support ring clicking/dragging with mouse or touch, plus relative up/down or sideways drags starting over the central number. Pointer capture and window release/cancel handling keep drags reliable outside the circle.
+
+Handwritten task entry uses fixed descender allowance instead of changing height for each letter; wrapping adds lines, with tighter line spacing in task rows and notes. The new body-weight field is optional in older backups and cloud records.
 
 ## Current interface
 

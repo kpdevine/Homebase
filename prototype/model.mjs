@@ -7,6 +7,7 @@ export { GROUPS } from './muscles.mjs';
 
 export function dateKey(date) { return date.toISOString().slice(0, 10); }
 export function addDays(key, amount) { const date = new Date(`${key}T12:00:00Z`); date.setUTCDate(date.getUTCDate() + amount); return dateKey(date); }
+export function isEditableDay(key, today) { return key >= addDays(today, -7); }
 export function sampleWeekStart(key) { const day = new Date(`${key}T12:00:00Z`).getUTCDay(); return addDays(key, -((day + 6) % 7)); }
 export function monthGrid(key) {
   const first = `${key.slice(0, 7)}-01`;
@@ -24,13 +25,13 @@ export function moveMonth(key, amount) {
 export function scoreFromPoint(x, y, centerX, centerY, {min=1,max=10,step=.1}={}) {
   if (Math.hypot(x - centerX, y - centerY) < 10) return null;
   const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
-  let offset = (angle - 135 + 720) % 360;
-  // The 90-degree gap at the bottom snaps to its nearest endpoint.
-  if (offset > 270) offset = offset < 315 ? 270 : 0;
-  return Number((Math.round((min + offset / 270 * (max-min))/step)*step).toFixed(6));
+  let offset = (angle - 105 + 720) % 360;
+  // The small bottom gap snaps to its nearest endpoint.
+  if (offset > 330) offset = offset < 345 ? 330 : 0;
+  return Number((Math.round((min + offset / 330 * (max-min))/step)*step).toFixed(6));
 }
 export function meterPoint(score, radius = 82, center = 110) {
-  const angle = (135 + (score - 1) / 9 * 270) * Math.PI / 180;
+  const angle = (105 + (score - 1) / 9 * 330) * Math.PI / 180;
   return { x: center + radius * Math.cos(angle), y: center + radius * Math.sin(angle) };
 }
 export function meterPath(radius = 82, center = 110) {
@@ -49,12 +50,12 @@ const checklist = ['Read for 20 minutes', 'Get outside for a walk', 'Take a stre
 export const DAY_SECTIONS = [
   { id: 'nutrition', label: 'Nutrition' },
   { id: 'training', label: 'Daily training' },
-  { id: 'checklists', label: 'Checklists' },
+  { id: 'checklists', label: 'To-do list' },
 ];
 
 function emptyDay(date) {
   return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' }, comment:'', sentiments:{notes:'',rating:null},
-    checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
+    bodyWeight:null, checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
 }
 
 function invalidateReview(day, section) {
@@ -153,6 +154,11 @@ export function createStore(options = {}) {
       if(typeof value!=='string'||value.length>5000)throw new RangeError('Use up to 5000 characters for your day comment.');
       writableDay(key).comment=value;
     },
+    updateBodyWeight(key, value) {
+      if(value!==null&&(!value||!['lb','kg'].includes(value.unit)||typeof value.value!=='number'||!Number.isFinite(value.value)||value.value<1||value.value>(value.unit==='kg'?700:1500)||Math.abs(value.value*10-Math.round(value.value*10))>1e-8))throw new RangeError('Enter a body weight in 0.1 steps, using lb or kg.');
+      const day=writableDay(key);
+      if(JSON.stringify(day.bodyWeight)!==JSON.stringify(value)){day.bodyWeight=value?{value:value.value,unit:value.unit}:null;invalidateReview(day,'training');}
+    },
     updateSentiments(key, changes) {
       if(!changes||typeof changes!=='object'||Array.isArray(changes)||Object.keys(changes).some(key=>!['notes','rating'].includes(key)))throw new RangeError('Use sentiment notes and an optional rating.');
       if('notes' in changes && (typeof changes.notes!=='string'||changes.notes.length>5000))throw new RangeError('Use up to 5000 characters for sentiments.');
@@ -178,7 +184,7 @@ export function createStore(options = {}) {
       } else task={id:nextId('task'),name:clean,done:false,children:children.map(name=>({id:nextId('task'),name:name.trim(),done:false,children:[]}))};
       const day=writableDay(key);
       if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
-      if(task) { day.checklistTouched=true; invalidateReview(day,'checklists'); }
+      if(task) invalidateReview(day,'checklists');
       return task?.id ?? null;
     },
     removeTask(key, id) {
@@ -187,7 +193,7 @@ export function createStore(options = {}) {
       if (index < 0) throw new Error('Task not found.');
       const [task] = day.tasks.splice(index, 1);
       if(task.templateId) day.skippedTemplates.push(task.templateId);
-      day.checklistTouched=true; invalidateReview(day, 'checklists');
+      invalidateReview(day, 'checklists');
       return { task: structuredClone(task), index };
     },
     restoreTask(key, task, index) {
@@ -196,7 +202,7 @@ export function createStore(options = {}) {
       const day = writableDay(key);
       if(task.templateId) { day.skippedTemplates=day.skippedTemplates.filter(id=>id!==task.templateId); day.tasks=day.tasks.filter(item=>item.templateId!==task.templateId); }
       day.tasks.splice(Math.max(0, Math.min(day.tasks.length, index)), 0, structuredClone(task));
-      day.checklistTouched=true; invalidateReview(day, 'checklists');
+      invalidateReview(day, 'checklists');
     },
     stopTemplate(id, afterDate) {
       const template=templates.find(item=>item.id===id);
@@ -259,9 +265,13 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateSentiments', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
     const original = store[method];
-    store[method] = (...args) => { const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result; };
+    store[method] = (...args) => {
+      const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];
+      if(options.editableToday&&date&&!isEditableDay(date,options.editableToday()))throw new Error('Days more than a week ago are summary only.');
+      const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result;
+    };
   }
   return store;
 }

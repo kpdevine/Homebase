@@ -16,10 +16,15 @@ test('all 91 tenth-step positions round-trip and dragging stays within the scale
   }
 });
 
-test('the bottom gap chooses the nearest endpoint instead of wrapping through a score', () => {
+test('meter spans 6:30 to 5:30 and the small bottom gap snaps to its nearest endpoint', () => {
   const at = angle => scoreFromPoint(110 + 82 * Math.cos(angle * Math.PI / 180), 110 + 82 * Math.sin(angle * Math.PI / 180), 110, 110);
-  assert.equal(at(60), 10);
-  assert.equal(at(120), 1);
+  const start=meterPoint(1),end=meterPoint(10);
+  assert.ok(start.x<110&&end.x>110);
+  assert.ok(Math.abs(start.y-end.y)<1e-8);
+  assert.ok(Math.abs(Math.atan2(start.y-110,start.x-110)*180/Math.PI-105)<1e-8);
+  assert.ok(Math.abs(Math.atan2(end.y-110,end.x-110)*180/Math.PI-75)<1e-8);
+  assert.equal(at(80),10);
+  assert.equal(at(100),1);
 });
 
 test('date arithmetic crosses month/year/leap boundaries without moving a calendar key', () => {

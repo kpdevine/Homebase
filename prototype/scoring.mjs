@@ -28,7 +28,7 @@ export function summarizeDay(day, trainingEntries = [], week) {
     { id: 'nutrition', label: 'Nutrition', score: day.nutrition, detail: day.nutrition === null ? 'Not logged yet' : `${day.nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
     { id: 'training', label: 'Daily training', score: training.score, logged:training.logged, excluded:training.excluded,
       detail:training.logged&&!training.target?'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Rest day covered':'Rest allowance used up'} · ${training.restCredits}/2 left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
-    { id: 'checklists', label: 'Checklist', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
+    { id: 'checklists', label: 'To-do list', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
   ];
   const requiredLogged=sections.filter(section=>section.logged??section.score!==null).length;
   if(day.sentiments?.rating!==null && day.sentiments?.rating!==undefined) sections.push({id:'sentiments',label:'Sentiments',score:day.sentiments.rating,detail:`${day.sentiments.rating.toFixed(1)} out of 10 · optional`,optional:true});
@@ -41,6 +41,19 @@ export function localDateKey(date = new Date(), timeZone = 'America/Chicago') {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
   const part = type => parts.find(item => item.type === type).value;
   return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+export function taskScoreRange(summary) {
+  if(!summary.total||summary.done===summary.total||summary.sections.find(section=>section.id==='checklists')?.score===null)return {score:summary.score,low:summary.score,projected:false};
+  const withTasks=score=>{
+    const values=summary.sections.map(section=>section.id==='checklists'?score:section.score).filter(value=>value!==null);
+    return Math.round(values.reduce((sum,value)=>sum+value,0)/values.length*10)/10;
+  };
+  return {score:withTasks(10),low:withTasks(summary.done/summary.total*10),projected:true};
+}
+
+export function categorySummary(summary, category='all') {
+  return category==='all'?summary:{...summary,score:summary.sections.find(section=>section.id===category)?.score??null,provisional:false};
 }
 
 export function averageDays(dates, getSummary) {
