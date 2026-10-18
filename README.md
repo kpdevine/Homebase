@@ -8,7 +8,7 @@ A local dashboard for dated tasks, recurring routines, nutrition ratings, traini
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 97 tests.
+Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 99 tests.
 
 The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Settings → Cloud sync connects personal records across devices through Google sign-in and Firebase. Open [shared Homebase](https://homebase-d3c6c.firebaseapp.com/) on your phone and display. See [Firebase setup and sync](docs/firebase-sync.md).
 
@@ -18,7 +18,7 @@ The root app starts empty and saves on this browser/device. [The synthetic previ
 - Dated one-time or recurring tasks: daily, weekdays, weekly, or selected weekdays. Expandable parents depend on all subtasks. Individual occurrences support removal/Undo; schedules can stop after today.
 - Nutrition dragging/buttons/arrows in 0.1 steps, direct entry to two decimal places, and optional handwritten notes. Training has dated set/rest logs, weekly targets, and the same notes treatment. Notes have a small cursor made from the owner's rotated slash.
 - Consistent LCD panels, numbered navigation, inset inputs, brief stepped transitions, and reduced-motion support. Dense tasks, a direct overview add button, aligned checkboxes, bold handwritten task headings, and entry underlines that accommodate descenders without shifting the layout. A time-based Chicago greeting, centered score with raised decimals, and a large corner clock.
-- Blue/indigo meters coded by amount, larger missing-input warnings, gradually brighter rings with a slight bias toward higher scores, white accents at 9.2+, and a second halo at 10. Calendar daily, Monday–Friday weekly, and monthly rings plus a logging streak. Blanks are omitted; provisional state is explicit.
+- Blue/indigo meters coded by amount, larger missing-input warnings, gradually brighter rings with a slight bias toward higher scores, white accents at 9.2+, and a second halo at 10. Calendar daily, Monday–Sunday weekly, and monthly rings plus a logging streak. Blanks are omitted; provisional state is explicit.
 - Read-only daily recaps with score/status, tasks and subtasks, dated training totals, and full handwritten notes. Category shortcuts and keyboard calendar navigation make earlier days easier to revisit.
 - Local persistence, backup export/import, storage recovery, and conflicting-tab protection. Version-1 backups migrate to version 2 without losing history.
 

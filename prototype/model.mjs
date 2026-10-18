@@ -91,8 +91,8 @@ export function createStore(options = {}) {
   const week = sampleWeekStart(today);
   if (options.seed !== false) targets.set(week, GROUPS.map(group => ({ ...group })));
   for (const [index, group] of (options.seed === false ? [] : GROUPS).entries()) {
-    entries.push({ id: nextId('gym'), date: addDays(week, 1), groupId: group.id, sets: [5, 6, 3, 3, 4, 5, 3][index] });
-    entries.push({ id: nextId('gym'), date: addDays(week, 2), groupId: group.id, sets: [3, 4, 2, 2, 2, 3, 3][index] });
+    entries.push({ id: nextId('gym'), date: addDays(week, 1), groupId: group.id, sets: [5, 6, 3, 3, 4, 5, 3, 2][index] });
+    entries.push({ id: nextId('gym'), date: addDays(week, 2), groupId: group.id, sets: [3, 4, 2, 2, 2, 3, 3, 2][index] });
   }
   for (const entry of entries) {
     if (!days.has(entry.date)) days.set(entry.date, emptyDay(entry.date));
@@ -113,7 +113,8 @@ export function createStore(options = {}) {
   function writableDay(key) { const day=loadDay(key); days.set(key,day); return day; }
   function effectiveTargets(key) {
     const start=sampleWeekStart(key),source=[...targets.keys()].filter(week=>week<=start).sort().at(-1);
-    return {source:source||null,groups:targets.get(source)||GROUPS};
+    const saved=targets.get(source);
+    return {source:source||null,groups:GROUPS.map(group=>({...group,target:saved?saved.find(value=>value.id===group.id)?.target??0:group.target}))};
   }
   function loadWeek(key) {
     const start=sampleWeekStart(key),end=addDays(start,6),effective=effectiveTargets(key);
@@ -239,7 +240,7 @@ export function createStore(options = {}) {
       const day = loadDay(key);
       const dailyEntries = this.loadTrainingDay(key);
       const ready = { nutrition: day.nutrition !== null,
-        training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training' && dailyEntries.length > 0,
+        training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training',
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
@@ -248,7 +249,7 @@ export function createStore(options = {}) {
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Log sets or mark this as a rest day.');
+      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Confirm gym attendance or mark this as a rest day.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },

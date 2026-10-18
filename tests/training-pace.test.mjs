@@ -9,8 +9,8 @@ const summary=(store,date)=>summarizeDay(store.loadDay(date),store.loadTrainingD
 function fresh(){const store=createStore({seed:false});store.setWeekTargets(monday,GROUPS.map((group,index)=>({id:group.id,target:index<5?10:0})));return store;}
 function rest(store,index){const date=addDays(monday,index);store.setTrainingMode(date,'rest');return store.trainingProgress(date);}
 
-test('all six proposed useful/extra examples produce the specified daily scores',()=>{
-  for(const [useful,extra,score] of [[10,0,10],[8,0,8],[5,10,7.5],[0,10,2.5],[0,20,5],[10,10,10]]){
+test('six goal/non-goal examples earn four attendance points plus six scaled set points',()=>{
+  for(const [useful,extra,score] of [[10,0,10],[8,0,8.8],[5,10,8.5],[0,10,5.5],[0,20,7],[10,10,10]]){
     const store=fresh();store.addGymEntry(monday,'chest',10);
     if(useful)store.addGymEntry(tuesday,'back',useful);
     if(extra)store.addGymEntry(tuesday,'chest',extra);
@@ -22,14 +22,14 @@ test('all six proposed useful/extra examples produce the specified daily scores'
 test('a group crossing its weekly cap splits a log into useful and extra sets',()=>{
   const store=fresh();store.addGymEntry(monday,'chest',8);const id=store.addGymEntry(tuesday,'chest',6);
   const value=store.trainingProgress(tuesday),entry=value.classifications.find(item=>item.id===id);
-  assert.equal(entry.useful,2);assert.equal(entry.nonUseful,4);assert.equal(value.weighted,3);assert.equal(value.score,3);
+  assert.equal(entry.useful,2);assert.equal(entry.nonUseful,4);assert.equal(value.weighted,3);assert.equal(value.score,5.8);
   assert.equal(value.credited,10);assert.equal(value.actual,14);assert.equal(store.loadWeek(tuesday).groups[0].completed,14);
 });
 
 test('daily target is fixed regardless of prior progress and later workouts cannot improve earlier scores',()=>{
   const store=fresh();store.addGymEntry(monday,'chest',2);store.addGymEntry(tuesday,'back',10);
-  assert.equal(store.trainingProgress(monday).score,2);assert.equal(store.trainingProgress(tuesday).score,10);
-  store.addGymEntry(addDays(monday,6),'chest',20);assert.equal(store.trainingProgress(monday).score,2);
+  assert.equal(store.trainingProgress(monday).score,5.2);assert.equal(store.trainingProgress(tuesday).score,10);
+  store.addGymEntry(addDays(monday,6),'chest',20);assert.equal(store.trainingProgress(monday).score,5.2);
   assert.equal(store.trainingProgress(tuesday).dailyTarget,10);
 });
 
@@ -53,7 +53,7 @@ test('completed weekly goals make subsequent rest perfect without spending any m
 
 test('a workout with only extra or untargeted sets earns quarter credit and uses no rest credit',()=>{
   const store=fresh();store.addGymEntry(monday,'chest',10);store.addGymEntry(tuesday,'chest',10);store.addGymEntry(tuesday,'legs',10);
-  const value=store.trainingProgress(tuesday);assert.equal(value.score,5);assert.equal(value.nonUseful,20);assert.equal(value.useful,0);
+  const value=store.trainingProgress(tuesday);assert.equal(value.score,7);assert.equal(value.nonUseful,20);assert.equal(value.useful,0);
   assert.equal(value.rest,false);assert.equal(value.restCredits,2);assert.equal(value.credited,10);
 });
 
@@ -66,19 +66,19 @@ test('week tracking resets Monday without changing earlier goals or records',()=
 
 test('targets carry forward until edited without changing earlier weeks or crossing later saved edits',()=>{
   const store=fresh();const targets=key=>store.loadWeek(key).groups.map(group=>group.target);
-  assert.deepEqual(targets(addDays(monday,7)),[10,10,10,10,10,0,0]);
+  assert.deepEqual(targets(addDays(monday,7)),[10,10,10,10,10,0,0,0]);
   store.setWeekTargets(addDays(monday,14),GROUPS.map(group=>({id:group.id,target:20})));
   store.setWeekTargets(addDays(monday,7),GROUPS.map(group=>({id:group.id,target:12})));
-  assert.deepEqual(targets(monday),[10,10,10,10,10,0,0]);assert.deepEqual(targets(addDays(monday,7)),Array(7).fill(12));
-  assert.deepEqual(targets(addDays(monday,14)),Array(7).fill(20));assert.deepEqual(targets(addDays(monday,21)),Array(7).fill(20));
+  assert.deepEqual(targets(monday),[10,10,10,10,10,0,0,0]);assert.deepEqual(targets(addDays(monday,7)),Array(8).fill(12));
+  assert.deepEqual(targets(addDays(monday,14)),Array(8).fill(20));assert.deepEqual(targets(addDays(monday,21)),Array(8).fill(20));
   const restored=createStore({seed:false,snapshot:validateSnapshot(store.exportSnapshot())});
-  assert.deepEqual(restored.loadWeek(addDays(monday,28)).groups.map(group=>group.target),Array(7).fill(20));
+  assert.deepEqual(restored.loadWeek(addDays(monday,28)).groups.map(group=>group.target),Array(8).fill(20));
 });
 
 test('backdated set deletion reclassifies later sets and reopens affected reviews',()=>{
   const store=fresh(),id=store.addGymEntry(monday,'chest',10);store.addGymEntry(tuesday,'chest',10);
   store.updateRating(tuesday,8);for(const section of ['nutrition','training','checklists'])store.confirmSection(tuesday,section);store.completeDay(tuesday);
-  assert.equal(store.trainingProgress(tuesday).score,2.5);
+  assert.equal(store.trainingProgress(tuesday).score,5.5);
   store.removeGymEntry(id);assert.equal(store.trainingProgress(tuesday).score,10);assert.equal(store.loadDay(tuesday).completedAt,null);
   assert.deepEqual(store.loadDay(tuesday).reviewed,{nutrition:true,training:false,checklists:true});
   assert.equal(store.loadDay(monday).trainingMode,'rest');assert.equal(store.trainingProgress(tuesday).restCredits,1);
@@ -93,7 +93,7 @@ test('backdating rest reallocates credits, and replacing rest with lifting gives
 test('target edits change the fixed daily denominator and replay useful sets and completed-goal rests',()=>{
   const store=fresh();store.addGymEntry(monday,'chest',10);store.confirmSection(monday,'training');rest(store,1);
   store.setWeekTargets(monday,GROUPS.map(group=>({id:group.id,target:20})));
-  assert.equal(store.trainingProgress(monday).dailyTarget,28);assert.equal(store.trainingProgress(monday).score,3.6);
+  assert.equal(store.trainingProgress(monday).dailyTarget,32);assert.equal(store.trainingProgress(monday).score,5.9);
   assert.equal(store.loadDay(monday).reviewed.training,false);assert.equal(store.trainingProgress(tuesday).score,10);
 });
 
@@ -126,6 +126,15 @@ test('suggestions use only needed muscle goals through the selected date, regard
 
 test('a workout entered later for an earlier date receives useful credit first',()=>{
   const store=fresh();store.addGymEntry(tuesday,'chest',10);assert.equal(store.trainingProgress(tuesday).score,10);
-  store.addGymEntry(monday,'chest',8);assert.equal(store.trainingProgress(monday).score,8);
-  assert.equal(store.trainingProgress(tuesday).useful,2);assert.equal(store.trainingProgress(tuesday).nonUseful,8);assert.equal(store.trainingProgress(tuesday).score,4);
+  store.addGymEntry(monday,'chest',8);assert.equal(store.trainingProgress(monday).score,8.8);
+  assert.equal(store.trainingProgress(tuesday).useful,2);assert.equal(store.trainingProgress(tuesday).nonUseful,8);assert.equal(store.trainingProgress(tuesday).score,6.4);
+});
+
+test('gym attendance without sets earns four, can be reviewed, persists, and never spends a rest credit',()=>{
+ const store=fresh();store.setTrainingMode(monday,'training');
+ const progress=store.trainingProgress(monday);assert.equal(progress.score,4);assert.equal(progress.logged,true);assert.equal(progress.restCredits,2);
+ store.confirmSection(monday,'training');assert.equal(store.dayProgress(monday).sections.find(value=>value.id==='training').ready,true);
+ const restored=createStore({seed:false,snapshot:validateSnapshot(store.exportSnapshot())});assert.equal(restored.trainingProgress(monday).score,4);
+ const recap=dailyRecap(restored.loadDay(monday),[],restored.loadWeek(monday));assert.equal(recap.training.score,4);assert.equal(recap.training.rest,false);
+ assert.equal(rest(restored,1).restCredits,1);assert.equal(rest(restored,1).score,10);
 });

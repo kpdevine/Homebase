@@ -37,7 +37,7 @@ test('a training log earns daily useful-set credit and removing its last entry r
   const store = createStore({ seed:false });
   const id = store.addGymEntry(DEMO_TODAY, 'chest', 3);
   let summary = summarizeDay(store.loadDay(DEMO_TODAY), store.loadTrainingDay(DEMO_TODAY));
-  assert.equal(summary.sections[1].score, 2.2); assert.equal(summary.score, 2.2); assert.ok(summary.provisional);
+  assert.equal(summary.sections[1].score, 5.3); assert.equal(summary.score, 5.3); assert.ok(summary.provisional);
   store.removeGymEntry(id);
   summary = summarizeDay(store.loadDay(DEMO_TODAY), store.loadTrainingDay(DEMO_TODAY));
   assert.equal(summary.sections[1].score, 10); assert.equal(summary.score, 10);

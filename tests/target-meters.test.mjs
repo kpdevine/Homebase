@@ -21,6 +21,6 @@ test('new edits accept only whole 0–20 targets without corrupting saved values
 });
 test('an older combined Legs goal can also be turned off without losing its logs',()=>{
   const store=createStore({seed:false});store.addGymEntry(date,'legs',5);const snapshot=store.exportSnapshot();snapshot.targets=[[date,[{id:'legs',name:'Legs',target:16}]]];
-  const restored=createStore({seed:false,snapshot});restored.setWeekTargets(date,[...values(0),{id:'legs',target:0}]);
+  const restored=createStore({seed:false,snapshot});restored.setWeekTargets(date,values(0));
   assert.equal(restored.trainingProgress(date).target,0);assert.equal(restored.trainingProgress(date).actual,5);
 });

@@ -7,6 +7,7 @@ export const GROUPS = [
   { id:'shoulders', name:'Shoulders', target:10 },
   { id:'quads', name:'Quads', target:8 },
   { id:'hamstrings', name:'Hamstrings', target:8 },
+  { id:'core', name:'Core', target:0 },
 ];
 export const ALL_GROUPS = [...GROUPS, { id:'legs', name:'Legs', target:16 }];
 export const muscleName = id => ALL_GROUPS.find(group=>group.id===id)?.name || id;

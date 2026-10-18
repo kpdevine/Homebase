@@ -105,10 +105,10 @@ test('gym totals use dated entries, preserve actual over-target totals, and can 
   for (const invalid of [0, -2, 2.5, 101]) assert.throws(() => store.addGymEntry(DEMO_TODAY, 'chest', invalid), RangeError);
   assert.throws(() => store.addGymEntry(DEMO_TODAY, 'unknown', 3), RangeError);
   store.addGymEntry('2026-10-19', 'chest', 3);
-  assert.equal(store.loadWeek('2026-10-19').groups.length, 7);
+  assert.equal(store.loadWeek('2026-10-19').groups.length, 8);
   assert.equal(store.loadTrainingDay('2026-10-19')[0].sets, 3);
   for (const entry of original.entries) store.removeGymEntry(entry.id);
-  assert.equal(store.loadWeek(DEMO_TODAY).groups.length, 7);
+  assert.equal(store.loadWeek(DEMO_TODAY).groups.length, 8);
   assert.ok(store.loadWeek(DEMO_TODAY).groups.every(group => group.completed === 0));
 });
 
@@ -127,12 +127,13 @@ test('a day can only be completed after explicit review of all three sections', 
   assert.ok(store.loadDay(DEMO_TODAY).completedAt);
 });
 
-test('missing nutrition and an unlogged workout cannot be confirmed', () => {
+test('missing nutrition and unanswered gym cannot be confirmed; attendance can', () => {
   const store = createStore();
   const key = '2026-10-20';
   assert.throws(() => store.confirmSection(key, 'nutrition'));
-  store.setTrainingMode(key, 'training');
   assert.throws(() => store.confirmSection(key, 'training'));
+  store.setTrainingMode(key, 'training');
+  store.confirmSection(key, 'training');
   store.addGymEntry(key, 'legs', 4);
   store.confirmSection(key, 'training');
   assert.throws(() => store.setTrainingMode(key, 'rest'));

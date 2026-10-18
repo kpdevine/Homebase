@@ -20,11 +20,11 @@ export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
       classifications.push({...entry,useful:credited,nonUseful:extra,weighted:credited+extra*.25});
       useful+=credited;nonUseful+=extra;totals.set(entry.groupId,previous+entry.sets);
     }
-    const dailySets=useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest;
+    const dailySets=useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest||current.trainingMode==='training';
     const goalsComplete=target>0&&week.groups.every(group=>(totals.get(group.id)||0)>=group.target);
     const restCreditUsed=rest&&target>0&&!goalsComplete&&restCredits>0;
     const weighted=useful+nonUseful*.25;
-    const score=!logged||!target?null:rest?(goalsComplete||restCreditUsed?10:0):weighted>=dailyTarget?10:Math.min(9.9,Math.round(weighted/dailyTarget*100)/10);
+    const score=!logged||!target?null:rest?(goalsComplete||restCreditUsed?10:0):weighted>=dailyTarget?10:Math.min(9.9,Math.round((4+weighted/dailyTarget*6)*10)/10);
     if(restCreditUsed)restCredits--;
     results.set(current.date,{score,logged,excluded:logged&&!target,rest,restCreditUsed,restCredits,goalsComplete,dailySets,useful,nonUseful,weighted});
   }

@@ -306,19 +306,20 @@ function renderGym() {
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
   $('#gym-form').hidden=day.trainingMode!=='training';
-  $('#training-rest-hint').textContent=entries.length?'Useful sets earn full credit; extra sets earn 25%.':noLift?'Rest is logged. Credits are assigned in date order; no advance planning needed.':day.trainingMode==='training'?'Log your sets below. Each workout is scored against the same daily target.':'Answer Yes or No to log this day. Unanswered dates stay unlogged.';
-  const restReason=pace.goalsComplete?'All weekly goals met · no credit needed':pace.restCreditUsed?'Rest credit used · 10 / 10':'No rest credits left · 0 / 10';
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} useful + ${pace.nonUseful} extra × 25% = ${pace.weighted} weighted sets`}</span><small>${pace.target?`${pace.dailyTarget} weighted sets for a 10 · ${pace.target} weekly goal ÷ 5`:'Set muscle targets below to include gym in the daily average.'}</small><small>${pace.restCredits} / 2 rest credits left through ${shortDate(selectedDate)} · ${pace.credited} / ${pace.target} weekly goal sets · ${pace.actual} total sets</small></div>`;
-  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining · ${group.credited}/${group.target}</small></span>`).join('')}</div><p>Based on progress through this date.${pace.rest?' Saved for your next lifting day.':''}</p>`:pace.target?'<p>Every muscle target is met. Extra sets earn 25% daily credit; rest earns 10 without using a credit.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
-  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${entry.sets} sets · ${credit.useful} useful · ${credit.nonUseful} extra</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
+  $('#training-rest-hint').textContent=entries.length?'4 points for attendance. Goal sets earn the remaining 6; non-goal sets count at 25%.':noLift?'Rest is logged. Credits are assigned in date order; no advance planning needed.':day.trainingMode==='training'?'Attendance logged · 4 points. Add sets to earn up to 6 more.':'Answer Yes or No to log this day. Unanswered dates stay unlogged.';
+  const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets for all 6 set points`:'Set muscle targets below to include gym in the daily average.'}</small></div>`;
+  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining · ${group.credited}/${group.target}</small></span>`).join('')}</div><p>Based on progress through this date.${pace.rest?' Saved for your next lifting day.':''}</p>`:pace.target?'<p>Every muscle target is met. Non-goal sets earn 25% daily credit; further rest is covered without using credits.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
+  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
   const weekCredit=week.groups.reduce((sum,group)=>sum+Math.min(group.completed,group.target),0);
   $('#gym-summary').textContent = `${weekCredit} / ${target}`;
   $('#gym-total-sets').textContent=total;
-  $('#gym-credit-summary').textContent=`${total} total sets logged · ${weekCredit} count toward muscle targets.${total>weekCredit?` ${total-weekCredit} extra or untargeted sets remain in your log.`:''}`;
+  $('#gym-credit-summary').textContent=`${total} total sets logged · ${weekCredit} count toward muscle targets.${total>weekCredit?` ${total-weekCredit} non-goal set${total-weekCredit===1?" remains":"s remain"} in your log.`:''}`;
+  $('#weekly-rest-credits').innerHTML=`<div><span class="eyebrow">Weekly rest credits</span><strong>${pace.restCredits}<small> / 2 left</small></strong></div><p>Remaining through ${shortDate(selectedDate)}<br>Resets every Monday</p>`;
   $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday · ${week.targetSource?'targets repeat until edited':'default targets · edit below'}`;
   const volumeGroups=[...week.groups];
-  for(const entry of week.entries) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
+  for(const entry of week.entries.filter(entry=>entry.groupId!=='legs')) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
   $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
   renderTargetEditor(week);
   $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${muscleName(entry.groupId)} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
@@ -338,7 +339,7 @@ function renderReview() {
     button.textContent = section.reviewed ? `✓ ${label[0].toUpperCase()+label.slice(1)} reviewed` : `Confirm ${label} review${reviewing ? ' →' : ''}`;
     button.classList.toggle('is-reviewed', section.reviewed);
     const purpose = section.id === 'checklists' ? 'Unfinished tasks stay unchecked.' : 'Confirms this section’s review.';
-    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Answer Yes and log sets, or No to record rest.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : 'A full-day summary comes before completion.'}`;
+    $(`#${section.id}-review-hint`).textContent = invalidRating ? 'Enter a rating from 1 to 10 in steps of 0.1.' : !section.ready ? section.id === 'nutrition' ? 'Enter a nutrition rating first.' : 'Answer Yes to record gym attendance, or No to record rest.' : section.reviewed ? section.id === 'checklists' ? 'Review confirmed. Unfinished tasks stay unchecked.' : 'Review confirmed.' : `${purpose} ${reviewing ? next ? `Next: ${next.label}.` : 'Next: full-day summary.' : 'A full-day summary comes before completion.'}`;
     $(`#tab-${section.id} .tab-check`).textContent = section.reviewed ? '✓' : '';
     $(`#tab-${section.id}`).setAttribute('aria-label', `${viewLabels[section.id]}${section.reviewed ? ', reviewed' : ''}`);
   }
@@ -366,9 +367,9 @@ function renderHistory() {
     const summary = summaryFor(date), day = store.loadDay(date), reward=scoreReward(summary.score);
     let cell = `<button class="calendar-day ${reward} ${date.slice(0,7) === calendarMonth.slice(0,7) ? '' : 'outside-month'} ${date === selectedDate ? 'selected' : ''} ${date === today ? 'is-today' : ''}" data-calendar-date="${date}" aria-label="${longDate(date)}, ${summary.score === null ? 'no score' : `${summary.provisional ? 'provisional ' : ''}daily score ${scoreText(summary.score)} out of 10${reward?summary.score===10?', perfect score':', high score':''}`}${day.completedAt ? ', day complete' : ''}" aria-pressed="${date === selectedDate}" ${date === today ? 'aria-current="date"' : ''}><span class="calendar-date">${Number(date.slice(-2))}</span>${circle(summary.score,true)}${day.completedAt ? '<span class="calendar-complete" aria-hidden="true">✓</span>' : ''}</button>`
     if (index % 7 === 6) {
-      const weekDates = dates.slice(index - 6, index - 1);
+      const weekDates = dates.slice(index - 6, index + 1);
       const weekly = averageDays(weekDates, summaryFor);
-      cell += '<div class="calendar-week-score" role="img" aria-label="Week of ' + shortDate(weekDates[0]) + ', Monday to Friday average ' + scoreText(weekly.score) + ' out of 10, ' + weekly.count + ' of 5 days logged' + (weekly.provisional ? ', partial' : '') + '">' + circle(weekly.score,true) + '<small>' + weekly.count + '/5' + (weekly.provisional ? ' · partial' : '') + '</small></div>';
+      cell += '<div class="calendar-week-score" role="img" aria-label="Week of ' + shortDate(weekDates[0]) + ', Monday to Sunday average ' + scoreText(weekly.score) + ' out of 10, ' + weekly.count + ' of 7 days logged' + (weekly.provisional ? ', partial' : '') + '">' + circle(weekly.score,true) + '<small>' + weekly.count + '/7' + (weekly.provisional ? ' · partial' : '') + '</small></div>';
     }
     return cell;
   }).join('');
@@ -377,7 +378,7 @@ function renderHistory() {
 function recapMarkup({final=false}={}) {
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
-  const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.sets?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
+  const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
   return `
@@ -408,7 +409,7 @@ function setView(next, focus = false) {
   const changed=view!==next;
   view = next; render();
   if(changed)reveal($('#'+panelIds[view]));
-  window.scrollTo({ top:0, behavior:'auto' });
+  $('#main').scrollTo({top:0,behavior:'instant'});
   if (focus) ($('#tab-' + view)||$('#main')).focus({preventScroll:true});
 }
 function navigateDay(date, changeMonth = true) {
@@ -662,7 +663,7 @@ $('#toggle-gym-log').addEventListener('click', () => {
 $('#targets-form').addEventListener('submit', event => {
   event.preventDefault();
   const values = [...targetDraft].map(([id,target])=>({id,target}));
-  try { store.setWeekTargets(selectedDate, values); render(); announce('Targets saved. They repeat from this week until edited.'); }
+  try { store.setWeekTargets(selectedDate, values); $('.target-editor').open=false; render(); $('.target-editor summary').focus({preventScroll:true}); cloud?.resume(); announce('Targets saved. They repeat from this week until edited.'); }
   catch (error) { announce(error.message); }
 });
 $('#complete-day').addEventListener('click', startCompletion);

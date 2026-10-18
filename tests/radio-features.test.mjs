@@ -38,14 +38,14 @@ test('notes bounds and malformed backup notes are rejected before mutations',()=
  assert.deepEqual(store.exportSnapshot(),before);
  for(const notes of [null,{}, {nutrition:3,training:''},{nutrition:'',training:'x'.repeat(5001)}]){const copy=structuredClone(before);copy.days[0].notes=notes;assert.throws(()=>validateSnapshot(copy));}
 });
-test('weekly averages use Monday to Friday, while month averages include only that month',()=>{
+test('weekly averages use Monday to Sunday, while month averages include only that month',()=>{
  const store=createStore({seed:false});const ratings={'2026-09-28':5,'2026-09-29':6,'2026-10-01':8,'2026-10-02':9,'2026-10-03':10,'2026-10-04':10};
  for(const[key,value]of Object.entries(ratings))store.updateRating(key,value);
- const week=Array.from({length:5},(_,i)=>addDays('2026-09-28',i));
- const weekly=averageDays(week,read(store));assert.equal(weekly.score,7);assert.equal(weekly.count,4);assert.equal(weekly.total,5);assert.ok(weekly.provisional);
+ const week=Array.from({length:7},(_,i)=>addDays('2026-09-28',i));
+ const weekly=averageDays(week,read(store));assert.equal(weekly.score,8);assert.equal(weekly.count,6);assert.equal(weekly.total,7);assert.ok(weekly.provisional);
  const month=monthGrid('2026-10-01').filter(key=>key.startsWith('2026-10'));
  const monthly=averageDays(month,read(store));assert.equal(monthly.score,9.3);assert.equal(monthly.count,4);assert.equal(monthly.total,31);
- store.updateRating('2026-10-02',5);assert.equal(averageDays(week,read(store)).score,6);
+ store.updateRating('2026-10-02',5);assert.equal(averageDays(week,read(store)).score,7.3);
 });
 test('averages distinguish unentered periods, partial daily inputs, and complete periods',()=>{
  assert.deepEqual(averageDays(['a','b'],()=>({score:null,provisional:true})),{score:null,count:0,total:2,provisional:true});
