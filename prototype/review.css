@@ -166,7 +166,8 @@ body:not(.is-overview) .display-footer {height:76px;min-height:76px;padding:0}
 /* Keep score colors legible over the blue LCD, including the pale rewards. */
 #overall-meter .meter-track,.nutrition-meter .meter-track,.target-meter .meter-track,.score-circle .score-circle-track {stroke:#263d75;stroke-opacity:.65}
 #overall-meter .meter-fill,.nutrition-meter .meter-fill,.target-meter .meter-fill {filter:drop-shadow(0 -1px 0 #14275d) drop-shadow(0 1px 0 #14275d) drop-shadow(-1px 0 0 #14275d) drop-shadow(1px 0 0 #14275d) drop-shadow(0 0 var(--score-glow,0px) #def8ffb0)}
-.score-circle .score-circle-fill,.score-circle.score-high .score-circle-fill {filter:drop-shadow(0 -.5px 0 #14275d) drop-shadow(0 .5px 0 #14275d) drop-shadow(-.5px 0 0 #14275d) drop-shadow(.5px 0 0 #14275d) drop-shadow(0 0 var(--score-glow,0px) #def8ffb0)}
+.score-circle .score-circle-fill,.score-circle.score-high .score-circle-fill {filter:none}
+.score-circle .score-circle-outline,.score-circle.score-high .score-circle-outline {stroke:#14275d;stroke-width:4.2;filter:none}
 #overall-meter .meter-number,.nutrition-score .meter-number,.score-circle>span,.target-number strong {color:#102450;text-shadow:1px 1px 0 #b2d5f480}
 #overall-meter.score-high .meter-number,.score-circle.score-high>span {color:#f2fbff;-webkit-text-stroke:1px #14275d;paint-order:stroke fill;text-shadow:0 1px 0 #14275d,0 0 5px #d2f7ff88}
 .score-circle.score-high>span {-webkit-text-stroke-width:.5px}

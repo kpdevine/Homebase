@@ -24,9 +24,15 @@ function play(element,frames,duration,{delay=0,easing='steps(10,end)'}={}) {
 }
 export function sweepRings(container) {
   if(!container)return;
-  container.querySelectorAll('.meter-fill,.score-circle-fill').forEach((path,index)=>{
+  container.querySelectorAll('.meter-fill,.score-circle-fill:not(.score-circle-outline)').forEach((path,index)=>{
     const target=path.getAttribute('stroke-dasharray');
-    if(target&&Number.parseFloat(target)>0)play(path,[{strokeDasharray:'0 100'},{strokeDasharray:target}],780,{delay:Math.min(index*35,140),easing:'steps(20,end)'});
+    if(target&&Number.parseFloat(target)>0) {
+      const frames=[{strokeDasharray:'0 100'},{strokeDasharray:target}];
+      const options={delay:Math.min(index*35,140),easing:'steps(20,end)'};
+      play(path,frames,780,options);
+      const outline=path.parentElement.querySelector('.score-circle-outline');
+      if(outline)play(outline,frames,780,options);
+    }
   });
 }
 export function setMeter(path,percent,{immediate=false}={}) {

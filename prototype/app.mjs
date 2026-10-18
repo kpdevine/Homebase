@@ -86,7 +86,8 @@ function announce(message, undo = null) {
 }
 function summaryFor(date = selectedDate) { return summarizeDay(store.loadDay(date), store.loadTrainingDay(date),store.loadWeek(date)); }
 function circle(score,reward=false) {
-  return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<circle class="score-circle-track" cx="24" cy="24" r="20"/><circle class="score-circle-fill" cx="24" cy="24" r="20" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100" transform="rotate(-90 24 24)"/></svg><span>${scoreText(score)}</span></span>`;
+  const arc=`cx="24" cy="24" r="20" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100" transform="rotate(-90 24 24)"`;
+  return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<circle class="score-circle-track" cx="24" cy="24" r="20"/><circle class="score-circle-fill score-circle-outline" ${arc}/><circle class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
 }
 function renderHeader() {
   document.body.classList.toggle('is-overview', view === 'today');
