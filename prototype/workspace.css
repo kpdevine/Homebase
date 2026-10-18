@@ -1,4 +1,63 @@
 /* Shared meter geometry and planning controls. */
+.handwriting-caret {width:.14em;transform:translateX(-50%);line-height:1}
+.handwriting-caret::before {content:'';display:block;width:100%;height:100%;background:currentColor;-webkit-mask:url('./assets/handwriting-caret.svg') center/100% 100% no-repeat;mask:url('./assets/handwriting-caret.svg') center/100% 100% no-repeat}
+.edit-task {display:inline-grid;place-items:center;flex:none;width:28px;min-height:28px;padding:5px;background:transparent;color:var(--ink);border-radius:3px}
+.edit-task>.icon {width:15px;height:15px}
+.edit-task:hover {background:#c5e6ff44}
+.task-edit-scope {display:flex;flex-wrap:wrap;gap:8px;border:0;padding:0;margin:0 0 20px}
+.task-edit-scope legend {font:700 12px var(--font-display);margin-bottom:10px}
+.task-edit-scope label {position:relative;flex:1;min-width:130px;margin:0}
+.task-edit-scope input {position:absolute;opacity:0}
+.task-edit-scope span {display:block;padding:10px;border:1px solid var(--line);font:400 12px var(--font-ui);text-align:center}
+.task-edit-scope :checked+span {background:#253f80;color:#e2f5ff;border-color:#beddf7}
+.task-edit-scope :focus-visible+span {outline:2px solid #e2f5ff;outline-offset:2px}
+.task-edit-scope p {width:100%;margin:2px 0 0;font:400 10px/1.5 var(--font-ui)}
+.calendar-day.is-logged {background:linear-gradient(145deg,#c0e6ff55,#8db7e52b);border-color:#bedff7;box-shadow:inset 0 -3px #ccecff99,0 0 5px #c3eaff22}
+.calendar-day.is-logged .calendar-date {font-weight:700;color:#102450}
+.calendar-day.is-reviewed {background:linear-gradient(145deg,#c5eaff88,#92bbe533);border-color:#f0fbff;box-shadow:inset 0 0 0 1px #26477f,inset 0 -4px #e2f6ff,0 0 8px #d2f2ff55}
+.calendar-day.is-logged.selected,.calendar-day.is-reviewed.selected {outline:2px solid #213869;outline-offset:-3px}
+.calendar-day .calendar-complete {display:grid;place-items:center;width:16px;height:16px;top:3px;right:3px;border-radius:50%;background:#233e7c;color:#effbff;font:700 11px/1 var(--font-ui);box-shadow:0 0 3px #d4f3ff}
+.calendar-logged {position:absolute;top:3px;right:4px;font-size:8px;color:#dff6ff;text-shadow:0 0 2px #203c75}
+.daily-training-card .body-weight-form {border:1px solid #c4e8ff;background:linear-gradient(140deg,#c9e8ff4a,#a0c8ec26);box-shadow:inset 3px 0 #dbf3ff;padding:14px;margin:0 0 16px}
+.weight-highlight {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.weight-highlight>div {display:flex;flex-direction:column;gap:5px}
+.weight-highlight span {font:700 12px var(--font-display);text-transform:uppercase}
+.weight-highlight strong {font:700 34px/1.1 var(--font-display);color:#112651}
+.weight-highlight strong small {font-size:14px}
+.weight-highlight strong .weight-missing {font:400 19px var(--font-display);text-transform:none}
+.weight-highlight .quiet-button {font-size:11px;padding:8px 10px;min-height:40px}
+.weight-history-dialog {width:min(900px,calc(100% - 32px))}
+.weight-chart-tools {display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+.weight-chart-tools>div {display:flex;gap:6px}
+.weight-chart-tools button {font-size:12px;min-height:40px;padding:8px 12px}
+.weight-chart-tools button[aria-pressed='true'] {background:#233e7c;color:#ecf9ff;border-color:#d4f0ff}
+.weight-chart-summary {font:700 14px/1.6 var(--font-display);margin:20px 0 10px}
+#weight-chart {border:1px solid #b6d9fa;background:#29487d;padding:8px;border-radius:3px}
+#weight-chart svg {display:block;width:100%;height:auto;min-height:170px}
+#weight-chart text {font:400 12px var(--font-ui);fill:#dff3ff}
+.weight-gridline {stroke:#badcf54a;stroke-width:1}
+.weight-line {fill:none;stroke:#d9f4ff;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.weight-point {fill:#f4fcff;stroke:#284477;stroke-width:1.5}
+.weight-chart-empty {color:#e0f3ff;font:400 13px/1.7 var(--font-ui);padding:22px}
+.weight-chart-data {margin-top:16px}
+.weight-chart-data table {width:100%;border-collapse:collapse;font:400 11px/1.5 var(--font-ui);text-align:left}
+.weight-chart-data td,.weight-chart-data th {padding:8px;border-bottom:1px solid var(--line)}
+.filtered-training-total {font:700 15px var(--font-display)}
+.recap-body-weight strong {font-size:25px}
+#tasks-title,#tomorrow-title,#later-title {font:700 26px/1.25 var(--font-handwriting);letter-spacing:.015em;padding:3px 0 6px;margin:0;text-shadow:none}
+.later-plan {margin-top:20px}
+.later-plan .panel-heading {margin-bottom:12px}
+#later-tasks,#later-tasks ul {list-style:none;padding:0;margin:0}
+.planned-task {display:flex;align-items:flex-start;gap:6px}
+.planned-task>span {flex:1;min-width:0;overflow-wrap:anywhere}
+#later-tasks .planned-task {font:400 17px/1.15 'Kieran Handwriting Entry',var(--font-handwriting);padding:6px 0}
+.planned-task small {display:block;font:400 8px var(--font-ui);margin-top:6px}
+.planning-date {border-top:1px solid var(--line);padding:8px 0}
+.planning-date>.text-button {font:700 11px var(--font-display);padding:4px 0;min-height:30px}
+.planning-empty {font:400 10px var(--font-ui);padding:6px 0;opacity:.8}
+.task-week-options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.task-week-options button {min-height:40px;font-size:11px;padding:8px}
+.task-week-options button[aria-pressed='true'] {background:#253f80;color:#dbf2ff;border-color:#b4d7f3}
 .score-circle svg>path {fill:none;stroke-width:3;stroke-linecap:round}
 .score-circle .score-circle-outline {stroke-width:4.2}
 #overall-meter .meter-endpoint.start,.sentiment-endpoint.start,.target-endpoint.start {left:30%;right:auto;top:auto;bottom:-21px;transform:translateX(-50%)}
@@ -121,14 +180,15 @@
   .gym-totals>div {padding:10px}
   .weekly-rest-credits {padding:10px;margin:12px 0}
   .weekly-rest-credits strong {font-size:28px}
-  .app-shell>main>#checklists-view {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px 20px}
+  .app-shell>main>#checklists-view {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:auto minmax(0,1fr);gap:12px 14px}
   #checklists-view>.detail-heading {grid-column:1/-1;margin:0}
-  .checklist-editor,.tomorrow-plan {position:relative;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:18px}
+  .checklist-editor,.tomorrow-plan,.later-plan {position:relative;min-height:0;display:flex;flex-direction:column;overflow:auto;padding:18px}
   .checklist-editor .panel-heading,.checklist-editor .task-tools,.checklist-editor .routine-manager {flex:none}
   .checklist-editor .task-progress {flex:none;margin-top:12px}
   .checklist-editor .task-list {min-height:0;flex:1;overflow:auto}
   #task-summary {margin:10px 0}
-  .tomorrow-plan {margin:0}
+  .tomorrow-plan,.later-plan {margin:0}
+  #later-tasks {min-height:0;flex:1;overflow:auto;padding-right:4px}
   #tomorrow-tasks {min-height:0;flex:1;max-height:none}
   .sentiments-editor {flex:1;min-height:0;container-type:size;padding:18px;overflow:auto;grid-template-columns:minmax(0,1.65fr) minmax(220px,1fr);align-items:start}
   .sentiments-editor textarea[data-notes] {height:calc(100cqh - 80px);min-height:110px;font-size:18px;line-height:1.3}

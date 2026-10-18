@@ -126,6 +126,19 @@ export function createStore(options = {}) {
   function reopenChangedTraining(before) {
     for(const day of days.values())if(before.has(day.date)&&before.get(day.date)!==trainingProgress(day,loadWeek(day.date)).score)invalidateReview(day,'training');
   }
+  function taskDraft(task,changes) {
+    const name=typeof changes.name==='string'?changes.name.trim():'';
+    if(!name||name.length>100)throw new RangeError('Use a task name between 1 and 100 characters.');
+    const children=changes.children??task.children,ids=new Set();
+    if(!Array.isArray(children)||children.length>20)throw new RangeError('Use up to 20 subtasks.');
+    return {name,children:children.map(child=>{
+      if(!child||typeof child.name!=='string'||!child.name.trim()||child.name.trim().length>100)throw new RangeError('Use subtask names of 1–100 characters.');
+      if(child.id&&(!task.children.some(old=>old.id===child.id)||ids.has(child.id)))throw new Error('Subtask no longer exists. Reopen the editor.');
+      if(child.id)ids.add(child.id);
+      return {id:child.id||null,name:child.name.trim()};
+    })};
+  }
+  const planningLimit=()=>options.editableToday?addDays(options.editableToday(),7):null;
   const store = {
     loadDay,
     exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial }); },
@@ -167,6 +180,7 @@ export function createStore(options = {}) {
       if(next.notes!==day.sentiments.notes||next.rating!==day.sentiments.rating) {day.sentiments=next;delete day.reviewed.sentiments;day.completedAt=null;}
     },
     addTask(key, name, options = {}) {
+      if(planningLimit()&&key>planningLimit())throw new RangeError('Plan tasks up to seven days ahead.');
       const clean = String(name).trim();
       if (!clean || clean.length > 100) throw new RangeError('Use a task name between 1 and 100 characters.');
       const children=options.children || [];
@@ -186,6 +200,46 @@ export function createStore(options = {}) {
       if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
       if(task) invalidateReview(day,'checklists');
       return task?.id ?? null;
+    },
+    editTask(key,id,changes) {
+      const current=loadDay(key),task=current.tasks.find(task=>task.id===id);
+      if(!task)throw new Error('Task no longer exists. Reopen the list.');
+      const draft=taskDraft(task,changes),date=changes.date??key;
+      if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||addDays(date,0)!==date)throw new RangeError('Choose a valid task date.');
+      if(options.editableToday&&!isEditableDay(date,options.editableToday()))throw new Error('Days more than a week ago are summary only.');
+      if(planningLimit()&&date>planningLimit())throw new RangeError('Plan tasks up to seven days ahead.');
+      if(task.templateId&&date!==key)throw new Error('Edit a recurring task on its scheduled day.');
+      if(date!==key&&loadDay(date).tasks.length>=1000)throw new RangeError('Task limit reached for that day.');
+      const next={...task,name:draft.name,children:draft.children.map(child=>({...child,id:child.id||nextId('task'),done:task.children.find(old=>old.id===child.id)?.done??false,children:[]}))};
+      if(next.children.length)next.done=next.children.every(child=>child.done);
+      if(date===key&&JSON.stringify(next)===JSON.stringify(task))return id;
+      if(date===key)current.tasks[current.tasks.findIndex(task=>task.id===id)]=next;
+      else {current.tasks=current.tasks.filter(task=>task.id!==id);const target=writableDay(date);target.tasks.push(next);invalidateReview(target,'checklists');}
+      days.set(key,current);invalidateReview(current,'checklists');return id;
+    },
+    editRoutine(key,id,changes) {
+      const current=loadDay(key),task=current.tasks.find(task=>task.id===id),template=templates.find(template=>template.id===task?.templateId);
+      if(!task||!template||!isDue(template,key))throw new Error('Recurring task no longer exists on that date.');
+      const draft=taskDraft(task,changes),recurrence=changes.recurrence;
+      if(!recurrence||!FREQUENCIES.includes(recurrence.frequency)||!Array.isArray(recurrence.weekdays)||recurrence.weekdays.some(day=>!Number.isInteger(day)||day<1||day>7)||recurrence.frequency==='custom'&&!recurrence.weekdays.length)throw new RangeError('Choose a repeat frequency and at least one selected day.');
+      if(templates.length>=5000)throw new RangeError('Recurring task limit reached.');
+      const schedule={name:draft.name,startDate:key,endDate:template.endDate,frequency:recurrence.frequency,weekdays:[...new Set(recurrence.weekdays)].sort()};
+      for(const day of days.values())if(day.date>=key&&isDue(schedule,day.date)&&!day.tasks.some(item=>item.templateId===template.id)&&!day.skippedTemplates.includes(template.id)&&day.tasks.length>=1000)throw new RangeError('Task limit reached on an affected date.');
+      const links=draft.children.map(child=>template.children.find(old=>child.id?.endsWith('-'+old.id))?.id??null);
+      const next={...schedule,id:nextId('routine'),children:draft.children.map(child=>({id:nextId('child'),name:child.name}))};
+      template.endDate=addDays(key,-1);templates.push(next);days.set(key,current);
+      for(const day of days.values())if(day.date>=key) {
+        const old=day.tasks.find(item=>item.templateId===template.id),skipped=day.skippedTemplates.includes(template.id);
+        day.tasks=day.tasks.filter(item=>item.templateId!==template.id);
+        if(skipped&&isDue(next,day.date))day.skippedTemplates.push(next.id);
+        if(!skipped&&isDue(next,day.date)) {
+          const replacement=occurrence(next,day.date);
+          replacement.children.forEach((child,index)=>{child.done=old?.children.find(item=>links[index]&&item.id.endsWith('-'+links[index]))?.done??false;});
+          replacement.done=replacement.children.length?replacement.children.every(child=>child.done):old?.done??false;
+          day.tasks.push(replacement);invalidateReview(day,'checklists');
+        } else if(old)invalidateReview(day,'checklists');
+      }
+      return loadDay(key).tasks.find(item=>item.templateId===next.id)?.id??null;
     },
     removeTask(key, id) {
       const day = writableDay(key);
@@ -265,7 +319,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
       const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];

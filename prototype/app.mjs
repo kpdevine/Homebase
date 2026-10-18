@@ -10,6 +10,7 @@ import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
+import {weightHistory,weightPlot} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -50,6 +51,15 @@ let recapDate = null;
 let targetScope=null,targetSignature='',targetDraft=new Map(),targetBaseline=[],targetDrag=null;
 let taskComposerTrigger;
 let taskComposeDate;
+let taskEdit=null;
+let weightHistoryDays=90;
+let weightChartUnit='lb';
+$('#body-weight-form').insertAdjacentHTML('afterbegin','<div class="weight-highlight"><div><span>Body weight</span><strong id="body-weight-current">—</strong></div><button id="open-weight-history" type="button" class="quiet-button">Weight graph ↗</button></div>');
+$('#body-weight-form>label').innerHTML='Log weight <small>(optional)</small>';
+$('#training-pace').after($('#body-weight-form'));
+$('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button">+ Plan a task</button></div></section>');
+$('.task-date-shortcuts').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-task-when="2" aria-pressed="false">Later this week</button>');
+$('.task-date-shortcuts').insertAdjacentHTML('afterend','<div id="task-week-options" class="task-week-options" role="group" aria-label="Choose a date later this week" hidden></div>');
 const expandedTasks = new Set();
 let displayName = 'Kieran';
 let preferences={},motionPreference='system';
@@ -149,7 +159,8 @@ function renderTasks() {
   const taskHtml = editable => day.tasks.length ? orderedTasks(day.tasks).map(task => {
     const children=task.children||[], expanded=expandedTasks.has(task.id), listId=`subtasks-${editable?'edit':'home'}-${task.id}`;
     const progress=taskProgress([task]);
-    return `<li class="task-group"><div class="task-row"><label class="${children.length?'parent-task':''}" ${children.length?`data-expand-task="${task.id}"`:''}><input type="checkbox" data-task-id="${task.id}" ${task.done?'checked':''} ${children.length?'disabled':''}><span>${escapeHtml(task.name)}${task.templateId?'<small class="recurring-label">Repeats</small>':''}</span></label>${children.length?`<button class="expand-task" data-expand-task="${task.id}" aria-expanded="${expanded}" aria-controls="${listId}" aria-label="${expanded?'Collapse':'Expand'} ${escapeHtml(task.name)} subtasks"><span>${progress.done}/${progress.total}</span> ${expanded?'▾':'▸'}</button>`:''}${editable?`<button class="remove-task" data-remove-task="${task.id}" aria-label="Remove task${task.templateId?' for this day':''}: ${escapeHtml(task.name)}">×</button>`:''}</div>${children.length?`<ul id="${listId}" class="child-tasks" ${expanded?'':'hidden'}>${children.map(child=>`<li><label><input type="checkbox" data-task-id="${child.id}" ${child.done?'checked':''}><span>${escapeHtml(child.name)}</span></label></li>`).join('')}</ul>`:''}</li>`;
+    const editButton=child=>`<button class="edit-task" data-edit-task="${task.id}" ${child?`data-edit-child="${child.id}"`:''} aria-label="Edit ${escapeHtml(child?.name??task.name)}" title="Edit task">${icon('edit')}</button>`;
+    return `<li class="task-group"><div class="task-row"><label class="${children.length?'parent-task':''}" ${children.length?`data-expand-task="${task.id}"`:''}><input type="checkbox" data-task-id="${task.id}" ${task.done?'checked':''} ${children.length?'disabled':''}><span>${escapeHtml(task.name)}${task.templateId?'<small class="recurring-label">Repeats</small>':''}</span></label>${children.length?`<button class="expand-task" data-expand-task="${task.id}" aria-expanded="${expanded}" aria-controls="${listId}" aria-label="${expanded?'Collapse':'Expand'} ${escapeHtml(task.name)} subtasks"><span>${progress.done}/${progress.total}</span> ${expanded?'▾':'▸'}</button>`:''}${editButton()}${editable?`<button class="remove-task" data-remove-task="${task.id}" aria-label="Remove task${task.templateId?' for this day':''}: ${escapeHtml(task.name)}">×</button>`:''}</div>${children.length?`<ul id="${listId}" class="child-tasks" ${expanded?'':'hidden'}>${children.map(child=>`<li><label><input type="checkbox" data-task-id="${child.id}" ${child.done?'checked':''}><span>${escapeHtml(child.name)}</span></label>${editButton(child)}</li>`).join('')}</ul>`:''}</li>`;
   }).join('') : '<li class="empty-tasks"><strong>No tasks yet.</strong><span>Add a task or a recurring routine.</span></li>';
   const scroll = $('.task-scroll').scrollTop;
   $('#overview-task-list').innerHTML = taskHtml(false);
@@ -162,12 +173,18 @@ function renderTasks() {
   $('#task-progress-fill').style.width = `${fraction * 100}%`;
   $('#task-progress-fill').style.backgroundColor = scoreColor(fraction * 10);
   const today=localDateKey(new Date(),timeZone),templates=store.loadTemplates();
+  $('#tasks-title').textContent=selectedDate===today?"Today's To-Do":`${shortDate(selectedDate)} To-Do`;
   $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}${template.endDate?` · ends ${shortDate(template.endDate)}`:''}</small></span>${!template.endDate?`<button class="text-button" data-stop-template="${template.id}">Stop after ${shortDate(today)}</button>`:'<small>Stopped</small>'}</li>`).join(''):'<li class="hint">Your recurring tasks will appear here.</li>';
   $('#routine-count').textContent=templates.filter(template=>!template.endDate).length;
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
   $('#tomorrow-date').textContent=longDate(tomorrow);
   $('#tomorrow-count').textContent=`${planned.length} task${planned.length===1?'':'s'}`;
-  $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>`<li>${escapeHtml(task.name)}${task.templateId?'<small>Repeats</small>':''}</li>`).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
+  const plannedTask=(task,date)=>`<li class="planned-task"><span>${escapeHtml(task.name)}${task.templateId||task.children.length?`<small>${[task.templateId?'Repeats':'',task.children.length?`${task.children.length} subtasks`:''].filter(Boolean).join(' · ')}</small>`:''}</span><button class="edit-task" data-edit-planned="${task.id}" data-planned-date="${date}" aria-label="Edit ${escapeHtml(task.name)} for ${shortDate(date)}">${icon('edit')}</button></li>`;
+  $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
+  const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
+  $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
+  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
+  $('#later-count').textContent=String(laterCount);
   $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} tasks scheduled`);
 }
 function renderScore() {
@@ -313,6 +330,7 @@ function renderGym() {
     $('#body-weight').max=bodyWeightUnit==='kg'?700:1500;
   }
   $('#body-weight-status').textContent=day.bodyWeight?`${weightText(day.bodyWeight)} saved for ${shortDate(selectedDate)}`:'Separate from your gym score.';
+  $('#body-weight-current').innerHTML=day.bodyWeight?`${day.bodyWeight.value.toFixed(1)} <small>${day.bodyWeight.unit}</small>`:'<span class="weight-missing">Not logged</span>';
   $('#remove-body-weight').hidden=!day.bodyWeight;
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
@@ -392,6 +410,10 @@ function renderHistory() {
     const summary = filteredSummary(date), day = store.loadDay(date), reward=scoreReward(summary.score);
     let cell = `<button class="calendar-day ${reward} ${date.slice(0,7) === calendarMonth.slice(0,7) ? '' : 'outside-month'} ${date === selectedDate ? 'selected' : ''} ${date === today ? 'is-today' : ''}" data-calendar-date="${date}" aria-label="${longDate(date)}, ${summary.score === null ? 'no score' : `${summary.provisional ? 'provisional ' : ''}daily score ${scoreText(summary.score)} out of 10${reward?summary.score===10?', perfect score':', high score':''}`}${day.completedAt ? ', day complete' : ''}" aria-pressed="${date === selectedDate}" ${date === today ? 'aria-current="date"' : ''}><span class="calendar-date">${Number(date.slice(-2))}</span>${circle(summary.score,true)}${day.completedAt ? '<span class="calendar-complete" aria-hidden="true">✓</span>' : ''}</button>`
     cell=cell.replace('daily score ',`${filterLabel.toLowerCase()} score `);
+    const fullyLogged=summaryFor(date).requiredLogged===3;
+    cell=cell.replace('class="calendar-day ',`class="calendar-day ${fullyLogged?'is-logged ':''}${day.completedAt?'is-reviewed ':''}`);
+    if(fullyLogged)cell=cell.replace('aria-label="','aria-label="All required categories logged, ');
+    if(fullyLogged&&!day.completedAt)cell=cell.replace('</button>','<span class="calendar-logged" aria-hidden="true">●</span></button>');
     if(calendarFilter==='training'&&day.bodyWeight)cell=cell.replace('</button>',`<small class="calendar-weight">${weightText(day.bodyWeight)}</small></button>`).replace('aria-label="',`aria-label="${weightText(day.bodyWeight)}, `);
     if (index % 7 === 6) {
       const weekDates = dates.slice(index - 6, index + 1);
@@ -406,6 +428,7 @@ function recapMarkup({final=false}={}) {
   const archived=archivedDay(),openSection=id=>archived?'disabled':`data-open-section="${id}"`;
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
+  if(!final&&view==='history'&&calendarFilter!=='all')return filteredRecapMarkup(day,recap);
   const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
@@ -425,8 +448,19 @@ function recapMarkup({final=false}={}) {
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
     ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
 }
+function filteredRecapMarkup(day,recap) {
+  const id=calendarFilter,label=categoryLabels[id],section=recap.sections.find(section=>section.id===id),value=section?.score??null;
+  let detail='';
+  if(id==='training')detail=`<p class="filtered-training-total">${recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.sets} total sets`:'No workout logged'}</p>${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${muscleName(group.id)}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
+  if(id==='nutrition')detail=recap.notes.filter(note=>note.section==='nutrition').map(note=>`<section class="recap-note"><h4>Nutrition notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('');
+  if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span>${escapeHtml(task.name)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
+  if(id==='sentiments')detail=day.sentiments.notes.trim()?`<section class="recap-note"><h4>Sentiments</h4><p>${escapeHtml(day.sentiments.notes)}</p></section>`:'<p>No sentiments notes.</p>';
+  return `<div class="recap-score">${circle(value,true)}<div><strong>${label}</strong><p>${value===null?'Not logged':day.reviewed[id]?'Reviewed':'Logged'}${id==='sentiments'&&value===null&&day.sentiments.notes.trim()?' · notes only':''}</p></div></div>${detail}`;
+}
 function renderRecap() {
   $('#open-selected-day').hidden=archivedDay();
+  $('.history-detail>.eyebrow').textContent=calendarFilter==='all'?'DAILY RECAP':`${categoryLabels[calendarFilter].toUpperCase()} RECAP`;
+  $('#open-selected-day').innerHTML=`${calendarFilter==='all'?'Open this day':`Open ${categoryLabels[calendarFilter].toLowerCase()}`} ${icon('arrow')}`;
   $('#history-date').textContent=dateFormat(selectedDate,{weekday:'short',month:'short',day:'numeric'});
   $('#history-content').innerHTML=recapMarkup();
   if(recapDate&&recapDate!==selectedDate)reveal($('#history-content'));
@@ -449,7 +483,7 @@ function renderAchievements(recompute=true) {
     return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.latest?`Latest earned ${shortDate(card.latest)}${card.latest.slice(0,4)!==editableToday().slice(0,4)?`, ${card.latest.slice(0,4)}`:''}`:'Still ahead of you'}</small></article>`;
   }).join(''):'<p class="achievement-empty">No unlocked achievements in this category yet.</p>';
 }
-function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); renderSaveStatus(); }
+function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
   if(archivedDay()&&next!=='achievements')next='history';
@@ -562,7 +596,7 @@ $('#mobile-calendar').addEventListener('click', () => {
 });
 $('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#calendar-filters').addEventListener('click',event=>{const button=event.target.closest('[data-calendar-filter]');if(button&&Object.hasOwn(categoryLabels,button.dataset.calendarFilter)){calendarFilter=button.dataset.calendarFilter;renderHistory();}});
-$('#open-selected-day').addEventListener('click', () => setView('today', true));
+$('#open-selected-day').addEventListener('click', () => setView(calendarFilter==='all'?'today':calendarFilter, true));
 $('#previous-month').addEventListener('click', () => { calendarMonth = moveMonth(calendarMonth, -1); renderHistory(); });
 $('#next-month').addEventListener('click', () => { calendarMonth = moveMonth(calendarMonth, 1); renderHistory(); });
 $('#calendar').addEventListener('click', event => {
@@ -585,6 +619,8 @@ for (const id of ['overview-sections', 'review-steps','history-content','final-r
 });
 $('#open-checklist').addEventListener('click', () => { setView('checklists'); $('#open-task-composer').focus(); });
 for (const id of ['overview-task-list', 'task-list']) $('#' + id).addEventListener('click',event=>{
+  const edit=event.target.closest('[data-edit-task]');
+  if(edit){openTaskEditor(edit,selectedDate,edit.dataset.editTask,edit.dataset.editChild);return;}
   const button=event.target.closest('[data-expand-task]');if(!button)return;
   const taskId=button.dataset.expandTask;
   if(expandedTasks.has(taskId))expandedTasks.delete(taskId);else expandedTasks.add(taskId);
@@ -639,27 +675,62 @@ function renderTaskDate() {
   const date=$('#task-date').value,today=editableToday();
   taskComposeDate=date;
   $('#task-start-date').textContent=date?longDate(date):'Choose a date';
-  $$('[data-task-when]').forEach(button=>button.setAttribute('aria-pressed',String(date===addDays(today,Number(button.dataset.taskWhen)))));
-  $('#task-submit').textContent=date===addDays(today,1)?'Add for tomorrow':'Add task';
+  $$('[data-task-when]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.taskWhen)===2?date>=addDays(today,2)&&date<=addDays(today,7):date===addDays(today,Number(button.dataset.taskWhen)))));
+  $('#task-week-options').hidden=!date||date<addDays(today,2)||date>addDays(today,7);
+  $('#task-week-options').innerHTML=Array.from({length:6},(_,index)=>{const key=addDays(today,index+2);return `<button type="button" class="quiet-button" data-task-date-choice="${key}" aria-pressed="${date===key}">${dateFormat(key,{weekday:'short',day:'numeric'})}</button>`;}).join('');
+  $('#task-submit').textContent=taskEdit?'Save changes':date===addDays(today,1)?'Add for tomorrow':'Add task';
+}
+function renderTaskEditScope() {
+  const recurring=!!taskEdit?.templateId,future=recurring&&$('[name="task-edit-scope"]:checked').value==='future';
+  $('#task-edit-scope').hidden=!recurring;
+  $('.task-date-picker').hidden=recurring;
+  $('.task-schedule').hidden=!!taskEdit&&!future;
+  $('#custom-weekdays').hidden=(!!taskEdit&&!future)||$('#task-frequency').value!=='custom';
+  $('#task-frequency option[value="once"]').disabled=future;
+}
+function appendSubtaskField(child={name:''}) {
+  const row=document.createElement('div');row.className='subtask-input-row';
+  row.innerHTML='<textarea data-child-name rows="1" maxlength="100" placeholder="Subtask name" aria-label="Subtask name" autocomplete="off" required></textarea><button class="remove-task" type="button" data-remove-subtask aria-label="Remove subtask">×</button>';
+  const input=row.querySelector('textarea');input.value=child.name;if(child.id)input.dataset.childId=child.id;
+  $('#subtask-inputs').append(row);return input;
 }
 function openTaskComposer(trigger,date=selectedDate) {
+  taskEdit=null;
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
-  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').value=date;renderTaskDate();
-  updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
+  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value=date;renderTaskDate();
+  $('#task-dialog-title').textContent='Add task';renderTaskEditScope();updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
 }
+function openTaskEditor(trigger,date,id,childId) {
+  const task=store.loadDay(date).tasks.find(task=>task.id===id);if(!task)return;
+  openTaskComposer(trigger,date);taskEdit={date,id,templateId:task.templateId};
+  $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;
+  for(const child of task.children)appendSubtaskField(child);
+  if(task.templateId) {
+    const template=store.loadTemplates().find(template=>template.id===task.templateId);
+    $('#task-frequency').value=template.frequency;
+    $$('[name="repeat-day"]').forEach(input=>input.checked=template.weekdays.includes(Number(input.value)));
+  }
+  renderTaskDate();renderTaskEditScope();fitTaskFields();
+  (childId?$$('[data-child-name]').find(input=>input.dataset.childId===childId):$('#task-name'))?.focus();
+}
+$$('[name="task-edit-scope"]').forEach(input=>input.addEventListener('change',()=>{renderTaskEditScope();fitTaskFields();}));
 for(const id of ['open-task-composer','overview-add-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget));
 for(const id of ['plan-tomorrow','add-tomorrow-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget,addDays(editableToday(),1)));
+$('#add-later-task').addEventListener('click',event=>openTaskComposer(event.currentTarget,addDays(editableToday(),2)));
+for(const id of ['tomorrow-tasks','later-tasks'])$('#'+id).addEventListener('click',event=>{
+  const edit=event.target.closest('[data-edit-planned]');if(edit){openTaskEditor(edit,edit.dataset.plannedDate,edit.dataset.editPlanned);return;}
+  const date=event.target.closest('[data-view-task-date]');if(date){navigateDay(date.dataset.viewTaskDate);setView('checklists',true);}
+});
 $('#view-tomorrow').addEventListener('click',()=>{navigateDay(addDays(editableToday(),1));setView('checklists',true);});
 $$('[data-task-when]').forEach(button=>button.addEventListener('click',()=>{$('#task-date').value=addDays(editableToday(),Number(button.dataset.taskWhen));renderTaskDate();}));
 $('#task-date').addEventListener('change',renderTaskDate);
+$('#task-week-options').addEventListener('click',event=>{const button=event.target.closest('[data-task-date-choice]');if(button){$('#task-date').value=button.dataset.taskDateChoice;renderTaskDate();}});
 $('#cancel-task').addEventListener('click',()=>closeDialog($('#task-dialog')));
 $('#add-subtask').addEventListener('click',()=>{
   if($$('[data-child-name]').length>=20){$('#task-composer-error').textContent='Use up to 20 subtasks.';return;}
-  const row=document.createElement('div');row.className='subtask-input-row';
-  row.innerHTML='<textarea data-child-name rows="1" maxlength="100" placeholder="Subtask name" aria-label="Subtask name" autocomplete="off" required></textarea><button class="remove-task" type="button" data-remove-subtask aria-label="Remove subtask">×</button>';
-  $('#subtask-inputs').append(row);row.querySelector('textarea').focus();fitTaskFields();
+  appendSubtaskField().focus();fitTaskFields();
 });
 $('#add-task-form').addEventListener('input',event=>{
   $('#task-composer-error').textContent='';
@@ -676,9 +747,17 @@ $('#add-task-form').addEventListener('submit', event => {
   const frequency=$('#task-frequency').value;
   const options={children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
   if(!$('#task-date').checkValidity()){ $('#task-date').reportValidity();return; }
-  try { const id=store.addTask(taskComposeDate,input.value,options);if(id&&options.children.length)expandedTasks.add(id); }
+  const editing=!!taskEdit;
+  try {
+    let id;
+    if(taskEdit) {
+      const changes={name:input.value,children:$$('[data-child-name]').map(field=>({id:field.dataset.childId||null,name:field.value})),date:taskComposeDate,recurrence:options.recurrence};
+      id=taskEdit.templateId&&$('[name="task-edit-scope"]:checked').value==='future'?store.editRoutine(taskEdit.date,taskEdit.id,changes):store.editTask(taskEdit.date,taskEdit.id,changes);
+    } else id=store.addTask(taskComposeDate,input.value,options);
+    if(id&&options.children.length)expandedTasks.add(id);
+  }
   catch(error){$('#task-composer-error').textContent=error.message;return;}
-  closeDialog($('#task-dialog'));render();taskComposerTrigger.focus({preventScroll:true});acknowledge($(view==='today'?'.overview-tasks':'.checklist-editor'));announce(`${frequency==='once'?'Task':'Recurring task'} added ${taskComposeDate===addDays(editableToday(),1)?'for tomorrow':`for ${shortDate(taskComposeDate)}`}.`);
+  closeDialog($('#task-dialog'));render();(taskComposerTrigger.isConnected?taskComposerTrigger:$(view==='today'?'#overview-add-task':'#open-task-composer')).focus({preventScroll:true});acknowledge($(view==='today'?'.overview-tasks':'.checklist-editor'));announce(editing?'Task changes saved.':`${frequency==='once'?'Task':'Recurring task'} added ${taskComposeDate===addDays(editableToday(),1)?'for tomorrow':`for ${shortDate(taskComposeDate)}`}.`);taskEdit=null;
 });
 $('#task-name').addEventListener('input', event => event.target.setCustomValidity(''));
 $('#body-weight-form').addEventListener('submit',event=>{
@@ -693,6 +772,20 @@ $$('[name="weight-unit"]').forEach(input=>input.addEventListener('change',()=>{
   bodyWeightUnit=unit;field.max=unit==='kg'?700:1500;
 }));
 $('#remove-body-weight').addEventListener('click',()=>{store.updateBodyWeight(selectedDate,null);render();announce('Body weight removed.');});
+function renderWeightHistory() {
+  const points=weightHistory(store.exportSnapshot(),{unit:weightChartUnit,through:editableToday(),days:weightHistoryDays}),plot=weightPlot(points);
+  $$('[data-weight-range]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.weightRange)===weightHistoryDays)));
+  $$('[data-chart-unit]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.chartUnit===weightChartUnit)));
+  $('#weight-chart-summary').textContent=points.length?`${points.at(-1).value.toFixed(1)} ${weightChartUnit} latest · ${points.length} weigh-in${points.length===1?'':'s'}${points.length>1?` · change ${points.at(-1).value-points[0].value>0?'+':''}${(points.at(-1).value-points[0].value).toFixed(1)} ${weightChartUnit}`:''}`:'No weights recorded in this period.';
+  $('#weight-chart-records').innerHTML=[...points].reverse().map(point=>`<tr><td>${longDate(point.date)}</td><td>${point.value.toFixed(1)} ${weightChartUnit}</td></tr>`).join('');
+  $('.weight-chart-data').hidden=!points.length;
+  if(!plot){$('#weight-chart').innerHTML='<p class="weight-chart-empty">Log your body weight on the training tab to start your graph.</p>';return;}
+  const ticks=Array.from({length:5},(_,index)=>({value:plot.min+(plot.max-plot.min)*index/4,y:225-index*190/4}));
+  $('#weight-chart').innerHTML=`<svg viewBox="0 0 700 280" role="img" aria-labelledby="weight-plot-title"><title id="weight-plot-title">Body weight in ${weightChartUnit}, ${shortDate(points[0].date)} to ${shortDate(points.at(-1).date)}. ${points.length} recorded weights.</title>${ticks.map(tick=>`<line class="weight-gridline" x1="70" x2="630" y1="${tick.y}" y2="${tick.y}"/><text x="58" y="${tick.y+4}" text-anchor="end">${tick.value.toFixed(1)}</text>`).join('')}<polyline class="weight-line" points="${plot.points.map(point=>`${point.x},${point.y}`).join(' ')}"/>${plot.points.map(point=>`<circle class="weight-point" cx="${point.x}" cy="${point.y}" r="4"><title>${shortDate(point.date)}: ${point.value.toFixed(1)} ${weightChartUnit}</title></circle>`).join('')}<text x="70" y="255">${shortDate(points[0].date)}</text>${points.length>1?`<text x="630" y="255" text-anchor="end">${shortDate(points.at(-1).date)}</text>`:''}<text x="630" y="20" text-anchor="end">${weightChartUnit}</text></svg>`;
+}
+$('#open-weight-history').addEventListener('click',()=>{weightChartUnit=bodyWeightUnit;renderWeightHistory();showDialog($('#weight-history-dialog'));});
+$$('[data-weight-range]').forEach(button=>button.addEventListener('click',()=>{weightHistoryDays=Number(button.dataset.weightRange);renderWeightHistory();}));
+$$('[data-chart-unit]').forEach(button=>button.addEventListener('click',()=>{weightChartUnit=button.dataset.chartUnit;renderWeightHistory();}));
 $('#recurring-tasks').addEventListener('click',event=>{
   const button=event.target.closest('[data-stop-template]');if(!button)return;
   store.stopTemplate(button.dataset.stopTemplate,localDateKey(new Date(),timeZone));render();announce('Recurring task stopped after today. Earlier days are kept.');
@@ -957,7 +1050,7 @@ if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
 cloud=mountCloud({
   preview,readLocal:()=>store.exportSnapshot(),
   flushLocal:()=>{flushSave();return !storageError&&!blockedSave;},
-  canApply:()=>!blockedSave&&!pendingSnapshot&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
+  canApply:()=>!blockedSave&&!pendingSnapshot&&!$('#task-dialog').open&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
   applyLocal:snapshot=>{
     if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
     const raw=writeLocal(storage,snapshot);

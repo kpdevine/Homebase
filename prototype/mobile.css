@@ -55,6 +55,15 @@
   .task-list .child-tasks label>span {font-size:16px;line-height:1.15}
   .task-row {gap:4px;align-items:center}
   .task-row .remove-task,.task-row .expand-task {min-width:32px;min-height:35px;margin:0;padding:4px;font-size:19px}
+  .edit-task {width:36px;min-height:40px;padding:8px}
+  .edit-task>.icon {width:18px;height:18px}
+  .calendar-day .calendar-complete {width:12px;height:12px;top:2px;right:1px;font-size:9px}
+  .weight-highlight {gap:8px;flex-wrap:wrap}
+  .weight-highlight strong {font-size:32px}
+  .weight-chart-tools button {min-height:44px}
+  #weight-chart {padding-left:16px}
+  #weight-chart svg {overflow:visible}
+  #weight-chart text {font-size:24px}
   .task-list .recurring-label {font-size:7px;letter-spacing:0}
   .child-tasks {padding-left:14px;margin-left:8px}
   .task-card-actions {gap:12px;flex-wrap:wrap}
@@ -103,9 +112,10 @@
   .ideal-workout ul {gap:6px 14px}
   .ideal-workout li {font-size:12px}
   .gym-form {display:grid;grid-template-columns:minmax(0,1fr) 80px;gap:12px;margin-top:18px}
-  .gym-form .muscle-picker {grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .gym-form .muscle-picker {grid-column:1/-1;display:block;width:100%}
+  .gym-form .muscle-choices {width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
   .muscle-picker legend {margin-bottom:10px}
-  .muscle-picker label span {min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12px;padding:8px}
+  .muscle-picker label span {min-height:44px;display:flex;align-items:center;justify-content:center;font-size:12px;padding:8px;white-space:nowrap}
   .gym-form>div {grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px}
   .gym-form>div label {margin:0}
   .gym-form>div input {width:90px}

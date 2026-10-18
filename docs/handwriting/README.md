@@ -47,3 +47,5 @@ Stroke weight is calibrated after scaling, in font units, to a shared median sha
 Both exported formats are reopened to verify character coverage, positive advance widths, and vertical bounds. Equal scale factors and consistent measured stroke widths are checked. The actual exported TTF is independently rasterized with FreeType at 1000 px to confirm stroke weight. The specimen is rendered with Pillow/FreeType for visual review.
 
 The owner's handwriting is original project artwork. Third-party font licenses in the fonts directory apply only to those separately named typefaces.
+
+The notes cursor uses `prototype/assets/handwriting-caret.svg`, extracted from the LCD font's slash and rotated upright. Rebuild it with `python scripts/build-handwriting-caret.py` after updating that font. The trimmed vector removes font sidebearing and baseline offsets while retaining the owner's original stroke shape. Cursor positioning also reverses ancestor display scaling before applying textarea scroll offsets.

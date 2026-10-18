@@ -8,7 +8,7 @@ A local dashboard for dated tasks, recurring routines, nutrition ratings, traini
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 123 tests.
+Open [Homebase](http://127.0.0.1:4173/). Node.js is the only runtime required; no packages need installation. Keep the terminal running; Ctrl+C stops it. `npm.cmd test` runs 137 tests.
 
 The root app starts empty and saves on this browser/device. [The synthetic preview](http://127.0.0.1:4173/?preview=1) uses separate storage. Settings provides validated JSON backup/restore. Settings → Cloud sync connects personal records across devices through Google sign-in and Firebase. Open [shared Homebase](https://homebase-d3c6c.firebaseapp.com/) on your phone and display. See [Firebase setup and sync](docs/firebase-sync.md).
 
@@ -18,6 +18,9 @@ The root app starts empty and saves on this browser/device. [The synthetic previ
 - Achievements has 55 compact badges with unique LCD icons, repeat counts, score/category thresholds, volume and writing milestones, and current/best streaks. New awards follow the day-completion animation and save notice. High-contrast category filters and full-page scrolling keep the catalog accessible.
 - Desktop defaults to the owner's preferred 80% visual density at normal zoom. Portrait and landscape phones use normal page scrolling. Only desktop Overview retains a footer; other views put Calendar beside the trophy in the header.
 - Dated one-time or recurring tasks: daily, weekdays, weekly, or selected weekdays. Expandable parents depend on all subtasks. Individual occurrences support removal/Undo; schedules can stop after today.
+- Pencil buttons edit existing tasks and subtasks. Move one-time tasks to another editable date, or change a recurring occurrence versus its routine from that day forward. Retained actions keep their completion; earlier history stays intact.
+- Three handwritten planning cards show Today's To-Do, Tomorrow, and Later This Week. Plan and edit tasks through seven days ahead with direct date shortcuts; recurring schedules continue beyond the planning window.
+- Prominent daily body weight with a 30-day, 90-day, or all-time line graph and lb/kg conversion. Calendar category filters show only the selected category's recap. Fully logged calendar days glow; completed reviews have an extra bright frame and check badge.
 - Nutrition dragging/buttons/arrows in 0.1 steps, direct entry to two decimal places, and optional handwritten notes. Training has dated set/rest logs, weekly targets, and the same notes treatment. Notes have a small cursor made from the owner's rotated slash.
 - Consistent LCD panels, numbered navigation, inset inputs, brief stepped transitions, and reduced-motion support. Dense tasks, a direct overview add button, aligned checkboxes, bold handwritten task headings, and entry underlines that accommodate descenders without shifting the layout. A time-based Chicago greeting, centered score with raised decimals, and a large corner clock.
 - Blue/indigo meters coded by amount, larger missing-input warnings, gradually brighter rings with a slight bias toward higher scores, white accents at 9.2+, and a second halo at 10. Calendar daily, Monday–Sunday weekly, and monthly rings plus a logging streak. Blanks are omitted; provisional state is explicit.
