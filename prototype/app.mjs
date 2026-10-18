@@ -27,6 +27,7 @@ let storageError = loaded.error;
 let blockedSave = !!loaded.error;
 let pendingSnapshot = null;
 let saveTimer;
+let maxSaveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
@@ -54,10 +55,13 @@ const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily tr
 const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view' };
 
 function queueSave(snapshot) {
+  const wasPending = !!pendingSnapshot;
   pendingSnapshot = snapshot;
   clearTimeout(saveTimer);
-  $('#save-message').textContent = blockedSave ? 'Changes not saved · see backups' : 'Saving on this device…';
-  saveTimer = setTimeout(flushSave, 100);
+  if (!wasPending) renderSaveStatus();
+  const editingText = document.activeElement?.matches('textarea,[contenteditable="true"]');
+  saveTimer = setTimeout(flushSave, editingText ? 2500 : 350);
+  if (!maxSaveTimer) maxSaveTimer = setTimeout(flushSave, 10000);
 }
 function renderSaveStatus() {
   $('#save-status').classList.toggle('has-error', !!storageError);
@@ -67,6 +71,8 @@ function renderSaveStatus() {
 }
 function flushSave() {
   clearTimeout(saveTimer);
+  clearTimeout(maxSaveTimer);
+  saveTimer = maxSaveTimer = null;
   if (!pendingSnapshot || blockedSave) { renderSaveStatus(); return; }
   try {
     if (storage.getItem(STORAGE_KEY) !== lastSavedRaw) {
@@ -866,6 +872,7 @@ window.addEventListener('storage', event => {
 });
 window.addEventListener('pagehide', flushSave);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
+document.addEventListener('focusout', event => { if (event.target.matches('textarea,[contenteditable="true"]') && pendingSnapshot) flushSave(); });
 updateClock();
 const clockStart=new Date();
 let reviewClockPhase=`${localDateKey(clockStart,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(clockStart))>=21}`;
