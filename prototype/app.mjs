@@ -10,7 +10,7 @@ import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
-import {weightHistory,weightPlot,weightPointContext} from './weight-history.mjs';
+import {weightHistory,weightPlot,weightPointContext,weightDayChange} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -800,8 +800,10 @@ function hideWeightPointCard() {
 function showWeightPointCard(point) {
   const card=$('#weight-day-card');if(!card||!point)return;
   const context=weightPointContext(point.dataset.weightDate,summaryFor);
+  const change=weightDayChange(store.exportSnapshot(),context.date,weightChartUnit);
+  const changeLabel=change===null?'No previous-day weight':`${change>0?'+':change<0?'−':''}${Math.abs(change).toFixed(1)} ${weightChartUnit} vs previous day`;
   $$('#weight-chart [data-weight-date]').forEach(item=>{item.classList.toggle('is-active',item===point);item.setAttribute('aria-expanded',String(item===point));});
-  card.innerHTML=`<strong>${dateFormat(context.date,{month:'short',day:'numeric',year:'numeric'})} weigh-in</strong><span>Previous day · ${shortDate(context.previousDate)}</span><div class="weight-day-scores">${[['Nutrition',context.nutrition],['Training',context.training]].map(([label,score])=>`<div>${circle(score,true)}<strong>${label}</strong><small>${score===null?'Not logged':'out of 10'}</small></div>`).join('')}</div>`;
+  card.innerHTML=`<strong>${dateFormat(context.date,{month:'short',day:'numeric',year:'numeric'})} weigh-in</strong><span class="weight-day-change">${changeLabel}</span><span>Previous day · ${shortDate(context.previousDate)}</span><div class="weight-day-scores">${[['Nutrition',context.nutrition],['Training',context.training]].map(([label,score])=>`<div>${circle(score,true)}<strong>${label}</strong><small>${score===null?'Not logged':'out of 10'}</small></div>`).join('')}</div>`;
   card.hidden=false;
   const chart=$('#weight-chart'),origin=chart.getBoundingClientRect(),anchor=point.querySelector('.weight-point').getBoundingClientRect(),scale=origin.width/chart.offsetWidth;
   const x=(anchor.left+anchor.width/2-origin.left)/scale-chart.clientLeft,y=(anchor.top+anchor.height/2-origin.top)/scale-chart.clientTop;

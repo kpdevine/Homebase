@@ -16,3 +16,8 @@ export function weightPointContext(date,readSummary) {
   const previousDate=addDays(date,-1),summary=readSummary(previousDate);
   return {date,previousDate,nutrition:summary.sections.find(section=>section.id==='nutrition')?.score??null,training:summary.sections.find(section=>section.id==='training')?.score??null};
 }
+
+export function weightDayChange(snapshot,date,unit) {
+  const points=weightHistory(snapshot,{unit,through:date}),current=points.find(point=>point.date===date),previous=points.find(point=>point.date===addDays(date,-1));
+  return current&&previous?Math.round((current.value-previous.value)*10)/10:null;
+}

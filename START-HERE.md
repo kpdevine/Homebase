@@ -16,6 +16,10 @@ To continue: **Continue Homebase from START-HERE.md. Keep development local. Fir
 
 Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
 
+## Latest checkpoint: compact graph card
+
+Mobile graph cards are now 174px wide with 34px score circles; the phone preview measured 174 × 117px within a 286 × 188px graph. Cards display signed body-weight change from the exact previous calendar day (converted to the chosen unit), or explicitly state that prior-day weight is missing. Custom hover card only; no native tooltip. All 140 tests pass. These refinements are included in the saved baseline for upcoming changes.
+
 ## Saved checkpoint before the next major changes
 
 The current UI is the baseline for the next round. The weight graph is available only in Calendar → Training, and hovering shows only the in-app previous-day score card (no browser tooltip). Its accessible labels remain. TODAY has its date above the heading, aligned with the other two planning cards. The graph interaction was checked in the browser: card visible, zero native tooltip elements. All 139 tests passed at this checkpoint. Source and PRD are delivered together to GitHub and Firebase Hosting. No further feature changes are queued; await the user's next proposal. Preserve existing personal data and the established scoring rules when making the upcoming changes.
@@ -131,3 +135,7 @@ Final-review Sentiments rating uses the same draggable 0–10 circle and 0.1 inc
 The final-review rating circle is compact and has no on-screen drag instructions; its accessible slider label and keyboard controls remain.
 
 Graph hover uses only the in-app score card, without a native browser tooltip; accessible graph and point labels remain available.
+
+Mobile weight-graph cards use a compact 174px layout and 34px score circles, keeping the plotted history visible while retaining both prior-day scores. Desktop card sizing is unchanged.
+
+The weigh-in card also shows signed body-weight change against the exact previous calendar day in the selected chart unit. Missing prior-day weight is stated explicitly; do not substitute the last recorded weigh-in.

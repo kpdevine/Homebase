@@ -74,3 +74,7 @@ Local saving remains available without sign-in. Google sign-in alone uploads not
 Settings provides validated backup/restore and Reset all data with an explicit confirmation. Preserve old backups and historical records through compatible migrations. Test model, scoring, chronology, persistence, cloud merging, and achievements; inspect desktop and both phone orientations before delivery. Physical device behavior remains a separate hardware check.
 
 Graph hover uses only the in-app score card, without a native browser tooltip; accessible graph and point labels remain available.
+
+Mobile weight-graph cards use a compact 174px layout and 34px score circles, keeping the plotted history visible while retaining both prior-day scores. Desktop card sizing is unchanged.
+
+The weigh-in card also shows signed body-weight change against the exact previous calendar day in the selected chart unit. Missing prior-day weight is stated explicitly; do not substitute the last recorded weigh-in.

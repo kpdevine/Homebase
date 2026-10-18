@@ -64,6 +64,15 @@
   #weight-chart {padding-left:16px}
   #weight-chart>svg {overflow:visible}
   #weight-chart text {font-size:24px}
+  .weight-day-card {width:174px;padding:7px;box-shadow:0 2px 8px #0a1d4e66}
+  .weight-day-card>strong {font-size:9px;line-height:1.2}
+  .weight-day-card>span {font-size:8px;line-height:1.2;margin-top:2px}
+  .weight-day-scores {gap:8px;margin-top:5px}
+  .weight-day-scores>div {gap:2px}
+  .weight-day-scores .score-circle {width:34px;height:34px;flex-basis:34px}
+  .weight-day-scores .score-circle>span {font-size:13px}
+  .weight-day-scores strong {font-size:9px}
+  .weight-day-scores small {font-size:8px}
   .calendar-tools {flex-wrap:wrap;margin-bottom:12px}
   .calendar-tools #calendar-filters {flex:1 0 100%;margin-bottom:0}
   .calendar-tools #open-weight-history {width:100%;min-height:44px;margin:0}

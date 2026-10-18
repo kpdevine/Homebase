@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {weightHistory,weightPlot,weightPointContext} from '../prototype/weight-history.mjs';
+import {weightHistory,weightPlot,weightPointContext,weightDayChange} from '../prototype/weight-history.mjs';
 import {createStore} from '../prototype/model.mjs';
 import {summarizeDay} from '../prototype/scoring.mjs';
 test('weight history omits missing/future entries, sorts dates, filters periods and converts mixed units',()=>{
@@ -29,4 +29,14 @@ test('weigh-in context crosses month/year/leap boundaries and preserves unlogged
     assert.deepEqual(calls,[previousDate]);assert.equal(context.previousDate,previousDate);assert.equal(context.nutrition,0);assert.equal(context.training,null);
   }
   assert.equal(weightPointContext('2026-10-18',()=>({sections:[]})).training,null);
+});
+
+test('daily weight change converts units, keeps the sign, and requires the exact previous date',()=>{
+  const snapshot={days:[{date:'2026-10-16',bodyWeight:{value:101,unit:'kg'}},{date:'2026-10-17',bodyWeight:{value:220.46226218,unit:'lb'}},{date:'2026-10-18',bodyWeight:{value:100.5,unit:'kg'}},{date:'2026-10-20',bodyWeight:{value:99,unit:'kg'}}]};
+  assert.equal(weightDayChange(snapshot,'2026-10-17','kg'),-1);
+  assert.equal(weightDayChange(snapshot,'2026-10-18','kg'),.5);
+  assert.equal(weightDayChange(snapshot,'2026-10-18','lb'),1.1);
+  assert.equal(weightDayChange(snapshot,'2026-10-20','kg'),null);
+  assert.equal(weightDayChange(snapshot,'2026-10-19','kg'),null);
+  assert.equal(weightDayChange({days:[{date:'2026-10-17',bodyWeight:{value:100,unit:'kg'}},{date:'2026-10-18',bodyWeight:{value:100,unit:'kg'}}]},'2026-10-18','kg'),0);
 });
