@@ -77,9 +77,14 @@
 .ideal-workout p {font:400 10px/1.6 var(--font-ui);margin:12px 0 0}
 
 .nutrition-meter,.target-meter {user-select:none;-webkit-user-select:none}
+.nutrition-meter {container-type:inline-size}
+:is(#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-out-of {left:24%;right:24%;top:64%;margin:0;font-size:clamp(9px,5.2cqw,12px);line-height:1.1;white-space:normal;text-align:center}
 
 /* Desktop panels share the available height; long records scroll within a panel. */
 @media(min-width:1001px) {
+  /* Match the owner's preferred 80% browser density at normal browser zoom. */
+  body {zoom:.8;height:125dvh;min-height:125dvh}
+  .app-shell,.is-overview .app-shell {height:calc(125dvh - 24px)}
   .app-shell>main {display:flex;flex-direction:column;container-type:size}
   .app-shell>main>.detail-view {flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 0}
   .detail-heading {flex:none;min-height:40px;margin-bottom:12px}

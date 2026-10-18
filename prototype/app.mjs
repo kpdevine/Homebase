@@ -8,6 +8,8 @@ import { mountCloud } from './cloud-ui.mjs';
 import { muscleName } from './muscles.mjs';
 import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
+import { buildAchievements } from './achievements.mjs';
+import { achievementIcon } from './achievement-icons.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -39,6 +41,7 @@ let view = 'today';
 let selectedDate = localDateKey(new Date(), timeZone);
 let calendarMonth = selectedDate;
 let calendarFilter='all',bodyWeightUnit='lb';
+let achievementFilter='all',unlockedOnly=false,achievementData=null;
 const categoryLabels={all:'Overall',nutrition:'Nutrition',training:'Training',checklists:'To-do list',sentiments:'Sentiments'};
 const weightText=weight=>weight?`${weight.value} ${weight.unit}`:'';
 let reviewSessionDate = null;
@@ -59,8 +62,8 @@ let store = createStore({ clientId, editableToday, today: selectedDate, seed: pr
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar' };
-const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view' };
+const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar', achievements:'Achievements' };
+const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view', achievements:'achievements-view' };
 
 function queueSave(snapshot) {
   const wasPending = !!pendingSnapshot;
@@ -105,16 +108,17 @@ function circle(score,reward=false) {
 }
 function renderHeader() {
   const archived=archivedDay();
-  if(archived)view='history';
+  if(archived&&view!=='achievements')view='history';
   document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
   $('#mobile-calendar').textContent = view === 'history' ? 'Overview' : 'Calendar';
+  $('#open-achievements').setAttribute('aria-pressed',String(view==='achievements'));
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);
   const isToday = selectedDate === localDateKey(now, timeZone);
   const past = selectedDate < localDateKey(now, timeZone);
   document.body.classList.toggle('viewing-other-day',!isToday);
-  $('#selected-day-notice').hidden=isToday;
+  $('#selected-day-notice').hidden=isToday||view==='achievements';
   $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
   $('#selected-day-help').textContent=archived?'Summary only · days more than a week ago cannot be edited.':`Entries on this screen belong to ${shortDate(selectedDate)}.`;
   $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>, ${escapeHtml(displayName)}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
@@ -122,8 +126,8 @@ function renderHeader() {
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
   $('#date-short').setAttribute('aria-label', `Choose date. Selected ${longDate(selectedDate)}`);
   const completed = !!store.loadDay(selectedDate).completedAt;
-  $('#day-state').textContent = archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
-  $('#day-state').classList.toggle('complete', completed);
+  $('#day-state').textContent = view==='achievements'?'All-time record':archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
+  $('#day-state').classList.toggle('complete', completed&&view!=='achievements');
   $('#calendar-day-number').textContent = Number(selectedDate.slice(-2));
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
   $('#overview-tasks-title').textContent = 'TO-DO LIST';
@@ -133,7 +137,7 @@ function renderHeader() {
   $$('[data-tab]').forEach(button => {
     button.disabled=archived;
     const active = button.dataset.tab === view;
-    button.setAttribute('aria-selected', String(active)); button.tabIndex = active || view==='history'&&button.dataset.tab==='today' ? 0 : -1;
+    button.setAttribute('aria-selected', String(active)); button.tabIndex = active || ['history','achievements'].includes(view)&&button.dataset.tab==='today' ? 0 : -1;
   });
 }
 function renderTasks() {
@@ -331,7 +335,7 @@ function renderGym() {
 }
 function renderReview() {
   const progress = store.dayProgress(selectedDate), reviewing = reviewSessionDate === selectedDate && !progress.completedAt;
-  $('#review-banner').hidden = !reviewing || view === 'history' || view === 'today';
+  $('#review-banner').hidden = !reviewing || ['history','today','achievements'].includes(view);
   $('#review-title').textContent = progress.canComplete ? 'All section reviews confirmed' : 'Review each section';
   $('#review-description').textContent = `${shortDate(selectedDate)} · ${progress.reviewedCount} of ${progress.sections.length} confirmed.`;
   $('#review-steps').innerHTML = progress.sections.map((section, index) => `<button data-open-section="${section.id}" class="review-step ${section.reviewed ? 'reviewed' : ''} ${view === section.id ? 'current' : ''}"><span>${section.reviewed ? '✓' : index + 1}</span>${section.label}</button>`).join('');
@@ -424,10 +428,27 @@ function renderRecap() {
   if(recapDate&&recapDate!==selectedDate)reveal($('#history-content'));
   recapDate=selectedDate;
 }
-function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); renderSaveStatus(); }
+function renderAchievements(recompute=true) {
+  if(recompute||!achievementData)achievementData=buildAchievements(store,editableToday());
+  const data=achievementData;
+  $('#achievements-through').textContent=`Your saved history · through ${longDate(editableToday())}`;
+  $('#achievements-summary').innerHTML=`<div class="achievement-total">${icon('trophy')}<strong>${data.unlocked}<small> / ${data.total}</small></strong><span>Achievements unlocked</span></div><div><strong>${data.earned}</strong><span>Total times earned</span></div><div><strong>${data.completed}</strong><span>Days completed</span></div>`;
+  const streakLabels={review:'Day review',logging:'Full logging',strong:'9+ days'};
+  $('#achievement-streaks').innerHTML=Object.entries(data.streaks).map(([id,streak])=>`<div><span>${streakLabels[id]} streak</span><strong>${streak.current}<small> day${streak.current===1?'':'s'}</small></strong><small>Best ${streak.best}${streak.current&&!streak.includesToday?' · through yesterday':''}</small></div>`).join('');
+  $$('[data-achievement-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementFilter===achievementFilter)));
+  $('#achievement-unlocked-only').setAttribute('aria-pressed',String(unlockedOnly));
+  const labels={overall:'Overall',nutrition:'Nutrition',training:'Gym',checklists:'To-do list',sentiments:'Sentiments',streaks:'Streaks'};
+  const cards=data.cards.filter(card=>(achievementFilter==='all'||card.group===achievementFilter)&&(!unlockedOnly||card.count)).sort((a,b)=>Number(b.count>0)-Number(a.count>0));
+  $('#achievement-results').textContent=`${cards.length} achievements shown. ${data.unlocked} of ${data.total} unlocked.`;
+  $('#achievement-grid').innerHTML=cards.length?cards.map(card=>{
+    const progress=card.streak?`Current ${card.streak.current} days · best ${card.streak.best}`:card.unit==='score'?`Best ${scoreText(card.value)} · Goal ${card.target}${card.target<10?'+':''}`:card.id==='weekly-five'?`Best week: ${card.value} days`:card.count?`${card.value} ${card.value===1?card.unit.slice(0,-1):card.unit} recorded`:`${card.value} / ${card.target} ${card.target===1?card.unit.slice(0,-1):card.unit}`;
+    return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.latest?`Latest earned ${shortDate(card.latest)}${card.latest.slice(0,4)!==editableToday().slice(0,4)?`, ${card.latest.slice(0,4)}`:''}`:'Still ahead of you'}</small></article>`;
+  }).join(''):'<p class="achievement-empty">No unlocked achievements in this category yet.</p>';
+}
+function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); renderSaveStatus(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
-  if(archivedDay())next='history';
+  if(archivedDay()&&next!=='achievements')next='history';
   const changed=view!==next;
   view = next; render();
   if(matchMedia('(max-width:767px)').matches&&view!=='history') {
@@ -525,6 +546,11 @@ $('#previous-day').addEventListener('click', () => navigateDay(addDays(selectedD
 $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate, 1)));
 $('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
+function returnToOverview() {if(archivedDay())navigateDay(editableToday());setView('today',true);}
+$('#open-achievements').addEventListener('click',()=>view==='achievements'?returnToOverview():setView('achievements',true));
+$('#achievements-overview').addEventListener('click',returnToOverview);
+$('#achievement-filters').addEventListener('click',event=>{const button=event.target.closest('[data-achievement-filter]');if(!button)return;achievementFilter=button.dataset.achievementFilter;renderAchievements(false);});
+$('#achievement-unlocked-only').addEventListener('click',()=>{unlockedOnly=!unlockedOnly;renderAchievements(false);});
 for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
 $('#mobile-calendar').addEventListener('click', () => {
   if(view==='history') {
@@ -749,11 +775,14 @@ $('#review-primary').addEventListener('click', () => {
   else announce(`${viewLabels[section.id]} review confirmed.`);
 });
 $('#submit-day').addEventListener('click',()=>{
+  const before=buildAchievements(store,editableToday());
   try { store.completeDay(selectedDate); }
   catch(error) { closeDialog($('#final-review-dialog'));render();announce(error.message);return; }
   closeDialog($('#final-review-dialog'));reviewSessionDate=null;setView('today',true);
+  const after=buildAchievements(store,editableToday()),earned=after.cards.filter(card=>card.count>(before.cards.find(previous=>previous.id===card.id)?.count??0)||card.id.startsWith('streak-logging-')&&card.count>0&&card.latest===selectedDate);
   celebrateDayCompletion();
   announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
+  queueAchievementCelebration(earned);
 });
 function updateFinalSentiments(changes){
   store.updateSentiments(selectedDate,changes);
@@ -779,6 +808,24 @@ function celebrateDayCompletion(){
   overlay.hidden=true;void overlay.offsetWidth;overlay.hidden=false;
   completionAnimationTimer=setTimeout(()=>{overlay.hidden=true;},document.documentElement.dataset.motion==='reduced'?1100:1850);
 }
+let achievementCelebrationTimer,achievementDismissTimer;
+function closeAchievementCelebration() {
+  clearTimeout(achievementCelebrationTimer);clearTimeout(achievementDismissTimer);
+  $('#achievement-unlock').hidden=true;
+}
+function queueAchievementCelebration(earned) {
+  closeAchievementCelebration();
+  if(!earned.length)return;
+  // The day-complete overlay and its 3.2-second save toast finish first.
+  achievementCelebrationTimer=setTimeout(()=>{
+    $('#achievement-unlock-title').textContent=earned.length===1?'Achievement unlocked':`${earned.length} achievements unlocked`;
+    $('#achievement-unlock-badges').innerHTML=earned.map(card=>`<div><span>${achievementIcon(card.id)}</span><strong>${escapeHtml(card.title)}</strong><small>${card.count}× earned</small></div>`).join('');
+    $('#achievement-unlock').hidden=false;reveal($('#achievement-unlock'));acknowledge($('#open-achievements'));
+    achievementDismissTimer=setTimeout(closeAchievementCelebration,earned.length>3?12000:8000);
+  },3400);
+}
+$('#dismiss-achievement-unlock').addEventListener('click',closeAchievementCelebration);
+$('#view-unlocked-achievements').addEventListener('click',()=>{closeAchievementCelebration();achievementFilter='all';unlockedOnly=true;setView('achievements',true);});
 
 function showDialog(dialog) { if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open','');reveal(dialog); }
 function closeDialog(dialog) { if (typeof dialog.close === 'function') dialog.close(); else dialog.removeAttribute('open'); }

@@ -19,11 +19,13 @@
   <link rel="stylesheet" href="./review.css">
   <link rel="stylesheet" href="./workspace.css">
   <link rel="stylesheet" href="./mobile.css">
+  <link rel="stylesheet" href="./achievements.css">
   <script type="module" src="./app.mjs"></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
     <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 3h10v5a5 5 0 0 1-10 0V3Zm0 2H3v2a4 4 0 0 0 5 4m9-6h4v2a4 4 0 0 1-5 4m-4 2v6m-4 2h8m-6-2h4"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="m9 3-.6 2.2-2 .9L4.3 5.5 2 9.5l1.6 1.6v1.8L2 14.5l2.3 4 2.1-.6 2 .9L9 21h6l.6-2.2 2-.9 2.1.6 2.3-4-1.6-1.6v-1.8L22 9.5l-2.3-4-2.1.6-2-.9L15 3Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
     <symbol id="i-warning" viewBox="0 0 24 24"><path d="M10.3 4.1 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 4.1a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 3v.2"/></symbol>
@@ -36,7 +38,7 @@
     <header class="app-header">
       <div class="top-row">
         <div class="day-navigation" aria-label="Selected date"><button class="icon-button" id="previous-day" aria-label="Previous day">‹</button><button id="date-short" class="date-button" aria-label="Choose date"></button><button class="icon-button" id="next-day" aria-label="Next day">›</button><button id="go-today" class="quiet-button">Today</button></div>
-        <button id="mobile-calendar" class="quiet-button mobile-calendar" type="button">Calendar</button><button id="save-status" class="save-status" aria-label="Save status and backups"><span class="save-dot"></span><span id="save-message">Saved on this device</span></button><button id="open-score-info" class="icon-button score-info-button" aria-label="How daily scoring works" title="How scoring works">i</button><button id="open-settings" class="icon-button settings-button" aria-label="Settings and backups"><svg class="icon"><use href="#i-settings"/></svg></button>
+        <button id="save-status" class="save-status" aria-label="Save status and backups"><span class="save-dot"></span><span id="save-message">Saved on this device</span></button><button id="open-score-info" class="icon-button score-info-button" aria-label="How daily scoring works" title="How scoring works">i</button><button id="mobile-calendar" class="quiet-button mobile-calendar" type="button">Calendar</button><button id="open-achievements" class="icon-button achievements-button" type="button" aria-label="Achievements" title="Achievements" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></button><button id="open-settings" class="icon-button settings-button" aria-label="Settings and backups"><svg class="icon"><use href="#i-settings"/></svg></button>
       </div>
       <div class="greeting-row"><div><p class="eyebrow" id="greeting-date"></p><h1 id="page-title">Good evening, Kieran<span class="greeting-dot">.</span></h1></div><span id="day-state" class="state-pill">Day in progress</span></div>
       <nav class="day-tabs" role="tablist" aria-label="Homebase sections">
@@ -78,6 +80,13 @@
           </section>
           <aside class="panel history-detail" aria-labelledby="history-date"><span class="eyebrow">DAILY RECAP</span><h3 id="history-date"></h3><div id="history-content"></div><button id="open-selected-day" class="primary-button">Open this day <svg class="icon"><use href="#i-arrow"/></svg></button></aside>
         </div>
+      </section>
+      <section id="achievements-view" class="detail-view achievements-view" role="region" aria-label="Achievements" hidden>
+        <div class="detail-heading"><p class="section-instruction" id="achievements-through"></p><button id="achievements-overview" class="quiet-button">Back to overview</button></div>
+        <div id="achievements-summary" class="achievements-summary"></div>
+        <div id="achievement-streaks" class="achievement-streaks" aria-label="Current and best streaks"></div>
+        <div class="achievement-tools"><div id="achievement-filters" class="achievement-filters" role="group" aria-label="Achievement category"><button data-achievement-filter="all" aria-pressed="true">All</button><button data-achievement-filter="overall" aria-pressed="false">Overall</button><button data-achievement-filter="nutrition" aria-pressed="false">Nutrition</button><button data-achievement-filter="training" aria-pressed="false">Gym</button><button data-achievement-filter="checklists" aria-pressed="false">To-do list</button><button data-achievement-filter="sentiments" aria-pressed="false">Sentiments</button><button data-achievement-filter="streaks" aria-pressed="false">Streaks</button></div><button id="achievement-unlocked-only" class="quiet-button" aria-pressed="false">Unlocked only</button></div>
+        <div class="achievement-catalog"><p id="achievement-results" class="sr-only" role="status"></p><div id="achievement-grid" class="achievement-grid"></div><p class="achievement-policy">Score badges count completed day reviews using recorded scores. Gym score badges require lifting with sets logged; rest does not count. Streaks include weekends; weekly badges use Monday–Sunday. Editing or resetting records updates achievements. Progress follows your synced history.</p></div>
       </section>
     </main>
     <footer class="display-footer"><div class="live-clock"><time id="clock-time"></time><span id="clock-date"></span></div><button id="open-calendar" class="calendar-launch"><span class="calendar-icon"><svg class="icon"><use href="#i-calendar"/></svg><span id="calendar-day-number"></span></span><span>Calendar<span class="calendar-launch-detail">History & averages</span></span><svg class="icon"><use href="#i-arrow"/></svg></button></footer>
@@ -122,6 +131,7 @@
     <div class="final-review-actions"><button class="quiet-button" data-close-dialog>Keep editing</button><button id="submit-day" class="primary-button">Complete entire day</button></div>
   </dialog>
   <div id="day-complete-overlay" class="day-complete-overlay" role="status" aria-live="polite" hidden><div class="completion-rings" aria-hidden="true"><i></i><i></i><i></i></div><div class="completion-message"><span class="completion-check" aria-hidden="true">✓</span><strong>DAY COMPLETE</strong><span id="completion-score"></span></div></div>
+  <section id="achievement-unlock" class="achievement-unlock" role="status" aria-live="polite" hidden><div class="achievement-unlock-heading"><h2 id="achievement-unlock-title">Achievement unlocked</h2><button id="dismiss-achievement-unlock" class="icon-button" aria-label="Dismiss achievement notification">×</button></div><div id="achievement-unlock-badges" class="achievement-unlock-badges"></div><button id="view-unlocked-achievements" class="quiet-button">View achievements</button></section>
   <noscript><p class="storage-warning">Homebase needs JavaScript enabled to log and save your day.</p></noscript>
 </body>
 </html>

@@ -1,7 +1,8 @@
 /* Phone layouts use normal page scrolling in either orientation. */
 @media(max-width:767px), (max-width:1000px) and (max-height:600px) and (orientation:landscape) {
-  html {scroll-padding-top:12px}
-  body {padding:0;min-height:100dvh;background:#243454}
+  /* Desktop locks the document and scrolls main. Phones scroll the document. */
+  html {height:auto;min-height:100%;overflow-x:clip;overflow-y:auto;scroll-padding-top:12px}
+  body {height:auto;overflow:visible;padding:0;min-height:100dvh;background:#243454}
   .app-shell,.is-overview .app-shell {display:block;width:100%;height:auto;min-height:100dvh;padding:0 16px;border:0;border-radius:0;box-shadow:none;overflow:visible;background:linear-gradient(165deg,#6289ce,#4c74bc 65%,#4265a9)}
   .app-shell::before {border-radius:0;box-shadow:inset 0 0 25px #18366020}
   .app-shell>main {display:block;overflow:visible;height:auto;min-height:0;scrollbar-gutter:auto;padding-bottom:max(24px,env(safe-area-inset-bottom))}
