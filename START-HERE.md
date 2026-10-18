@@ -139,3 +139,5 @@ Graph hover uses only the in-app score card, without a native browser tooltip; a
 Mobile weight-graph cards use a compact 174px layout and 34px score circles, keeping the plotted history visible while retaining both prior-day scores. Desktop card sizing is unchanged.
 
 The weigh-in card also shows signed body-weight change against the exact previous calendar day in the selected chart unit. Missing prior-day weight is stated explicitly; do not substitute the last recorded weigh-in.
+
+Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop radius), with their existing generous invisible touch halo retained.
