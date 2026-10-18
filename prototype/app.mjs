@@ -173,7 +173,7 @@ function renderTasks() {
   $('#task-progress-fill').style.width = `${fraction * 100}%`;
   $('#task-progress-fill').style.backgroundColor = scoreColor(fraction * 10);
   const today=localDateKey(new Date(),timeZone),templates=store.loadTemplates();
-  $('#tasks-title').textContent=selectedDate===today?"Today's To-Do":`${shortDate(selectedDate)} To-Do`;
+  $('#tasks-title').textContent=selectedDate===today?'TODAY':shortDate(selectedDate);
   $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}${template.endDate?` · ends ${shortDate(template.endDate)}`:''}</small></span>${!template.endDate?`<button class="text-button" data-stop-template="${template.id}">Stop after ${shortDate(today)}</button>`:'<small>Stopped</small>'}</li>`).join(''):'<li class="hint">Your recurring tasks will appear here.</li>';
   $('#routine-count').textContent=templates.filter(template=>!template.endDate).length;
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
