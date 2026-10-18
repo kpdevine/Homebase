@@ -108,6 +108,7 @@ function renderHeader() {
   if(archived)view='history';
   document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
+  $('#mobile-calendar').textContent = view === 'history' ? 'Overview' : 'Calendar';
   const now = new Date();
   const greeting = timeGreeting(now,timeZone);
   const isToday = selectedDate === localDateKey(now, timeZone);
@@ -524,7 +525,15 @@ $('#previous-day').addEventListener('click', () => navigateDay(addDays(selectedD
 $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate, 1)));
 $('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
-for (const id of ['date-short', 'open-calendar','mobile-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
+for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
+$('#mobile-calendar').addEventListener('click', () => {
+  if(view==='history') {
+    if(archivedDay())navigateDay(editableToday());
+    setView('today',true);
+  } else {
+    calendarMonth=selectedDate;setView('history',true);
+  }
+});
 $('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
 $('#calendar-filters').addEventListener('click',event=>{const button=event.target.closest('[data-calendar-filter]');if(button&&Object.hasOwn(categoryLabels,button.dataset.calendarFilter)){calendarFilter=button.dataset.calendarFilter;renderHistory();}});
 $('#open-selected-day').addEventListener('click', () => setView('today', true));
