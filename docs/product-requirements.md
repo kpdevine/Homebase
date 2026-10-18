@@ -72,3 +72,5 @@ Every source upload to `kpdevine/Homebase`, branch `codex/homebase-prototype`, m
 Local saving remains available without sign-in. Google sign-in alone uploads nothing; explicit sync enablement connects private owner records across devices. Batch typing saves, support offline retry, and surface competing changes without silent overwrite. Preview data is separate from personal data and never uploads.
 
 Settings provides validated backup/restore and Reset all data with an explicit confirmation. Preserve old backups and historical records through compatible migrations. Test model, scoring, chronology, persistence, cloud merging, and achievements; inspect desktop and both phone orientations before delivery. Physical device behavior remains a separate hardware check.
+
+Graph hover uses only the in-app score card, without a native browser tooltip; accessible graph and point labels remain available.

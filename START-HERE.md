@@ -16,6 +16,10 @@ To continue: **Continue Homebase from START-HERE.md. Keep development local. Fir
 
 Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
 
+## Saved checkpoint before the next major changes
+
+The current UI is the baseline for the next round. The weight graph is available only in Calendar → Training, and hovering shows only the in-app previous-day score card (no browser tooltip). Its accessible labels remain. TODAY has its date above the heading, aligned with the other two planning cards. The graph interaction was checked in the browser: card visible, zero native tooltip elements. All 139 tests passed at this checkpoint. Source and PRD are delivered together to GitHub and Firebase Hosting. No further feature changes are queued; await the user's next proposal. Preserve existing personal data and the established scoring rules when making the upcoming changes.
+
 ## October 18 update
 
 Latest: Weight graph access is now only in Calendar → Training, with a full-width button on phone; Daily training retains weight entry and its prominent saved value. Hover/focus/tap a plotted weigh-in to see a themed card with the previous calendar day's Nutrition and Training score bubbles, leaving unlogged values blank. Mouse departure, tapping away, or Escape dismisses it; touch selection stays open until dismissed. Graph ranges/units clear stale cards. TODAY now has its selected date above it, and all three planner headers align on the same baseline. All 139 tests pass.
@@ -125,3 +129,5 @@ The active section's Confirm button lives in the day-review strip and confirmati
 Final-review Sentiments rating uses the same draggable 0–10 circle and 0.1 increments as the Sentiments tab, with arrow keys and Home/End for accessibility. Notes and rating edits in the final review save immediately and mark the Sentiments section reviewed without an extra confirmation button; Complete entire day remains the last action.
 
 The final-review rating circle is compact and has no on-screen drag instructions; its accessible slider label and keyboard controls remain.
+
+Graph hover uses only the in-app score card, without a native browser tooltip; accessible graph and point labels remain available.
