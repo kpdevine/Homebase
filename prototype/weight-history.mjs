@@ -21,3 +21,13 @@ export function weightDayChange(snapshot,date,unit) {
   const points=weightHistory(snapshot,{unit,through:date}),current=points.find(point=>point.date===date),previous=points.find(point=>point.date===addDays(date,-1));
   return current&&previous?Math.round((current.value-previous.value)*10)/10:null;
 }
+
+// UI-13: overlapping touch halos should select the closest visible reading.
+export function nearestWeightPoint(points,x,y,maxDistance=32) {
+  let nearest=null,distance=maxDistance**2;
+  for(const point of points) {
+    const next=(point.x-x)**2+(point.y-y)**2;
+    if(next<=distance&&(nearest===null||next<distance)){nearest=point;distance=next;}
+  }
+  return nearest;
+}

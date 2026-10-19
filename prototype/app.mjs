@@ -1,7 +1,7 @@
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
 import { summarizeDay, taskScoreRange, categorySummary, scoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
-import { taskProgress, scheduleLabel, orderedTasks } from './tasks.mjs';
+import { taskProgress, scheduleLabel, orderedTasks, activeTemplates } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
 import { mountCloud } from './cloud-ui.mjs';
@@ -10,7 +10,8 @@ import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
-import {weightHistory,weightPlot,weightPointContext,weightDayChange} from './weight-history.mjs';
+import {needsWelcome,profileName} from './onboarding.mjs';
+import {weightHistory,weightPlot,weightPointContext,weightDayChange,nearestWeightPoint} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
 
@@ -59,8 +60,28 @@ $('#body-weight-form').insertAdjacentHTML('afterbegin','<div class="weight-highl
 const calendarTools=document.createElement('div');calendarTools.className='calendar-tools';
 $('#calendar-filters').before(calendarTools);calendarTools.append($('#calendar-filters'));
 calendarTools.insertAdjacentHTML('beforeend','<button id="open-weight-history" type="button" class="calendar-weight-launch quiet-button" hidden>Weight graph ↗</button>');
+// UI-10: selecting a calendar day on phone reveals its recap instead of changing it off screen.
+$('.history-detail').insertAdjacentHTML('afterbegin','<button id="back-to-calendar" class="text-button" type="button">↑ Back to calendar</button>');
+$('.history-detail').tabIndex=-1;
+const phoneLayout=()=>matchMedia('(max-width:1000px)').matches;
+$('#back-to-calendar').addEventListener('click',()=>{$('.calendar-card').scrollIntoView({block:'start',behavior:'instant'});$('#calendar-month').tabIndex=-1;$('#calendar-month').focus({preventScroll:true});});
+
 $('#body-weight-form>label').innerHTML='Log weight <small>(optional)</small>';
 $('#training-pace').after($('#body-weight-form'));
+// UI-04: keep saved weight prominent without permanently expanding its editor.
+const weightEditor=document.createElement('details');weightEditor.className='weight-entry-editor';
+weightEditor.innerHTML='<summary id="weight-editor-label">Log weight</summary>';
+$('#body-weight-form').append(weightEditor);
+for(const field of [...$('#body-weight-form').children])if(field!==weightEditor&&!field.classList.contains('weight-highlight'))weightEditor.append(field);
+let weightEditorDate=null;
+// UI-05: recommendations precede logging; optional supporting detail stays available.
+$('#gym-form').before($('#ideal-workout'));
+const gapsDetails=document.createElement('details');gapsDetails.className='training-gaps';
+gapsDetails.innerHTML='<summary>Weekly muscle gaps</summary>';$('#muscle-suggestions').before(gapsDetails);gapsDetails.append($('#muscle-suggestions'));
+const notesDetails=document.createElement('details');notesDetails.className='training-notes-details';
+notesDetails.innerHTML='<summary>Training notes (optional)</summary>';$('.training-notes').before(notesDetails);notesDetails.append($('.training-notes'));
+let trainingNotesDate=null;
+
 $('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button">+ Plan a task</button></div></section>');
 const todayTaskHeading=document.createElement('div');
 $('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="tasks-date" class="eyebrow"></p>';todayTaskHeading.append($('#tasks-title'));
@@ -70,7 +91,10 @@ const expandedTasks = new Set();
 let displayName = 'Kieran';
 let preferences={},motionPreference='system';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
-if(typeof preferences.name==='string'&&preferences.name.trim()&&preferences.name.length<=30)displayName=preferences.name;
+if(profileName(preferences.name))displayName=profileName(preferences.name);
+const welcomeRequired=needsWelcome({preview,preferences,snapshot:loaded.snapshot,error:loaded.error});
+if(welcomeRequired)displayName='';
+let welcomeGoogleAttempt=!!preferences.welcomeGooglePending;
 motionPreference=setMotionPreference(preferences.motion);
 const editableToday=()=>localDateKey(new Date(),timeZone);
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
@@ -141,7 +165,7 @@ function renderHeader() {
   $('#selected-day-notice').hidden=isToday||view==='achievements';
   $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
   $('#selected-day-help').textContent=archived?'Summary only · days more than a week ago cannot be edited.':`Entries on this screen belong to ${shortDate(selectedDate)}.`;
-  $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>, ${escapeHtml(displayName)}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
+  $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>${displayName?`, ${escapeHtml(displayName)}`:''}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
   $('#greeting-date').textContent = longDate(selectedDate);
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
   $('#date-short').setAttribute('aria-label', `Choose date. Selected ${longDate(selectedDate)}`);
@@ -174,25 +198,25 @@ function renderTasks() {
   $('#task-list').innerHTML = taskHtml(true);
   $('#overview-task-count').textContent = `${done}/${total}`;
   $('#task-count').textContent = `${done} / ${total}`;
-  $('#task-summary').textContent = total ? `${done} of ${total} tasks checked off · ${total-done} remaining` : 'No tasks added for this date.';
+  $('#task-summary').textContent = total ? `${done} of ${total} actions done · ${total-done} remaining` : 'No tasks added for this date.';
   const fraction = total ? done / total : 0;
   $('#task-progress-fill').style.width = `${fraction * 100}%`;
   $('#task-progress-fill').style.backgroundColor = scoreColor(fraction * 10);
-  const today=localDateKey(new Date(),timeZone),templates=store.loadTemplates();
+  const today=localDateKey(new Date(),timeZone),templates=activeTemplates(store.loadTemplates(),today);
   $('#tasks-title').textContent=selectedDate===today?'TODAY':shortDate(selectedDate);
   $('#tasks-date').textContent=longDate(selectedDate);
-  $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}${template.endDate?` · ends ${shortDate(template.endDate)}`:''}</small></span>${!template.endDate?`<button class="text-button" data-stop-template="${template.id}">Stop after ${shortDate(today)}</button>`:'<small>Stopped</small>'}</li>`).join(''):'<li class="hint">Your recurring tasks will appear here.</li>';
-  $('#routine-count').textContent=templates.filter(template=>!template.endDate).length;
+  $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}</small></span><button class="quiet-button" data-stop-template="${template.id}">Stop recurring task</button></li>`).join(''):'<li class="hint">No active recurring tasks.</li>';
+  $('#routine-count').textContent=templates.length;
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
   $('#tomorrow-date').textContent=longDate(tomorrow);
   $('#tomorrow-count').textContent=`${planned.length} task${planned.length===1?'':'s'}`;
-  const plannedTask=(task,date)=>`<li class="planned-task"><span>${escapeHtml(task.name)}${task.templateId||task.children.length?`<small>${[task.templateId?'Repeats':'',task.children.length?`${task.children.length} subtasks`:''].filter(Boolean).join(' · ')}</small>`:''}</span><button class="edit-task" data-edit-planned="${task.id}" data-planned-date="${date}" aria-label="Edit ${escapeHtml(task.name)} for ${shortDate(date)}">${icon('edit')}</button></li>`;
+  const plannedTask=(task,date)=>`<li class="planned-task"><span>${escapeHtml(task.name)}${task.templateId||task.children.length?`<small>${[task.templateId?'Repeats':'',task.children.length?`${task.children.length} subtask${task.children.length===1?'':'s'}`:''].filter(Boolean).join(' · ')}</small>`:''}</span><button class="edit-task" data-edit-planned="${task.id}" data-planned-date="${date}" aria-label="Edit ${escapeHtml(task.name)} for ${shortDate(date)}">${icon('edit')}</button></li>`;
   $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
   const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
   $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
   $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
   $('#later-count').textContent=String(laterCount);
-  $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} tasks scheduled`);
+  $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} task${planned.length===1?'':'s'} scheduled`);
 }
 function renderScore() {
   const summary = summaryFor();
@@ -331,19 +355,25 @@ $('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.load
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
-  if(!$('#body-weight-form').contains(document.activeElement)) {
+  if(!weightEditor.open||weightEditorDate!==selectedDate) {
     $('#body-weight').value=day.bodyWeight?.value??'';bodyWeightUnit=day.bodyWeight?.unit??'lb';
     $$('[name="weight-unit"]').forEach(input=>input.checked=input.value===bodyWeightUnit);
     $('#body-weight').max=bodyWeightUnit==='kg'?700:1500;
   }
-  $('#body-weight-status').textContent=day.bodyWeight?`${weightText(day.bodyWeight)} saved for ${shortDate(selectedDate)}`:'Separate from your gym score.';
+  updateWeightDraftHint();
   $('#body-weight-current').innerHTML=day.bodyWeight?`${day.bodyWeight.value.toFixed(1)} <small>${day.bodyWeight.unit}</small>`:'<span class="weight-missing">Not logged</span>';
   $('#remove-body-weight').hidden=!day.bodyWeight;
+  $('#weight-editor-label').textContent=day.bodyWeight?'Edit weight':'Log weight';
+  if(weightEditorDate!==selectedDate){weightEditor.open=false;weightEditorDate=selectedDate;}
+  if(trainingNotesDate!==selectedDate){notesDetails.open=!!day.notes.training;trainingNotesDate=selectedDate;}
+
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
   $('#gym-form').hidden=day.trainingMode!=='training';
+  $('#training-mode-hint').hidden=!entries.length;
+  $('#ideal-workout').hidden=noLift;
   const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set muscle targets below to include gym in the daily average.'}</small></div>`;
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to include gym in the daily average.'}</small></div>`;
   $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
   const workout=idealWorkout(pace);
   $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets${pace.dailySets?' remaining today':''}</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul><p>Based on your daily target and the weekly goals still open. Updates as you log sets.</p>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
@@ -450,7 +480,7 @@ function recapMarkup({final=false}={}) {
       <button ${openSection('checklists')} aria-label="To-do list${archived?' summary':' for this day'}"><span>To-do list</span><strong>${tasks}</strong></button>
     </div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
-    ${recap.tasks.length?`<details class="recap-section" open><summary>Checklist <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
+    ${recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
     ${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}
     ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
@@ -479,8 +509,8 @@ function renderAchievements(recompute=true) {
   const data=achievementData;
   $('#achievements-through').textContent=`Your saved history · through ${longDate(editableToday())}`;
   $('#achievements-summary').innerHTML=`<div class="achievement-total">${icon('trophy')}<strong>${data.unlocked}<small> / ${data.total}</small></strong><span>Achievements unlocked</span></div><div><strong>${data.earned}</strong><span>Total times earned</span></div><div><strong>${data.completed}</strong><span>Days completed</span></div>`;
-  const streakLabels={review:'Day review',logging:'Full logging',strong:'9+ days'};
-  $('#achievement-streaks').innerHTML=Object.entries(data.streaks).map(([id,streak])=>`<div><span>${streakLabels[id]} streak</span><strong>${streak.current}<small> day${streak.current===1?'':'s'}</small></strong><small>Best ${streak.best}${streak.current&&!streak.includesToday?' · through yesterday':''}</small></div>`).join('');
+  const streakLabels={logging:'Consecutive days logged',strong:'9+ point days in a row'};
+  $('#achievement-streaks').innerHTML=Object.entries(data.streaks).map(([id,streak])=>`<div><span>${streakLabels[id]}</span><strong>${streak.current}<small> day${streak.current===1?'':'s'}</small></strong><small>Best ${streak.best}${streak.current&&!streak.includesToday?' · through yesterday':''}</small></div>`).join('');
   $$('[data-achievement-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementFilter===achievementFilter)));
   $('#achievement-unlocked-only').setAttribute('aria-pressed',String(unlockedOnly));
   const labels={overall:'Overall',nutrition:'Nutrition',training:'Gym',checklists:'To-do list',sentiments:'Sentiments',streaks:'Streaks'};
@@ -497,10 +527,10 @@ function setView(next, focus = false) {
   if(archivedDay()&&next!=='achievements')next='history';
   const changed=view!==next;
   view = next; render();
-  if(matchMedia('(max-width:767px)').matches&&view!=='history') {
-    const nav=$('.day-tabs'),tab=$('#tab-'+view),left=tab.offsetLeft-nav.offsetLeft;
-    if(left<nav.scrollLeft)nav.scrollLeft=left;
-    else if(left+tab.offsetWidth>nav.scrollLeft+nav.clientWidth)nav.scrollLeft=left+tab.offsetWidth-nav.clientWidth;
+  // UI-03: switching phone sections must reveal the new content, including utility pages.
+  if(changed&&phoneLayout()&&window.scrollY>0) {
+    const main=$('#main'),nav=$('.day-tabs');
+    window.scrollTo({top:Math.max(0,main.getBoundingClientRect().top+window.scrollY-nav.offsetHeight),behavior:'instant'});
   }
   if(changed)reveal($('#'+panelIds[view]));
   $('#main').scrollTo({top:0,behavior:'instant'});
@@ -611,6 +641,7 @@ $('#calendar').addEventListener('click', event => {
   const button = event.target.closest('[data-calendar-date]'); if (!button) return;
   navigateDay(button.dataset.calendarDate, false);
   $(`[data-calendar-date="${selectedDate}"]`).focus({preventScroll:true});
+  if(phoneLayout()){$('.history-detail').scrollIntoView({block:'start',behavior:'instant'});$('.history-detail').focus({preventScroll:true});}
 });
 $('#calendar').addEventListener('keydown',event=>{
   if(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
@@ -642,14 +673,27 @@ for (const id of ['overview-task-list', 'task-list']) $('#' + id).addEventListen
   if(checked)checkOff($(`#${id} [data-task-id="${taskId}"]`));
   announce(checked ? 'Task checked off.' : 'Task marked incomplete.');
 });
+let pendingTaskRemoval=null;
+function confirmTaskRemoval({title,message,label,action}) {
+  pendingTaskRemoval=action;$('#task-removal-title').textContent=title;$('#task-removal-message').textContent=message;$('#confirm-task-removal').textContent=label;
+  showDialog($('#task-removal-dialog'));$('#cancel-task-removal').focus();
+}
+$('#task-removal-dialog').addEventListener('close',()=>{pendingTaskRemoval=null;});
+$('#cancel-task-removal').addEventListener('click',()=>closeDialog($('#task-removal-dialog')));
+$('#confirm-task-removal').addEventListener('click',()=>{const action=pendingTaskRemoval;closeDialog($('#task-removal-dialog'));action?.();});
 $('#task-list').addEventListener('click', event => {
   const button = event.target.closest('[data-remove-task]'); if (!button) return;
-  const date = selectedDate, removed = store.removeTask(date, button.dataset.removeTask);
-  render(); $('#open-task-composer').focus({preventScroll:true});
-  announce('Task removed.', () => { store.restoreTask(date, removed.task, removed.index); render(); announce('Task restored.'); });
+  const date=selectedDate,task=store.loadDay(date).tasks.find(task=>task.id===button.dataset.removeTask);if(!task)return;
+  const remove=()=>{const removed=store.removeTask(date,task.id);render();$('#open-task-composer').focus({preventScroll:true});announce('Task removed.',()=>{store.restoreTask(date,removed.task,removed.index);render();announce('Task restored.');});};
+  if(task.templateId)confirmTaskRemoval({title:'Remove this occurrence?',message:`Remove “${task.name}” for ${longDate(date)} only? Its recurring schedule will continue on other days.`,label:'Remove for this day',action:remove});
+  else remove();
 });
 $('#undo-action').addEventListener('click', () => undoAction?.());
 const taskTextMeasure=document.createElement('canvas').getContext('2d');
+const taskWrapMeasure=document.createElement('div');
+taskWrapMeasure.setAttribute('aria-hidden','true');
+taskWrapMeasure.style.cssText='position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;white-space:pre-wrap;overflow-wrap:break-word;box-sizing:border-box;height:auto;min-height:0;border:0;';
+document.body.append(taskWrapMeasure);
 function fitTaskField(field) {
   if(!field.clientWidth)return;
   const style=getComputedStyle(field),size=Number.parseFloat(style.fontSize);
@@ -658,20 +702,21 @@ function fitTaskField(field) {
   const caps=taskTextMeasure?.measureText('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
   const fontAscent=metrics?.fontBoundingBoxAscent??size*.75,fontDescent=metrics?.fontBoundingBoxDescent??size*.25;
   const ascent=caps?.actualBoundingBoxAscent??size*.7,descent=metrics?.actualBoundingBoxDescent??size*1.15;
-  const borders=Number.parseFloat(style.borderTopWidth)+Number.parseFloat(style.borderBottomWidth);
-  function measure(lineHeight) {
-    const leading=(lineHeight-fontAscent-fontDescent)/2;
-    const top=Math.ceil(Math.max(0,ascent-fontAscent-leading)+1);
-    const bottom=Math.ceil(Math.max(0,descent-fontDescent-leading)+1);
-    field.style.lineHeight=`${lineHeight}px`;
-    field.style.paddingTop=`${top}px`;field.style.paddingBottom=`${bottom}px`;
-    // Let the underline follow the ink without shifting the surrounding layout.
-    field.style.marginBottom=`-${bottom-1}px`;
-    field.style.height='0px';
-    return {height:Math.ceil(field.scrollHeight+borders),lines:Math.round((field.scrollHeight-top-bottom)/lineHeight)};
-  }
-  const fitted=measure(Math.ceil(size*1.12));
-  field.style.height=`${fitted.height}px`;
+  const lineHeight=Math.ceil(size*1.12),leading=(lineHeight-fontAscent-fontDescent)/2;
+  const top=Math.ceil(Math.max(0,ascent-fontAscent-leading)+1);
+  const overhang=Math.ceil(Math.max(0,descent-fontDescent-leading)+1);
+  for(const property of ['fontFamily','fontSize','fontStyle','fontWeight','fontKerning','letterSpacing','wordSpacing','wordBreak','tabSize','paddingLeft','paddingRight'])taskWrapMeasure.style[property]=style[property];
+  taskWrapMeasure.style.width=`${field.clientWidth}px`;
+  taskWrapMeasure.style.lineHeight=`${lineHeight}px`;
+  taskWrapMeasure.style.paddingTop=`${top}px`;taskWrapMeasure.style.paddingBottom='1px';
+  taskWrapMeasure.textContent=field.value||field.placeholder||' ';
+  // Line boxes measure wrapping; scrollHeight also includes the unusually long
+  // handwritten descenders. Reserve their ink outside the visible writing box.
+  const height=Math.max(lineHeight+top+1,taskWrapMeasure.offsetHeight);
+  field.parentElement.style.height=`${height}px`;
+  field.style.lineHeight=`${lineHeight}px`;
+  field.style.paddingTop=`${top}px`;field.style.paddingBottom=`${overhang+1}px`;
+  field.style.marginBottom='0px';field.style.height=`${height+overhang}px`;
 }
 function fitTaskFields() { if($('#task-dialog').open)$$('#task-name,[data-child-name]').forEach(fitTaskField); }
 document.fonts.ready.then(fitTaskFields);
@@ -698,7 +743,7 @@ function renderTaskEditScope() {
 }
 function appendSubtaskField(child={name:''}) {
   const row=document.createElement('div');row.className='subtask-input-row';
-  row.innerHTML='<textarea data-child-name rows="1" maxlength="100" placeholder="Subtask name" aria-label="Subtask name" autocomplete="off" required></textarea><button class="remove-task" type="button" data-remove-subtask aria-label="Remove subtask">×</button>';
+  row.innerHTML='<div class="task-writing-field"><textarea data-child-name rows="1" maxlength="100" placeholder="Subtask name" aria-label="Subtask name" autocomplete="off" required></textarea></div><button class="remove-task" type="button" data-remove-subtask aria-label="Remove subtask">×</button>';
   const input=row.querySelector('textarea');input.value=child.name;if(child.id)input.dataset.childId=child.id;
   $('#subtask-inputs').append(row);return input;
 }
@@ -768,16 +813,23 @@ $('#add-task-form').addEventListener('submit', event => {
   closeDialog($('#task-dialog'));render();(taskComposerTrigger.isConnected?taskComposerTrigger:$(view==='today'?'#overview-add-task':'#open-task-composer')).focus({preventScroll:true});acknowledge($(view==='today'?'.overview-tasks':'.checklist-editor'));announce(editing?'Task changes saved.':`${frequency==='once'?'Task':'Recurring task'} added ${taskComposeDate===addDays(editableToday(),1)?'for tomorrow':`for ${shortDate(taskComposeDate)}`}.`);taskEdit=null;
 });
 $('#task-name').addEventListener('input', event => event.target.setCustomValidity(''));
+function updateWeightDraftHint() {
+  const saved=store.loadDay(selectedDate).bodyWeight,field=$('#body-weight');
+  const changed=weightEditor.open&&(field.value!==''?(Number(field.value)!==saved?.value||bodyWeightUnit!==saved?.unit):!!saved);
+  $('#body-weight-status').textContent=changed?'Unsaved weight · choose Save weight.':saved?`${weightText(saved)} saved for ${shortDate(selectedDate)}`:'Separate from your gym score.';
+}
+$('#body-weight').addEventListener('input',updateWeightDraftHint);
+weightEditor.addEventListener('toggle',()=>{if(!weightEditor.open){renderGym();cloud?.resume();}});
 $('#body-weight-form').addEventListener('submit',event=>{
   event.preventDefault();const input=$('#body-weight');
   if(!input.checkValidity()){input.reportValidity();return;}
-  try {store.updateBodyWeight(selectedDate,{value:Number(input.value),unit:bodyWeightUnit});render();announce('Body weight saved.');}
+  try {store.updateBodyWeight(selectedDate,{value:Number(input.value),unit:bodyWeightUnit});render();weightEditor.open=false;$('#weight-editor-label').focus();announce('Body weight saved.');}
   catch(error){announce(error.message);}
 });
 $$('[name="weight-unit"]').forEach(input=>input.addEventListener('change',()=>{
   const field=$('#body-weight'),value=Number(field.value),unit=input.value;
   if(field.value&&Number.isFinite(value)&&unit!==bodyWeightUnit)field.value=(unit==='kg'?value/2.2046226218:value*2.2046226218).toFixed(1);
-  bodyWeightUnit=unit;field.max=unit==='kg'?700:1500;
+  bodyWeightUnit=unit;field.max=unit==='kg'?700:1500;updateWeightDraftHint();
 }));
 $('#remove-body-weight').addEventListener('click',()=>{store.updateBodyWeight(selectedDate,null);render();announce('Body weight removed.');});
 function renderWeightHistory() {
@@ -811,8 +863,20 @@ function showWeightPointCard(point) {
   const preferred=y-card.offsetHeight-14;
   card.style.top=`${Math.max(8,Math.min(chart.clientHeight-card.offsetHeight-8,preferred>=8?preferred:y+14))}px`;
 }
+function weightReadingAtPointer(event) {
+  if(!event.target.closest('[data-weight-date]'))return null;
+  const points=$$('#weight-chart [data-weight-date]').map(element=>{const bounds=element.querySelector('.weight-point').getBoundingClientRect();return {element,x:bounds.left+bounds.width/2,y:bounds.top+bounds.height/2};});
+  return nearestWeightPoint(points,event.clientX,event.clientY)?.element??null;
+}
+$('#weight-chart').addEventListener('pointermove',event=>{
+  if(event.pointerType!=='mouse')return;
+  const point=weightReadingAtPointer(event);
+  if(!point){if(!weightPointPinned)hideWeightPointCard();return;}
+  if(point.classList.contains('is-active'))return;
+  weightPointPinned=false;showWeightPointCard(point);
+});
 $('#weight-chart').addEventListener('pointerover',event=>{
-  const point=event.target.closest('[data-weight-date]');if(!point||event.pointerType==='touch')return;
+  const point=weightReadingAtPointer(event);if(!point||event.pointerType==='touch')return;
   weightPointPinned=false;showWeightPointCard(point);
 });
 $('#weight-chart').addEventListener('pointerout',event=>{
@@ -820,7 +884,8 @@ $('#weight-chart').addEventListener('pointerout',event=>{
   hideWeightPointCard();
 });
 $('#weight-chart').addEventListener('pointerdown',event=>{
-  const point=event.target.closest('[data-weight-date]');if(!point)return;
+  const point=weightReadingAtPointer(event);if(!point)return;
+  event.preventDefault();point.focus({preventScroll:true});
   weightPointPinned=event.pointerType!=='mouse';showWeightPointCard(point);
 });
 $('#weight-chart').addEventListener('focusin',event=>{const point=event.target.closest('[data-weight-date]');if(point)showWeightPointCard(point);});
@@ -836,7 +901,8 @@ $$('[data-weight-range]').forEach(button=>button.addEventListener('click',()=>{w
 $$('[data-chart-unit]').forEach(button=>button.addEventListener('click',()=>{weightChartUnit=button.dataset.chartUnit;renderWeightHistory();}));
 $('#recurring-tasks').addEventListener('click',event=>{
   const button=event.target.closest('[data-stop-template]');if(!button)return;
-  store.stopTemplate(button.dataset.stopTemplate,localDateKey(new Date(),timeZone));render();announce('Recurring task stopped after today. Earlier days are kept.');
+  const template=store.loadTemplates().find(template=>template.id===button.dataset.stopTemplate);if(!template)return;
+  confirmTaskRemoval({title:'Stop this recurring task?',message:`Stop “${template.name}” after today? Future occurrences will be removed. Today and earlier history will be kept.`,label:'Stop recurring schedule',action:()=>{store.stopTemplate(template.id,localDateKey(new Date(),timeZone));render();announce('Recurring task stopped after today. Earlier days are kept.');}});
 });
 $('#rating-minus').addEventListener('click', () => { $('#rating-value').setCustomValidity(''); updateRating(adjustScore(store.loadDay(selectedDate).nutrition, -1), true); });
 $('#rating-plus').addEventListener('click', () => { $('#rating-value').setCustomValidity(''); updateRating(adjustScore(store.loadDay(selectedDate).nutrition, 1), true); });
@@ -887,7 +953,7 @@ $$('[name="training-mode"]').forEach(input => input.addEventListener('change', (
 }));
 for (const id of ['daily-training-entries','gym-log']) $('#' + id).addEventListener('click', event => {
   const button = event.target.closest('[data-remove-entry]'); if (!button) return;
-  store.removeGymEntry(button.dataset.removeEntry); render(); $('#gym-sets').focus({preventScroll:true}); announce('Set entry removed.');
+  store.removeGymEntry(button.dataset.removeEntry); render(); $('#gym-sets').focus({preventScroll:true}); announce('Set entry removed. Lifting status is unchanged.');
 });
 $('#toggle-gym-log').addEventListener('click', () => {
   const log = $('#gym-log'); log.hidden = !log.hidden;
@@ -976,7 +1042,7 @@ $('#score-info').addEventListener('click', () => { closeDialog($('#settings-dial
 $('#open-score-info').addEventListener('click',()=>showDialog($('#score-dialog')));
 function openSettings() {
   $('#profile-name').value = displayName;
-  $('#motion-setting').value=motionPreference;renderMotionSetting();
+  $('#motion-setting').value=motionPreference;$('#motion-preview').hidden=true;renderMotionSetting();
   $('#settings-message').textContent = storageError ? `Local storage issue: ${storageError}` : preview ? 'This preview saves separately from your personal Homebase data.' : '';
   $('#export-backup').textContent = 'Download local backup';
   $('#export-recovery').hidden = !(loaded.error && loaded.raw);
@@ -993,19 +1059,39 @@ $('#preferences-form').addEventListener('submit', event => {
   renderHeader();
 });
 $('#profile-name').addEventListener('input', event => event.target.setCustomValidity(''));
+function finishWelcome(name) {
+  displayName=profileName(name)||'Friend';
+  welcomeGoogleAttempt=false;
+  preferences={...preferences,name:displayName,welcomed:true,welcomeGooglePending:false};
+  try {localStorage.setItem(preferencesKey,JSON.stringify(preferences));}catch{}
+  closeDialog($('#welcome-dialog'));renderHeader();
+}
+$('#welcome-dialog').addEventListener('cancel',event=>event.preventDefault());
+$('#welcome-form').addEventListener('submit',event=>{
+  event.preventDefault();const input=$('#welcome-name'),name=profileName(input.value);
+  if(!name){input.setCustomValidity('Enter a name, up to 30 characters.');input.reportValidity();return;}
+  finishWelcome(name);
+});
+$('#welcome-name').addEventListener('input',event=>event.target.setCustomValidity(''));
+$('#welcome-google').addEventListener('click',()=>{
+  welcomeGoogleAttempt=true;preferences={...preferences,welcomeGooglePending:true};
+  try{localStorage.setItem(preferencesKey,JSON.stringify(preferences));}catch{}
+  cloud?.signIn();
+});
 function renderMotionSetting() {
   const on=document.documentElement.dataset.motion==='full';
   $('#motion-description').textContent=motionPreference==='system'?`Following device setting: animations ${on?'on':'reduced'}.`:on?'Stepped transitions and score sweeps are on.':'Transitions and score sweeps are off.';
   $('#preview-motion').disabled=!on;
+  if(!on)$('#motion-preview').hidden=true;
 }
 $('#motion-setting').addEventListener('change',event=>{
   motionPreference=setMotionPreference(event.target.value);renderMotionSetting();
   preferences={...preferences,name:displayName,motion:motionPreference};
   try {localStorage.setItem(preferencesKey,JSON.stringify(preferences));$('#settings-message').textContent='Motion preference saved on this device.';}
   catch {$('#settings-message').textContent='Motion updated for this session. Browser storage is unavailable.';}
-  reveal($('#motion-preview'));
+  if(document.documentElement.dataset.motion==='full'){$('#motion-preview').hidden=false;reveal($('#motion-preview'));}
 });
-$('#preview-motion').addEventListener('click',()=>reveal($('#motion-preview')));
+$('#preview-motion').addEventListener('click',()=>{$('#motion-preview').hidden=false;reveal($('#motion-preview'));});
 function downloadBackup() {
   flushSave();
   const content = JSON.stringify(store.exportSnapshot(), null, 2);
@@ -1094,16 +1180,27 @@ $('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';
 render();
 reveal($('#'+panelIds[view]));
 if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
+if(welcomeRequired)showDialog($('#welcome-dialog'));
 
 cloud=mountCloud({
   preview,readLocal:()=>store.exportSnapshot(),
   flushLocal:()=>{flushSave();return !storageError&&!blockedSave;},
-  canApply:()=>!blockedSave&&!pendingSnapshot&&!$('#task-dialog').open&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
+  canApply:()=>!blockedSave&&!pendingSnapshot&&!$('#task-dialog').open&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!weightEditor.open&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
   applyLocal:snapshot=>{
     if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
     const raw=writeLocal(storage,snapshot);
     store=createStore({clientId,editableToday,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
     closeDialog($('#final-review-dialog'));reviewSessionDate=null;render();
   },
-  onStatus:state=>{cloudLabel=state.label;renderSaveStatus();}
+  onUser:user=>{
+    if(user&&($('#welcome-dialog').open||welcomeGoogleAttempt)) {
+      const name=typeof user.displayName==='string'?user.displayName.trim().slice(0,30):null;
+      if(name)finishWelcome(name);
+      else {$('#welcome-status').textContent='Signed in. Enter the name you want to use.';$('#welcome-google').hidden=true;}
+    }
+  },
+  onStatus:state=>{
+    cloudLabel=state.label;renderSaveStatus();$('#welcome-google').disabled=!state.canSignIn;
+    if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
+  }
 });

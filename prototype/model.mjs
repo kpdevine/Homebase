@@ -287,7 +287,11 @@ export function createStore(options = {}) {
     },
     removeGymEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
-      if (index >= 0) { const before=trainingScores(),[entry] = entries.splice(index, 1); if(!entries.some(value=>value.date===entry.date))writableDay(entry.date).trainingMode='rest';invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before); }
+      if (index >= 0) {
+        const before=trainingScores(),[entry] = entries.splice(index, 1);
+        // UI-14: removing set volume does not reverse the lifting answer.
+        invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before);
+      }
     },
     loadTrainingDay(key) { return structuredClone(entries.filter(entry => entry.date === key)); },
     setTrainingMode(key, mode) {

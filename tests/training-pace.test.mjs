@@ -81,7 +81,7 @@ test('backdated set deletion reclassifies later sets and reopens affected review
   assert.equal(store.trainingProgress(tuesday).score,5.5);
   store.removeGymEntry(id);assert.equal(store.trainingProgress(tuesday).score,10);assert.equal(store.loadDay(tuesday).completedAt,null);
   assert.deepEqual(store.loadDay(tuesday).reviewed,{nutrition:true,training:false,checklists:true});
-  assert.equal(store.loadDay(monday).trainingMode,'rest');assert.equal(store.trainingProgress(tuesday).restCredits,1);
+  assert.equal(store.loadDay(monday).trainingMode,'training');assert.equal(store.trainingProgress(monday).score,4);assert.equal(store.trainingProgress(tuesday).restCredits,2);
 });
 
 test('backdating rest reallocates credits, and replacing rest with lifting gives a later rest its credit back',()=>{

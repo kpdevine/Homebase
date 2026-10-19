@@ -1,6 +1,8 @@
 // Recurrence is calculated on calendar dates; merely viewing a day never logs it.
 export const FREQUENCIES = ['daily', 'weekdays', 'weekly', 'custom'];
 export function orderedTasks(tasks) { return [...tasks].sort((a,b)=>Number(!!a.templateId)-Number(!!b.templateId)); }
+// Stopped/old schedule versions remain in history, never in the active manager.
+export function activeTemplates(templates,today) { return templates.filter(template=>!template.endDate||template.endDate>today); }
 export const weekday = date => (new Date(`${date}T12:00:00Z`).getUTCDay() + 6) % 7 + 1;
 export function isDue(template, date) {
   if (date < template.startDate || template.endDate && date > template.endDate) return false;

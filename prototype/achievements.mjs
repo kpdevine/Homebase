@@ -63,11 +63,11 @@ export function buildAchievements(store,today) {
   const sentimentDays=completed.filter(record=>score(record,'sentiments')!==null);
   daily('sentiments-9','sentiments','A day to remember','Rate your sentiments 9+ and finish the full day review.',sentimentDays,record=>score(record,'sentiments')>=9,
     Math.max(0,...sentimentDays.map(record=>score(record,'sentiments'))),9);
-  const reviewDates=completed.map(record=>record.date),loggedDates=records.filter(record=>record.summary.requiredLogged===3).map(record=>record.date),strongDates=completed.filter(record=>record.summary.score>=9).map(record=>record.date);
-  for(const [type,dates,blocks,label] of [['review',reviewDates,[3,7,14,30,60,100],'completed day reviews'],['logging',loggedDates,[3,7,14,30,60],'days with all three required categories logged'],['strong',strongDates,[3,7,14],'completed days scoring 9+']]) {
+  const loggedDates=records.filter(record=>record.summary.requiredLogged===3).map(record=>record.date),strongDates=completed.filter(record=>record.summary.score>=9).map(record=>record.date);
+  for(const [type,dates,blocks,label] of [['logging',loggedDates,[3,7,14,30,60],'days with all three required categories logged'],['strong',strongDates,[3,7,14],'completed days scoring 9+']]) {
     for(const target of blocks) {
       const streak=streakStats(dates,today,target);
-      cards.push({id:`streak-${type}-${target}`,group:'streaks',title:`${target}-day ${type==='review'?'review':type==='logging'?'logging':'standout'} streak`,
+      cards.push({id:`streak-${type}-${target}`,group:'streaks',title:type==='logging'?`${target} logged days in a row`:`${target} days at 9+ in a row`,
         description:`Earn once for each full ${target}-day block of consecutive ${label}.`,count:streak.count,latest:streak.latest,value:streak.current,target,unit:'days',streak});
     }
   }
@@ -87,5 +87,5 @@ export function buildAchievements(store,today) {
   daily('weekly-five','overall','Show up all week','Complete at least five day reviews in a Monday–Sunday week. Once per week.',consistentWeeks,()=>true,
     Math.max(0,...[...byWeek.values()].map(days=>days.length)),5,'days');
   return {cards,unlocked:cards.filter(card=>card.count>0).length,total:cards.length,earned:cards.reduce((sum,card)=>sum+card.count,0),completed:completed.length,
-    streaks:{review:streakStats(reviewDates,today),logging:streakStats(loggedDates,today),strong:streakStats(strongDates,today)}};
+    streaks:{logging:streakStats(loggedDates,today),strong:streakStats(strongDates,today)}};
 }

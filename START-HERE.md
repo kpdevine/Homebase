@@ -16,6 +16,12 @@ To continue: **Continue Homebase from START-HERE.md. Keep development local. Fir
 
 Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
 
+## Latest checkpoint: reviewed UI polish
+
+Kieran reviewed the UI/functionality pass and authorized “push to prd” on October 18. See [the numbered review log](docs/ui-polish-review.md) for UI-01 through UI-19, source locations, behavior changes, validation, and selective revert guidance. The PRD now includes the pass: consistent contrast/layouts, compact mobile navigation with end insets, weight draft preservation, nearest-point graph selection, explicit lifting status after set deletion, two streak types, and a matching scoring-info icon with grouped gym explanations. The follow-ups align phone task checkboxes to the first line, let descenders extend below task/subtask writing frames without growing them, hide stopped recurring schedules behind safer removal confirmations, and welcome first-time guests with name entry or Google sign-in. All 146 tests pass. The normal local responsive previews at port 4188 serve the working files after refresh; isolated QA at port 4189 uses separate sample records. This replaces the prior publication hold for this pass. The pre-polish baseline was local commit `5decdb4` / remote checkpoint `c632498ced155502fe8043a9483b7f02e9c6a0a6`.
+
+Release verification: Firebase Hosting deployment completed on October 18. SHA-256 comparisons of all 62 public files at `https://homebase-d3c6c.firebaseapp.com/` matched the local `prototype/` directory. The live preview opened successfully and displayed the two streak summaries and 49 achievement cards. Source, PRD, and review log are included together in this Git checkpoint; the model suite passes 146/146. No Firestore rules, database schema, or personal records were changed by this release.
+
 ## Latest checkpoint: compact graph card
 
 Mobile graph cards are now 174px wide with 34px score circles; the phone preview measured 174 × 117px within a 286 × 188px graph. Cards display signed body-weight change from the exact previous calendar day (converted to the chosen unit), or explicitly state that prior-day weight is missing. Custom hover card only; no native tooltip. All 140 tests pass. These refinements are included in the saved baseline for upcoming changes.

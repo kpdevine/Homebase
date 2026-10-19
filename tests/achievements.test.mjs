@@ -40,7 +40,7 @@ test('threshold badges repeat per qualifying day, preserve latest dates, and nev
   assert.equal(badge(first,'overall-10').count,1);
   assert.equal(badge(first,'nutrition-9').latest,addDays(monday,1));
   assert.deepEqual(first,second);assert.deepEqual(store.exportSnapshot(),before);
-  assert.equal(first.total,55);
+  assert.equal(first.total,49);
 });
 
 test('gym score badges exclude perfect rest and attendance-only days',()=>{
@@ -64,13 +64,15 @@ test('streaks handle gaps, yesterday grace, future records and repeat only for f
   assert.equal(streakStats(gap,addDays(monday,5),3).best,3);
 });
 
-test('logging and review streaks are independent, and future completed days never award early',()=>{
+test('streaks only track logged days and completed 9+ days; future days never award early',()=>{
   const store=fresh();
   for(let index=0;index<8;index++) {
     const date=addDays(monday,index);store.updateRating(date,10);store.setTrainingMode(date,'rest');store.confirmSection(date,'checklists');
   }
   let result=buildAchievements(store,sunday);
-  assert.equal(result.streaks.logging.current,7);assert.equal(result.streaks.review.current,0);
+  assert.deepEqual(Object.keys(result.streaks),['logging','strong']);
+  assert.equal(result.streaks.logging.current,7);assert.equal(result.streaks.strong.current,0);
+  assert.ok(result.cards.filter(card=>card.group==='streaks').every(card=>/^streak-(logging|strong)-/.test(card.id)));
   assert.equal(badge(result,'streak-logging-7').count,1);
   finish(store,addDays(monday,7));
   result=buildAchievements(store,sunday);assert.equal(result.completed,0);assert.equal(badge(result,'completed-1').count,0);
@@ -120,7 +122,7 @@ test('every achievement has its own distinct accessible decorative icon',()=>{
   assert.ok(icons.every(svg=>svg.includes('aria-hidden="true"')&&svg.includes('viewBox="0 0 32 32"')));
 });
 
-test('expanded milestones distinguish 9.5 scores and unlock longer review, logging and journal runs',()=>{
+test('expanded milestones distinguish 9.5 scores and unlock longer logging and journal runs',()=>{
   const store=fresh();
   for(let index=0;index<14;index++)finish(store,addDays(monday,index),{nutrition:index===0?9.4:9.5,notes:'Daily chapter'});
   const result=buildAchievements(store,addDays(monday,13));
@@ -130,6 +132,22 @@ test('expanded milestones distinguish 9.5 scores and unlock longer review, loggi
   assert.equal(badge(result,'nutrition-8').count,14);
   assert.equal(badge(result,'journal-3').count,1);
   assert.equal(badge(result,'journal-30').count,0);
-  assert.equal(badge(result,'streak-review-14').count,1);
   assert.equal(badge(result,'streak-logging-14').count,1);
+});
+
+test('9+ streaks require consecutive completed days at the threshold and recalculate after edits',()=>{
+  const store=fresh();
+  for(let index=0;index<3;index++)finish(store,addDays(monday,index),{nutrition:7,sets:4});
+  let result=buildAchievements(store,addDays(monday,2));
+  assert.equal(result.streaks.strong.current,3);
+  assert.equal(badge(result,'streak-strong-3').count,1);
+  finish(store,addDays(monday,3),{nutrition:6,sets:4});
+  result=buildAchievements(store,addDays(monday,3));
+  assert.equal(result.streaks.logging.current,4);
+  assert.equal(result.streaks.strong.best,3);
+  assert.equal(result.streaks.strong.includesToday,false);
+  store.updateRating(addDays(monday,1),6);
+  result=buildAchievements(store,addDays(monday,3));
+  assert.equal(result.streaks.logging.current,4);
+  assert.equal(badge(result,'streak-strong-3').count,0);
 });

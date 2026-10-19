@@ -18,7 +18,7 @@
 .achievements-summary span {font:400 11px/1.5 var(--font-ui)}
 .achievement-total {position:relative;padding-left:62px!important}
 .achievement-total>.icon {position:absolute;left:18px;top:50%;transform:translateY(-50%);width:28px;height:28px;filter:drop-shadow(0 0 4px #d4f3ff66)}
-.achievement-streaks {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;flex:none}
+.achievement-streaks {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;flex:none}
 .achievement-streaks>div {display:grid;grid-template-columns:1fr auto;gap:5px 12px;padding:11px 14px;border-left:3px solid #c7e8ff99;background:#263f7b1a}
 .achievement-streaks span {font:400 12px/1.5 var(--font-display)}
 .achievement-streaks strong {grid-row:1/3;grid-column:2;align-self:center;font:700 26px/1.2 var(--font-display)}

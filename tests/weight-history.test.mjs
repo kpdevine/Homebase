@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {weightHistory,weightPlot,weightPointContext,weightDayChange} from '../prototype/weight-history.mjs';
+import {weightHistory,weightPlot,weightPointContext,weightDayChange,nearestWeightPoint} from '../prototype/weight-history.mjs';
 import {createStore} from '../prototype/model.mjs';
 import {summarizeDay} from '../prototype/scoring.mjs';
 test('weight history omits missing/future entries, sorts dates, filters periods and converts mixed units',()=>{
@@ -39,4 +39,14 @@ test('daily weight change converts units, keeps the sign, and requires the exact
   assert.equal(weightDayChange(snapshot,'2026-10-20','kg'),null);
   assert.equal(weightDayChange(snapshot,'2026-10-19','kg'),null);
   assert.equal(weightDayChange({days:[{date:'2026-10-17',bodyWeight:{value:100,unit:'kg'}},{date:'2026-10-18',bodyWeight:{value:100,unit:'kg'}}]},'2026-10-18','kg'),0);
+});
+
+test('overlapping graph tap halos select the nearest visible dot and reject distant space',()=>{
+  const points=[{date:'2026-10-16',x:20,y:20},{date:'2026-10-17',x:26,y:22},{date:'2026-10-18',x:30,y:18}];
+  assert.equal(nearestWeightPoint(points,21,20).date,'2026-10-16');
+  assert.equal(nearestWeightPoint(points,26,21).date,'2026-10-17');
+  assert.equal(nearestWeightPoint(points,31,18).date,'2026-10-18');
+  assert.equal(nearestWeightPoint(points,200,200),null);
+  assert.equal(nearestWeightPoint([],20,20),null);
+  assert.equal(nearestWeightPoint([points[0]],20,52).date,'2026-10-16');
 });
