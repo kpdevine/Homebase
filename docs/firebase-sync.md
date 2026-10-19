@@ -49,4 +49,6 @@ The free plan currently includes 50,000 Firestore document reads, 20,000 writes,
 
 ## Verification
 
+Incoming changes also wait while a dialog, visible expanded panel, focused control, unsaved editor, drag, or guided day review is active. This includes reading and preparing to type; there is no idle timeout. Closing a menu, leaving its visible section, finishing/pausing review, or finishing an editor resumes queued updates when drafts permit. The newest queued cloud snapshot replaces older queued snapshots. A cloud refresh does not close the final review or cancel the guided review. Local saving continues normally during the wait.
+
 Automated tests cover document round-trips, one-document nutrition edits, record merging/deletion conflicts, unique concurrent IDs, payload bounds, bulk batching, explicit enablement, edit deferral, own-write acknowledgements, offline retry, conflict resolution, delayed server acknowledgements, and sign-out during an upload. Live browser checks and their results are recorded in START-HERE.md. Physical phone/display and long offline soak tests remain to do.

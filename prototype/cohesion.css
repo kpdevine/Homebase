@@ -456,3 +456,22 @@ input[type='number'] {font-family:var(--font-display)}
 @media(min-width:768px) and (max-width:1000px) and (max-height:600px) {
   .nutrition-editor .nutrition-body {grid-template-columns:minmax(230px,.85fr) minmax(0,1.15fr)}
 }
+
+/* UI-29 — keep the phone task list close to its handwritten card heading. */
+@media(max-width:767px) {
+  .checklist-editor .task-progress {margin:8px 0 4px}
+  .checklist-editor #task-summary {display:none}
+  .overview-tasks .task-scroll {margin-top:8px}
+  #checklists-view>.detail-heading>.section-instruction {display:none}
+  #checklists-view>.detail-heading {justify-content:flex-end;margin-bottom:8px}
+}
+
+/* UI-30 — one icon group, in visual and keyboard order: Home through Info. */
+@media(max-width:767px) {
+  .top-row {grid-template-columns:minmax(0,1fr) auto}
+  .top-row .header-shortcuts {grid-column:2}
+}
+@media(max-width:1000px) and (max-height:600px) and (orientation:landscape) {
+  .top-row {grid-template-columns:minmax(185px,1fr) minmax(0,auto) auto}
+  .top-row .header-shortcuts {grid-column:3}
+}

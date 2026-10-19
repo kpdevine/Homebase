@@ -77,10 +77,10 @@ test('targets carry forward until edited without changing earlier weeks or cross
 
 test('backdated set deletion reclassifies later sets and reopens affected reviews',()=>{
   const store=fresh(),id=store.addGymEntry(monday,'chest',10);store.addGymEntry(tuesday,'chest',10);
-  store.updateRating(tuesday,8);for(const section of ['nutrition','training','checklists'])store.confirmSection(tuesday,section);store.completeDay(tuesday);
+  store.updateRating(tuesday,8);for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(tuesday,section);store.completeDay(tuesday);
   assert.equal(store.trainingProgress(tuesday).score,5.5);
   store.removeGymEntry(id);assert.equal(store.trainingProgress(tuesday).score,10);assert.equal(store.loadDay(tuesday).completedAt,null);
-  assert.deepEqual(store.loadDay(tuesday).reviewed,{nutrition:true,training:false,checklists:true});
+  assert.deepEqual(store.loadDay(tuesday).reviewed,{nutrition:true,training:false,checklists:true,sentiments:true});
   assert.equal(store.loadDay(monday).trainingMode,'training');assert.equal(store.trainingProgress(monday).score,4);assert.equal(store.trainingProgress(tuesday).restCredits,2);
 });
 
@@ -107,7 +107,7 @@ test('legacy planned/unplanned/unclassified rest becomes flexible rest without l
 
 test('rest scores are included in overview, recap, averages, and required check-ins',()=>{
   const store=fresh();store.updateRating(monday,6);store.addTask(monday,'Task');rest(store,0);
-  for(const section of ['nutrition','training','checklists'])store.confirmSection(monday,section);
+  for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(monday,section);
   assert.equal(summary(store,monday).score,5.3);assert.equal(summary(store,monday).sections[1].excluded,false);
   assert.equal(dailyRecap(store.loadDay(monday),[],store.loadWeek(monday)).training.score,10);
   assert.equal(averageDays([monday],date=>summary(store,date)).score,5.3);assert.equal(loggingStreak(monday,date=>summary(store,date)).count,1);

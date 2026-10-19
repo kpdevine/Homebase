@@ -43,12 +43,13 @@
     <header class="app-header">
       <div class="top-row">
         <div class="day-navigation" aria-label="Selected date"><button class="icon-button" id="previous-day" aria-label="Previous day">‹</button><button id="date-short" class="date-button" aria-label="Choose date"></button><button class="icon-button" id="next-day" aria-label="Next day">›</button><button id="go-today" class="quiet-button">Today</button></div>
-        <button id="save-status" class="save-status" aria-label="Save status and backups"><span class="save-dot"></span><span id="save-message">Saved on this device</span></button><button id="open-score-info" class="icon-button score-info-button" aria-label="How daily scoring works" title="How scoring works"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></button>
+        <button id="save-status" class="save-status" aria-label="Save status and backups"><span class="save-dot"></span><span id="save-message">Saved on this device</span></button>
         <div class="header-shortcuts">
           <button id="open-home" class="icon-button" type="button" aria-label="Home" title="Home"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg></button>
           <button id="mobile-calendar" class="quiet-button mobile-calendar" type="button" aria-label="Calendar" title="Calendar"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span class="calendar-button-label">Calendar</span></button>
           <button id="open-achievements" class="icon-button achievements-button" type="button" aria-label="Achievements" title="Achievements" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></button>
           <button id="open-settings" class="icon-button settings-button" aria-label="Settings and backups" title="Settings and backups"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg></button>
+          <button id="open-score-info" class="icon-button score-info-button" aria-label="How daily scoring works" title="How scoring works"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></button>
         </div>
       </div>
       <div class="greeting-row"><div><p class="eyebrow" id="greeting-date"></p><h1 id="page-title">Good evening, Kieran<span class="greeting-dot">.</span></h1></div><span id="day-state" class="state-pill">Day in progress</span></div>
@@ -132,7 +133,7 @@
       <p>Weekly progress is separate from daily scoring. Targets carry forward until edited. Workout suggestions prioritize the least-complete muscle goals, then the most sets remaining. Body weight is optional and never affects your score.</p>
     </section>
     <section class="score-info-section" aria-labelledby="scoring-tasks"><h3 id="scoring-tasks">To-do list</h3><p>Completed actions ÷ all actions × 10. Subtasks count individually; their parent adds no extra credit. Adding tasks alone stays unlogged. Check off an action or confirm the list review to include it. A reviewed empty list earns 10.</p><p>While today is open, its main meter assumes remaining tasks get done. “As low as” shows the result if they stay unchecked. Calendar averages and final review use the recorded result.</p></section>
-    <section class="score-info-section" aria-labelledby="scoring-sentiments"><h3 id="scoring-sentiments">Sentiments · optional</h3><p>A 0–10 rating joins the average only when entered. Notes alone do not change your score. Notes plus a rating add a Sentiments review step.</p></section>
+    <section class="score-info-section" aria-labelledby="scoring-sentiments"><h3 id="scoring-sentiments">Sentiments · optional</h3><p>A 0–10 rating joins the average only when entered. Notes alone do not change your score. Confirm its review even if you choose to leave it blank.</p></section>
     <section class="score-info-section" aria-labelledby="scoring-review"><h3 id="scoring-review">Logging and day review</h3><p>Log Nutrition, Gym, and To-do list to count a logged day. Rest counts, including a zero-score rest day. Confirming each section and finishing the full day review are separate steps. Score achievements require a completed day review; logging streaks only require all three check-ins.</p><p>Days more than seven days ago are summary only.</p></section>
   </dialog>
   <dialog id="settings-dialog" aria-labelledby="settings-title">

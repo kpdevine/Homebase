@@ -68,7 +68,7 @@ test('saved snapshots restore dated entries, targets, review, completion and saf
   original.updateRating(DEMO_TODAY,9.3); original.addTask(DEMO_TODAY,'My task');
   original.addGymEntry(DEMO_TODAY,'legs',4);
   original.setWeekTargets(DEMO_TODAY,GROUPS.map(group=>({id:group.id,target:20})));
-  for (const id of ['nutrition','training','checklists']) original.confirmSection(DEMO_TODAY,id);
+  for (const id of ['nutrition','training','checklists','sentiments']) original.confirmSection(DEMO_TODAY,id);
   original.completeDay(DEMO_TODAY);
   const storage=memoryStorage(); writeLocal(storage,original.exportSnapshot());
   const result=readLocal(storage); assert.equal(result.error,null);
@@ -80,7 +80,7 @@ test('saved snapshots restore dated entries, targets, review, completion and saf
   const ids=restored.exportSnapshot().days.flatMap(day=>day.tasks.map(task=>task.id));
   assert.equal(ids.length,new Set(ids).size);
   assert.equal(restored.loadDay(DEMO_TODAY).completedAt,null);
-  assert.deepEqual(restored.loadDay(DEMO_TODAY).reviewed,{nutrition:true,training:true,checklists:false});
+  assert.deepEqual(restored.loadDay(DEMO_TODAY).reviewed,{nutrition:true,training:true,checklists:false,sentiments:true});
 });
 test('corrupt saved data is returned for recovery and never overwritten on read', () => {
   const storage=memoryStorage(); storage.setItem(STORAGE_KEY,'{"version":1,"days":');

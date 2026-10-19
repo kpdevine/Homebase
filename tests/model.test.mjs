@@ -117,7 +117,7 @@ test('gym totals use dated entries, preserve actual over-target totals, and can 
   assert.ok(store.loadWeek(DEMO_TODAY).groups.every(group => group.completed === 0));
 });
 
-test('a day can only be completed after explicit review of all three sections', () => {
+test('a day can only be completed after explicit review of all four sections, allowing blank sentiments', () => {
   const store = createStore();
   assert.throws(() => store.completeDay(DEMO_TODAY));
   store.confirmSection(DEMO_TODAY, 'nutrition');
@@ -128,6 +128,8 @@ test('a day can only be completed after explicit review of all three sections', 
   store.confirmSection(DEMO_TODAY, 'checklists');
   // Reviewing a checklist does not require checking every task.
   assert.ok(store.loadDay(DEMO_TODAY).tasks.some(task => !task.done));
+  assert.throws(() => store.completeDay(DEMO_TODAY));
+  store.confirmSection(DEMO_TODAY, 'sentiments');
   store.completeDay(DEMO_TODAY);
   assert.ok(store.loadDay(DEMO_TODAY).completedAt);
 });
@@ -150,12 +152,12 @@ test('missing nutrition and unanswered gym cannot be confirmed; attendance can',
 test('edits reopen only the affected review and do not affect another date', () => {
   const store = createStore();
   store.setTrainingMode(DEMO_TODAY, 'rest');
-  for (const section of ['nutrition', 'training', 'checklists']) store.confirmSection(DEMO_TODAY, section);
+  for (const section of ['nutrition', 'training', 'checklists', 'sentiments']) store.confirmSection(DEMO_TODAY, section);
   store.completeDay(DEMO_TODAY);
   const other = store.loadDay('2026-10-14');
   store.updateRating(DEMO_TODAY, 7.8);
   assert.equal(store.loadDay(DEMO_TODAY).completedAt, null);
-  assert.deepEqual(store.loadDay(DEMO_TODAY).reviewed, { nutrition: false, training: true, checklists: true });
+  assert.deepEqual(store.loadDay(DEMO_TODAY).reviewed, { nutrition: false, training: true, checklists: true, sentiments:true });
   assert.deepEqual(store.loadDay('2026-10-14'), other);
   store.confirmSection(DEMO_TODAY, 'nutrition');
   store.completeDay(DEMO_TODAY);
@@ -167,7 +169,7 @@ test('edits reopen only the affected review and do not affect another date', () 
 test('removing the last workout entry invalidates training review and completion', () => {
   const store = createStore();
   const id = store.addGymEntry(DEMO_TODAY, 'chest', 3);
-  for (const section of ['nutrition', 'training', 'checklists']) store.confirmSection(DEMO_TODAY, section);
+  for (const section of ['nutrition', 'training', 'checklists', 'sentiments']) store.confirmSection(DEMO_TODAY, section);
   store.completeDay(DEMO_TODAY);
   store.removeGymEntry(id);
   assert.equal(store.loadDay(DEMO_TODAY).completedAt, null);

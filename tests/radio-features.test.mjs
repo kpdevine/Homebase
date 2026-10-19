@@ -13,9 +13,9 @@ test('tenth controls snap old quarter ratings in the requested direction and pre
 });
 test('optional dated notes round-trip and editing reopens only their section',()=>{
  const store=createStore({seed:false});store.updateRating(date,8.25);store.setTrainingMode(date,'rest');
- for(const section of ['nutrition','training','checklists'])store.confirmSection(date,section);store.completeDay(date);
+ for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(date,section);store.completeDay(date);
  store.updateNotes(date,'nutrition','Balanced meals. Ate late.\nCould prep lunch.');
- assert.equal(store.loadDay(date).completedAt,null);assert.deepEqual(store.loadDay(date).reviewed,{nutrition:false,training:true,checklists:true});
+ assert.equal(store.loadDay(date).completedAt,null);assert.deepEqual(store.loadDay(date).reviewed,{nutrition:false,training:true,checklists:true,sentiments:true});
  store.updateNotes(date,'training','Recovery day.');
  const restored=createStore({seed:false,snapshot:store.exportSnapshot()});
  assert.deepEqual(restored.loadDay(date).notes,store.loadDay(date).notes);assert.equal(restored.loadDay(date).nutrition,8.25);

@@ -7,7 +7,7 @@ test('whole-day comments persist without changing section notes, reviews, scores
   const date='2026-10-17',store=createStore({seed:false});
   store.updateRating(date,8.4);store.setTrainingMode(date,'rest');
   store.updateNotes(date,'nutrition','A nutrition-only explanation.');
-  for(const id of ['nutrition','training','checklists'])store.confirmSection(date,id);
+  for(const id of ['nutrition','training','checklists','sentiments'])store.confirmSection(date,id);
   store.completeDay(date);
   const before=store.loadDay(date);
   store.updateDayComment(date,'A good day overall.\nTomorrow: start earlier.');

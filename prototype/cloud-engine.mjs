@@ -17,7 +17,7 @@ export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>t
     remote=new Map(next);
     remoteEditTimes=new Map(times);
     if(!enabled){emit('ready','Sign-in is ready. Enable sync to connect this personal workspace.');return;}
-    if(!canApply()){waiting=remote;emit('editing','Cloud changes are waiting while you finish editing.');return;}
+    if(!canApply()){waiting=remote;emit('editing','Cloud updates are waiting while a menu, review, or editor is open.');return;}
     waiting=null;
     try {
       const current=readLocal(),local=snapshotRecords(current);

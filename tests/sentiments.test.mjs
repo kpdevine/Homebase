@@ -6,7 +6,7 @@ import {validateSnapshot} from '../prototype/persistence.mjs';
 import {dailyRecap} from '../prototype/recap.mjs';
 const date='2026-10-17';
 const summary=store=>summarizeDay(store.loadDay(date),store.loadTrainingDay(date));
-function logged(){const store=createStore({seed:false});store.updateRating(date,8);store.setTrainingMode(date,'rest');for(const section of ['nutrition','training','checklists'])store.confirmSection(date,section);return store;}
+function logged(){const store=createStore({seed:false});store.updateRating(date,8);store.setTrainingMode(date,'rest');for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(date,section);return store;}
 
 test('all 101 sentiment positions round-trip on the zero-to-ten circular scale',()=>{
   for(let tenth=0;tenth<=100;tenth++){const point=meterPoint(1+tenth*.09);assert.equal(scoreFromPoint(point.x,point.y,110,110,{min:0,max:10}),tenth/10);}
@@ -43,10 +43,10 @@ test('notes-only recaps show activity without inventing a rating',()=>{
   assert.equal(dailyRecap(store.loadDay(date)).hasActivity,true);assert.equal(summary(store).score,null);
 });
 
-test('notes and a rating add a sentiments review before full-day completion',()=>{
+test('sentiments always have a review checkoff, including empty, notes-only, and rating-only entries',()=>{
   const store=logged();
   store.updateSentiments(date,{rating:7});
-  assert.equal(store.dayProgress(date).sections.length,3);
+  assert.equal(store.dayProgress(date).sections.length,4);
   store.updateSentiments(date,{notes:'Felt strong today.'});
   assert.deepEqual(store.dayProgress(date).sections.at(-1),{id:'sentiments',label:'Sentiments',ready:true,reviewed:false});
   assert.equal(store.dayProgress(date).canComplete,false);
@@ -60,8 +60,31 @@ test('notes and a rating add a sentiments review before full-day completion',()=
   assert.equal(restored.dayProgress(date).canComplete,false);
   assert.equal(restored.loadDay(date).completedAt,null);
   restored.updateSentiments(date,{notes:''});
-  assert.equal(restored.dayProgress(date).sections.length,3);
+  assert.equal(restored.dayProgress(date).sections.length,4);
+  assert.equal(restored.dayProgress(date).canComplete,false);
+  restored.confirmSection(date,'sentiments');
   assert.equal(restored.dayProgress(date).canComplete,true);
+});
+
+test('a blank sentiments review persists without adding a score, a logged category, or writing activity',()=>{
+  const store=createStore({seed:false}),before=summary(store);
+  store.confirmSection(date,'sentiments');
+  assert.equal(store.dayProgress(date).sections.at(-1).reviewed,true);
+  const restored=createStore({seed:false,snapshot:store.exportSnapshot()});
+  assert.deepEqual(summary(restored),before);
+  assert.equal(dailyRecap(restored.loadDay(date)).hasActivity,false);
+  assert.equal(restored.dayProgress(date).sections.at(-1).reviewed,true);
+  restored.updateSentiments(date,{notes:'Something happened.'});
+  assert.equal(restored.dayProgress(date).sections.at(-1).reviewed,false);
+});
+
+test('older completed blank days retain completion without creating a new saved review flag on read',()=>{
+  const old=logged().exportSnapshot();delete old.days[0].reviewed.sentiments;
+  old.days[0].completedAt='2026-10-17T22:00:00.000Z';
+  const restored=createStore({seed:false,snapshot:old});
+  assert.equal(restored.dayProgress(date).canComplete,true);
+  assert.equal(restored.loadDay(date).reviewed.sentiments,undefined);
+  assert.deepEqual(restored.exportSnapshot(),old);
 });
 
 test('older completed days with rated sentiments keep their completed review',()=>{

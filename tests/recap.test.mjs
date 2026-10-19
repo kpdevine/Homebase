@@ -30,8 +30,8 @@ test('rest, reviewed empty checklists and completed days retain their distinct m
   assert.equal(result.state,'All categories logged');assert.equal(result.completed,false);
   assert.equal(result.training.rest,true);assert.equal(result.training.sets,0);
   assert.equal(result.total,0);assert.equal(result.checklistLogged,true);assert.equal(result.reviewed,1);
-  store.confirmSection(date,'nutrition');store.confirmSection(date,'training');store.completeDay(date);
-  result=recap(store);assert.equal(result.state,'Day complete');assert.equal(result.reviewed,3);assert.equal(result.completed,true);
+  store.confirmSection(date,'nutrition');store.confirmSection(date,'training');store.confirmSection(date,'sentiments');store.completeDay(date);
+  result=recap(store);assert.equal(result.state,'Day complete');assert.equal(result.reviewed,4);assert.equal(result.completed,true);
 });
 test('notes retain their full text, omit whitespace-only notes, and do not create a score',()=>{
   const store=createStore({seed:false}),text='Late dinner.\nStill hungry. <b>Personal note</b>';

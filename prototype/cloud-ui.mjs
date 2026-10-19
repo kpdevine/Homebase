@@ -53,8 +53,10 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
   el('cloud-keep-remote').addEventListener('click',()=>engine?.resolve('cloud'));
   window.addEventListener('online',()=>engine?.retry());
   window.addEventListener('offline',()=>{if(enabled)setState({...state,status:'offline',message:'Saved locally. Cloud sync will resume after reconnecting.'});});
-  document.addEventListener('focusout',()=>setTimeout(()=>engine?.resume(),0));
-  document.addEventListener('pointerup',()=>setTimeout(()=>engine?.resume(),0));
+  let resumeTimer;
+  const resumeAfterInteraction=()=>{clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>engine?.resume(),0);};
+  // Native close/toggle events do not bubble. Click also covers keyboard activation.
+  for(const type of ['focusout','pointerup','click','close','toggle'])document.addEventListener(type,resumeAfterInteraction,true);
   paint();
   if(!preview&&firebaseConfig)import('./firebase-driver.mjs').then(module=>{client=module.firebaseClient(firebaseConfig);client.observeAuth(observeUser,error=>setState({status:'error',message:`Google sign-in did not finish. ${error.message}`,conflicts:[]}));paint();}).catch(error=>setState({status:'offline',message:`Cloud connection is unavailable. Local saving still works. Reload when online. ${error.message}`,conflicts:[]}));
   return {changed:()=>engine?.changed(),resume:()=>engine?.resume(),isEnabled:()=>enabled,status:()=>state.status,signIn};

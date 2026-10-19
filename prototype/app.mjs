@@ -12,6 +12,7 @@ import { achievementIcon } from './achievement-icons.mjs';
 import {needsWelcome,profileName} from './onboarding.mjs';
 import {snapshotRecords} from './cloud-records.mjs';
 import {createRecordEdits} from './record-edits.mjs';
+import {workspaceBusy} from './interaction-guard.mjs';
 import {weightHistory,weightPlot,weightPointContext,weightDayChange,nearestWeightPoint} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
@@ -239,7 +240,7 @@ function renderTasks() {
   $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
   const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
   $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
-  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
+  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=store.loadDay(date).tasks.filter(task=>!task.templateId);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
   $('#later-count').textContent=String(laterCount);
   $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} task${planned.length===1?'':'s'} scheduled`);
 }
@@ -1193,12 +1194,12 @@ cloud=mountCloud({
   localEditTimes:records=>recordEdits.times(records),
   adoptEditTimes:(records,times)=>recordEdits.adopt(records,times),
   flushLocal:()=>{flushSave();return !storageError&&!blockedSave;},
-  canApply:()=>!blockedSave&&!pendingSnapshot&&!$('#task-dialog').open&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!weightEditor.open&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
+  canApply:()=>!blockedSave&&!pendingSnapshot&&!workspaceBusy(document,{reviewing:reviewSessionDate===selectedDate})&&!dragging&&!targetDrag&&!weightEditor.open&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
   applyLocal:snapshot=>{
     if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
     const raw=writeLocal(storage,snapshot);
     store=createStore({clientId,editableToday,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
-    closeDialog($('#final-review-dialog'));reviewSessionDate=null;render();
+    render();
   },
   onUser:user=>{
     if(user&&($('#welcome-dialog').open||welcomeGoogleAttempt)) {

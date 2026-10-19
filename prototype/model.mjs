@@ -315,7 +315,7 @@ export function createStore(options = {}) {
         training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training',
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
-      if(day.sentiments.notes.trim() && day.sentiments.rating!==null) sections.push({id:'sentiments',label:'Sentiments',ready:true,reviewed:day.reviewed.sentiments===true});
+      sections.push({id:'sentiments',label:'Sentiments',ready:true,reviewed:day.reviewed.sentiments===true||day.reviewed.sentiments===undefined&&!!day.completedAt});
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
         canComplete: sections.every(section => section.reviewed), completedAt: day.completedAt };
     },
