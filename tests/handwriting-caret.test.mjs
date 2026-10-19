@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {caretGeometry} from '../prototype/handwriting-caret.mjs';
+import {caretGeometry,caretAppearance} from '../prototype/handwriting-caret.mjs';
 
 test('handwritten caret follows text at normal, compact desktop, and enlarged scale',()=>{
   for(const scale of [1,.8,1.25]) {
@@ -22,4 +22,14 @@ test('unmeasurable or hidden text keeps the native cursor fallback',()=>{
   assert.equal(caretGeometry(rect,origin,100),null);
   assert.equal(caretGeometry({...rect,height:20},{...origin,width:0},100),null);
   assert.equal(caretGeometry({...rect,height:20},origin,0),null);
+});
+
+test('caret height follows font size rather than oversized line or descender rectangles',()=>{
+  for(const fontSize of [16,18,20])for(const height of [fontSize,fontSize*1.3,fontSize*2.1]) {
+    const caret=caretAppearance({x:12,y:24,height},fontSize);
+    assert.equal(caret.x,12);assert.equal(caret.height,fontSize*.64);
+    assert.ok(caret.y>=24);assert.ok(caret.y+caret.height<=24+height);
+  }
+  assert.equal(caretAppearance(null,18),null);
+  assert.equal(caretAppearance({x:0,y:0,height:18},NaN),null);
 });

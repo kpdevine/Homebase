@@ -63,3 +63,12 @@ test('target drags clamp to whole sets and ratings respect their configured mini
   nutrition.send('pointerdown',110,110);nutrition.send('pointermove',110,500);
   assert.equal(nutrition.value(),1);
 });
+
+test('nutrition uses the shared zero-to-ten arc while retaining a minimum rating of one',()=>{
+  const nutrition=control({min:1,scaleMin:0});
+  nutrition.send('pointerdown',28,110);assert.equal(nutrition.value(),2.3);
+  nutrition.send('pointermove',192,110);assert.equal(nutrition.value(),7.7);
+  const radians=105*Math.PI/180;
+  nutrition.send('pointermove',110+82*Math.cos(radians),110+82*Math.sin(radians));
+  assert.equal(nutrition.value(),1);
+});

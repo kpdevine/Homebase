@@ -1,4 +1,4 @@
-import {GROUPS} from './muscles.mjs';
+import {GROUPS,muscleName} from './muscles.mjs';
 
 export const REST_MODES=['rest','unplanned-rest','rest-unclassified'];
 export function idealWorkout(progress) {
@@ -13,6 +13,10 @@ export function idealWorkout(progress) {
     if(next)next.sets++;
   }
   return {sets:budget,groups:groups.filter(group=>group.sets),targetMet:progress.target>0&&needed===0,goalsMet:progress.target>0&&!available.length};
+}
+export function workoutForDay(day,week) {
+  const plan=day.workoutPlan||idealWorkout(trainingProgress({...day,trainingMode:null},{...week,entries:week.entries.filter(entry=>entry.date<day.date),days:(week.days||[]).filter(value=>value.date<day.date)}));
+  return {sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets,name:muscleName(id)})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
 }
 // Derived from dated records: backdated edits replay the week, never future days.
 export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {

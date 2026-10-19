@@ -64,7 +64,16 @@ export function validateSnapshot(value) {
     assert(!day.reviewed.sentiments||sentimentsReady,'sentiments review without notes and a rating.');
     assert(!day.completedAt||!sentimentsReady||day.reviewed.sentiments!==false,'incomplete sentiments review.');
     const reviewed={...Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])),...(day.reviewed.sentiments!==undefined?{sentiments:day.reviewed.sentiments}:day.completedAt&&sentimentsReady?{sentiments:true}:{})};
-    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt };
+    let workoutPlan;
+    if(day.workoutPlan!==undefined) {
+      const plan=day.workoutPlan;
+      assert(plan&&Array.isArray(plan.groups)&&plan.groups.length<=groupIds.length&&Number.isInteger(plan.sets)&&plan.sets>=0&&plan.sets<=10000&&typeof plan.targetMet==='boolean'&&typeof plan.goalsMet==='boolean','workout plan.');
+      const seen=new Set();
+      for(const group of plan.groups){assert(group&&groupIds.includes(group.id)&&!seen.has(group.id)&&Number.isInteger(group.sets)&&group.sets>0&&group.sets<=1000,'workout plan muscle.');seen.add(group.id);}
+      assert(plan.groups.reduce((sum,group)=>sum+group.sets,0)===plan.sets,'workout plan total.');
+      workoutPlan={sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
+    }
+    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);

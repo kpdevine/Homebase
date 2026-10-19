@@ -6,7 +6,6 @@ import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
 import { mountCloud } from './cloud-ui.mjs';
 import { muscleName } from './muscles.mjs';
-import { idealWorkout } from './training.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
@@ -19,7 +18,9 @@ import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
-const refreshNoteCarets=handwritingCarets($$('[data-notes]'));
+const refreshNoteCarets=handwritingCarets($$('[data-notes],#task-name'));
+const nutritionNotesHeading=document.createElement('div');nutritionNotesHeading.className='nutrition-notes-heading';
+$('.nutrition-notes>label').before(nutritionNotesHeading);nutritionNotesHeading.append($('.nutrition-notes>label'),$('#clear-rating'));
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[character]));
 const scoreText = score => score === null ? '—' : score === 10 ? '10' : score.toFixed(2).replace(/(\.\d)0$/, '$1');
 const scoreMarkup = score => { const [whole,fraction]=scoreText(score).split('.'); return `<span class="score-whole">${whole}</span>${fraction?`<span class="score-fraction">.${fraction}</span>`:''}`; };
@@ -155,6 +156,21 @@ function circle(score,reward=false) {
   const arc=`d="${meterPath(20,24)}" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100"`;
   return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<path class="score-circle-track" d="${meterPath(20,24)}"/><path class="score-circle-fill score-circle-outline" ${arc}/><path class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
 }
+function drawScoreMeter(meter,score,{immediate=false}={}) {
+  meter.classList.add('standard-score-meter');
+  const svg=meter.querySelector('svg'),size=Number(svg.getAttribute('viewBox').split(/\s+/)[2]),unit=size/240,center=size/2,radius=86*unit;
+  let halo=svg.querySelector('.score-halo');
+  if(!halo){halo=document.createElementNS('http://www.w3.org/2000/svg','circle');halo.setAttribute('class','score-halo');svg.insertBefore(halo,svg.querySelector('.meter-track'));}
+  for(const [name,value] of Object.entries({cx:center,cy:center,r:101*unit}))halo.setAttribute(name,value);
+  for(const name of ['meter-track','meter-fill']){const path=svg.querySelector('.'+name);path.setAttribute('d',meterPath(radius,center));path.style.strokeWidth=10*unit;}
+  meter.style.setProperty('--score-color',scoreColor(score));meter.style.setProperty('--score-glow',`${scoreGlow(score)}px`);
+  meter.classList.toggle('score-high',!!scoreReward(score));meter.classList.toggle('score-perfect',score===10);
+  setMeter(svg.querySelector('.meter-fill'),score===null?0:score*10,{immediate});
+  const knob=svg.querySelector('.meter-knob');
+  if(knob){const point=meterPoint(1+(score??0)*.9,radius,center);knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.setAttribute('r',4*unit);knob.style.removeProperty('opacity');}
+  meter.querySelectorAll('.sentiment-endpoint').forEach(endpoint=>endpoint.classList.add('meter-endpoint'));
+  if(!meter.querySelector('.meter-endpoint'))meter.insertAdjacentHTML('beforeend','<span class="meter-endpoint start" aria-hidden="true">0</span><span class="meter-endpoint end" aria-hidden="true">10</span>');
+}
 function renderHeaderShortcuts() {
   const settings=$('#settings-dialog').hasAttribute('open'),info=$('#score-dialog').hasAttribute('open'),modal=settings||info;
   for(const [id,active] of [['open-home',view==='today'&&!modal],['mobile-calendar',view==='history'&&!modal],['open-achievements',view==='achievements'&&!modal],['open-settings',settings],['open-score-info',info]])
@@ -233,13 +249,7 @@ function renderScore() {
   const range=selectedDate===editableToday()&&!day.completedAt?taskScoreRange(summary):{score:summary.score,low:summary.score,projected:false},displayScore=range.score;
   const meter = $('#overall-meter');
   const reward=scoreReward(displayScore);
-  meter.classList.toggle('score-high',!!reward);
-  meter.classList.toggle('score-perfect',displayScore===10);
-  meter.style.setProperty('--score-glow',`${scoreGlow(displayScore)}px`);
-  const path = meterPath(86, 120);
-  meter.querySelector('.meter-track').setAttribute('d', path);
-  meter.querySelector('.meter-fill').setAttribute('d', path);
-  setMeter(meter.querySelector('.meter-fill'),displayScore===null?0:displayScore*10,{immediate:dragging||document.activeElement===$('#rating-value')});
+  drawScoreMeter(meter,displayScore,{immediate:dragging||document.activeElement===$('#rating-value')});
   meter.querySelector('.meter-number').innerHTML = scoreMarkup(displayScore);
   meter.style.setProperty('--score-soft', displayScore === null ? '#f2f4ef' : `${scoreColor(displayScore)}0a`);
   $('#day-gradient-start').setAttribute('stop-color',scoreColor(displayScore));
@@ -267,12 +277,7 @@ function renderScore() {
 }
 function renderRating() {
   const score = store.loadDay(selectedDate).nutrition, meter = $('#nutrition-meter');
-  meter.style.setProperty('--score-color', scoreColor(score));
-  meter.querySelector('.meter-track').setAttribute('d', meterPath());
-  meter.querySelector('.meter-fill').setAttribute('d', meterPath());
-  setMeter(meter.querySelector('.meter-fill'),score===null?0:(score-1)/9*100,{immediate:dragging||document.activeElement===$('#rating-value')});
-  const point = meterPoint(score ?? 1), knob = meter.querySelector('.meter-knob');
-  knob.setAttribute('cx', point.x); knob.setAttribute('cy', point.y); knob.style.opacity = score === null ? '.4' : '1';
+  drawScoreMeter(meter,score,{immediate:dragging||document.activeElement===$('#rating-value')});
   meter.querySelector('.meter-number').innerHTML = scoreMarkup(score);
   meter.querySelector('.meter-out-of').textContent = score === null ? 'not rated yet' : 'out of 10';
   meter.setAttribute('aria-valuenow', score ?? 1);
@@ -285,12 +290,7 @@ function renderRating() {
 function renderSentiments() {
   const {rating}=store.loadDay(selectedDate).sentiments,input=$('#sentiments-rating'),meter=$('#sentiments-meter');
   if(document.activeElement!==input)input.value=rating===null?'':rating;
-  meter.style.setProperty('--score-color',scoreColor(rating));
-  meter.querySelector('.meter-track').setAttribute('d',meterPath());
-  const fill=meter.querySelector('.meter-fill');fill.setAttribute('d',meterPath());
-  setMeter(fill,rating===null?0:rating*10,{immediate:sentimentPointer!==-1||document.activeElement===input});
-  const point=meterPoint(1+(rating??0)*.9),knob=meter.querySelector('.meter-knob');
-  knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.style.opacity=rating===null?'.4':'1';
+  drawScoreMeter(meter,rating,{immediate:sentimentPointer!==-1||document.activeElement===input});
   meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
   meter.querySelector('.meter-out-of').textContent=rating===null?'not rated yet':'out of 10';
   meter.setAttribute('aria-valuenow',rating??0);meter.setAttribute('aria-valuetext',rating===null?'Not rated. Optional rating from 0 to 10.':`${scoreText(rating)} out of 10`);
@@ -384,8 +384,8 @@ function renderGym() {
   const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
   $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to include gym in the daily average.'}</small></div>`;
   $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
-  const workout=idealWorkout(pace);
-  $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets${pace.dailySets?' remaining today':''}</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul><p>Based on your daily target and the weekly goals still open. Updates as you log sets.</p>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
+  const workout=store.idealWorkout(selectedDate);
+  $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets planned</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
   $('#daily-training-entries').hidden=noLift;
   $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
@@ -584,12 +584,7 @@ function showFinalReview() {
 function renderFinalSentimentsState() {
   const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
   const meter=$('#final-sentiments-meter');
-  meter.style.setProperty('--score-color',scoreColor(rating));
-  meter.querySelector('.meter-track').setAttribute('d',meterPath());
-  const fill=meter.querySelector('.meter-fill');fill.setAttribute('d',meterPath());
-  setMeter(fill,rating===null?0:rating*10,{immediate:finalSentimentPointer!==-1});
-  const point=meterPoint(1+(rating??0)*.9),knob=meter.querySelector('.meter-knob');
-  knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.style.opacity=rating===null?'.4':'1';
+  drawScoreMeter(meter,rating,{immediate:finalSentimentPointer!==-1});
   meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
   meter.querySelector('.meter-out-of').textContent=rating===null?'not rated yet':'out of 10';
   meter.setAttribute('aria-valuenow',rating??0);
@@ -754,7 +749,7 @@ function appendSubtaskField(child={name:''}) {
   const row=document.createElement('div');row.className='subtask-input-row';
   row.innerHTML='<div class="task-writing-field"><textarea data-child-name rows="1" maxlength="100" placeholder="Subtask name" aria-label="Subtask name" autocomplete="off" required></textarea></div><button class="remove-task" type="button" data-remove-subtask aria-label="Remove subtask">×</button>';
   const input=row.querySelector('textarea');input.value=child.name;if(child.id)input.dataset.childId=child.id;
-  $('#subtask-inputs').append(row);return input;
+  $('#subtask-inputs').append(row);refreshNoteCarets.add([input]);return input;
 }
 function openTaskComposer(trigger,date=selectedDate) {
   taskEdit=null;
@@ -939,7 +934,7 @@ nutritionMeter.addEventListener('keydown', event => {
   else return;
   event.preventDefault(); updateRating(next);
 });
-bindMeterDrag(nutritionMeter,{min:1,read:()=>store.loadDay(selectedDate).nutrition,change:updateRating,onStart:()=>dragging=true,onEnd:()=>{
+bindMeterDrag(nutritionMeter,{min:1,scaleMin:0,read:()=>store.loadDay(selectedDate).nutrition,change:updateRating,onStart:()=>dragging=true,onEnd:()=>{
   dragging=false;
   const score=store.loadDay(selectedDate).nutrition;
   if(score!==null)announce(`Nutrition set to ${scoreText(score)}.`);

@@ -408,3 +408,51 @@ input[type='number'] {font-family:var(--font-display)}
 .welcome-or::before,.welcome-or::after {content:'';height:1px;background:#34517e66;flex:1}
 .welcome-dialog #welcome-status {font-size:12px;margin:16px 0 0}
 .welcome-dialog #welcome-status:empty {display:none}
+
+/* Shared selected state wins over older tab-specific ID rules. */
+.day-tabs>button:is(#tab-today,#tab-nutrition,#tab-training,#tab-checklists,#tab-sentiments)[aria-selected='true'] {background:var(--ui-action);color:var(--ui-light);border-color:#d9edff;text-shadow:none;box-shadow:inset 0 -2px #e4f5ff}
+.handwriting-caret {width:max(1.5px,.09em)}
+
+/* Today’s Score is the common visual treatment for editable score meters. */
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-track {fill:none;stroke:#263d75;stroke-opacity:.65;stroke-linecap:round}
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-fill {fill:none;stroke:var(--score-color);stroke-linecap:round;filter:drop-shadow(0 -1px 0 #14275d) drop-shadow(0 1px 0 #14275d) drop-shadow(-1px 0 0 #14275d) drop-shadow(1px 0 0 #14275d) drop-shadow(0 0 var(--score-glow,0px) #def8ffb0)}
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-number {color:#102450;text-shadow:1px 1px 0 #b2d5f480;-webkit-text-stroke:0}
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter).score-high .meter-number {color:#f2fbff;-webkit-text-stroke:1px #14275d;paint-order:stroke fill;text-shadow:0 1px 0 #14275d,0 0 5px #d2f7ff88}
+.standard-score-meter .score-halo {fill:#345da321}
+.standard-score-meter.score-high .score-halo {fill:#4492f166}
+.standard-score-meter.score-perfect .score-halo {stroke:#dcf7ff;stroke-width:1.2;stroke-dasharray:2 5;filter:drop-shadow(0 0 4px #c2eeff)}
+.standard-score-meter .meter-knob {opacity:0;stroke:#e5f4ff;stroke-width:2}
+.standard-score-meter:is(:focus-visible,.dragging) .meter-knob {opacity:1}
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-endpoint.start {left:30%;right:auto;top:auto;bottom:-21px;transform:translateX(-50%)}
+.standard-score-meter:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter) .meter-endpoint.end {left:70%;right:auto;top:auto;bottom:-21px;transform:translateX(-50%)}
+.nutrition-meter.standard-score-meter {margin-bottom:30px}
+.nutrition-notes-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.nutrition-notes-heading>label {margin:0}
+.nutrition-notes-heading #clear-rating {min-height:32px;margin:0;padding:4px 0;font-size:11px}
+#nutrition-view .detail-heading {justify-content:flex-end;min-height:36px;margin-bottom:8px}
+#nutrition-view .detail-heading>.section-instruction,#rating-description {display:none}
+.nutrition-editor .nutrition-body {gap:18px;grid-template-columns:minmax(220px,.85fr) minmax(0,1.15fr)}
+#nutrition-meter .meter-number,#sentiments-meter .meter-number {font-size:clamp(32px,38cqw,108px)}
+@media(min-width:1001px) {
+  .nutrition-editor {flex:0 1 500px;align-items:stretch}
+  .nutrition-editor .nutrition-body {align-items:stretch}
+  .nutrition-body>div:first-child {align-self:center}
+  .nutrition-notes {display:flex;flex-direction:column;align-self:stretch;min-height:0}
+  .nutrition-notes-heading {flex:none}
+  .nutrition-notes .notes-input-shell {flex:1;min-height:0}
+  .nutrition-notes textarea[data-notes] {height:100%;min-height:110px;max-height:none}
+}
+@media(max-width:767px) {
+  .nutrition-editor .nutrition-body {grid-template-columns:1fr;gap:14px}
+  .nutrition-body>div:first-child {display:grid;grid-template-columns:minmax(0,1.3fr) minmax(100px,1fr);gap:8px 16px;align-items:center}
+  .nutrition-body #nutrition-meter {grid-column:1;grid-row:1/4;width:100%;max-width:180px;margin:0 0 28px}
+  #rating-form {grid-column:2;grid-row:1/3;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+  #rating-value {grid-column:1/-1;grid-row:1;width:100%;height:44px;font-size:23px}
+  #rating-minus,#rating-plus {grid-row:2;width:100%;height:40px}
+  #meter-help {grid-column:2;grid-row:3;font-size:9px;line-height:1.5;margin:0}
+  .nutrition-notes {padding:0;border:0}
+  .nutrition-notes textarea[data-notes] {height:170px;min-height:130px}
+}
+@media(min-width:768px) and (max-width:1000px) and (max-height:600px) {
+  .nutrition-editor .nutrition-body {grid-template-columns:minmax(230px,.85fr) minmax(0,1.15fr)}
+}

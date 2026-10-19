@@ -1,7 +1,7 @@
 import {scoreFromPoint} from './model.mjs';
 
 // Ring gestures follow the angle; gestures on the number adjust without jumping.
-export function bindMeterDrag(meter,{read,change,min=0,max=10,step=.1,onStart=()=>{},onEnd=()=>{}}) {
+export function bindMeterDrag(meter,{read,change,min=0,scaleMin=min,max=10,step=.1,onStart=()=>{},onEnd=()=>{}}) {
   let gesture=null;
   const surface=meter.ownerDocument.defaultView;
   const point=event=>{
@@ -12,7 +12,7 @@ export function bindMeterDrag(meter,{read,change,min=0,max=10,step=.1,onStart=()
     const current=point(event);
     const value=gesture.center
       ? Math.max(min,Math.min(max,Math.round((gesture.value+(current.x-gesture.x+gesture.y-current.y)*(max-min)/180)/step)*step))
-      : scoreFromPoint(current.x,current.y,110,110,{min,max,step});
+      : Math.max(min,scoreFromPoint(current.x,current.y,110,110,{min:scaleMin,max,step})??min);
     if(value!==null&&value!==read())change(Number(value.toFixed(6)));
   }
   function move(event) {

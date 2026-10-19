@@ -7,11 +7,19 @@ export function caretGeometry(rect,origin,width,scrollLeft=0,scrollTop=0) {
   return {x:(rect.left-origin.left)/scale-scrollLeft,y:(rect.top-origin.top)/scale-scrollTop,height:rect.height/scale};
 }
 
+export function caretAppearance(geometry,fontSize) {
+  if(!geometry||!Number.isFinite(fontSize)||fontSize<=0)return null;
+  // Size to the handwriting's capitals, never its line spacing or deep tails.
+  return {x:geometry.x,y:geometry.y+Math.max(0,(geometry.height-fontSize)/2)+fontSize*.08,height:fontSize*.64};
+}
+
 export function handwritingCarets(inputs) {
-  const refreshers=[];
-  for (const input of inputs) {
-    const shell=document.createElement('div');shell.className='notes-input-shell';
-    input.before(shell);shell.append(input);
+  const refreshers=new Map();
+  function attach(input) {
+    if(refreshers.has(input))return;
+    let shell=input.parentElement;
+    if(!shell.classList.contains('task-writing-field')){shell=document.createElement('div');input.before(shell);shell.append(input);}
+    shell.classList.add('notes-input-shell');
     const mirror=document.createElement('div');mirror.className='notes-caret-mirror';mirror.setAttribute('aria-hidden','true');
     const layer=document.createElement('div');layer.className='notes-caret-layer';layer.setAttribute('aria-hidden','true');layer.hidden=true;
     const cursor=document.createElement('span');cursor.className='handwriting-caret';
@@ -31,19 +39,21 @@ export function handwritingCarets(inputs) {
       const rect=range.getBoundingClientRect(),origin=mirror.getBoundingClientRect();
       const geometry=caretGeometry(rect,origin,width,input.scrollLeft,input.scrollTop);
       if(!geometry) {layer.hidden=true;return;} // Keep native fallback if measurement fails.
-      const {x,y,height}=geometry;
+      const {x,y,height}=caretAppearance(geometry,Number.parseFloat(style.fontSize));
       cursor.style.fontFamily=style.fontFamily;cursor.style.fontSize=style.fontSize;
       // The mask is the owner's slash, upright and trimmed to its visible ink.
       // Align its cap-height footprint rather than the font's oversized sidebearings.
-      cursor.style.left=`${x}px`;cursor.style.top=`${y+height*.05}px`;cursor.style.height=`${height*.8}px`;
+      cursor.style.left=`${x}px`;cursor.style.top=`${y}px`;cursor.style.height=`${height}px`;
       cursor.style.animation='none';void cursor.offsetWidth;cursor.style.animation='';
       layer.hidden=false;input.classList.add('has-handwriting-caret');
     }
     for(const type of ['input','focus','blur','click','keyup','select','scroll','compositionend'])input.addEventListener(type,refresh);
     const observer=new ResizeObserver(refresh);observer.observe(input);
-    refreshers.push(refresh);
+    refreshers.set(input,{refresh,observer});
   }
-  const refreshAll=()=>refreshers.forEach(refresh=>refresh());
+  const refreshAll=()=>{for(const [input,binding] of refreshers){if(!input.isConnected){binding.observer.disconnect();refreshers.delete(input);}else binding.refresh();}};
+  refreshAll.add=fields=>{for(const input of fields)attach(input);refreshAll();};
+  refreshAll.add(inputs);
   document.addEventListener('selectionchange',refreshAll);
   document.fonts.ready.then(refreshAll);
   document.fonts.addEventListener('loadingdone',refreshAll);
