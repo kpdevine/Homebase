@@ -345,7 +345,7 @@ dialog p,dialog label,.settings-section p,.scoring-explanation li {color:var(--i
 }
 
 @media(max-width:1000px) {
-  html {scrollbar-gutter:stable}
+  html {scrollbar-gutter:stable;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 .overview-tasks .panel-heading h2 {min-width:0;overflow-wrap:normal;white-space:normal}
 .overview-tasks .task-heading-actions {flex:none}
@@ -387,7 +387,8 @@ input[type='number'] {font-family:var(--font-display)}
 .task-writing-field:focus-within {outline:2px solid #f1faff;outline-offset:2px;box-shadow:0 0 0 4px #20345b;border-bottom-color:var(--ink)}
 @media(max-width:1000px) {
   /* Center against the first line's cap height, never the whole wrapped label
-     or its deep g/y tails. Entry-face ascent is .75em; capitals are .7em. */
+     or its deep g/y tails. The entry font itself has .75em ascent; capitals
+     are .7em, including browsers without CSS font-metric overrides. */
   .task-list label,.overview-tasks .task-list label,.editable-task-list label {--task-check-size:20px;display:grid;grid-template-columns:var(--task-check-size) minmax(0,1fr);align-items:start;font-size:17px;line-height:1.15}
   .task-list .child-tasks label {font-size:16px}
   .task-list label>span,.overview-tasks .task-list label>span,.editable-task-list label>span,.task-list .child-tasks label>span {min-width:0;font-size:inherit;line-height:inherit;overflow-wrap:anywhere}

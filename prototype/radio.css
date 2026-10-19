@@ -32,7 +32,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @font-face{font-family:'Kieran Handwriting LCD';src:url('./assets/fonts/KieranHandwriting-LCD.woff2') format('woff2');font-weight:400;font-display:swap}
 /* Tighter metrics keep the caret near the writing's cap height. Line spacing
    still leaves room for the source handwriting's long descenders. */
-@font-face{font-family:'Kieran Handwriting Entry';src:url('./assets/fonts/KieranHandwriting-LCD.woff2') format('woff2');font-weight:400;font-display:swap;ascent-override:75%;descent-override:25%;line-gap-override:0%}
+@font-face{font-family:'Kieran Handwriting Entry';src:url('./assets/fonts/KieranHandwriting-Entry.woff2') format('woff2');font-weight:400;font-display:swap}
 :root{--font-handwriting:'Kieran Handwriting LCD','Kieran Handwriting',cursive}
 summary{color:var(--ink)}.day-tabs>button[aria-selected='true'] .tab-check{color:inherit}input{accent-color:#344e9c}
 textarea[data-notes]{font-family:'Kieran Handwriting Entry',var(--font-handwriting);font-size:20px;line-height:2.05;padding:10px 13px}
