@@ -82,7 +82,7 @@ Every source upload to `kpdevine/Homebase`, branch `codex/homebase-prototype`, m
 
 ## Persistence and quality
 
-Local saving remains available without sign-in. Google sign-in alone uploads nothing; explicit sync enablement connects private owner records across devices. Batch typing saves, support offline retry, and surface competing changes without silent overwrite. Preview data is separate from personal data and never uploads.
+Local saving remains available without sign-in. Google sign-in alone uploads nothing; explicit sync enablement connects private owner records across devices. Batch typing saves and support offline retry. When both versions of a record changed, automatically use the version with the later trustworthy saved edit time: upload it if local, or adopt it if cloud. Track actual local edits across reloads/offline use; receiving cloud data is not a new local edit. Equal, missing, suspiciously future-dated times and deletion-versus-edit conflicts require a choice. Resolve whole daily/routine/target records, not individual fields. Protect transaction writes against newer payloads or edit times arriving after comparison. Preview data is separate from personal data and never uploads.
 
 Settings provides validated backup/restore and Reset all data with an explicit confirmation. Preserve old backups and historical records through compatible migrations. Test model, scoring, chronology, persistence, cloud merging, and achievements; inspect desktop and both phone orientations before delivery. Physical device behavior remains a separate hardware check.
 

@@ -46,6 +46,8 @@ Use the IDs below to request individual reversions. Most visual rules are groupe
 
 - **UI-19 — First-visit welcome.** New personal visitors choose a name or the existing Google sign-in flow. Name entry persists and personalizes the greeting; Google can use its account display name. Preserve pending onboarding across same-tab Google redirects. Existing records, named visitors, previews, and recovery bypass welcome. Sign-in does not enable uploads. Sources: `onboarding.mjs`, Welcome markup/styles/handlers, `cloud-ui.mjs` shared sign-in method and auth callback, and onboarding tests.
 
+- **UI-20 — Prefer newer saved versions in cloud sync.** Persist per-record edit times tied to saved payloads, carry them through existing cloud payloads, and automatically resolve competing live records by newer known edit time. Newer local records upload; newer cloud records are adopted. Preserve manual decisions for unknown/equal/future times and deletion conflicts, and compare timestamps as well as payloads inside transactions. Only saved local data is eligible for upload while a newer typing draft is pending. Explicit local conflict choices get a fresh decision timestamp. Sources: `record-edits.mjs`, cloud engine/driver/UI integration, local save hooks, and `tests/smart-sync.test.mjs`.
+
 ## Verification
 
 - All seven sections inspected at six viewport sizes: desktop 1280×800, compact display 1024×600, portrait 390×844, landscape 844×390, narrow phone 350×740, and tablet 820×1180. The browser's scrollbar reduces the usable width on some simulated phone sizes; the checks use the measured client width.
@@ -67,4 +69,4 @@ The production PRD now includes the reviewed behavior. The local previews at por
 
 The scoring formula, weekly goal definitions, Monday–Sunday weeks, rest allowance, retained achievement thresholds, cloud schema, fonts, and technology choices have not been redesigned. UI-14 changes the interpretation of deleting a set entry. UI-16 removes the redundant review-streak category, as requested.
 
-Validation: all 146 tests pass, including simplified streaks, onboarding eligibility/name validation, active recurring schedule filtering, and historical preservation; app/model/cloud-UI syntax checks and Git whitespace checks pass. The approved PRD update accompanies this source checkpoint. Deployment verification is recorded in START-HERE.md.
+Validation: all 157 tests pass, including simplified streaks, onboarding, recurring history, saved edit-time persistence, newer local upload/newer cloud adoption, ambiguous-version fallback, and transaction version checks; app/model/cloud syntax checks and Git whitespace checks pass. Sync race tests use the isolated transport harness; no private production records were changed for testing. The approved PRD update accompanies this source checkpoint. Deployment verification is recorded in START-HERE.md.

@@ -11,6 +11,8 @@ import { bindMeterDrag } from './meter-drag.mjs';
 import { buildAchievements } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
 import {needsWelcome,profileName} from './onboarding.mjs';
+import {snapshotRecords} from './cloud-records.mjs';
+import {createRecordEdits} from './record-edits.mjs';
 import {weightHistory,weightPlot,weightPointContext,weightDayChange,nearestWeightPoint} from './weight-history.mjs';
 import { reveal, acknowledge, checkOff, setMeter, setMotionPreference } from './motion.mjs';
 import { STORAGE_KEY, readLocal, writeLocal, validateSnapshot, resetLocal } from './persistence.mjs';
@@ -32,6 +34,7 @@ let lastSavedRaw = loaded.raw;
 let storageError = loaded.error;
 let blockedSave = !!loaded.error;
 let pendingSnapshot = null;
+let pendingEditTime=null;
 let saveTimer;
 let maxSaveTimer;
 let toastTimer;
@@ -99,6 +102,10 @@ motionPreference=setMotionPreference(preferences.motion);
 const editableToday=()=>localDateKey(new Date(),timeZone);
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
 let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
+const editsKey=`homebase.record-edits.v1${suffix}`;
+let initialSyncRecords=new Map();try{initialSyncRecords=snapshotRecords(store.exportSnapshot());}catch{}
+const recordEdits=createRecordEdits({records:initialSyncRecords,load:()=>JSON.parse(localStorage.getItem(editsKey)),save:value=>localStorage.setItem(editsKey,JSON.stringify(value))});
+function captureRecordEdits(snapshot,at=Date.now()){try{recordEdits.capture(snapshotRecords(snapshot),at);}catch{/* Timestamp metadata must never prevent local saving. */}}
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
@@ -108,6 +115,7 @@ const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:
 function queueSave(snapshot) {
   const wasPending = !!pendingSnapshot;
   pendingSnapshot = snapshot;
+  pendingEditTime=Date.now();
   clearTimeout(saveTimer);
   if (!wasPending) renderSaveStatus();
   const editingText = document.activeElement?.matches('textarea,[contenteditable="true"]');
@@ -130,6 +138,7 @@ function flushSave() {
       blockedSave = true; throw new Error('Another tab changed the saved data. Export this tab’s changes before reloading.');
     }
     lastSavedRaw = writeLocal(storage, pendingSnapshot);
+    captureRecordEdits(pendingSnapshot,pendingEditTime);
     pendingSnapshot = null; storageError = null; cloud?.changed();cloud?.resume();
   } catch (error) { storageError = error.message; }
   renderSaveStatus();
@@ -1114,8 +1123,9 @@ $('#confirm-reset').addEventListener('click',()=>{
   clearTimeout(saveTimer);pendingSnapshot=null;pendingImport=null;
   store=createStore({clientId,editableToday,snapshot:reset.snapshot,seed:false,onChange:queueSave});
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
+  captureRecordEdits(reset.snapshot);
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
-  preferences={};displayName='Kieran';motionPreference=setMotionPreference('system');
+  preferences={};displayName=preview?'Kieran':'Friend';motionPreference=setMotionPreference('system');
   reviewSessionDate=null;recapDate=null;expandedTasks.clear();undoAction=null;
   $('#import-preview').hidden=true;$('#import-file').value='';$('#export-recovery').hidden=true;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#custom-weekdays').hidden=true;
@@ -1150,6 +1160,7 @@ $('#confirm-import').addEventListener('click', () => {
   try {
     clearTimeout(saveTimer);
     lastSavedRaw = writeLocal(storage, pendingImport);
+    captureRecordEdits(pendingImport);
     store = createStore({ clientId, editableToday, snapshot:pendingImport, seed:false, onChange:queueSave });
     loaded.error = null; loaded.raw = null; storageError = null; blockedSave = false; pendingSnapshot = null; pendingImport = null;
     $('#import-preview').hidden = true; $('#import-file').value = ''; reviewSessionDate = null;
@@ -1183,7 +1194,9 @@ if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
 if(welcomeRequired)showDialog($('#welcome-dialog'));
 
 cloud=mountCloud({
-  preview,readLocal:()=>store.exportSnapshot(),
+  preview,readLocal:()=>pendingSnapshot&&lastSavedRaw?JSON.parse(lastSavedRaw):store.exportSnapshot(),
+  localEditTimes:records=>recordEdits.times(records),
+  adoptEditTimes:(records,times)=>recordEdits.adopt(records,times),
   flushLocal:()=>{flushSave();return !storageError&&!blockedSave;},
   canApply:()=>!blockedSave&&!pendingSnapshot&&!$('#task-dialog').open&&!document.activeElement?.matches('input,textarea,select,[role="slider"]')&&!targetDrag&&!weightEditor.open&&!($('.target-editor').open&&targetBaseline.some(group=>group.target!==targetDraft.get(group.id))),
   applyLocal:snapshot=>{

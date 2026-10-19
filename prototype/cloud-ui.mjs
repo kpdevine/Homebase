@@ -1,7 +1,7 @@
 import {firebaseConfig} from './firebase-config.mjs';
 import {createCloudEngine} from './cloud-engine.mjs';
 
-export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onStatus,onUser=()=>{}}) {
+export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onStatus,onUser=()=>{},localEditTimes,adoptEditTimes}) {
   const el=id=>document.getElementById(id);
   let client=null,engine=null,user=null,enabled=false,busy=false;
   let state={status:preview?'preview':firebaseConfig?'loading':'unconfigured',message:preview?'Preview stays on this device. Open your personal workspace to use cloud sync.':firebaseConfig?'Connecting to Firebase…':'Firebase connection is being configured. Your records continue saving locally.',conflicts:[]};
@@ -27,7 +27,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
     const baseKey=key('base');let savedBase=null;
     try {const parsed=JSON.parse(localStorage.getItem(baseKey));if(Array.isArray(parsed)&&parsed.every(pair=>Array.isArray(pair)&&pair.length===2&&pair.every(value=>typeof value==='string')))savedBase=parsed;}catch{}
     setState({status:'loading',message:'Loading your private cloud records…',conflicts:[]});
-    engine=createCloudEngine({transport:client.transport(user.uid),readLocal,applyLocal,canApply,loadBase:()=>savedBase,saveBase:base=>localStorage.setItem(baseKey,JSON.stringify(base)),onState:setState});
+    engine=createCloudEngine({transport:client.transport(user.uid),readLocal,applyLocal,canApply,localEditTimes,adoptEditTimes,loadBase:()=>savedBase,saveBase:base=>localStorage.setItem(baseKey,JSON.stringify(base)),onState:setState});
     if(enabled)engine.enable();
   }
   async function signIn() {

@@ -34,13 +34,20 @@ export function recordsSnapshot(records,serial=0) {
 export function recordChanges(base,next) {
   return [...new Set([...base.keys(),...next.keys()])].filter(id=>base.get(id)!==next.get(id)).map(id=>({id,before:base.get(id)??null,after:next.get(id)??null}));
 }
-export function reconcileRecords(base,local,remote,choice='local') {
+export function reconcileRecords(base,local,remote,choice='local',versions={}) {
   const merged=new Map(remote),conflicts=[];
   for(const {id,before,after} of recordChanges(base,local)) {
     const theirs=remote.get(id)??null;
     const conflict=theirs!==before&&theirs!==after;
-    if(conflict)conflicts.push(id);
-    if(!conflict||choice==='local'){if(after===null)merged.delete(id);else merged.set(id,after);}
+    let selected=choice;
+    if(conflict&&choice==='newest') {
+      const mine=versions.local?.get(id),theirsAt=versions.remote?.get(id),now=versions.now??Date.now();
+      const valid=at=>Number.isSafeInteger(at)&&at>0&&at<=now+60000;
+      // Deletion vs. editing and legacy/equal/invalid times still need a choice.
+      selected=after!==null&&theirs!==null&&valid(mine)&&valid(theirsAt)&&mine!==theirsAt?(mine>theirsAt?'local':'cloud'):null;
+    }
+    if(conflict&&(!selected||choice!=='newest'))conflicts.push(id);
+    if(!conflict||selected==='local'){if(after===null)merged.delete(id);else merged.set(id,after);}
   }
   return {merged,conflicts};
 }
