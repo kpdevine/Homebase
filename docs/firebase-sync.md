@@ -4,7 +4,15 @@ Homebase uses the owner's Firebase project `homebase-d3c6c`, on the **Spark plan
 
 ## Connect a device
 
-Open **https://homebase-d3c6c.firebaseapp.com/** on each device. This address uses same-tab Google sign-in so it works without a popup. In Settings → Cloud sync, sign in with the same Google account and choose **Enable sync for this workspace**. Wait for **Saved · cloud synced** before switching devices. The `.web.app` hosting alias also serves the app, but uses popup sign-in, as does localhost.
+Open **https://pocketplanet.day/** on each device. This address uses same-origin, same-tab Google sign-in so it works on browsers that restrict third-party storage and popups. In Settings → Cloud sync, sign in with the same Google account and choose **Enable sync for this workspace**. Wait for **Saved · cloud synced** before switching devices. The original **https://homebase-d3c6c.firebaseapp.com/** remains available with its existing redirect sign-in. The `.web.app` hosting alias also serves the app, but uses popup sign-in, as does localhost.
+
+The custom domain serves the same Firebase project, Auth users, and Firestore records. Browser-local storage is per origin: the new address starts a separate local workspace. Connect the same Google account and enable sync to receive existing cloud records. Names, motion preferences, and any local-only records do not transfer merely because the domain changed. The original site is retained, with no forced redirect that could strand its local data.
+
+## Custom domain configuration
+
+`pocketplanet.day` is registered with Cloudflare and attached to the `homebase-d3c6c` Firebase Hosting site. DNS has an apex A record to `199.36.158.100` (DNS only), an apex TXT `hosting-site=homebase-d3c6c`, and Firebase's requested `_acme-challenge` TXT for certificate validation. Firebase manages HTTPS issuance/renewal. Keep the certificate verification record until Firebase no longer requests it.
+
+Firebase Authentication's authorized domain list includes `pocketplanet.day`. The existing Google web OAuth client retains its old entries and adds JavaScript origin `https://pocketplanet.day` and redirect URI `https://pocketplanet.day/__/auth/handler`. `authDomainFor()` chooses the custom auth domain only on that exact hostname; existing Firebase aliases and local previews retain their prior auth configuration. CSP permits the custom-domain auth frame. No new Firebase project, database, billing account, or data migration is required.
 
 The local desktop shortcut remains available at `http://127.0.0.1:4173/`. Its browser profile, the hosted site, and the preview at port 4174 have separate local storage. Enabling sync connects the personal workspace currently open; it does not upload `?preview=1` data. To retain records currently stored in a preview, download a JSON backup there, then restore it in the personal workspace deliberately. Restore and hard reset propagate to other devices when cloud sync is enabled; both flows explain their scope. Export before replacing records.
 

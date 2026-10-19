@@ -6,7 +6,9 @@ Updated October 18, 2026. This is the current application specification; older d
 
 Homebase is a personal daily dashboard for computer, phone, and a landscape display. Development stays local. Firebase Authentication, Firestore, and classic Hosting provide optional private sync and the shared app on the free Spark plan, with no billing, Analytics, or Gemini. The production framework, display hardware, and future Spotify integration remain open.
 
-Every source upload to `kpdevine/Homebase`, branch `codex/homebase-prototype`, must be accompanied by a deployment of the same version to `https://homebase-d3c6c.firebaseapp.com/`. Personal records, credentials, and local test artifacts stay out of Git and Hosting.
+Every source upload to `kpdevine/Homebase`, branch `codex/homebase-prototype`, must be accompanied by a deployment of the same version to Firebase Hosting. The primary custom address is `https://pocketplanet.day/`; `https://homebase-d3c6c.firebaseapp.com/` remains an accessible alias. Personal records, credentials, and local test artifacts stay out of Git and Hosting.
+
+The custom domain uses the same existing Firebase project, Auth accounts, and owner-private Firestore records. Serve HTTPS and same-origin Google redirect sign-in on the custom domain; preserve existing sign-in behavior at Firebase/local aliases. Each browser origin retains separate local storage, and users explicitly connect the same Google account and enable sync to recover their existing cloud records. Do not force-redirect the old site or overwrite local-only records during the domain change.
 
 ## Interface and navigation
 

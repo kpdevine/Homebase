@@ -2,6 +2,8 @@
 
 Saved October 18, 2026 (America/Chicago).
 
+Custom-domain setup, October 19: `https://pocketplanet.day/` is the chosen primary address for the same Firebase Hosting site/project. Cloudflare DNS has the Firebase A, ownership TXT, and certificate-validation TXT records. Firebase Auth and the existing Google OAuth web client include the new origin/redirect. The browser config selects same-origin redirect auth only on `pocketplanet.day`; old aliases retain existing behavior. Both original URLs and all records remain intact. Connect the same Google account and enable sync at the new origin to receive existing cloud records. See [Firebase/domain setup](docs/firebase-sync.md). All 169 tests pass; domain activation and HTTPS are checked separately against Firebase's provisioning state.
+
 ## Run locally
 
 Windows: the **Homebase** desktop shortcut starts the background server and opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. See [desktop launcher](docs/desktop-launcher.md). Existing preview records at port 4174 remain separate. The shortcut opens a personal workspace; it does not migrate the preview. Sign in and enable Cloud sync in Settings to connect that workspace. See [Firebase sync](docs/firebase-sync.md).
