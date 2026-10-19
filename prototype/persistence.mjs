@@ -7,7 +7,7 @@ const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.te
 const validId = value => typeof value === 'string' && value.length > 0 && value.length <= 100 && /^[A-Za-z0-9_-]+$/.test(value);
 const validScore = value => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 1 && value <= 10 && Math.abs(value * 100 - Math.round(value * 100)) < 1e-8;
 const validTimestamp = value => value === null || typeof value === 'string' && Number.isFinite(Date.parse(value));
-const assert = (condition, message) => { if (!condition) throw new Error(`Invalid Homebase backup: ${message}`); };
+const assert = (condition, message) => { if (!condition) throw new Error(`Invalid Pocket Planet backup: ${message}`); };
 
 export function validateSnapshot(value) {
   assert(value && typeof value === 'object' && [1,2].includes(value.version), 'unsupported format.');

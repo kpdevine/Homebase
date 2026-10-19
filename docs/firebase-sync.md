@@ -1,6 +1,6 @@
 # Firebase sync
 
-Homebase uses the owner's Firebase project `homebase-d3c6c`, on the **Spark plan with no billing account**. Firestore Standard is in `us-central1` (Iowa). Google Authentication and classic Firebase Hosting are enabled. Analytics, Gemini, paid backups, Functions, Storage buckets, and App Hosting are not enabled.
+Pocket Planet uses the owner's Firebase project `homebase-d3c6c`, on the **Spark plan with no billing account**. Firestore Standard is in `us-central1` (Iowa). Google Authentication and classic Firebase Hosting are enabled. Analytics, Gemini, paid backups, Functions, Storage buckets, and App Hosting are not enabled.
 
 ## Connect a device
 

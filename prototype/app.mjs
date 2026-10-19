@@ -202,7 +202,7 @@ function renderHeader() {
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
   $('#overview-tasks-title').textContent = 'TO-DO LIST';
   $('#tasks-title').textContent = 'TO-DO LIST';
-  document.title = `Homebase · ${viewLabels[view]}`;
+  document.title = `Pocket Planet · ${viewLabels[view]}`;
   for (const [key, panel] of Object.entries(panelIds)) $('#' + panel).hidden = view !== key;
   $$('[data-tab]').forEach(button => {
     button.disabled=archived;
@@ -1048,7 +1048,7 @@ $('#open-score-info').addEventListener('click',()=>showDialog($('#score-dialog')
 function openSettings() {
   $('#profile-name').value = displayName;
   $('#motion-setting').value=motionPreference;$('#motion-preview').hidden=true;renderMotionSetting();
-  $('#settings-message').textContent = storageError ? `Local storage issue: ${storageError}` : preview ? 'This preview saves separately from your personal Homebase data.' : '';
+  $('#settings-message').textContent = storageError ? `Local storage issue: ${storageError}` : preview ? 'This preview saves separately from your personal Pocket Planet data.' : '';
   $('#export-backup').textContent = 'Download local backup';
   $('#export-recovery').hidden = !(loaded.error && loaded.raw);
   showDialog($('#settings-dialog'));
@@ -1101,14 +1101,14 @@ function downloadBackup() {
   flushSave();
   const content = JSON.stringify(store.exportSnapshot(), null, 2);
   const url = URL.createObjectURL(new Blob([content], { type:'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `homebase-backup-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-backup-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
   $('#settings-message').textContent = 'Backup download requested. Keep the file somewhere you can find again.';
 }
 $('#export-backup').addEventListener('click',downloadBackup);
 $('#reset-backup').addEventListener('click',()=>{downloadBackup();$('#reset-message').textContent='Backup download requested. Confirm that you have the file before resetting.';});
 $('#open-reset').addEventListener('click',()=>{
-  $('#reset-scope').textContent=preview?'This resets preview data only. Personal Homebase data is separate.':cloud?.isEnabled()?'This clears your personal records here and syncs the reset to Firebase and your other signed-in devices.':'This resets Homebase data in this browser on this device.';
+  $('#reset-scope').textContent=preview?'This resets preview data only. Personal Pocket Planet data is separate.':cloud?.isEnabled()?'This clears your personal records here and syncs the reset to Firebase and your other signed-in devices.':'This resets Pocket Planet data in this browser on this device.';
   $('#reset-message').textContent='';
   showDialog($('#reset-dialog'));
 });
@@ -1131,12 +1131,12 @@ $('#confirm-reset').addEventListener('click',()=>{
   selectedDate=localDateKey(new Date(),timeZone);calendarMonth=selectedDate;
   setView('today',true);
   cloud?.changed();
-  announce(`All ${preview?'preview':'Homebase'} data and preferences reset${cloud?.isEnabled()?' and queued to sync':' on this device'}.`);
+  announce(`All ${preview?'preview':'Pocket Planet'} data and preferences reset${cloud?.isEnabled()?' and queued to sync':' on this device'}.`);
 });
 $('#export-recovery').addEventListener('click', () => {
   if (!loaded.raw) return;
   const url = URL.createObjectURL(new Blob([loaded.raw], { type:'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `homebase-recovery-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-recovery-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
   $('#settings-message').textContent = 'Original saved data downloaded for recovery. Your current entries can be downloaded separately above.';
 });

@@ -1,10 +1,10 @@
-# Homebase product requirements
+# Pocket Planet product requirements
 
 Updated October 18, 2026. This is the current application specification; older design documents retain the planning history.
 
 ## Purpose and delivery
 
-Homebase is a personal daily dashboard for computer, phone, and a landscape display. Development stays local. Firebase Authentication, Firestore, and classic Hosting provide optional private sync and the shared app on the free Spark plan, with no billing, Analytics, or Gemini. The production framework, display hardware, and future Spotify integration remain open.
+Pocket Planet is a personal daily dashboard for computer, phone, and a landscape display. Development stays local. Firebase Authentication, Firestore, and classic Hosting provide optional private sync and the shared app on the free Spark plan, with no billing, Analytics, or Gemini. The production framework, display hardware, and future Spotify integration remain open.
 
 Every source upload to `kpdevine/Homebase`, branch `codex/homebase-prototype`, must be accompanied by a deployment of the same version to Firebase Hosting. The primary custom address is `https://pocketplanet.day/`; `https://homebase-d3c6c.firebaseapp.com/` remains an accessible alias. Personal records, credentials, and local test artifacts stay out of Git and Hosting.
 
@@ -13,7 +13,7 @@ The custom domain uses the same existing Firebase project, Auth accounts, and ow
 ## Interface and navigation
 
 - First-time personal visitors see a themed Welcome screen offering name entry or Google sign-in immediately. Save their chosen name locally and personalize the greeting. Returning named users, existing record workspaces, previews, and recovery states bypass onboarding. Google sign-in uses the existing authentication flow and account display name; explicit cloud sync enablement remains separate. Keep sign-in failure/offline messages visible and name entry available.
-- Match the owner's car radio: dark blue LCD, indigo ink, charcoal frame, visible scan lines, subtly pixelated type, and progressive ice-white score rewards. Keep all numbers legible over their rings. No Homebase logo or slogan.
+- Match the owner's car radio: dark blue LCD, indigo ink, charcoal frame, visible scan lines, subtly pixelated type, and progressive ice-white score rewards. Keep all numbers legible over their rings. No Pocket Planet logo or slogan.
 - Use consistent dark ink, brighter writing fields, pale secondary controls, dark primary actions, visible keyboard focus, and high-contrast selected states. Keep completed task text readable and give late-warning symbols a dark backplate. Main headings are bold; content edges and title/action spacing align across sections.
 - Use the owner's Kieran handwriting for task text, notes, and the bold to-do heading. Descenders never extend the writing box or move surrounding controls; let their ink pass below its bottom line. Task/subtask editors measure wrapped line boxes separately from descender overflow, growing only for wrapped lines. Keep note editors independent of glyph depth.
 - On phones and tablets, align each task checkbox with the first text line's capital height, including wrapped, recurring, and child tasks. Keep checkbox sizing and horizontal spacing consistent; deep descenders do not determine alignment.
@@ -107,3 +107,7 @@ Mobile weight-graph cards use a compact 174px layout and 34px score circles, kee
 The weigh-in card also shows signed body-weight change against the exact previous calendar day in the selected chart unit. Missing prior-day weight is stated explicitly; do not substitute the last recorded weigh-in.
 
 Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop radius), with their existing generous invisible touch halo retained.
+
+### Pocket Planet identity
+
+Use Pocket Planet as the product name, including browser and installed-app titles, backup labels, and accessibility text. Use the muted periwinkle LCD planet icon for favicon and home-screen icons. Preserve existing storage keys, backup compatibility, Firebase resource IDs, and repository identifiers through the rename.

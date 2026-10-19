@@ -27,3 +27,6 @@ Thumbs.db
 .firebase/
 __pycache__/
 *.pyc
+
+# Image-generation drafts; selected app icons live in prototype/assets/icons
+/output/imagegen/

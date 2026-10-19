@@ -1,4 +1,4 @@
-# Homebase UI polish — local review
+# Pocket Planet UI polish — local review
 
 October 18, 2026 · **Reviewed and approved for delivery.**
 

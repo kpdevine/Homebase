@@ -1,4 +1,4 @@
-# Homebase — resume here
+# Pocket Planet — resume here
 
 Saved October 18, 2026 (America/Chicago).
 
@@ -6,15 +6,15 @@ Custom-domain setup, October 19: `https://pocketplanet.day/` is the chosen prima
 
 ## Run locally
 
-Windows: the **Homebase** desktop shortcut starts the background server and opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. See [desktop launcher](docs/desktop-launcher.md). Existing preview records at port 4174 remain separate. The shortcut opens a personal workspace; it does not migrate the preview. Sign in and enable Cloud sync in Settings to connect that workspace. See [Firebase sync](docs/firebase-sync.md).
+Windows: the **Pocket Planet** desktop shortcut starts the background server and opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. See [desktop launcher](docs/desktop-launcher.md). Existing preview records at port 4174 remain separate. The shortcut opens a personal workspace; it does not migrate the preview. Sign in and enable Cloud sync in Settings to connect that workspace. See [Firebase sync](docs/firebase-sync.md).
 
 ```powershell
 npm.cmd run dev
 ```
 
-Open [Homebase](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs the model, persistence, sync, and UI-policy checks.
+Open [Pocket Planet](http://127.0.0.1:4173/). Keep the terminal running; Ctrl+C stops the server. No packages need installation. `npm.cmd test` runs the model, persistence, sync, and UI-policy checks.
 
-To continue: **Continue Homebase from START-HERE.md. Keep development local. Firebase is selected for authentication, sync, and hosting; the production framework and device platform remain open.**
+To continue: **Continue Pocket Planet from START-HERE.md. Keep development local. Firebase is selected for authentication, sync, and hosting; the production framework and device platform remain open.**
 
 Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
 
@@ -155,3 +155,7 @@ Mobile weight-graph cards use a compact 174px layout and 34px score circles, kee
 The weigh-in card also shows signed body-weight change against the exact previous calendar day in the selected chart unit. Missing prior-day weight is stated explicitly; do not substitute the last recorded weigh-in.
 
 Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop radius), with their existing generous invisible touch halo retained.
+
+## Pocket Planet identity — October 19
+
+The product is now Pocket Planet. App titles, accessibility labels, backups, launcher messages, and current documentation use the new name. The selected LCD planet icon supplies the favicon, iPhone home-screen icon, and web-app manifest. Existing Homebase storage keys, backup schemas, Firebase project identifiers, and Git repository remain unchanged to preserve records and compatibility. pocketplanet.day serves the deployed app over valid HTTPS; the original Firebase addresses remain available.

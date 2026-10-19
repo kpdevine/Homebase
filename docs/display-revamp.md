@@ -1,4 +1,4 @@
-# Display-first Homebase revamp
+# Display-first Pocket Planet revamp
 
 Active brief: rebuild the working local app from the owner's October 16 sketch. Primary use is an Amazon Echo Show style landscape touch display; use a white background with restrained color. Keep the production stack open.
 

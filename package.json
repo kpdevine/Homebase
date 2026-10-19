@@ -1,7 +1,7 @@
 {
-  "name": "homebase-local-prototype",
+  "name": "pocket-planet-local-prototype",
   "private": true,
-  "description": "Homebase dashboard with local saving and optional private Firebase sync.",
+  "description": "Pocket Planet dashboard with local saving and optional private Firebase sync.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs"

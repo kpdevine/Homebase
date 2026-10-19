@@ -1,6 +1,6 @@
 # Desktop launcher
 
-Double-click **Homebase** on the Windows Desktop. It starts the loopback server in the background when needed, waits for Homebase to respond, then opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. Repeated launches reuse a responding Homebase server. Another application on that port produces an error rather than silently switching addresses.
+Double-click **Pocket Planet** on the Windows Desktop. It starts the loopback server in the background when needed, waits for Pocket Planet to respond, then opens the personal workspace at `http://127.0.0.1:4173/` in the default browser. Repeated launches reuse a responding Pocket Planet server. Another application on that port produces an error rather than silently switching addresses.
 
 The browser must use the same profile to retain its local records. The preview at port 4174 with `?preview=1`, the personal workspace, and different browsers all have separate local storage. Existing preview records are left intact. The launcher does not upload or migrate them.
 
