@@ -159,3 +159,5 @@ Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop r
 ## Pocket Planet identity — October 19
 
 The product is now Pocket Planet. App titles, accessibility labels, backups, launcher messages, and current documentation use the new name. The selected LCD planet icon supplies the favicon, iPhone home-screen icon, and web-app manifest. Existing Homebase storage keys, backup schemas, Firebase project identifiers, and Git repository remain unchanged to preserve records and compatibility. pocketplanet.day serves the deployed app over valid HTTPS; the original Firebase addresses remain available.
+
+October 20: owner approved the smiling Jupiter/hug icon with interlocked hands and stronger ring-arms and requested immediate publication. Icon URLs are versioned to request the revised artwork. Reminder and achievement changes remain in progress separately from this icon-only release.

@@ -111,3 +111,5 @@ Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop r
 ### Pocket Planet identity
 
 Use Pocket Planet as the product name, including browser and installed-app titles, backup labels, and accessibility text. Use the muted periwinkle LCD planet icon for favicon and home-screen icons. Preserve existing storage keys, backup compatibility, Firebase resource IDs, and repository identifiers through the rename.
+
+Approved October 20 app icon: large Jupiter-like cloud bands, a wide smile with two small face eyes, and connected ring-arms with interlocked hands. Remove the lower oval storm feature. Keep the muted blue LCD style. Use this approved artwork for the favicon and iPhone home-screen icon.
