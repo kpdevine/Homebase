@@ -527,7 +527,7 @@ function renderAchievements(recompute=true) {
   $$('[data-achievement-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementFilter===achievementFilter)));
   $('#achievement-unlocked-only').setAttribute('aria-pressed',String(unlockedOnly));
   const labels={overall:'Overall',nutrition:'Nutrition',training:'Gym',checklists:'To-do list',sentiments:'Sentiments',streaks:'Streaks'};
-  $('[data-achievement-order]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementOrder===achievementOrder)));
+  $$('[data-achievement-order]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementOrder===achievementOrder)));
   const cards=sortAchievements(data.cards.filter(card=>(achievementFilter==='all'||card.group===achievementFilter)&&(!unlockedOnly||card.count)),achievementOrder);
   $('#achievement-results').textContent=`${cards.length} achievements shown. ${data.unlocked} of ${data.total} unlocked.`;
   $('#achievement-grid').innerHTML=cards.length?cards.map(card=>{
