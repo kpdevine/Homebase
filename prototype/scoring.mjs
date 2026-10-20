@@ -27,7 +27,7 @@ export function summarizeDay(day, trainingEntries = [], week) {
   const sections = [
     { id: 'nutrition', label: 'Nutrition', score: day.nutrition, detail: day.nutrition === null ? 'Not logged yet' : `${day.nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
     { id: 'training', label: 'Daily training', score: training.score, logged:training.logged, excluded:training.excluded,
-      detail:training.logged&&!training.target?'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Rest day covered':'Rest allowance used up'} · ${training.restCredits}/2 left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
+      detail:training.logged&&!training.target?training.tracksCreatine?'Creatine only · no set targets':'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Rest day covered':'Rest allowance used up'} · ${training.restCredits}/2 left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
     { id: 'checklists', label: 'To-do list', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
   ];
   const requiredLogged=sections.filter(section=>section.logged??section.score!==null).length;
@@ -44,7 +44,7 @@ export function localDateKey(date = new Date(), timeZone = 'America/Chicago') {
 }
 
 export function taskScoreRange(summary) {
-  if(!summary.total||summary.done===summary.total||summary.sections.find(section=>section.id==='checklists')?.score===null)return {score:summary.score,low:summary.score,projected:false};
+  if(!summary.total||summary.done===summary.total)return {score:summary.score,low:summary.score,projected:false};
   const withTasks=score=>{
     const values=summary.sections.map(section=>section.id==='checklists'?score:section.score).filter(value=>value!==null);
     return Math.round(values.reduce((sum,value)=>sum+value,0)/values.length*10)/10;

@@ -13,7 +13,7 @@ function fresh() {
   return store;
 }
 function finish(store,date,{nutrition=10,sets=0,notes='',sentiment=null}={}) {
-  store.updateRating(date,nutrition);
+  store.updateRating(date,nutrition);store.setCreatine(date,true);
   if(sets)store.addGymEntry(date,'chest',sets);else store.setTrainingMode(date,'rest');
   if(notes||sentiment!==null)store.updateSentiments(date,{notes,rating:sentiment});
   for(const section of store.dayProgress(date).sections)store.confirmSection(date,section.id);

@@ -54,7 +54,7 @@ export const DAY_SECTIONS = [
 ];
 
 function emptyDay(date) {
-  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, notes: { nutrition:'', training:'' }, comment:'', sentiments:{notes:'',rating:null},
+  return { date, tasks: [], nutrition: null, sampleOverall: null, trainingMode: null, creatine: false, notes: { nutrition:'', training:'' }, comment:'', sentiments:{notes:'',rating:null},
     bodyWeight:null, checklistTouched:false, skippedTemplates:[], reviewed: { nutrition: false, training: false, checklists: false }, completedAt: null };
 }
 
@@ -285,6 +285,7 @@ export function createStore(options = {}) {
       if (!ALL_GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
       const before=trainingScores(),entry = { id: nextId('gym'), date, groupId, sets },day=writableDay(date);
+      if(day.creatine===undefined)day.creatine=false;
       startWorkout(day);
       entries.push(entry);
       day.trainingMode = 'training';
@@ -297,16 +298,23 @@ export function createStore(options = {}) {
       if (index >= 0) {
         const before=trainingScores(),[entry] = entries.splice(index, 1);
         // UI-14: removing set volume does not reverse the lifting answer.
-        invalidateReview(writableDay(entry.date), 'training');reopenChangedTraining(before);
+        const day=writableDay(entry.date);if(day.creatine===undefined)day.creatine=false;
+        invalidateReview(day, 'training');reopenChangedTraining(before);
       }
     },
     loadTrainingDay(key) { return structuredClone(entries.filter(entry => entry.date === key)); },
+    setCreatine(key, taken) {
+      if(typeof taken!=='boolean')throw new RangeError('Choose whether you took creatine.');
+      const day=writableDay(key);
+      if(day.creatine!==taken){day.creatine=taken;invalidateReview(day,'training');}
+    },
     setTrainingMode(key, mode) {
       if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting or rest.');
       if (mode !== 'training' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
-      const before=trainingScores(),day = writableDay(key);
+      const before=trainingScores(),day = writableDay(key),newPolicy=day.creatine===undefined;
+      if(newPolicy)day.creatine=false;
       if(mode==='training')startWorkout(day);
-      if (day.trainingMode !== mode) { day.trainingMode = mode; invalidateReview(day, 'training');reopenChangedTraining(before); }
+      if (day.trainingMode !== mode || newPolicy) { day.trainingMode = mode; invalidateReview(day, 'training');reopenChangedTraining(before); }
     },
     dayProgress(key) {
       const day = loadDay(key);
@@ -331,7 +339,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
       const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];

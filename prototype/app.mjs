@@ -1,6 +1,6 @@
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
-import { summarizeDay, taskScoreRange, categorySummary, scoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
+import { summarizeDay, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
 import { taskProgress, scheduleLabel, orderedTasks, activeTemplates } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
@@ -28,6 +28,7 @@ const scoreText = score => score === null ? '—' : score === 10 ? '10' : score.
 const scoreMarkup = score => { const [whole,fraction]=scoreText(score).split('.'); return `<span class="score-whole">${whole}</span>${fraction?`<span class="score-fraction">.${fraction}</span>`:''}`; };
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const timeZone = 'America/Chicago';
+const scoreColor=score=>window.pocketTheme.color(blueScoreColor(score));
 const preview = new URLSearchParams(location.search).get('preview') === '1';
 const suffix = preview ? '.preview' : '';
 const preferencesKey = `homebase.preferences.v1${suffix}`;
@@ -102,6 +103,7 @@ const welcomeRequired=needsWelcome({preview,preferences,snapshot:loaded.snapshot
 if(welcomeRequired)displayName='';
 let welcomeGoogleAttempt=!!preferences.welcomeGooglePending;
 motionPreference=setMotionPreference(preferences.motion);
+window.pocketTheme.apply(preferences.theme);
 const editableToday=()=>localDateKey(new Date(),timeZone);
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
 let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
@@ -261,7 +263,7 @@ function renderScore() {
   $('#day-gradient-end').setAttribute('stop-color',scoreColor(displayScore));
   meter.setAttribute('aria-label', displayScore === null ? 'No daily score yet. Log a category to get started.' : `${range.projected?'Projected ':summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(displayScore)} out of 10.${range.projected?` Assuming all tasks completed; as low as ${scoreText(range.low)} if remaining tasks stay unchecked.`:''} ${summary.logged} of ${summary.sections.length} categories logged.`);
   $('#score-range').hidden=!range.projected;
-  $('#score-range').innerHTML=range.projected?`As low as <strong>${scoreText(range.low)}</strong><span> if remaining tasks stay unchecked</span>`:'';
+  $('#score-range').innerHTML=range.projected?`As high as <strong>${scoreText(range.score)}</strong> · As low as <strong>${scoreText(range.low)}</strong><span> Tasks assumed done vs. left unchecked. Unlogged nutrition and training are not assumed.</span>`:'';
   const rewardLabel=range.projected?'With all tasks done':reward?(summary.provisional?'High so far':displayScore===10?'Perfect score':'High score'):'';
   $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/${summary.sections.length} logged` : 'All categories logged'].filter(Boolean).join(' · ');
   $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of ${progress.sections.length} section reviews confirmed.`;
@@ -380,13 +382,16 @@ function renderGym() {
   if(weightEditorDate!==selectedDate){weightEditor.open=false;weightEditorDate=selectedDate;}
   if(trainingNotesDate!==selectedDate){notesDetails.open=!!day.notes.training;trainingNotesDate=selectedDate;}
 
+  $('#creatine-taken').checked=day.creatine===true;
+  $('#creatine-taken').disabled=archivedDay();
+  $('#creatine-status').textContent=day.creatine===true?'✓ Taken':'Not checked';
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
   $('#gym-form').hidden=day.trainingMode!=='training';
   $('#training-mode-hint').hidden=!entries.length;
   $('#ideal-workout').hidden=noLift;
   const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?'No targets · not scored':pace.logged?`Gym score · ${scoreText(pace.score)} / 10`:'Gym score · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to include gym in the daily average.'}</small></div>`;
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?pace.tracksCreatine?'Creatine only':'No targets · not scored':pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to unlock the 9 gym points.'}</small></div>`;
   $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
   const workout=store.idealWorkout(selectedDate);
   $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets planned</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
@@ -494,6 +499,7 @@ function recapMarkup({final=false}={}) {
     </div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
+    ${recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
     ${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}
     ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
@@ -539,15 +545,19 @@ function render() { renderHeader(); renderTasks(); renderScore(); renderRating()
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
   if(archivedDay()&&next!=='achievements')next='history';
-  const changed=view!==next;
+  const changed=view!==next,mainScroll=$('#main').scrollTop;
+  // Keep the navigation at the same viewport height. Deep content starts afresh
+  // under the pinned strip rather than leaving a short tab scrolled into blank space.
+  const scrollY=Math.min(window.scrollY,$('#tab-scroll-anchor').getBoundingClientRect().top+window.scrollY);
+  // Reserve the current document height before hiding a long phone panel.
+  if(changed&&phoneLayout())$('#main').style.minHeight=`${Math.max(0,scrollY+window.innerHeight-($('#main').getBoundingClientRect().top+scrollY))}px`;
   view = next; render();
   // UI-03: switching phone sections must reveal the new content, including utility pages.
-  if(changed&&phoneLayout()&&window.scrollY>0) {
-    const main=$('#main'),nav=$('.day-tabs');
-    window.scrollTo({top:Math.max(0,main.getBoundingClientRect().top+window.scrollY-nav.offsetHeight),behavior:'instant'});
+  if(changed&&phoneLayout()) {
+    window.scrollTo({top:scrollY,behavior:'instant'});
   }
   if(changed)reveal($('#'+panelIds[view]));
-  $('#main').scrollTo({top:0,behavior:'instant'});
+  $('#main').scrollTo({top:mainScroll,behavior:'instant'});
   if (focus) ($('#tab-' + view)||$('#main')).focus({preventScroll:true});
 }
 function navigateDay(date, changeMonth = true) {
@@ -956,6 +966,7 @@ $('#gym-form').addEventListener('submit', event => {
   catch (error) { input.setCustomValidity(error.message); input.reportValidity(); return; }
   render(); announce(`${input.value} sets logged for ${shortDate(selectedDate)}.`);
 });
+$('#creatine-taken').addEventListener('change',event=>{store.setCreatine(selectedDate,event.target.checked);render();});
 $('#gym-sets').addEventListener('input', event => event.target.setCustomValidity(''));
 $$('[name="training-mode"]').forEach(input => input.addEventListener('change', () => {
   try { store.setTrainingMode(selectedDate, input.value==='no'?'rest':input.value); render(); }
@@ -1054,7 +1065,7 @@ $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () 
 $('#score-info').addEventListener('click', () => { closeDialog($('#settings-dialog')); showDialog($('#score-dialog')); });
 $('#open-score-info').addEventListener('click',()=>showDialog($('#score-dialog')));
 function openSettings() {
-  $('#profile-name').value = displayName;
+  $('#profile-name').value = displayName;renderThemeOptions();
   $('#motion-setting').value=motionPreference;$('#motion-preview').hidden=true;renderMotionSetting();
   $('#settings-message').textContent = storageError ? `Local storage issue: ${storageError}` : preview ? 'This preview saves separately from your personal Pocket Planet data.' : '';
   $('#export-backup').textContent = 'Download local backup';
@@ -1066,12 +1077,14 @@ $('#save-status').addEventListener('click', openSettings);
 $('#preferences-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#profile-name'), name = input.value.trim();
   if (!name) { input.setCustomValidity('Enter a name.'); input.reportValidity(); return; }
-  displayName = name;
-  try {preferences={...preferences,name,motion:motionPreference};localStorage.setItem(preferencesKey, JSON.stringify(preferences)); $('#settings-message').textContent = 'Your name is saved on this device.'; }
-  catch { $('#settings-message').textContent = 'Name updated for this session. Browser storage is unavailable.'; }
+  const nextPreferences={...preferences,name,motion:motionPreference};
+  try {localStorage.setItem(preferencesKey,JSON.stringify(nextPreferences));preferences=nextPreferences;displayName=name;$('#save-name').textContent='✓ Saved';$('#save-name').classList.add('is-saved');$('#name-save-feedback').textContent=`Saved as ${name} on this device.`;}
+  catch {$('#name-save-feedback').textContent='Could not save your name. Browser storage is unavailable.';$('#save-name').classList.remove('is-saved');}
   renderHeader();
 });
-$('#profile-name').addEventListener('input', event => event.target.setCustomValidity(''));
+$('#profile-name').addEventListener('input',event=>{event.target.setCustomValidity('');$('#save-name').textContent='Save name';$('#save-name').classList.remove('is-saved');$('#name-save-feedback').textContent='';});
+$$('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{const theme=button.dataset.themeChoice;try{const next={...preferences,theme};localStorage.setItem(preferencesKey,JSON.stringify(next));preferences=next;window.pocketTheme.apply(theme);renderThemeOptions();render();$('#theme-feedback').textContent='Theme saved on this device.';}catch{$('#theme-feedback').textContent='Theme could not be saved. Browser storage is unavailable.';}}));
+function renderThemeOptions(){$$('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===document.documentElement.dataset.theme)));}
 function finishWelcome(name) {
   displayName=profileName(name)||'Friend';
   welcomeGoogleAttempt=false;
@@ -1129,7 +1142,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
   captureRecordEdits(reset.snapshot);
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
-  preferences={};displayName=preview?'Kieran':'Friend';motionPreference=setMotionPreference('system');
+  preferences={};window.pocketTheme.apply('blue');displayName=preview?'Kieran':'Friend';motionPreference=setMotionPreference('system');
   reviewSessionDate=null;recapDate=null;expandedTasks.clear();undoAction=null;
   $('#import-preview').hidden=true;$('#import-file').value='';$('#export-recovery').hidden=true;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#custom-weekdays').hidden=true;
@@ -1223,3 +1236,14 @@ cloud=mountCloud({
 });
 
 reminders=mountReminders({cloud,preview});
+
+// iOS reports keyboard viewport height independently of the layout viewport.
+function updateVisibleHeight(){document.documentElement.style.setProperty('--visible-height',`${window.visualViewport?.height||window.innerHeight}px`);}
+window.visualViewport?.addEventListener('resize',updateVisibleHeight);updateVisibleHeight();
+function disableSpelling(root){
+  if(root.nodeType!==1)return;
+  const fields=[...(root.matches('input,textarea,[contenteditable]')?[root]:[]),...root.querySelectorAll('input,textarea,[contenteditable]')];
+  for(const field of fields){field.spellcheck=false;field.setAttribute('autocorrect','off');}
+}
+disableSpelling(document.documentElement);
+new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)disableSpelling(node);}).observe(document.body,{childList:true,subtree:true});

@@ -47,6 +47,7 @@ export function validateSnapshot(value) {
     assert(new Set(occurrences).size===occurrences.length && occurrences.every(id=>!skippedTemplates.includes(id)),'duplicate recurring occurrence.');
     assert(validScore(day.nutrition) && validScore(day.sampleOverall ?? null), 'rating.');
     assert(day.trainingMode === null || ['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(day.trainingMode), 'day type.');
+    assert(day.creatine===undefined||typeof day.creatine==='boolean','creatine check-in.');
     assert(day.reviewed && sectionIds.every(id => typeof day.reviewed[id] === 'boolean'), 'review state.');
     assert(validTimestamp(day.completedAt), 'completion timestamp.');
     assert(!day.reviewed.nutrition || day.nutrition !== null, 'nutrition review without a rating.');
@@ -72,7 +73,7 @@ export function validateSnapshot(value) {
       assert(plan.groups.reduce((sum,group)=>sum+group.sets,0)===plan.sets,'workout plan total.');
       workoutPlan={sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
     }
-    return { date: day.date, tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
+    return { date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);

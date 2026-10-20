@@ -16,7 +16,7 @@ export function dailyRecap(day, entries=[], week) {
     bodyWeight:day.bodyWeight?{...day.bodyWeight}:null,
     checklistLogged:summary.sections.find(section=>section.id==='checklists').score!==null,
     tasks:orderedTasks(day.tasks).map(task=>({name:task.name,done:task.done,recurring:!!task.templateId,children:(task.children||[]).map(child=>({name:child.name,done:child.done}))})),
-    training:{rest:['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode),planned:day.trainingMode==='rest',unplanned:day.trainingMode==='unplanned-rest',score:summary.sections.find(section=>section.id==='training').score,sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:[...groups].map(([id,sets])=>({id,sets}))},
+    training:{creatine:day.creatine,rest:['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode),planned:day.trainingMode==='rest',unplanned:day.trainingMode==='unplanned-rest',score:summary.sections.find(section=>section.id==='training').score,sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:[...groups].map(([id,sets])=>({id,sets}))},
     notes,
   };
 }

@@ -21,7 +21,7 @@ test('weigh-in context uses the previous calendar day, never the weigh-in day or
   const store=createStore({seed:false});store.updateRating('2026-10-17',8.4);store.setTrainingMode('2026-10-17','training');
   store.updateRating('2026-10-18',10);store.setTrainingMode('2026-10-18','rest');
   const before=store.exportSnapshot(),context=weightPointContext('2026-10-18',date=>summarizeDay(store.loadDay(date),store.loadTrainingDay(date),store.loadWeek(date)));
-  assert.deepEqual(context,{date:'2026-10-18',previousDate:'2026-10-17',nutrition:8.4,training:4});assert.deepEqual(store.exportSnapshot(),before);
+  assert.deepEqual(context,{date:'2026-10-18',previousDate:'2026-10-17',nutrition:8.4,training:3.6});assert.deepEqual(store.exportSnapshot(),before);
 });
 test('weigh-in context crosses month/year/leap boundaries and preserves unlogged scores as absent',()=>{
   for(const [date,previousDate] of [['2026-01-01','2025-12-31'],['2024-03-01','2024-02-29'],['2026-03-01','2026-02-28']]) {

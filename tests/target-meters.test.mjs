@@ -10,7 +10,7 @@ test('target meter has exactly 21 whole positions and snaps the gap to an endpoi
 test('zero targets persist, carry forward, and exclude goal credit while keeping total sets',()=>{
   const store=createStore({seed:false});store.setWeekTargets(date,values(0));store.addGymEntry(date,'chest',5);
   const restored=createStore({seed:false,snapshot:validateSnapshot(store.exportSnapshot())}),pace=restored.trainingProgress(date);
-  assert.equal(pace.actual,5);assert.equal(pace.credited,0);assert.equal(pace.score,null);assert.equal(pace.excluded,true);assert.equal(pace.logged,true);assert.deepEqual(pace.suggestions,[]);
+  assert.equal(pace.actual,5);assert.equal(pace.credited,0);assert.equal(pace.score,0);assert.equal(pace.excluded,false);assert.equal(pace.logged,true);assert.deepEqual(pace.suggestions,[]);
   assert.ok(restored.loadWeek('2026-10-19').groups.every(group=>group.target===0));
 });
 test('new edits accept only whole 0–20 targets without corrupting saved values',()=>{

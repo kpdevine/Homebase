@@ -14,7 +14,7 @@ test('starting a workout freezes its plan before sets and keeps it through loggi
   store.setTrainingMode(monday,'training');
   const saved=store.loadDay(monday).workoutPlan;
   for(const group of plan.groups)store.addGymEntry(monday,group.id,group.sets);
-  assert.equal(store.trainingProgress(monday).score,10);
+  assert.equal(store.trainingProgress(monday).gymScore,10);
   assert.deepEqual(store.idealWorkout(monday),plan);
   for(const entry of store.loadTrainingDay(monday))store.removeGymEntry(entry.id);
   store.setTrainingMode(monday,'rest');store.setTrainingMode(monday,'training');

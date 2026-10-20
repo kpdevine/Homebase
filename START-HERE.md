@@ -18,7 +18,11 @@ To continue: **Continue Pocket Planet from START-HERE.md. Keep development local
 
 Whenever uploading source changes to GitHub, deploy the same working version to Firebase Hosting and verify deployment. The user has authorized both as the normal delivery workflow.
 
-## Latest checkpoint: reviewed UI polish
+## Latest checkpoint: Mars theme and daily creatine
+
+October 20: added a saturated rust Mars LCD theme and matching icon variants, an explicit Google sign-in sync prompt, full-width sticky phone tabs (including 375px), stable tab navigation height, projected task bounds before list logging, spellcheck/autocorrect suppression, compact Nutrition guidance, daily creatine (1 training point, including rest; gym/rest scaled to 9), and adjacent checked name-save feedback. Untouched older training records keep their previous scores; new records and explicit workout edits adopt creatine tracking. All source and PRD changes go through the normal GitHub + Firebase delivery. See [the current requirements](docs/product-requirements.md) and [the verification checkpoint](docs/october-20-refinements.md). Physical iPhone keyboard/icon behavior cannot be certified from Windows viewport checks.
+
+## Earlier checkpoint: reviewed UI polish
 
 Latest follow-up (UI-26–30): protect reading/typing menus and guided review from incoming cloud refreshes; keep the newest remote snapshot queued until the protected interaction ends. Automatic cloud application no longer closes final review or cancels a review session. Later This Week shows only one-time tasks, with recurring schedules and their actual dated occurrences preserved. Sentiments always has a checkoff and can be confirmed blank without scoring; older completed days remain complete. Phone task-card spacing is tighter (66px to 16px measured heading-to-list gap), with descender behavior retained. Header icons now run Home, Calendar, Achievements, Settings, Info. All 167 tests pass. Prior published checkpoint: `6994ce6f963ca5c0bee4e6f532de263c928d5a5a`. Deliver source, PRD, and review notes together through the normal GitHub/Firebase workflow.
 

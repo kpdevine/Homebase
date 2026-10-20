@@ -6,7 +6,7 @@ import {validateSnapshot} from '../prototype/persistence.mjs';
 import {dailyRecap} from '../prototype/recap.mjs';
 const date='2026-10-17';
 const summary=store=>summarizeDay(store.loadDay(date),store.loadTrainingDay(date));
-function logged(){const store=createStore({seed:false});store.updateRating(date,8);store.setTrainingMode(date,'rest');for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(date,section);return store;}
+function logged(){const store=createStore({seed:false});store.updateRating(date,8);store.setTrainingMode(date,'rest');store.setCreatine(date,true);for(const section of ['nutrition','training','checklists','sentiments'])store.confirmSection(date,section);return store;}
 
 test('all 101 sentiment positions round-trip on the zero-to-ten circular scale',()=>{
   for(let tenth=0;tenth<=100;tenth++){const point=meterPoint(1+tenth*.09);assert.equal(scoreFromPoint(point.x,point.y,110,110,{min:0,max:10}),tenth/10);}

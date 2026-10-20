@@ -29,7 +29,7 @@ test('one-time tasks precede recurring tasks without changing their relative ord
 test('planning tasks does not log the to-do list; working or explicitly reviewing does',()=>{
   const store=fresh();store.updateRating(today,8);const id=store.addTask(today,'One task');
   assert.equal(summary(store).sections.find(section=>section.id==='checklists').score,null);
-  assert.equal(summary(store).score,8);assert.equal(taskScoreRange(summary(store)).projected,false);
+  assert.equal(summary(store).score,8);assert.equal(taskScoreRange(summary(store)).projected,true);
   store.removeTask(today,id);const next=store.addTask(today,'Another task');
   assert.equal(summary(store).logged,1);
   store.confirmSection(today,'checklists');assert.equal(summary(store).sections[2].score,0);
@@ -37,7 +37,7 @@ test('planning tasks does not log the to-do list; working or explicitly reviewin
 });
 
 test('the optimistic task score includes only remaining leaf actions and never changes the recorded score',()=>{
-  const store=fresh();store.updateRating(today,8);store.setTrainingMode(today,'rest');store.addTask(today,'Parent',{children:['First','Second']});
+  const store=fresh();store.updateRating(today,8);store.setTrainingMode(today,'rest');store.setCreatine(today,true);store.addTask(today,'Parent',{children:['First','Second']});
   let day=store.loadDay(today);store.toggleTask(today,day.tasks[0].children[0].id);
   const actual=summary(store),before=store.exportSnapshot();
   assert.deepEqual(taskScoreRange(actual),{score:9.3,low:7.7,projected:true});assert.equal(actual.score,7.7);assert.deepEqual(store.exportSnapshot(),before);
@@ -69,7 +69,7 @@ test('ideal workout fills the remaining daily target with useful whole sets and 
   const store=fresh(),progress=store.trainingProgress(today),plan=idealWorkout(progress);
   assert.equal(plan.sets,Math.ceil(progress.dailyTarget));assert.ok(plan.groups.length>=1);
   for(const group of plan.groups){assert.ok(Number.isInteger(group.sets)&&group.sets>0&&group.sets<=group.remaining);store.addGymEntry(today,group.id,group.sets);}
-  assert.equal(store.trainingProgress(today).score,10);assert.equal(idealWorkout(store.trainingProgress(today)).sets,0);
+  assert.equal(store.trainingProgress(today).gymScore,10);assert.equal(idealWorkout(store.trainingProgress(today)).sets,0);
   assert.equal(idealWorkout(store.trainingProgress(today)).targetMet,true);
 });
 

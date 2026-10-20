@@ -1,6 +1,6 @@
 # Pocket Planet product requirements
 
-Updated October 18, 2026. This is the current application specification; older design documents retain the planning history.
+Updated October 20, 2026. This is the current application specification; older design documents retain the planning history.
 
 ## Purpose and delivery
 
@@ -41,15 +41,15 @@ The custom domain uses the same existing Firebase project, Auth accounts, and ow
 - Existing tasks and subtasks have pencil edit controls on Overview and To-do list. Edit names, add/remove subtasks, and move one-time tasks between editable dates. Keep retained action IDs and completion, recompute parents, reopen the affected checklist review, and never turn editing alone into logging. Saving an unchanged task leaves its review intact.
 - Recurring editing defaults to Only this day. This day & future can change names, child dependencies, and repeat frequency from that date onward. Version the schedule so earlier saved and virtual history stays unchanged; preserve future skipped occurrences and matching completion checks. Cancel discards the draft; validation failures are atomic. Archived dates remain protected in both editor and store.
 - Sentiments: optional dated handwritten notes and optional 0–10 circular rating. Notes alone are unscored. A rating, including zero, adds an equal daily-score component only when entered. Sentiments always has a review checkoff; blank, notes-only, and rating-only entries can all be confirmed without inventing a score.
-- Average logged Nutrition, Gym, To-do, and any entered Sentiments rating. Never penalize an unlogged checklist as zero. Today's logged task component projects completion of remaining actions, with a smaller “as low as” recorded-outcome indicator. Final review, history, achievements, and averages use recorded scores.
+- Average logged Nutrition, Gym, To-do, and any entered Sentiments rating. Never penalize an unlogged checklist as zero. Today's task component projects completion of remaining actions even before the checklist is logged: show “As high as” with tasks done and “As low as” if unchecked. Include only actually entered Nutrition, Training and optional Sentiments ratings in these bounds; never invent those ratings. Keep the recorded checklist unlogged until action or review. Final review, history, achievements, and averages use recorded scores.
 - Today and the previous seven calendar dates are editable. Older days allow summaries only; enforce this in store mutations as well as navigation.
 
 ## Gym
 
 - Ask “Did you lift today?” Yes records attendance; No records flexible rest. Muscles: Chest, Back, Triceps, Biceps, Shoulders, Quads, Hamstrings, Core. Retain older Legs entries in history but exclude Legs from active goals.
-- Deleting the last set preserves Yes and the existing four-point attendance score without consuming rest credit. Choose No explicitly to record rest. While sets remain, explain why No is unavailable.
+- Deleting the last set preserves Yes and the gym attendance baseline without consuming rest credit (3.6 of the 9 gym points, plus the separate creatine point if taken). Choose No explicitly to record rest. While sets remain, explain why No is unavailable.
 - Weekly muscle goals inherit until edited. Target circles use whole 0–20 sets with uniform color; Save closes the target editor. Weeks always run Monday–Sunday.
-- Fixed daily target = sum of active weekly goals / 5. Useful sets fill unmet muscle goals; excess sets receive 25% daily credit. Workout score = min(10, 4 + useful-and-quarter-extra sets / daily target × 6). All-zero targets leave gym unscored.
+- Fixed daily target = sum of active weekly goals / 5. Useful sets fill unmet muscle goals; excess sets receive 25% daily credit. Gym component = min(10, 4 + useful-and-quarter-extra sets / daily target × 6). Scale that component to 9 points and add 1 if daily creatine is checked, then round to a tenth. Creatine applies on lifting and rest days; a missed dose is a valid, reviewable log. With all-zero set targets, only the 0–1 creatine point is available. Untouched legacy records lacking the creatine field retain their old scores and serialized shape; explicitly changing lifting/rest, sets, or creatine adopts the new policy.
 - Two flexible rest credits per week earn ten each. Further rest earns zero until every nonzero muscle goal has been met; subsequent rest earns ten without using credits. Unanswered dates consume nothing. A workout with only excess sets remains a workout.
 - Classify logs chronologically. Historical edits/deletions replay classifications, daily scores, and rest credits, reopening affected reviews. Later workouts do not improve earlier scores.
 - Display goal sets and total sets separately, non-goal sets where relevant, and a prominent remaining rest allowance. Do not display a weighted-set total or redundant scoring descriptions.
@@ -119,3 +119,16 @@ Approved October 20 app icon: large Jupiter-like cloud bands, a wide smile with 
 Offer per-device opt-in push reminders in Settings. After 10:30 p.m. America/Chicago, send at most one reminder per device/day when any of the three required categories is unlogged. Match the app timezone, including DST; exclude Sentiments and do not require final review for suppression. Use the free Cloudflare Worker/D1 sender while retaining Firebase Spark. Never automatically request notification permission. See push-reminders.md for delivery, privacy and setup details.
 
 Achievement popups occur after day completion only for first unlocks, with local seen IDs preventing replay. Repeat counts still accrue. Show each achievement’s first earned date and latest date, and offer Most recent (default) or First earned sorting. Derive earned dates from synced history so historical edits and restores remain consistent.
+
+
+## October 20 theme, onboarding, and iPhone refinements
+
+- Settings provides Orbit blue and Mars. Mars is a deliberately saturated burnt rust/orange LCD palette, including dialogs, controls, score ramps, animations, and scanlines. Keep the original blue appearance. Store the theme locally per workspace/device and apply it before the first paint. Never filter the page: fixed and sticky positions must remain correct.
+- Switch favicon, Apple touch icon, manifest and browser theme color with the theme. Mars uses the approved smiling ring-arm planet in a warm palette. Existing iPhone Home Screen installations may retain their icon until removed and added again; do not claim automatic OS icon replacement.
+- After Google sign-in, offer Enable sync or Not now. Wait for the account connection before enabling. Never enable it silently. Preserve the settings control, private owner-only records, and conflict handling. A declined restored session must not reopen the prompt on every reload; an explicit new sign-in may prompt again.
+- iPhone's five numbered tabs occupy a full-width sticky strip, including narrow 375px layouts. Respect safe-area insets and keep native page scrolling. Tab changes preserve the navigation's viewport height: when pinned, show the new section directly below it rather than jumping the header back into view or landing in blank space below a short section.
+- Use at least 16px text inputs on phone to avoid Safari focus zoom. Disable spellchecking and autocorrect on static and newly created text fields, including handwriting contenteditables. Handwriting descenders remain free to overflow their fixed writing lines. Dialog height responds to the visual viewport for the iOS keyboard.
+- Nutrition guidance: “How did eating feel today? Go with your overall impression. Did you eat well and hit your protein goals? Pick the rating that fits.” No “feel fueled” phrasing. Keep the desktop editor compact and fully visible; on phone keep meter and numeric controls together above notes.
+- Save name shows a persistent checked Saved button and an adjacent live success message only after browser storage succeeds. Editing the name restores Save name; failures are shown beside the control without claiming a save.
+
+Validation: 189 app tests and 2 reminder service tests; browser checks at 375×667, 393×852, 430×932, 852×393, and 1280×800. These are viewport checks on Windows, not physical iPhone/Safari testing. No private user records were modified. Additional on-device checks remain useful for iOS keyboard and installed-icon behavior.

@@ -1,3 +1,4 @@
+const themed=hex=>(window.pocketTheme?.color(hex.slice(0,7))||hex.slice(0,7))+hex.slice(7);
 const running=new WeakMap(),active=new Set(),values=new WeakMap();
 const system=window.matchMedia('(prefers-reduced-motion: reduce)');
 let preference='system';
@@ -50,9 +51,9 @@ export function reveal(element) {
   if(element?.matches('[role="tabpanel"],#history-view,#history-content,.motion-preview'))sweepRings(element);
 }
 export function acknowledge(element) {
-  play(element,[{backgroundColor:'#bce8ff88',boxShadow:'inset 3px 0 #bce8ff'},{backgroundColor:'transparent',boxShadow:'inset 0 0 transparent'}],580);
+  play(element,[{backgroundColor:themed('#bce8ff88'),boxShadow:`inset 3px 0 ${themed('#bce8ff')}`},{backgroundColor:'transparent',boxShadow:'inset 0 0 transparent'}],580);
 }
 export function checkOff(input) {
   acknowledge(input?.closest('li'));
-  play(input,[{transform:'scale(.85)',boxShadow:'0 0 0 0 #c7eeff77'},{transform:'scale(1)',boxShadow:'0 0 0 4px #c7eeff00'}],300);
+  play(input,[{transform:'scale(.85)',boxShadow:`0 0 0 0 ${themed('#c7eeff77')}`},{transform:'scale(1)',boxShadow:`0 0 0 4px ${themed('#c7eeff00')}`}],300);
 }
