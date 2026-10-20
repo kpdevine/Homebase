@@ -4,8 +4,8 @@
   "short_name": "Pocket Planet",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#c76e35",
-  "theme_color": "#c76e35",
+  "background_color": "#d66542",
+  "theme_color": "#d66542",
   "icons": [
     {
       "src": "./assets/icons/pocket-planet-mars-192.png?v=20261020-hug",

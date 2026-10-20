@@ -132,3 +132,6 @@ Achievement popups occur after day completion only for first unlocks, with local
 - Save name shows a persistent checked Saved button and an adjacent live success message only after browser storage succeeds. Editing the name restores Save name; failures are shown beside the control without claiming a save.
 
 Validation: 189 app tests and 2 reminder service tests; browser checks at 375×667, 393×852, 430×932, 852×393, and 1280×800. These are viewport checks on Windows, not physical iPhone/Safari testing. No private user records were modified. Additional on-device checks remain useful for iOS keyboard and installed-icon behavior.
+
+
+Final palette adjustment: after comparing previews, the owner requested slightly less saturation. Keep the burnt rust hue and darker LCD contrast, with moderate saturation between the first muted preview and the strongest orange preview. Browser theme color and Mars manifest background track the same palette mapping. The owner chose to keep the web app after discussing the native iOS limitation: browser/install icon metadata updates automatically, but an existing iPhone Home Screen icon cannot be forcibly switched through a web API. Do not promise or require automatic native icon replacement; no native iPhone conversion is in scope.

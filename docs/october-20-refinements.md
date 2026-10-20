@@ -20,3 +20,6 @@ Daily training = rounded(existing gym/rest score × 0.9 + creatine point), cappe
 ## Theme maintenance
 
 The app remains buildless. Existing blue CSS colors are fallback values in LCD custom properties. After adding/changing CSS colors, run `node scripts/build-theme.mjs` to refresh the Mars token palette. The generator is idempotent. `theme-init.js` maps runtime score/animation colors consistently and applies theme/icon preferences before rendering. Image files and both manifests are ordinary Hosting assets.
+
+
+Final palette adjustment: after comparing previews, the owner requested slightly less saturation. Keep the burnt rust hue and darker LCD contrast, with moderate saturation between the first muted preview and the strongest orange preview. Browser theme color and Mars manifest background track the same palette mapping. The owner chose to keep the web app after discussing the native iOS limitation: browser/install icon metadata updates automatically, but an existing iPhone Home Screen icon cannot be forcibly switched through a web API. Do not promise or require automatic native icon replacement; no native iPhone conversion is in scope.
