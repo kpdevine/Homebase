@@ -1,5 +1,6 @@
 // Generate a complete alternate LCD palette without filtering the page or changing layout.
-import {readFile,writeFile,readdir} from 'node:fs/promises';
+import {readFile,writeFile,readdir,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 const root=new URL('../prototype/',import.meta.url),tokens=new Map();
 function mars(r,g,b){
  const hi=Math.max(r,g,b),lo=Math.min(r,g,b),l=((hi+lo)/510)*((hi+lo)/510<.8?.9:1);
@@ -30,3 +31,17 @@ console.log(`Mars palette: ${tokens.size} color tokens.`);
 const manifestPath=new URL('manifest-mars.webmanifest',root),manifest=JSON.parse(await readFile(manifestPath,'utf8'));
 manifest.background_color=manifest.theme_color=convert('#7890bf');
 await writeFile(manifestPath,JSON.stringify(manifest,null,2)+'\n');
+
+// Real content-addressed paths make the loaded palette identifiable on every device.
+const assetRoot=new URL('assets/themes/',root);await mkdir(assetRoot,{recursive:true});
+const palette=await readFile(new URL('themes.css',root)),boot=await readFile(new URL('theme-init.js',root));
+const fingerprint=bytes=>createHash('sha256').update(bytes).digest('hex').slice(0,12);
+const paletteId=fingerprint(palette),bootId=fingerprint(boot);
+await writeFile(new URL(`palette-${paletteId}.css`,assetRoot),palette);
+await writeFile(new URL(`theme-${bootId}.js`,assetRoot),boot);
+let html=await readFile(new URL('index.html',root),'utf8');
+html=html.replace(/href="\.\/(?:themes\.css|assets\/themes\/palette-[a-f0-9]+\.css)(?:\?[^" ]*)?"/,`href="./assets/themes/palette-${paletteId}.css"`);
+html=html.replace(/src="\.\/(?:theme-init\.js|assets\/themes\/theme-[a-f0-9]+\.js)(?:\?[^" ]*)?"/,`src="./assets/themes/theme-${bootId}.js"`);
+html=html.replace(/<p id="display-version"[^>]*>[\s\S]*?<\/p>/,`<p id="display-version" class="hint">Display revision: ${paletteId}</p>`);
+await writeFile(new URL('index.html',root),html);
+console.log(`Display revision: ${paletteId}`);
