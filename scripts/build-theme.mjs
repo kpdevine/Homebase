@@ -6,7 +6,7 @@ function mars(r,g,b){
  const hi=Math.max(r,g,b),lo=Math.min(r,g,b),l=((hi+lo)/510)*((hi+lo)/510<.8?.9:1);
  // Preserve neutral whites and blacks. Blue luminance becomes warm sand/copper.
  if(hi-lo<12)return [r,g,b];
- const sat=Math.min(.8,Math.max(.64,(hi-lo)/(255-Math.abs(hi+lo-255))*.95+.2)),h=14/60;
+ const sat=Math.min(.58,Math.max(.42,(hi-lo)/(255-Math.abs(hi+lo-255))*.55+.08)),h=14/60;
  const c=(1-Math.abs(2*l-1))*sat,x=c*(1-Math.abs(h%2-1)),m=l-c/2;
  return [c+m,x+m,m].map(v=>Math.round(v*255));
 }

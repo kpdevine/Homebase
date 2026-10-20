@@ -28,3 +28,6 @@ Phone cache follow-up: version all page stylesheet URLs and the early-theme/app 
 
 
 iPhone follow-up: the owner confirmed Mars is selected and orange at pocketplanet.day, but the shade appears old after repeated refreshes. Do not infer that caching is the proven cause. The theme generator now publishes the balanced palette and early initialization script at SHA-256-derived file paths, and Settings → About this display exposes the palette revision. The same palette values are retained; a direct revision link forces a fresh document URL without clearing saved records. Actual iPhone visual confirmation remains with the owner. No test suite run for this delivery, as requested.
+
+
+Owner's iPhone screenshot showed the Mars background remained visibly vivid after fresh loads. The previous saturation reduction was too subtle; caching was not established as the cause and must not be reported as a confirmed fix. The palette now uses 42–58% saturation instead of 64–80%, retaining the burnt hue and darkened luminance. This changes the actual mobile and desktop backgrounds, not only URLs. Runtime score colors, generated stylesheet, browser chrome and manifest use the same mapping. Content-addressed paths and the display revision remain for identification. No test suite run, as requested; actual iPhone appearance awaits owner review.
