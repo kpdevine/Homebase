@@ -33,12 +33,12 @@ export function buildAchievements(store,today) {
   const cards=[];
   function daily(id,group,title,description,source,predicate,value,target,unit='score') {
     const matches=source.filter(predicate);
-    cards.push({id,group,title,description,count:matches.length,latest:matches.at(-1)?.date??null,value,target,unit});
+    cards.push({id,group,title,description,count:matches.length,first:matches[0]?.date??null,latest:matches.at(-1)?.date??null,value,target,unit});
   }
   function milestone(id,group,title,description,source,target,amount=()=>1,unit='days') {
     let value=0,latest=null;
     for(const record of source) {value+=amount(record);if(!latest&&value>=target)latest=record.date;}
-    cards.push({id,group,title,description,count:value>=target?1:0,latest,value,target,unit});
+    cards.push({id,group,title,description,count:value>=target?1:0,first:latest,latest,value,target,unit});
   }
   for(const [target,title] of [[1,'First day home'],[3,'Finding your rhythm'],[7,'A week in the books'],[14,'Two weeks rooted'],[30,'Thirty days stronger'],[60,'Built to last'],[100,'The hundred club'],[180,'Half-year habit'],[365,'A year at home']])
     milestone(`completed-${target}`,'overall',title,`Complete ${target} full day review${target===1?'':'s'}.`,completed,target);
@@ -68,7 +68,7 @@ export function buildAchievements(store,today) {
     for(const target of blocks) {
       const streak=streakStats(dates,today,target);
       cards.push({id:`streak-${type}-${target}`,group:'streaks',title:type==='logging'?`${target} logged days in a row`:`${target} days at 9+ in a row`,
-        description:`Earn once for each full ${target}-day block of consecutive ${label}.`,count:streak.count,latest:streak.latest,value:streak.current,target,unit:'days',streak});
+        description:`Earn once for each full ${target}-day block of consecutive ${label}.`,count:streak.count,first:firstStreakDate(dates,today,target),latest:streak.latest,value:streak.current,target,unit:'days',streak});
     }
   }
   const byWeek=new Map();
@@ -88,4 +88,18 @@ export function buildAchievements(store,today) {
     Math.max(0,...[...byWeek.values()].map(days=>days.length)),5,'days');
   return {cards,unlocked:cards.filter(card=>card.count>0).length,total:cards.length,earned:cards.reduce((sum,card)=>sum+card.count,0),completed:completed.length,
     streaks:{logging:streakStats(loggedDates,today),strong:streakStats(strongDates,today)}};
+}
+
+export function firstStreakDate(dates,today,block) {
+  const ordered=[...new Set(dates.filter(date=>date<=today))].sort();
+  return ordered.find((date,index)=>index>=block-1&&ordered[index-block+1]===addDays(date,1-block))??null;
+}
+export function sortAchievements(cards,order='recent') {
+  return [...cards].sort((a,b)=>Number(b.count>0)-Number(a.count>0)||
+    (order==='first'?(a.first??'9999').localeCompare(b.first??'9999'):(b.latest??'').localeCompare(a.latest??''))||a.id.localeCompare(b.id));
+}
+export function firstAchievementUnlocks(before,after,{date,notified=[]}={}) {
+  const seen=new Set(notified),previous=new Map(before.cards.map(card=>[card.id,card]));
+  return after.cards.filter(card=>card.count>0&&!seen.has(card.id)&&
+    ((previous.get(card.id)?.count??0)===0||card.id.startsWith('streak-logging-')&&card.first===date));
 }

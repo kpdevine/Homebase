@@ -30,3 +30,8 @@ __pycache__/
 
 # Image-generation drafts; selected app icons live in prototype/assets/icons
 /output/imagegen/
+
+# Worker local state and secrets
+.wrangler/
+.dev.vars
+.dev.vars.*

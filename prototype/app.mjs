@@ -5,9 +5,10 @@ import { taskProgress, scheduleLabel, orderedTasks, activeTemplates } from './ta
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
 import { mountCloud } from './cloud-ui.mjs';
+import {mountReminders} from './reminders.mjs';
 import { muscleName } from './muscles.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
-import { buildAchievements } from './achievements.mjs';
+import { buildAchievements,sortAchievements,firstAchievementUnlocks } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
 import {needsWelcome,profileName} from './onboarding.mjs';
 import {snapshotRecords} from './cloud-records.mjs';
@@ -42,13 +43,13 @@ let maxSaveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
-let cloud=null,cloudLabel='';
+let cloud=null,reminders=null,cloudLabel='';
 const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
 let selectedDate = localDateKey(new Date(), timeZone);
 let calendarMonth = selectedDate;
 let calendarFilter='all',bodyWeightUnit='lb';
-let achievementFilter='all',unlockedOnly=false,achievementData=null;
+let achievementFilter='all',achievementOrder='recent',unlockedOnly=false,achievementData=null;
 const categoryLabels={all:'Overall',nutrition:'Nutrition',training:'Training',checklists:'To-do list',sentiments:'Sentiments'};
 const weightText=weight=>weight?`${weight.value} ${weight.unit}`:'';
 let reviewSessionDate = null;
@@ -104,6 +105,8 @@ motionPreference=setMotionPreference(preferences.motion);
 const editableToday=()=>localDateKey(new Date(),timeZone);
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
 let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
+const achievementNotified=new Set(Array.isArray(preferences.achievementNotified)?preferences.achievementNotified.filter(id=>typeof id==='string'):[]);
+for(const card of buildAchievements(store,editableToday()).cards)if(card.count&&(card.first<editableToday()||store.loadDay(card.first).completedAt))achievementNotified.add(card.id);
 const editsKey=`homebase.record-edits.v1${suffix}`;
 let initialSyncRecords=new Map();try{initialSyncRecords=snapshotRecords(store.exportSnapshot());}catch{}
 const recordEdits=createRecordEdits({records:initialSyncRecords,load:()=>JSON.parse(localStorage.getItem(editsKey)),save:value=>localStorage.setItem(editsKey,JSON.stringify(value))});
@@ -524,11 +527,12 @@ function renderAchievements(recompute=true) {
   $$('[data-achievement-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementFilter===achievementFilter)));
   $('#achievement-unlocked-only').setAttribute('aria-pressed',String(unlockedOnly));
   const labels={overall:'Overall',nutrition:'Nutrition',training:'Gym',checklists:'To-do list',sentiments:'Sentiments',streaks:'Streaks'};
-  const cards=data.cards.filter(card=>(achievementFilter==='all'||card.group===achievementFilter)&&(!unlockedOnly||card.count)).sort((a,b)=>Number(b.count>0)-Number(a.count>0));
+  $('[data-achievement-order]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.achievementOrder===achievementOrder)));
+  const cards=sortAchievements(data.cards.filter(card=>(achievementFilter==='all'||card.group===achievementFilter)&&(!unlockedOnly||card.count)),achievementOrder);
   $('#achievement-results').textContent=`${cards.length} achievements shown. ${data.unlocked} of ${data.total} unlocked.`;
   $('#achievement-grid').innerHTML=cards.length?cards.map(card=>{
     const progress=card.streak?`Current ${card.streak.current} days · best ${card.streak.best}`:card.unit==='score'?`Best ${scoreText(card.value)} · Goal ${card.target}${card.target<10?'+':''}`:card.id==='weekly-five'?`Best week: ${card.value} days`:card.count?`${card.value} ${card.value===1?card.unit.slice(0,-1):card.unit} recorded`:`${card.value} / ${card.target} ${card.target===1?card.unit.slice(0,-1):card.unit}`;
-    return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.latest?`Latest earned ${shortDate(card.latest)}${card.latest.slice(0,4)!==editableToday().slice(0,4)?`, ${card.latest.slice(0,4)}`:''}`:'Still ahead of you'}</small></article>`;
+    return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.first?`First earned ${dateFormat(card.first,{month:'short',day:'numeric',year:'numeric'})}${card.latest!==card.first?`<br>Latest ${dateFormat(card.latest,{month:'short',day:'numeric',year:'numeric'})}`:''}`:'Still ahead of you'}</small></article>`;
   }).join(''):'<p class="achievement-empty">No unlocked achievements in this category yet.</p>';
 }
 function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus(); }
@@ -632,6 +636,7 @@ $('#open-home').addEventListener('click',returnToOverview);
 $('#open-achievements').addEventListener('click',()=>view==='achievements'?returnToOverview():setView('achievements',true));
 $('#achievements-overview').addEventListener('click',returnToOverview);
 $('#achievement-filters').addEventListener('click',event=>{const button=event.target.closest('[data-achievement-filter]');if(!button)return;achievementFilter=button.dataset.achievementFilter;renderAchievements(false);});
+$('#achievement-order').addEventListener('click',event=>{const button=event.target.closest('[data-achievement-order]');if(button){achievementOrder=button.dataset.achievementOrder;renderAchievements(false);}});
 $('#achievement-unlocked-only').addEventListener('click',()=>{unlockedOnly=!unlockedOnly;renderAchievements(false);});
 for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('click', () => { calendarMonth = selectedDate; setView('history', true); });
 $('#mobile-calendar').addEventListener('click', () => {
@@ -991,7 +996,10 @@ $('#submit-day').addEventListener('click',()=>{
   try { store.completeDay(selectedDate); }
   catch(error) { closeDialog($('#final-review-dialog'));render();announce(error.message);return; }
   closeDialog($('#final-review-dialog'));reviewSessionDate=null;setView('today',true);
-  const after=buildAchievements(store,editableToday()),earned=after.cards.filter(card=>card.count>(before.cards.find(previous=>previous.id===card.id)?.count??0)||card.id.startsWith('streak-logging-')&&card.count>0&&card.latest===selectedDate);
+  const after=buildAchievements(store,editableToday()),earned=firstAchievementUnlocks(before,after,{date:selectedDate,notified:achievementNotified});
+  for(const card of earned)achievementNotified.add(card.id);
+  preferences={...preferences,achievementNotified:[...achievementNotified]};
+  try{localStorage.setItem(preferencesKey,JSON.stringify(preferences));}catch{}
   celebrateDayCompletion();
   announce(`${shortDate(selectedDate)}: entire day completed and saved.`);
   queueAchievementCelebration(earned);
@@ -1117,7 +1125,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   try {reset=resetLocal(localStorage,{suffix,expectedRaw:lastSavedRaw});}
   catch(error) {$('#reset-message').textContent=`Reset failed. ${error.message}`;return;}
   clearTimeout(saveTimer);pendingSnapshot=null;pendingImport=null;
-  store=createStore({clientId,editableToday,snapshot:reset.snapshot,seed:false,onChange:queueSave});
+  store=createStore({clientId,editableToday,snapshot:reset.snapshot,seed:false,onChange:queueSave});achievementNotified.clear();
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
   captureRecordEdits(reset.snapshot);
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
@@ -1209,7 +1217,9 @@ cloud=mountCloud({
     }
   },
   onStatus:state=>{
-    cloudLabel=state.label;renderSaveStatus();$('#welcome-google').disabled=!state.canSignIn;
+    cloudLabel=state.label;renderSaveStatus();reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }
 });
+
+reminders=mountReminders({cloud,preview});

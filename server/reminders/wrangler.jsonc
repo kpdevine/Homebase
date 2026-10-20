@@ -1,0 +1,25 @@
+{
+  "name": "pocket-planet-reminders",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-20",
+  "account_id": "42bd5466d9b9afb527e53da3026ed2c6",
+  "workers_dev": true,
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": false
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pocket-planet-reminders",
+      "database_id": "890ff260-0edd-47f8-bc07-342eb344c3ca"
+    }
+  ],
+  "vars": {
+    "VAPID_PUBLIC_KEY": "BCeTX7orE5KA15xy9UvaAsKFPocRz4u2uUrBZjv23CJD6u3Yq0RWCB5yN-XPmlHMf6ICfT3pVSC7MWDqdvuEZFE"
+  }
+}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStore,addDays,GROUPS} from '../prototype/model.mjs';
-import {buildAchievements,streakStats} from '../prototype/achievements.mjs';
+import {buildAchievements,streakStats,firstStreakDate,sortAchievements,firstAchievementUnlocks} from '../prototype/achievements.mjs';
 import {recordsSnapshot,snapshotRecords} from '../prototype/cloud-records.mjs';
 import {achievementIcon,achievementIconIds} from '../prototype/achievement-icons.mjs';
 
@@ -150,4 +150,29 @@ test('9+ streaks require consecutive completed days at the threshold and recalcu
   result=buildAchievements(store,addDays(monday,3));
   assert.equal(result.streaks.logging.current,4);
   assert.equal(badge(result,'streak-strong-3').count,0);
+});
+
+
+test('achievements retain first and latest dates while repeat awards do not trigger first-unlock notifications',()=>{
+  const store=fresh(),before=buildAchievements(store,sunday);finish(store,monday);
+  const first=buildAchievements(store,sunday),earned=firstAchievementUnlocks(before,first,{date:monday});
+  assert.equal(badge(first,'nutrition-9').first,monday);assert.ok(earned.some(card=>card.id==='nutrition-9'));
+  finish(store,addDays(monday,1));const second=buildAchievements(store,sunday);
+  assert.equal(badge(second,'nutrition-9').first,monday);assert.equal(badge(second,'nutrition-9').latest,addDays(monday,1));
+  assert.equal(firstAchievementUnlocks(first,second,{date:addDays(monday,1)}).some(card=>card.id==='nutrition-9'),false);
+  assert.equal(firstAchievementUnlocks(before,first,{date:monday,notified:earned.map(card=>card.id)}).length,0);
+});
+test('streak first dates use the first complete block and recent sorting is deterministic without mutating cards',()=>{
+  const dates=[monday,addDays(monday,2),addDays(monday,3),addDays(monday,4),addDays(monday,5),addDays(monday,6)];
+  assert.equal(firstStreakDate(dates,sunday,3),addDays(monday,4));
+  const cards=[{id:'locked',count:0,first:null,latest:null},{id:'old',count:2,first:monday,latest:monday},{id:'new',count:1,first:sunday,latest:sunday}];
+  assert.deepEqual(sortAchievements(cards).map(card=>card.id),['new','old','locked']);
+  assert.deepEqual(sortAchievements(cards,'first').map(card=>card.id),['old','new','locked']);assert.equal(cards[0].id,'locked');
+});
+test('a first logging-streak popup waits for day completion and its seen id suppresses replay',()=>{
+  const store=fresh();for(let index=0;index<3;index++){const date=addDays(monday,index);store.updateRating(date,9);store.setTrainingMode(date,'rest');store.confirmSection(date,'checklists');}
+  const date=addDays(monday,2),before=buildAchievements(store,sunday);finish(store,date);
+  const after=buildAchievements(store,sunday),first=firstAchievementUnlocks(before,after,{date});
+  assert.ok(first.some(card=>card.id==='streak-logging-3'));
+  assert.ok(!firstAchievementUnlocks(before,after,{date,notified:['streak-logging-3']}).some(card=>card.id==='streak-logging-3'));
 });

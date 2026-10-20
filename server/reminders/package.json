@@ -1,0 +1,13 @@
+{
+  "name": "pocket-planet-reminders",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "npx --yes wrangler@4.151.2 deploy",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "2.0.0",
+    "jose": "6.2.13"
+  }
+}

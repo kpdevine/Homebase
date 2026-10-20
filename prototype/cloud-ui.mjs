@@ -1,7 +1,7 @@
 import {firebaseConfig} from './firebase-config.mjs';
 import {createCloudEngine} from './cloud-engine.mjs';
 
-export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onStatus,onUser=()=>{},localEditTimes,adoptEditTimes}) {
+export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onStatus,onUser=()=>{},beforeSignOut=async()=>{},localEditTimes,adoptEditTimes}) {
   const el=id=>document.getElementById(id);
   let client=null,engine=null,user=null,enabled=false,busy=false;
   let state={status:preview?'preview':firebaseConfig?'loading':'unconfigured',message:preview?'Preview stays on this device. Open your personal workspace to use cloud sync.':firebaseConfig?'Connecting to Firebase…':'Firebase connection is being configured. Your records continue saving locally.',conflicts:[]};
@@ -45,7 +45,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
   });
   el('cloud-signout').addEventListener('click',async()=>{
     if(!client||busy)return;busy=true;paint();
-    try {await client.signOut();}catch(error){setState({...state,message:error.message});}
+    try {await beforeSignOut();await client.signOut();}catch(error){setState({...state,message:error.message});}
     finally{busy=false;paint();}
   });
   el('cloud-retry').addEventListener('click',()=>engine?.retry());
@@ -59,5 +59,5 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
   for(const type of ['focusout','pointerup','click','close','toggle'])document.addEventListener(type,resumeAfterInteraction,true);
   paint();
   if(!preview&&firebaseConfig)import('./firebase-driver.mjs').then(module=>{client=module.firebaseClient(firebaseConfig);client.observeAuth(observeUser,error=>setState({status:'error',message:`Google sign-in did not finish. ${error.message}`,conflicts:[]}));paint();}).catch(error=>setState({status:'offline',message:`Cloud connection is unavailable. Local saving still works. Reload when online. ${error.message}`,conflicts:[]}));
-  return {changed:()=>engine?.changed(),resume:()=>engine?.resume(),isEnabled:()=>enabled,status:()=>state.status,signIn};
+  return {changed:()=>engine?.changed(),resume:()=>engine?.resume(),isEnabled:()=>enabled,status:()=>state.status,signIn,hasUser:()=>!!user,session:async()=>user?{uid:user.uid,token:await user.getIdToken()}:null};
 }

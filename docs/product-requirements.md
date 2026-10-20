@@ -113,3 +113,9 @@ Mobile plotted weight dots are enlarged to a 10-unit radius (2.5× the desktop r
 Use Pocket Planet as the product name, including browser and installed-app titles, backup labels, and accessibility text. Use the muted periwinkle LCD planet icon for favicon and home-screen icons. Preserve existing storage keys, backup compatibility, Firebase resource IDs, and repository identifiers through the rename.
 
 Approved October 20 app icon: large Jupiter-like cloud bands, a wide smile with two small face eyes, and connected ring-arms with interlocked hands. Remove the lower oval storm feature. Keep the muted blue LCD style. Use this approved artwork for the favicon and iPhone home-screen icon.
+
+### Nightly reminders and first achievement unlocks — October 20
+
+Offer per-device opt-in push reminders in Settings. After 10:30 p.m. America/Chicago, send at most one reminder per device/day when any of the three required categories is unlogged. Match the app timezone, including DST; exclude Sentiments and do not require final review for suppression. Use the free Cloudflare Worker/D1 sender while retaining Firebase Spark. Never automatically request notification permission. See push-reminders.md for delivery, privacy and setup details.
+
+Achievement popups occur after day completion only for first unlocks, with local seen IDs preventing replay. Repeat counts still accrue. Show each achievement’s first earned date and latest date, and offer Most recent (default) or First earned sorting. Derive earned dates from synced history so historical edits and restores remain consistent.
