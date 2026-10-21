@@ -2,7 +2,7 @@
 
 Run `npm.cmd run dev` and open `http://127.0.0.1:4173/`. The loopback server serves only `prototype/`; Ctrl+C stops it. Node is sufficient. Fonts are bundled locally.
 
-Root starts empty. `?preview=1` uses synthetic history and separate storage. Both persist across refresh. Clock, Today, and greeting use America/Chicago; calendar arithmetic uses explicit date keys. Settings handles profile name, scoring information, and validated JSON entry backups. Export before clearing local data or changing devices.
+Root starts empty. `?preview=1` uses synthetic history and separate storage. Both persist across refresh. Clock and greeting use the device's local time. Today changes at 1:00 a.m.; midnight through 12:59 a.m. still logs the preceding day. Calendar arithmetic uses explicit date keys and Monday–Sunday weeks. Open forms and menus keep their date while in use, and deliberately selected dates stay selected. Settings handles profile name, scoring information, and validated JSON entry backups. Export before clearing local data or changing devices.
 
 ## Interface and tasks
 

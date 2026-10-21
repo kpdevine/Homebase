@@ -1,6 +1,7 @@
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
-import { summarizeDay, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, localDateKey, averageDays, timeGreeting, loggingStreak } from './scoring.mjs';
+import { summarizeDay, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, averageDays, loggingStreak } from './scoring.mjs';
+import {appDateKey, timeGreeting, lateCheckInWindow, createDayRollover} from './day-clock.mjs';
 import { taskProgress, scheduleLabel, orderedTasks, activeTemplates } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
 import { dailyRecap } from './recap.mjs';
@@ -27,7 +28,6 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({ '&
 const scoreText = score => score === null ? '—' : score === 10 ? '10' : score.toFixed(2).replace(/(\.\d)0$/, '$1');
 const scoreMarkup = score => { const [whole,fraction]=scoreText(score).split('.'); return `<span class="score-whole">${whole}</span>${fraction?`<span class="score-fraction">.${fraction}</span>`:''}`; };
 const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-const timeZone = 'America/Chicago';
 const scoreColor=score=>window.pocketTheme.color(blueScoreColor(score));
 const preview = new URLSearchParams(location.search).get('preview') === '1';
 const suffix = preview ? '.preview' : '';
@@ -47,7 +47,8 @@ let pendingImport = null;
 let cloud=null,reminders=null,cloudLabel='';
 const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
-let selectedDate = localDateKey(new Date(), timeZone);
+let selectedDate = appDateKey();
+const dayRollover = createDayRollover(selectedDate);
 let calendarMonth = selectedDate;
 let calendarFilter='all',bodyWeightUnit='lb';
 let achievementFilter='all',achievementOrder='recent',unlockedOnly=false,achievementData=null;
@@ -104,7 +105,7 @@ if(welcomeRequired)displayName='';
 let welcomeGoogleAttempt=!!preferences.welcomeGooglePending;
 motionPreference=setMotionPreference(preferences.motion);
 window.pocketTheme.apply(preferences.theme);
-const editableToday=()=>localDateKey(new Date(),timeZone);
+const editableToday=()=>appDateKey();
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
 let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
 const achievementNotified=new Set(Array.isArray(preferences.achievementNotified)?preferences.achievementNotified.filter(id=>typeof id==='string'):[]);
@@ -189,9 +190,9 @@ function renderHeader() {
   document.body.classList.toggle('is-overview', view === 'today');
   renderHeaderShortcuts();
   const now = new Date();
-  const greeting = timeGreeting(now,timeZone);
-  const isToday = selectedDate === localDateKey(now, timeZone);
-  const past = selectedDate < localDateKey(now, timeZone);
+  const greeting = timeGreeting(now);
+  const isToday = selectedDate === appDateKey(now);
+  const past = selectedDate < appDateKey(now);
   document.body.classList.toggle('viewing-other-day',!isToday);
   $('#selected-day-notice').hidden=isToday||view==='achievements';
   $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
@@ -206,7 +207,9 @@ function renderHeader() {
   $('#calendar-day-number').textContent = Number(selectedDate.slice(-2));
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
   $('#overview-tasks-title').textContent = 'TO-DO LIST';
-  $('#tasks-title').textContent = 'TO-DO LIST';
+  // Keep one writer for this heading; dates belong in its separate eyebrow.
+  $('#tasks-title').textContent = isToday ? 'TODAY' : 'TO-DO LIST';
+  $('#tasks-date').textContent = longDate(selectedDate);
   document.title = `Pocket Planet · ${viewLabels[view]}`;
   for (const [key, panel] of Object.entries(panelIds)) $('#' + panel).hidden = view !== key;
   $$('[data-tab]').forEach(button => {
@@ -233,9 +236,7 @@ function renderTasks() {
   const fraction = total ? done / total : 0;
   $('#task-progress-fill').style.width = `${fraction * 100}%`;
   $('#task-progress-fill').style.backgroundColor = scoreColor(fraction * 10);
-  const today=localDateKey(new Date(),timeZone),templates=activeTemplates(store.loadTemplates(),today);
-  $('#tasks-title').textContent=selectedDate===today?'TODAY':shortDate(selectedDate);
-  $('#tasks-date').textContent=longDate(selectedDate);
+  const today=appDateKey(),templates=activeTemplates(store.loadTemplates(),today);
   $('#recurring-tasks').innerHTML=templates.length?templates.map(template=>`<li><span><strong>${escapeHtml(template.name)}</strong><small>${scheduleLabel(template)} · from ${shortDate(template.startDate)}</small></span><button class="quiet-button" data-stop-template="${template.id}">Stop recurring task</button></li>`).join(''):'<li class="hint">No active recurring tasks.</li>';
   $('#routine-count').textContent=templates.length;
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
@@ -423,9 +424,8 @@ function renderReview() {
   primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'to-do list':current.id==='training'?'training':current.id} review`:'Continue day review →';
   primary.disabled=!!current&&!current.reviewed&&(!current.ready||invalidRating);
   $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Enter a nutrition rating first.':'Log lifting or rest first.':'';
-  const now=new Date(),today=localDateKey(now,timeZone);
-  const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(now));
-  const showLateWarnings=selectedDate<today || selectedDate===today&&hour>=21;
+  const now=new Date(),today=appDateKey(now);
+  const showLateWarnings=selectedDate<today || selectedDate===today&&lateCheckInWindow(now);
   const scoreSections=summaryFor().sections;
   for (const section of progress.sections) {
     const logged=scoreSections.find(item=>item.id===section.id),warn=section.id!=='sentiments'&&showLateWarnings&&!(logged?.logged??logged?.score!==null);
@@ -452,7 +452,7 @@ $$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset
 function renderHistory() {
   $('#open-weight-history').hidden=calendarFilter!=='training';
   $('#calendar-month').textContent = dateFormat(calendarMonth, { month:'long', year:'numeric' });
-  const today = localDateKey(new Date(), timeZone);
+  const today = appDateKey();
   const dates = monthGrid(calendarMonth);
   const monthDates = dates.filter(date => date.slice(0,7) === calendarMonth.slice(0,7));
   const filteredSummary=date=>categorySummary(summaryFor(date),calendarFilter),filterLabel=categoryLabels[calendarFilter];
@@ -563,7 +563,7 @@ function setView(next, focus = false) {
 function navigateDay(date, changeMonth = true) {
   flushSave();
   if (date !== selectedDate) reviewSessionDate = null;
-  selectedDate = date; if (changeMonth) calendarMonth = date;
+  selectedDate = date; dayRollover.select(date, appDateKey()); if (changeMonth) calendarMonth = date;
   $('#task-name').value = ''; $('#rating-value').setCustomValidity(''); $('#gym-sets').setCustomValidity('');
   $('#gym-log').hidden = true; $('#toggle-gym-log').setAttribute('aria-expanded','false'); $('#toggle-gym-log').textContent = "View week's entries";
   render();
@@ -616,11 +616,11 @@ function updateRating(score, notify = false) {
   if (notify) announce(score === null ? 'Nutrition rating cleared.' : `Nutrition set to ${scoreText(score)}.`);
 }
 function updateClock() {
-  const now = new Date(), parts = new Intl.DateTimeFormat('en-US', { timeZone, hour:'numeric', minute:'2-digit', hour12:true }).formatToParts(now);
+  const now = new Date(), parts = new Intl.DateTimeFormat('en-US', { hour:'numeric', minute:'2-digit', hour12:true }).formatToParts(now);
   const value = type => parts.find(part => part.type === type)?.value ?? '';
   $('#clock-time').innerHTML = `${value('hour')}:${value('minute')}<small>${value('dayPeriod').toLowerCase()}</small>`;
   $('#clock-time').dateTime = now.toISOString();
-  $('#clock-date').textContent = new Intl.DateTimeFormat('en-US', { timeZone, weekday:'long', month:'short', day:'numeric' }).format(now);
+  $('#clock-date').textContent = dateFormat(appDateKey(now), {weekday:'long', month:'short', day:'numeric'});
 }
 
 $$('[data-tab]').forEach(button => {
@@ -639,8 +639,8 @@ $$('[data-tab]').forEach(button => {
 });
 $('#previous-day').addEventListener('click', () => navigateDay(addDays(selectedDate, -1)));
 $('#next-day').addEventListener('click', () => navigateDay(addDays(selectedDate, 1)));
-$('#go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
-$('#notice-go-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
+$('#go-today').addEventListener('click', () => navigateDay(appDateKey()));
+$('#notice-go-today').addEventListener('click', () => navigateDay(appDateKey()));
 function returnToOverview() {if(archivedDay())navigateDay(editableToday());setView('today',true);}
 $('#open-home').addEventListener('click',returnToOverview);
 $('#open-achievements').addEventListener('click',()=>view==='achievements'?returnToOverview():setView('achievements',true));
@@ -652,7 +652,7 @@ for (const id of ['date-short', 'open-calendar']) $('#' + id).addEventListener('
 $('#mobile-calendar').addEventListener('click', () => {
   calendarMonth=selectedDate;setView('history',true);
 });
-$('#history-today').addEventListener('click', () => navigateDay(localDateKey(new Date(), timeZone)));
+$('#history-today').addEventListener('click', () => navigateDay(appDateKey()));
 $('#calendar-filters').addEventListener('click',event=>{const button=event.target.closest('[data-calendar-filter]');if(button&&Object.hasOwn(categoryLabels,button.dataset.calendarFilter)){calendarFilter=button.dataset.calendarFilter;renderHistory();}});
 $('#open-selected-day').addEventListener('click', () => setView(calendarFilter==='all'?'today':calendarFilter, true));
 $('#previous-month').addEventListener('click', () => { calendarMonth = moveMonth(calendarMonth, -1); renderHistory(); });
@@ -922,7 +922,8 @@ $$('[data-chart-unit]').forEach(button=>button.addEventListener('click',()=>{wei
 $('#recurring-tasks').addEventListener('click',event=>{
   const button=event.target.closest('[data-stop-template]');if(!button)return;
   const template=store.loadTemplates().find(template=>template.id===button.dataset.stopTemplate);if(!template)return;
-  confirmTaskRemoval({title:'Stop this recurring task?',message:`Stop “${template.name}” after today? Future occurrences will be removed. Today and earlier history will be kept.`,label:'Stop recurring schedule',action:()=>{store.stopTemplate(template.id,localDateKey(new Date(),timeZone));render();announce('Recurring task stopped after today. Earlier days are kept.');}});
+  const stopAfter=appDateKey();
+  confirmTaskRemoval({title:'Stop this recurring task?',message:`Stop “${template.name}” after today? Future occurrences will be removed. Today and earlier history will be kept.`,label:'Stop recurring schedule',action:()=>{store.stopTemplate(template.id,stopAfter);render();announce('Recurring task stopped after today. Earlier days are kept.');}});
 });
 $('#rating-minus').addEventListener('click', () => { $('#rating-value').setCustomValidity(''); updateRating(adjustScore(store.loadDay(selectedDate).nutrition, -1), true); });
 $('#rating-plus').addEventListener('click', () => { $('#rating-value').setCustomValidity(''); updateRating(adjustScore(store.loadDay(selectedDate).nutrition, 1), true); });
@@ -1122,7 +1123,7 @@ function downloadBackup() {
   flushSave();
   const content = JSON.stringify(store.exportSnapshot(), null, 2);
   const url = URL.createObjectURL(new Blob([content], { type:'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-backup-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-backup-${appDateKey()}.json`; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
   $('#settings-message').textContent = 'Backup download requested. Keep the file somewhere you can find again.';
 }
@@ -1149,7 +1150,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   $$('input,textarea').forEach(input=>input.setCustomValidity(''));$('#gym-sets').value='3';$('#task-composer-error').textContent='';
   $$('details').forEach(details=>details.open=false);$('#gym-log').hidden=true;$('#toggle-gym-log').setAttribute('aria-expanded','false');$('#toggle-gym-log').textContent="View week's entries";
   closeDialog($('#reset-dialog'));closeDialog($('#settings-dialog'));
-  selectedDate=localDateKey(new Date(),timeZone);calendarMonth=selectedDate;
+  selectedDate=appDateKey();dayRollover.select(selectedDate,selectedDate);calendarMonth=selectedDate;
   setView('today',true);
   cloud?.changed();
   announce(`All ${preview?'preview':'Pocket Planet'} data and preferences reset${cloud?.isEnabled()?' and queued to sync':' on this device'}.`);
@@ -1157,7 +1158,7 @@ $('#confirm-reset').addEventListener('click',()=>{
 $('#export-recovery').addEventListener('click', () => {
   if (!loaded.raw) return;
   const url = URL.createObjectURL(new Blob([loaded.raw], { type:'application/json' }));
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-recovery-${localDateKey(new Date(), timeZone)}.json`; anchor.click();
+  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `pocket-planet-recovery-${appDateKey()}.json`; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
   $('#settings-message').textContent = 'Original saved data downloaded for recovery. Your current entries can be downloaded separately above.';
 });
@@ -1185,7 +1186,7 @@ $('#confirm-import').addEventListener('click', () => {
     $('#settings-message').textContent = 'Backup restored and saved on this device.';
     $('#export-backup').textContent = 'Download local backup';
     $('#export-recovery').hidden = true;
-    navigateDay(localDateKey(new Date(), timeZone));
+    navigateDay(appDateKey());
   } catch (error) { $('#settings-message').textContent = `Backup not imported. ${error.message}`; }
 });
 window.addEventListener('storage', event => {
@@ -1194,16 +1195,25 @@ window.addEventListener('storage', event => {
   renderSaveStatus();
 });
 window.addEventListener('pagehide', flushSave);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushSave(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushSave();
+  else refreshClock();
+});
+
 document.addEventListener('focusout', event => { if (event.target.matches('textarea,[contenteditable="true"]') && pendingSnapshot) flushSave(); });
-updateClock();
-const clockStart=new Date();
-let reviewClockPhase=`${localDateKey(clockStart,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(clockStart))>=21}`;
-setInterval(() => {
-  updateClock();renderHeader();
-  const now=new Date(),phase=`${localDateKey(now,timeZone)}:${Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(now))>=21}`;
-  if(phase!==reviewClockPhase){reviewClockPhase=phase;render();}
-}, 15000);
+let clockReviewPhase='';
+function refreshClock() {
+  updateClock();
+  const now=new Date(),today=appDateKey(now),busy=!!pendingSnapshot||workspaceBusy(document,{reviewing:reviewSessionDate===selectedDate})||dragging||!!targetDrag;
+  const rollover=dayRollover.tick(today,{busy});
+  if(rollover?.followToday)navigateDay(rollover.today);
+  else if(rollover)render();
+  else if(!busy)renderHeader();
+  const phase=`${today}:${lateCheckInWindow(now)}`;
+  if(phase!==clockReviewPhase){clockReviewPhase=phase;renderReview();}
+}
+refreshClock();
+setInterval(refreshClock,15000);
 $('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';
 render();
 reveal($('#'+panelIds[view]));

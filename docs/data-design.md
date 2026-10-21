@@ -43,8 +43,8 @@ The local prototype persists daily inputs, weekly targets, review confirmations,
 ## Dates, boundaries, and scores
 
 - Store the intended calendar date explicitly, for example `2026-10-15`. A daily record must not move dates because a UTC timestamp crosses midnight.
-- Store event timestamps separately in UTC, with the relevant named timezone where needed. America/Chicago is the initial planning context; travel behavior remains a product decision.
-- Agree on the week start before implementing gym aggregation. Save the week start with each target so a later preference change cannot silently regroup old targets.
+- Store event timestamps separately in UTC. Determine the active record date from the device's local wall clock, rolling over at 1:00 a.m.; midnight through 12:59 a.m. belongs to the preceding date. A timezone change affects the current app date, never the explicit date keys of existing records.
+- Weeks run Monday–Sunday. Monday's app week begins at local 1:00 a.m.; before then, Sunday remains active. Preserve each stored target's explicit week key.
 - Subjective ratings range from 1 through 10 in 0.1 increments. Store and validate that precision explicitly. Set counts and targets remain whole numbers in their actual units.
 - An unentered score is missing, never an automatic 1 or 0. Treatment in the overall score is still undecided.
 - Weekly gym completion, elapsed time in a week, and rest days need an explicit policy before gym contributes to a daily score.

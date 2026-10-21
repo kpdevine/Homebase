@@ -1,6 +1,6 @@
 # Pocket Planet product requirements
 
-Updated October 20, 2026. This is the current application specification; older design documents retain the planning history.
+Updated October 21, 2026. This is the current application specification; older design documents retain the planning history.
 
 ## Purpose and delivery
 
@@ -20,7 +20,7 @@ The custom domain uses the same existing Firebase project, Auth accounts, and ow
 - Bake the entry handwriting face's compact 75% ascent / 25% descent / zero-gap metrics into the font asset itself so iPhone alignment does not depend on CSS metric-override support. Preserve original outlines, spacing, and the separate heading font. Prevent automatic mobile text inflation from changing row geometry when rotating; retain normal page zoom.
 - Five numbered daily views: Overview, Nutrition, Daily training, To-do list, and Sentiments. Stable slots align tab numbers, labels, and prominent review checks. Missing required inputs show tab warnings after 9 p.m.; Sentiments is exempt.
 - All five selected daily tabs share the same dark surface, pale border/ink, and inset indicator; do not give individual tabs different glows.
-- Overview has a time-based Chicago greeting, large clock, tasks, daily score, and category breakdown. The clock appears only here.
+- Overview has a greeting and large clock based on the device's local time, tasks, daily score, and category breakdown. The clock appears only here.
 - Home, Calendar, Achievements, and Settings are adjacent icon-only buttons in the header on desktop and both phone orientations. All four have matching 40px touch targets and 21px icons with 6px gaps. Home always returns to Overview; Calendar always opens Calendar and never changes into Home. For an archived selected date, Home returns to today's editable Overview. Desktop Overview also retains its bottom clock/calendar bar; other views have no bottom bar. Trophy opens Achievements.
 - Scoring info uses the same 40px square button and 21px line icon. Its guide groups the gym formula, goal/non-goal sets, rest credits, worked example, weekly rules, and body-weight explanation together. Nutrition, To-do list, Sentiments, and logging/review have separate sections.
 - Each header menu button indicates its active menu with pale ink, a dark filled button, and an inset indicator. Expose the state through `aria-pressed`. Settings and scoring-info indicate their open dialogs; closing a dialog, including Escape, restores the underlying view's indicator.
@@ -32,6 +32,9 @@ The custom domain uses the same existing Firebase project, Auth accounts, and ow
 - Every score meter fills clockwise from about 6:30 to 5:30. Endpoint numbers occupy reserved space below the ring. Editable ratings support mouse/touch dragging, arrow keys, Home/End, and tenth increments. Whole-number 10 has no decimal. Unrated labels stay inside small circles without touching the ring.
 
 ## Daily records and scoring
+
+- The active app day changes at 1:00 a.m. in the device's local timezone. From midnight through 12:59 a.m., Today, logging, recurring tasks, planning/editing windows, streaks, achievements, and weekly progress still use the preceding date. Keep the real local clock time and time-based greeting; show the active app date beside the clock. All weeks remain Monday–Sunday, with the new week beginning at Monday 1:00 a.m. Existing records retain their explicit date keys and UTC event timestamps.
+- An open screen following Today advances after the boundary when no writing control, menu, expanded panel, drag, pending local save, or guided review is active. Preserve an in-progress interaction on its original date, then catch up when it finishes. A deliberately selected past/future date stays selected. Recheck when returning to a backgrounded app as well as during normal use. Required-section late warnings remain visible through the midnight grace hour.
 
 - Nutrition: optional notes and a 1–10 rating. Dragging/buttons use 0.1 increments; direct entry preserves two decimal places.
 - To-do list: dated one-time tasks, daily/weekday/weekly/custom recurrence, and expandable parents dependent on their subtasks. Count leaf actions once. One-time tasks precede recurring ones. Creating or scheduling tasks does not log the list; checking an action or confirming its review does. A reviewed empty list is complete.
@@ -114,9 +117,11 @@ Use Pocket Planet as the product name, including browser and installed-app title
 
 Approved October 20 app icon: large Jupiter-like cloud bands, a wide smile with two small face eyes, and connected ring-arms with interlocked hands. Remove the lower oval storm feature. Keep the muted blue LCD style. Use this approved artwork for the favicon and iPhone home-screen icon.
 
+October 21 approved icon update: retain the original smiling mascot and connected ring-arms, with sharper pixel edges and small stars over a darker sky. Orbit Blue uses the reviewed V6 screenshot-matched palette; Mars uses the reviewed V7 richer terracotta palette. Both favicon and install assets have versioned URLs. Mars theme saturation is 50–66%; preserve desktop hue 14°, phone hue 10°, luminance, and opacity. To-do card headings remain TODAY for the active app day and TO-DO LIST for other dates, with the date only in the separate eyebrow; partial review refreshes must never replace the title with a date.
+
 ### Nightly reminders and first achievement unlocks — October 20
 
-Offer per-device opt-in push reminders in Settings. After 10:30 p.m. America/Chicago, send at most one reminder per device/day when any of the three required categories is unlogged. Match the app timezone, including DST; exclude Sentiments and do not require final review for suppression. Use the free Cloudflare Worker/D1 sender while retaining Firebase Spark. Never automatically request notification permission. See push-reminders.md for delivery, privacy and setup details.
+Offer per-device opt-in push reminders in Settings. The existing deployed service checks after 10:30 p.m. America/Chicago, including DST, and sends at most one reminder per device/day when any of the three required categories is unlogged. Exclude Sentiments and do not require final review for suppression. Use the free Cloudflare Worker/D1 sender while retaining Firebase Spark. Never automatically request notification permission. Notification work is paused; aligning this service with the new device-local 1:00 a.m. app boundary is a separate follow-up. See push-reminders.md for delivery, privacy and setup details.
 
 Achievement popups occur after day completion only for first unlocks, with local seen IDs preventing replay. Repeat counts still accrue. Show each achievement’s first earned date and latest date, and offer Most recent (default) or First earned sorting. Derive earned dates from synced history so historical edits and restores remain consistent.
 

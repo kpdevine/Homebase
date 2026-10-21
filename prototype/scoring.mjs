@@ -2,6 +2,7 @@
 import { taskProgress } from './tasks.mjs';
 import {trainingProgress} from './training.mjs';
 import {GROUPS} from './muscles.mjs';
+export {localDateKey, timeGreeting} from './day-clock.mjs';
 // A slight visual bias toward the top end; logged scores and ring fill stay exact.
 function rewardLevel(score) { return 10*(Math.max(0,Math.min(10,score))/10)**1.2; }
 export function scoreColor(score) {
@@ -37,12 +38,6 @@ export function summarizeDay(day, trainingEntries = [], week) {
   return { score, sections, logged: requiredLogged+(sections.some(section=>section.id==='sentiments')?1:0), requiredLogged, provisional: requiredLogged<3, done, total };
 }
 
-export function localDateKey(date = new Date(), timeZone = 'America/Chicago') {
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
-  const part = type => parts.find(item => item.type === type).value;
-  return `${part('year')}-${part('month')}-${part('day')}`;
-}
-
 export function taskScoreRange(summary) {
   if(!summary.total||summary.done===summary.total)return {score:summary.score,low:summary.score,projected:false};
   const withTasks=score=>{
@@ -60,11 +55,6 @@ export function averageDays(dates, getSummary) {
   const values = dates.map(getSummary).filter(day => day.score !== null);
   return { score:values.length ? Math.round(values.reduce((sum, day) => sum + day.score, 0) / values.length * 10) / 10 : null,
     count:values.length, total:dates.length, provisional:values.length < dates.length || values.some(day => day.provisional) };
-}
-
-export function timeGreeting(date=new Date(), timeZone='America/Chicago') {
-  const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone,hour:'numeric',hourCycle:'h23'}).format(date));
-  return hour<5 || hour>=21 ? 'Good night' : hour<12 ? 'Good morning' : hour<17 ? 'Good afternoon' : 'Good evening';
 }
 
 export function loggingStreak(today,getSummary) {

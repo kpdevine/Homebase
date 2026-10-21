@@ -60,8 +60,8 @@ test('continuous LCD palette brightens from indigo through blue to ice without t
   }
 });
 test('local calendar date and clock timezone survive UTC midnight and DST', () => {
-  assert.equal(localDateKey(new Date('2026-10-17T02:00:00Z')), '2026-10-16');
-  assert.equal(localDateKey(new Date('2026-11-01T07:30:00Z')), '2026-11-01');
+  assert.equal(localDateKey(new Date('2026-10-17T02:00:00Z'), 'America/Chicago'), '2026-10-16');
+  assert.equal(localDateKey(new Date('2026-11-01T07:30:00Z'), 'America/Chicago'), '2026-11-01');
 });
 test('saved snapshots restore dated entries, targets, review, completion and safe IDs', () => {
   const original=createStore({seed:false});

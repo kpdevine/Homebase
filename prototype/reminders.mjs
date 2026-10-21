@@ -63,7 +63,8 @@ export function mountReminders({cloud,preview}) {
   disableButton.addEventListener('click',()=>disable().catch(()=>{}));
   window.addEventListener('online',changed);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){discover().then(changed).catch(()=>paint());}});
-  // Updates the day after midnight even when the workspace remains open.
+  // Refresh server-selected reminder status periodically; this API does not send
+  // the viewed app date. The existing Central-time schedule is separate.
   setInterval(syncState,15*60*1000);
   discover().then(changed).catch(()=>paint());paint();
   return {changed,disable};

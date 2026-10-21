@@ -77,7 +77,7 @@ test('fully logged streak allows today in progress and resets at the first gap',
   assert.equal(loggingStreak(addDays(today,2),summary(store)).count,0);
 });
 test('all four time greetings use Chicago time including midnight and DST',()=>{
-  for(const[utc,expected]of [['2026-10-17T09:59Z','Good night'],['2026-10-17T10:00Z','Good morning'],['2026-10-17T17:00Z','Good afternoon'],['2026-10-17T22:00Z','Good evening'],['2026-10-18T02:00Z','Good night'],['2026-11-01T07:30Z','Good night']])assert.equal(timeGreeting(new Date(utc)),expected);
+  for(const[utc,expected]of [['2026-10-17T09:59Z','Good night'],['2026-10-17T10:00Z','Good morning'],['2026-10-17T17:00Z','Good afternoon'],['2026-10-17T22:00Z','Good evening'],['2026-10-18T02:00Z','Good night'],['2026-11-01T07:30Z','Good night']])assert.equal(timeGreeting(new Date(utc),'America/Chicago'),expected);
 });
 test('score rewards distinguish high and perfect scores without rewarding missing input',()=>{
   for(const score of [null,NaN,0,8.9,9,9.19])assert.equal(scoreReward(score),'');
