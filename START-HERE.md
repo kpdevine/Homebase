@@ -181,3 +181,12 @@ October 21 revised opening preview (still held): supersedes the tile/bar preview
 
 
 October 21 animation approved: the owner reviewed the transparent-mascot/circle/slide preview and requested “great, push and quick.” The animation publication hold is lifted. Publish this animation, both transparent mascot assets, supporting palette/index files, focused tests, and PRD through the normal GitHub + Firebase workflow. Ten focused launch/theme checks already passed; no repeat full test suite for this quick release. The original sky-backed app/install icons remain unchanged.
+
+
+## Current checkpoint — customization and friends, October 21
+
+Implemented the owner's major settings/onboarding/social request plus the subsequent days-logged and phone task-composer requests. See the newest section of `docs/product-requirements.md` for exact scoring and sharing rules. New modules: customization/settings UI; social summaries, Firestore driver, and Friends UI. Existing private data and legacy scores remain supported. Friends are mutual accepted requests; only aggregate scores/counts are shared.
+
+Nutrition can log vibes or actual protein/calories; Training can use customizable gym groups or named activity minutes, configurable flex rests, and explicit optional creatine Yes/No. To-do has default-date/expansion settings and the revised phone composer. Sentiment ratings can be required/optional/hidden. Defaults enable motion. Current tests pass (219 ordinary app/backend checks plus the separate emulator security/client-flow test). UI was exercised in local desktop and 390px portrait previews without changing personal production records. Physical iPhone delivery/rendering is not claimed by desktop QA.
+
+The reminder policy recognizes the new macro, minute, and explicit-creatine fields so valid logs still suppress reminders. Its existing schedule and subscriptions are unchanged; no test notifications are sent by this update. The requested device-local 1 a.m. reminder-window alignment remains separate. GitHub and Firebase releases should be kept together under the owner's standing authorization.

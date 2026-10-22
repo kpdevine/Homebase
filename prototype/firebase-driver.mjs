@@ -2,10 +2,12 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-
 import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
 import {getFirestore,collection,doc,onSnapshot,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
 import {packCloudPayload,unpackCloudPayload,matchesCloudVersion} from './record-edits.mjs';
+import {socialClient} from './social-driver.mjs';
 
 export function firebaseClient(config) {
   const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
   return {
+    social:uid=>socialClient(db,uid),
     observeAuth(callback,onError){getRedirectResult(auth).catch(onError);return onAuthStateChanged(auth,callback,onError);},
     signIn:()=>location.hostname===config.authDomain?signInWithRedirect(auth,new GoogleAuthProvider()):signInWithPopup(auth,new GoogleAuthProvider()),
     signOut:()=>signOut(auth),

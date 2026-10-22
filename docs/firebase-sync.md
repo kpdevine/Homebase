@@ -60,3 +60,12 @@ The free plan currently includes 50,000 Firestore document reads, 20,000 writes,
 Incoming changes also wait while a dialog, visible expanded panel, focused control, unsaved editor, drag, or guided day review is active. This includes reading and preparing to type; there is no idle timeout. Closing a menu, leaving its visible section, finishing/pausing review, or finishing an editor resumes queued updates when drafts permit. The newest queued cloud snapshot replaces older queued snapshots. A cloud refresh does not close the final review or cancel the guided review. Local saving continues normally during the wait.
 
 Automated tests cover document round-trips, one-document nutrition edits, record merging/deletion conflicts, unique concurrent IDs, payload bounds, bulk batching, explicit enablement, edit deferral, own-write acknowledgements, offline retry, conflict resolution, delayed server acknowledgements, and sign-out during an upload. Live browser checks and their results are recorded in START-HERE.md. Physical phone/display and long offline soak tests remain to do.
+
+
+## Customization and social records
+
+The private `settings` record now carries logging configuration and a catalog of historical training-group names. Daily records optionally contain their configuration snapshot, protein/calorie amounts, and training minutes. Existing v2 and older imports remain valid. Do not remove unknown retired groups from the historical catalog.
+
+Separate social collections contain only usernames (`handles`, `publicProfiles`), friend requests, reciprocal friendships, and aggregate `socialScores`. Only the owner writes their summary; only accepted friends or that owner can read it. A summary contains yesterday's score, monthly average, monthly/all-time logged counts, date keys, and updated timestamp. No private-record permission is widened. Rankings are client-derived personal-tracking scores rather than a tamper-proof competition service.
+
+Install developer dependencies with `npm.cmd ci`. With Java 21+ available, run `npm.cmd run test:rules`: it uses an isolated `demo-pocket-planet` emulator and never production records. Ordinary tests run with `npm.cmd test`; the emulator-only test is skipped outside that command. The access test verifies unique usernames, prefix queries, private log isolation, pending/accepted friend access, reciprocal acceptance, score shape/ranges, live listeners, and removal revocation.

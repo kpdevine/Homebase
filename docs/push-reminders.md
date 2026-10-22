@@ -23,3 +23,6 @@ The main app remains buildless. Backend dependencies are isolated in `server/rem
 Deploy the worker with the authorized Cloudflare CLI and `--config server/reminders/wrangler.jsonc`. Initialize a new reminder-only database using its `schema.sql`; never run that command against the app's Firestore records. Keep the deployed endpoint in `prototype/reminder-config.mjs` and both hosting/local CSP connect-src lists. The push-only service worker has no asset cache or fetch interception, preserving the normal release update behavior.
 
 Physical iPhone notification delivery requires the owner's one-time permission and has not been simulated or claimed by desktop QA.
+
+
+October 21 customization compatibility: logging detection also recognizes configured protein/calorie amounts, Other training minutes, and an explicit creatine answer when enabled. The evening schedule, subscription handling, and delivery behavior are unchanged. This compatibility update sends no test pushes.

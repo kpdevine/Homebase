@@ -1,3 +1,4 @@
+import {normalizeSettings,settingsForDay,nutritionScore,sentimentReady,trainingReady} from './customization.mjs';
 import { FREQUENCIES } from './tasks.mjs';
 import { ALL_GROUPS } from './muscles.mjs';
 export const STORAGE_KEY = 'homebase.local.v1'; // Keep the storage key so v1 data migrates in place.
@@ -16,6 +17,11 @@ export function validateSnapshot(value) {
   assert(Array.isArray(value.targets) && value.targets.length <= 5000, 'weekly targets.');
   assert(Number.isSafeInteger(value.serial) && value.serial >= 0, 'record counter.');
   const dates = new Set(), ids = new Set();
+  const groupCatalog=value.groupCatalog??[];
+  assert(Array.isArray(groupCatalog)&&groupCatalog.length<=1000&&new Set(groupCatalog.map(g=>g.id)).size===groupCatalog.length&&groupCatalog.every(g=>g&&typeof g.id==='string'&&/^[a-z][a-z0-9_-]{0,49}$/.test(g.id)&&typeof g.name==='string'&&g.name.length>0&&g.name.length<=50),'group catalog.');
+  const settings=value.settings===undefined?undefined:normalizeSettings(value.settings);
+  const knownGroupIds=new Set([...groupIds,...groupCatalog.map(g=>g.id),...(settings?.training.groups||[]).map(g=>g.id),...value.days.flatMap(day=>(day.configuration?normalizeSettings(day.configuration).training.groups:[]).map(g=>g.id)),...value.targets.flatMap(pair=>Array.isArray(pair?.[1])?pair[1].map(g=>g.id):[])]);
+  const validGroup=id=>typeof id==='string'&&/^[a-z][a-z0-9_-]{0,49}$/.test(id)&&knownGroupIds.has(id);
   const templatesValue=value.version===1 ? [] : value.templates;
   assert(Array.isArray(templatesValue) && templatesValue.length<=5000,'recurring tasks.');
   const readName=name=>{assert(typeof name==='string' && name.trim().length>0 && name.length<=100,'task name.');return name;};
@@ -47,10 +53,10 @@ export function validateSnapshot(value) {
     assert(new Set(occurrences).size===occurrences.length && occurrences.every(id=>!skippedTemplates.includes(id)),'duplicate recurring occurrence.');
     assert(validScore(day.nutrition) && validScore(day.sampleOverall ?? null), 'rating.');
     assert(day.trainingMode === null || ['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(day.trainingMode), 'day type.');
-    assert(day.creatine===undefined||typeof day.creatine==='boolean','creatine check-in.');
+    assert(day.creatine===undefined||day.creatine===null||typeof day.creatine==='boolean','creatine check-in.');
     assert(day.reviewed && sectionIds.every(id => typeof day.reviewed[id] === 'boolean'), 'review state.');
     assert(validTimestamp(day.completedAt), 'completion timestamp.');
-    assert(!day.reviewed.nutrition || day.nutrition !== null, 'nutrition review without a rating.');
+    assert(!day.reviewed.nutrition || nutritionScore(day) !== null, 'nutrition review without a rating.');
     assert(!day.completedAt || sectionIds.every(id => day.reviewed[id]), 'incomplete section reviews.');
     const notes = day.notes === undefined ? { nutrition:'', training:'' } : day.notes;
     assert(notes && ['nutrition','training'].every(id => typeof notes[id] === 'string' && notes[id].length <= 5000), 'notes.');
@@ -67,21 +73,26 @@ export function validateSnapshot(value) {
     let workoutPlan;
     if(day.workoutPlan!==undefined) {
       const plan=day.workoutPlan;
-      assert(plan&&Array.isArray(plan.groups)&&plan.groups.length<=groupIds.length&&Number.isInteger(plan.sets)&&plan.sets>=0&&plan.sets<=10000&&typeof plan.targetMet==='boolean'&&typeof plan.goalsMet==='boolean','workout plan.');
+      assert(plan&&Array.isArray(plan.groups)&&plan.groups.length<=24&&Number.isInteger(plan.sets)&&plan.sets>=0&&plan.sets<=10000&&typeof plan.targetMet==='boolean'&&typeof plan.goalsMet==='boolean','workout plan.');
       const seen=new Set();
-      for(const group of plan.groups){assert(group&&groupIds.includes(group.id)&&!seen.has(group.id)&&Number.isInteger(group.sets)&&group.sets>0&&group.sets<=1000,'workout plan muscle.');seen.add(group.id);}
+      for(const group of plan.groups){assert(group&&validGroup(group.id)&&!seen.has(group.id)&&Number.isInteger(group.sets)&&group.sets>0&&group.sets<=1000,'workout plan muscle.');seen.add(group.id);}
       assert(plan.groups.reduce((sum,group)=>sum+group.sets,0)===plan.sets,'workout plan total.');
       workoutPlan={sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
     }
-    return { date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
+    const configuration=day.configuration===undefined?undefined:normalizeSettings(day.configuration);
+    const food=day.food;
+    assert(food===undefined||food&&['protein','calories'].every(key=>food[key]===null||typeof food[key]==='number'&&Number.isFinite(food[key])&&food[key]>=0&&food[key]<=50000),'nutrition amounts.');
+    assert(day.trainingMinutes===undefined||day.trainingMinutes===null||typeof day.trainingMinutes==='number'&&Number.isFinite(day.trainingMinutes)&&day.trainingMinutes>=0&&day.trainingMinutes<=1440,'training minutes.');
+    assert(!day.reviewed.sentiments||sentimentReady(day),'required sentiment rating.');
+    return { ...(configuration?{configuration}:{}),...(food?{food:{protein:food.protein,calories:food.calories}}:{}),...(day.trainingMinutes!==undefined?{trainingMinutes:day.trainingMinutes}:{}),date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);
-    assert(validDate(entry.date) && dates.has(entry.date) && groupIds.includes(entry.groupId) && Number.isInteger(entry.sets) && entry.sets >= 1 && entry.sets <= 100, 'set entry.');
+    assert(validDate(entry.date) && dates.has(entry.date) && validGroup(entry.groupId) && Number.isInteger(entry.sets) && entry.sets >= 1 && entry.sets <= 100, 'set entry.');
     return { id: entry.id, date: entry.date, groupId: entry.groupId, sets: entry.sets };
   });
   for (const day of days) {
-    const hasSets = entries.some(entry => entry.date === day.date);
+    const hasSets = settingsForDay(day).training.mode==='gym'&&entries.some(entry => entry.date === day.date);
     assert(!(day.trainingMode === 'rest' && hasSets), 'rest day with set entries.');
     assert(!hasSets || day.trainingMode === 'training', 'set entries without a training day.');
     assert(!day.reviewed.training || ['training','rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) || hasSets, 'training review without a log.');
@@ -91,13 +102,13 @@ export function validateSnapshot(value) {
     assert(Array.isArray(pair) && pair.length === 2 && validDate(pair[0]) && !weeks.has(pair[0]) && Array.isArray(pair[1]), 'target week.'); weeks.add(pair[0]);
     const groups = new Set();
     return [pair[0], pair[1].map(group => {
-      assert(group && groupIds.includes(group.id) && !groups.has(group.id) && Number.isInteger(group.target) && group.target >= 0 && group.target <= 1000 && typeof group.name === 'string' && group.name.length <= 50, 'target values.'); groups.add(group.id);
+      assert(group && validGroup(group.id) && !groups.has(group.id) && Number.isInteger(group.target) && group.target >= 0 && group.target <= 1000 && typeof group.name === 'string' && group.name.length <= 50, 'target values.'); groups.add(group.id);
       return { id: group.id, name: group.name, target: group.target };
     })];
   });
   const maxSerial = [...ids].reduce((max, id) => { const match = /^(?:task|gym|routine|child)-(\d+)$/.exec(id); return match ? Math.max(max, Number(match[1])) : max; }, 0);
   assert(value.serial >= maxSerial, 'record counter would reuse an ID.');
-  return { version: 2, days, entries, targets, templates, serial: value.serial };
+  return { version: 2, days, entries, targets, templates, serial: value.serial,...(settings?{settings}:{}),...(groupCatalog.length?{groupCatalog:groupCatalog.map(({id,name})=>({id,name}))}:{}) };
 }
 
 export function readLocal(storage) {

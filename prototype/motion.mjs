@@ -1,7 +1,7 @@
 const themed=hex=>(window.pocketTheme?.color(hex.slice(0,7))||hex.slice(0,7))+hex.slice(7);
 const running=new WeakMap(),active=new Set(),values=new WeakMap();
 const system=window.matchMedia('(prefers-reduced-motion: reduce)');
-let preference='system';
+let preference='full';
 const enabled=()=>preference==='full'||preference==='system'&&!system.matches;
 
 function applyPreference() {
@@ -9,7 +9,7 @@ function applyPreference() {
   if(!enabled())for(const animation of active)animation.cancel();
 }
 export function setMotionPreference(value) {
-  preference=['system','full','reduced'].includes(value)?value:'system';
+  preference=['system','full','reduced'].includes(value)?value:'full';
   applyPreference();return preference;
 }
 system.addEventListener('change',applyPreference);

@@ -38,7 +38,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
   function key(name){return `homebase.cloud-${name}.v1.${firebaseConfig.projectId}.${user.uid}`;}
   function observeUser(next) {
     engine?.close();engine=null;user=next;enabled=false;closePrompt();
-    onUser(user?{displayName:user.displayName}:null);
+    onUser(user?{uid:user.uid,displayName:user.displayName}:null);
     if(!user){setState({status:'signed-out',message:'Sign in with Google to connect your personal records across devices.',conflicts:[]});return;}
     try {enabled=localStorage.getItem(key('enabled'))==='true';}
     catch {setState({status:'error',message:'Browser storage is unavailable. Restore local saving before connecting cloud sync.',conflicts:[]});return;}
@@ -78,5 +78,5 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
   for(const type of ['focusout','pointerup','click','close','toggle'])document.addEventListener(type,resumeAfterInteraction,true);
   paint();
   if(!preview&&firebaseConfig)loadClient().then(connected=>{client=connected;client.observeAuth(observeUser,error=>setState({status:'error',message:`Google sign-in did not finish. ${error.message}`,conflicts:[]}));paint();}).catch(error=>setState({status:'offline',message:`Cloud connection is unavailable. Local saving still works. Reload when online. ${error.message}`,conflicts:[]}));
-  return {changed:()=>engine?.changed(),resume:()=>engine?.resume(),isEnabled:()=>enabled,status:()=>state.status,signIn,hasUser:()=>!!user,session:async()=>user?{uid:user.uid,token:await user.getIdToken()}:null};
+  return {social:()=>user&&client?.social?client.social(user.uid):null,changed:()=>engine?.changed(),resume:()=>engine?.resume(),isEnabled:()=>enabled,status:()=>state.status,signIn,hasUser:()=>!!user,session:async()=>user?{uid:user.uid,token:await user.getIdToken()}:null};
 }

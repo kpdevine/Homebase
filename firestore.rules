@@ -1,6 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function self(uid) { return signedIn() && request.auth.uid == uid; }
+    function validProfile(data) {
+      return data.keys().hasOnly(['uid','username','createdAt']) && self(data.uid)
+        && data.username is string && data.username.matches('[a-z][a-z0-9_]{2,19}') && data.createdAt == request.time;
+    }
+    match /handles/{name} {
+      allow read: if signedIn();
+      allow create: if validProfile(request.resource.data) && request.resource.data.username == name
+        && getAfter(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username == name;
+    }
+    match /publicProfiles/{uid} {
+      allow read: if signedIn();
+      allow create: if self(uid) && validProfile(request.resource.data) && request.resource.data.uid == uid
+        && getAfter(/databases/$(database)/documents/handles/$(request.resource.data.username)).data.uid == uid;
+    }
+    match /friendRequests/{id} {
+      function participant() {return signedIn() && (resource.data.recipient == request.auth.uid || resource.data.requester == request.auth.uid);}
+      allow list, delete: if participant();
+      allow get: if signedIn() && (id.matches(request.auth.uid+'~.*') || id.matches('.*~'+request.auth.uid));
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['requester','recipient','status','createdAt','updatedAt'])
+        && request.resource.data.requester == request.auth.uid && request.resource.data.recipient is string
+        && request.resource.data.recipient != request.auth.uid && id == request.auth.uid+'~'+request.resource.data.recipient
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.auth.uid))
+        && exists(/databases/$(database)/documents/publicProfiles/$(request.resource.data.recipient))
+        && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if signedIn() && resource.data.recipient == request.auth.uid && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+        && request.resource.data.status == 'accepted' && request.resource.data.updatedAt == request.time;
+    }
+    match /friendships/{owner}/friends/{friend} {
+      allow read: if self(owner);
+      function accepted() {
+        let data=request.resource.data;
+        let invitation=getAfter(/databases/$(database)/documents/friendRequests/$(data.requestId)).data;
+        let mirror=getAfter(/databases/$(database)/documents/friendships/$(friend)/friends/$(owner)).data;
+        return data.keys().hasOnly(['owner','friend','requestId','createdAt']) && owner != friend && data.owner == owner && data.friend == friend
+          && data.createdAt == request.time && invitation.status == 'accepted' && invitation.recipient == request.auth.uid
+          && ((invitation.recipient == owner && invitation.requester == friend) || (invitation.requester == owner && invitation.recipient == friend))
+          && mirror.owner == friend && mirror.friend == owner && mirror.requestId == data.requestId;
+      }
+      allow create: if signedIn() && accepted();
+      allow delete: if self(owner) || self(friend);
+    }
+    match /socialScores/{uid} {
+      function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
+      allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
+      allow create, update: if self(uid)
+        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt'])
+        && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
+        && request.resource.data.appDate is string && request.resource.data.appDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && request.resource.data.month is string && request.resource.data.month.matches('[0-9]{4}-[0-9]{2}') && request.resource.data.appDate.matches(request.resource.data.month+'-[0-9]{2}')
+        && request.resource.data.yesterdayDate is string && request.resource.data.yesterdayDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && score(request.resource.data.yesterdayScore) && score(request.resource.data.monthScore)
+        && request.resource.data.daysLogged is int && request.resource.data.daysLogged >= 0 && request.resource.data.daysLogged <= 31
+        && request.resource.data.totalDaysLogged is int && request.resource.data.totalDaysLogged >= request.resource.data.daysLogged && request.resource.data.totalDaysLogged <= 20000
+        && request.resource.data.updatedAt == request.time;
+    }
     match /users/{userId}/records/{recordId} {
       function owner() { return request.auth != null && request.auth.uid == userId; }
       function supportedId() { return recordId.matches('settings|day_[0-9]{4}-[0-9]{2}-[0-9]{2}|targets_[0-9]{4}-[0-9]{2}-[0-9]{2}|routine_[A-Za-z0-9_-]+'); }

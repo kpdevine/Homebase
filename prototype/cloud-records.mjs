@@ -7,7 +7,7 @@ export function canonical(value) {
   return JSON.stringify(value);
 }
 export function snapshotRecords(snapshot) {
-  const value=validateSnapshot(snapshot),records=new Map([['settings',canonical({type:'settings',version:2})]]);
+  const value=validateSnapshot(snapshot),records=new Map([['settings',canonical({type:'settings',version:2,...(value.settings?{settings:value.settings}:{}),...(value.groupCatalog?{groupCatalog:value.groupCatalog}:{})})]]);
   for(const day of value.days)records.set(`day_${day.date}`,canonical({type:'day',day,entries:value.entries.filter(entry=>entry.date===day.date)}));
   for(const template of value.templates)records.set(`routine_${template.id}`,canonical({type:'routine',template}));
   for(const [week,groups] of value.targets)records.set(`targets_${week}`,canonical({type:'targets',week,groups}));
@@ -18,7 +18,7 @@ export function recordsSnapshot(records,serial=0) {
   const result=structuredClone(EMPTY_SNAPSHOT);result.serial=serial;
   for(const [id,payload] of records) {
     const value=JSON.parse(payload);
-    if(id==='settings'&&value.type==='settings'&&value.version===2)continue;
+    if(id==='settings'&&value.type==='settings'&&value.version===2){if(value.settings)result.settings=value.settings;if(value.groupCatalog)result.groupCatalog=value.groupCatalog;continue;}
     if(value.type==='day'&&id===`day_${value.day?.date}`){result.days.push(value.day);result.entries.push(...value.entries);}
     else if(value.type==='routine'&&id===`routine_${value.template?.id}`)result.templates.push(value.template);
     else if(value.type==='targets'&&id===`targets_${value.week}`)result.targets.push([value.week,value.groups]);

@@ -1,0 +1,80 @@
+/* Settings, social pages, and the phone task composer share the LCD controls. */
+.customize-dialog,.username-dialog {width:min(640px,calc(100vw - 24px));max-height:calc(var(--visible-height,100dvh) - 24px);box-sizing:border-box;overflow:auto;color:var(--lcd-_142451,#142451);background:var(--lcd-_7890bf,#7890bf);border:2px solid var(--lcd-_283c70,#283c70);padding:24px;}
+.config-tabs,.config-settings-links {display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+.config-tabs button {flex:1;padding:12px 8px;border:1px solid var(--lcd-_334c80,#334c80);background:var(--lcd-_8ca3ce,#8ca3ce);color:var(--lcd-_142451,#142451);}
+.config-tabs button[aria-pressed="true"] {background:var(--lcd-_253c76,#253c76);color:var(--lcd-_edf5ff,#edf5ff);box-shadow:inset 0 -3px var(--lcd-_dcecff,#dcecff);}
+.config-options {display:grid;gap:8px;border:0;padding:0;margin:16px 0;}
+.config-options legend {margin-bottom:10px;font-weight:700;}
+.config-options label,.config-toggle {display:flex;align-items:center;gap:12px;padding:13px;background:var(--lcd-_8aa2cf,#8aa2cf);border:1px solid var(--lcd-_3d568b,#3d568b);cursor:pointer;}
+.config-options label:has(input:checked) {background:var(--lcd-_344f87,#344f87);color:var(--lcd-_f2f6ff,#f2f6ff);border-color:var(--lcd-_e2efff,#e2efff);}
+.config-options input,.config-toggle input,.repeat-toggle input {width:22px;height:22px;flex:0 0 22px;accent-color:var(--lcd-_243d78,#243d78);}
+.config-options span,.config-toggle span {display:grid;gap:6px;}
+.config-options small,.config-toggle small {font-size:12px;line-height:1.4;}
+.config-fields {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+.config-fields label,.food-amounts label {display:grid;gap:8px;min-width:0;font-size:13px;font-weight:700;}
+.config-fields input,.config-group-row input,.food-amounts input,.friend-search input,.username-dialog input {min-width:0;max-width:100%;width:100%;box-sizing:border-box;font-size:16px;line-height:1.3;padding:10px 12px;background:var(--lcd-_a7bae0,#a7bae0);color:var(--lcd-_142451,#142451);border:1px solid var(--lcd-_344f87,#344f87);border-radius:3px;}
+.config-fields .hint {grid-column:1/-1;}
+.config-group-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.config-group-heading span {font-size:11px;}
+.config-group-row {display:grid;grid-template-columns:minmax(0,1fr) 78px 36px;gap:8px;align-items:center;margin-bottom:8px;}
+#config-error,#username-error {font-size:13px;font-weight:700;}
+.creatine-check {display:block!important;padding:8px 0!important;}
+.creatine-choice {margin:0!important;}
+.food-amounts {display:grid;gap:14px;width:min(300px,100%);margin:auto;}
+.food-amounts label {grid-template-columns:1fr 110px;align-items:center;}
+.sets-added {background:var(--lcd-_e2efff,#e2efff)!important;color:var(--lcd-_1b2f63,#1b2f63)!important;box-shadow:0 0 12px var(--lcd-_e2efff66,#e2efff66);}
+.friends-view {display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.4fr);gap:18px;overflow:auto;min-height:0;}
+.friends-board,.leaderboard {padding:22px;min-width:0;}
+.friend-search>div {display:flex;gap:8px;margin-top:8px;}
+.friend-search label {font-size:13px;}
+.friend-search input {flex:1;}
+.friend-results {padding:0;list-style:none;}
+.friend-results li {display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--lcd-_415b91,#415b91);flex-wrap:wrap;}
+.friend-results strong {margin-right:auto;overflow-wrap:anywhere;}
+.friend-results button {font-size:12px;}
+.leaderboard-scroll {overflow-x:auto;}
+.leaderboard table {width:100%;border-collapse:collapse;font-size:13px;text-align:left;}
+.leaderboard th,.leaderboard td {padding:16px 10px;border-bottom:1px solid var(--lcd-_415b91,#415b91);}
+.leaderboard thead {background:var(--lcd-_344f87,#344f87);color:var(--lcd-_f0f6ff,#f0f6ff);}
+.leaderboard td {text-align:center;}
+.leaderboard td strong {font-size:23px;}
+.leaderboard td small,.leaderboard th small {display:block;font-size:10px;line-height:1.5;}
+.leaderboard .is-you {background:var(--lcd-_9eb8e1,#9eb8e1);}
+.leaderboard-rank {display:inline-block;min-width:18px;font-size:11px;opacity:.8;}
+.header-shortcuts #open-friends {order:0;}
+#task-dialog .task-date-shortcuts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+#task-dialog .task-date-shortcuts button {min-width:0;white-space:normal;padding:12px 7px;font-size:13px;line-height:1.2;min-height:48px;}
+#task-dialog .task-date-shortcuts button[aria-pressed="true"],#task-dialog [data-task-date-choice][aria-pressed="true"] {background:var(--lcd-_253c76,#253c76);color:var(--lcd-_f0f6ff,#f0f6ff);border-color:var(--lcd-_dcecff,#dcecff);}
+.task-chosen-date {font-size:13px;font-weight:700;margin:14px 0 10px;}
+.task-exact-date {font-size:12px;}
+.task-exact-date summary {cursor:pointer;min-height:28px;}
+#task-dialog #task-date {display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;font-size:16px;margin-top:8px;}
+#task-dialog #task-week-options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0;}
+.repeat-toggle {display:flex!important;align-items:center;gap:10px;min-height:46px;cursor:pointer;}
+#repeat-options {padding:10px 0 0 32px;min-width:0;}
+#repeat-options select {max-width:100%;width:100%;font-size:16px;}
+#task-dialog .composer-actions {position:sticky;bottom:-1px;background:var(--lcd-_7890bf,#7890bf);padding-top:12px;z-index:3;}
+@media(max-width:1000px){
+  .friends-view {grid-template-columns:1fr;overflow:visible;}
+  .friends-board,.leaderboard {padding:16px;}
+  .header-shortcuts {gap:5px!important;}
+  .header-shortcuts>button {width:38px!important;min-width:38px!important;height:38px!important;}
+  .leaderboard th,.leaderboard td {padding:12px 5px;font-size:11px;}
+  .leaderboard td strong {font-size:20px;}
+}
+@media(max-width:600px){
+  .customize-dialog,.username-dialog {padding:18px 15px;}
+  .config-fields {grid-template-columns:1fr;}
+  .config-tabs {gap:5px;}
+  .config-tabs button {font-size:12px;}
+  #task-dialog {width:calc(100vw - 18px);max-width:calc(100vw - 18px);max-height:calc(var(--visible-height,100dvh) - 18px);padding:18px 15px;box-sizing:border-box;overflow-x:hidden;}
+  #task-dialog .task-date-picker {min-width:0;display:block;}
+  #task-dialog .task-schedule {min-width:0;}
+  #task-dialog .task-composer>* {min-width:0;max-width:100%;box-sizing:border-box;}
+  #task-dialog .task-week-options button {font-size:12px;min-height:40px;padding:8px 4px;}
+}
+
+#task-frequency,#repeat-options>label {display:none}
+.repeat-choices {display:grid;grid-template-columns:1fr 1fr;gap:8px}.repeat-choices button{min-height:44px;padding:10px;font-size:13px}.repeat-choices button[aria-pressed="true"]{background:var(--lcd-_253c76,#253c76);color:var(--lcd-_f0f6ff,#f0f6ff);border:1px solid var(--lcd-_dcecff,#dcecff)}
+
+.config-goal-meter{position:relative;width:70px;height:70px;touch-action:none;cursor:grab;user-select:none;color:var(--lcd-_243e78,#243e78)}.config-goal-meter svg{width:100%;height:100%;fill:none;stroke-width:11;stroke-linecap:round}.config-goal-track{stroke:var(--lcd-_334c8044,#334c8044)}.config-goal-fill{stroke:currentColor}.config-goal-meter strong{position:absolute;inset:0;display:grid;place-content:center;font-size:23px;pointer-events:none}.config-group-row{grid-template-columns:minmax(0,1fr) 70px 36px}

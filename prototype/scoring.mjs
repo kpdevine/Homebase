@@ -1,3 +1,4 @@
+import {nutritionScore,settingsForDay} from './customization.mjs';
 // A reversible local scoring policy. Keep it independent of rendering/storage.
 import { taskProgress } from './tasks.mjs';
 import {trainingProgress} from './training.mjs';
@@ -24,15 +25,16 @@ export function summarizeDay(day, trainingEntries = [], week) {
   const {done,total} = taskProgress(day.tasks);
   const touched=day.checklistTouched??total>0;
   const checklist = total && touched ? done / total * 10 : day.reviewed.checklists ? 10 : null;
+  const nutrition=nutritionScore(day);
   const training = trainingProgress(day,week||{groups:GROUPS,entries:trainingEntries});
   const sections = [
-    { id: 'nutrition', label: 'Nutrition', score: day.nutrition, detail: day.nutrition === null ? 'Not logged yet' : `${day.nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
+    { id: 'nutrition', label: 'Nutrition', score: nutrition, detail: nutrition === null ? 'Not logged yet' : `${nutrition.toFixed(2).replace(/(\.\d)0$/, '$1')} out of 10` },
     { id: 'training', label: 'Daily training', score: training.score, logged:training.logged, excluded:training.excluded,
-      detail:training.logged&&!training.target?training.tracksCreatine?'Creatine only · no set targets':'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Rest day covered':'Rest allowance used up'} · ${training.restCredits}/2 left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
+      detail:training.mode==='other'?(training.rest?`Rest day · ${training.restCredits}/${training.restAllowance} credits left`:training.logged?`${training.minutes} / ${training.minuteGoal} minutes · ${training.activity}`:'Log training or rest'):training.logged&&!training.target?training.tracksCreatine?'Creatine only · no set targets':'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Rest day covered':'Rest allowance used up'} · ${training.restCredits}/${training.restAllowance} left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
     { id: 'checklists', label: 'To-do list', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
   ];
   const requiredLogged=sections.filter(section=>section.logged??section.score!==null).length;
-  if(day.sentiments?.rating!==null && day.sentiments?.rating!==undefined) sections.push({id:'sentiments',label:'Sentiments',score:day.sentiments.rating,detail:`${day.sentiments.rating.toFixed(1)} out of 10 · optional`,optional:true});
+  if(settingsForDay(day).sentiments.rating!=='hidden' && day.sentiments?.rating!==null && day.sentiments?.rating!==undefined) sections.push({id:'sentiments',label:'Sentiments',score:day.sentiments.rating,detail:`${day.sentiments.rating.toFixed(1)} out of 10 · optional`,optional:true});
   const available = sections.filter(section => section.score !== null);
   const score = available.length ? Math.round(available.reduce((sum, section) => sum + section.score, 0) / available.length * 10) / 10 : null;
   return { score, sections, logged: requiredLogged+(sections.some(section=>section.id==='sentiments')?1:0), requiredLogged, provisional: requiredLogged<3, done, total };

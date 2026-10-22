@@ -1,3 +1,6 @@
+import {mountSocial} from './social-ui.mjs';
+import {settingsForDay,nutritionScore} from './customization.mjs';
+import {mountCustomization} from './customization-ui.mjs';
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
 import { summarizeDay, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, averageDays, loggingStreak } from './scoring.mjs';
@@ -44,7 +47,7 @@ let maxSaveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
-let cloud=null,reminders=null,cloudLabel='';
+let cloud=null,reminders=null,customization=null,socialUI=null,cloudLabel='';
 const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
 let selectedDate = appDateKey();
@@ -95,9 +98,9 @@ const todayTaskHeading=document.createElement('div');
 $('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="tasks-date" class="eyebrow"></p>';todayTaskHeading.append($('#tasks-title'));
 $('.task-date-shortcuts').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-task-when="2" aria-pressed="false">Later this week</button>');
 $('.task-date-shortcuts').insertAdjacentHTML('afterend','<div id="task-week-options" class="task-week-options" role="group" aria-label="Choose a date later this week" hidden></div>');
-const expandedTasks = new Set();
+const expandedTasks = new Set(),autoExpandedTasksSeen=new Set();
 let displayName = 'Kieran';
-let preferences={},motionPreference='system';
+let preferences={},motionPreference='full';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
 if(profileName(preferences.name))displayName=profileName(preferences.name);
 const welcomeRequired=needsWelcome({preview,preferences,snapshot:loaded.snapshot,error:loaded.error});
@@ -117,8 +120,8 @@ function captureRecordEdits(snapshot,at=Date.now()){try{recordEdits.capture(snap
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar', achievements:'Achievements' };
-const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view', achievements:'achievements-view' };
+const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar', achievements:'Achievements',friends:'Friends' };
+const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view', achievements:'achievements-view',friends:'friends-view' };
 
 function queueSave(snapshot) {
   const wasPending = !!pendingSnapshot;
@@ -180,12 +183,12 @@ function drawScoreMeter(meter,score,{immediate=false}={}) {
 }
 function renderHeaderShortcuts() {
   const settings=$('#settings-dialog').hasAttribute('open'),info=$('#score-dialog').hasAttribute('open'),modal=settings||info;
-  for(const [id,active] of [['open-home',view==='today'&&!modal],['mobile-calendar',view==='history'&&!modal],['open-achievements',view==='achievements'&&!modal],['open-settings',settings],['open-score-info',info]])
+  for(const [id,active] of [['open-home',view==='today'&&!modal],['open-friends',view==='friends'&&!modal],['mobile-calendar',view==='history'&&!modal],['open-achievements',view==='achievements'&&!modal],['open-settings',settings],['open-score-info',info]])
     $('#'+id).setAttribute('aria-pressed',String(active));
 }
 function renderHeader() {
   const archived=archivedDay();
-  if(archived&&view!=='achievements')view='history';
+  if(archived&&!['achievements','friends'].includes(view))view='history';
   document.body.classList.toggle('summary-only',archived);
   document.body.classList.toggle('is-overview', view === 'today');
   renderHeaderShortcuts();
@@ -194,7 +197,7 @@ function renderHeader() {
   const isToday = selectedDate === appDateKey(now);
   const past = selectedDate < appDateKey(now);
   document.body.classList.toggle('viewing-other-day',!isToday);
-  $('#selected-day-notice').hidden=isToday||view==='achievements';
+  $('#selected-day-notice').hidden=isToday||['achievements','friends'].includes(view);
   $('#selected-day-label').textContent=`${past?'Past':'Future'} day · ${longDate(selectedDate)}`;
   $('#selected-day-help').textContent=archived?'Summary only · days more than a week ago cannot be edited.':`Entries on this screen belong to ${shortDate(selectedDate)}.`;
   $('#page-title').innerHTML = view === 'today' ? `<strong class="time-greeting">${greeting}</strong>${displayName?`, ${escapeHtml(displayName)}`:''}<span class="greeting-dot">.</span>` : escapeHtml(viewLabels[view]);
@@ -202,7 +205,7 @@ function renderHeader() {
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
   $('#date-short').setAttribute('aria-label', `Choose date. Selected ${longDate(selectedDate)}`);
   const completed = !!store.loadDay(selectedDate).completedAt;
-  $('#day-state').textContent = view==='achievements'?'All-time record':archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
+  $('#day-state').textContent = view==='friends'?'Your orbit':view==='achievements'?'All-time record':archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
   $('#day-state').classList.toggle('complete', completed&&view!=='achievements');
   $('#calendar-day-number').textContent = Number(selectedDate.slice(-2));
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
@@ -221,6 +224,7 @@ function renderHeader() {
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
   const taskHtml = editable => day.tasks.length ? orderedTasks(day.tasks).map(task => {
+    if(settingsForDay(day).tasks.expandSubtasks&&!autoExpandedTasksSeen.has(task.id)){expandedTasks.add(task.id);autoExpandedTasksSeen.add(task.id);}
     const children=task.children||[], expanded=expandedTasks.has(task.id), listId=`subtasks-${editable?'edit':'home'}-${task.id}`;
     const progress=taskProgress([task]);
     const editButton=child=>`<button class="edit-task" data-edit-task="${task.id}" ${child?`data-edit-child="${child.id}"`:''} aria-label="Edit ${escapeHtml(child?.name??task.name)}" title="Edit task">${icon('edit')}</button>`;
@@ -283,7 +287,7 @@ function renderScore() {
   $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All section reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
 }
 function renderRating() {
-  const score = store.loadDay(selectedDate).nutrition, meter = $('#nutrition-meter');
+  const score = nutritionScore(store.loadDay(selectedDate)), meter = $('#nutrition-meter');
   drawScoreMeter(meter,score,{immediate:dragging||document.activeElement===$('#rating-value')});
   meter.querySelector('.meter-number').innerHTML = scoreMarkup(score);
   meter.querySelector('.meter-out-of').textContent = score === null ? 'not rated yet' : 'out of 10';
@@ -331,7 +335,7 @@ sentimentMeter.addEventListener('keydown',event=>{
 });
 $('#clear-sentiments-rating').addEventListener('click',()=>{ $('#sentiments-rating').setCustomValidity('');updateSentiments({rating:null}); });
 function renderTargetEditor(week,reset=false) {
-  const values=[...GROUPS.map(group=>({...group,target:week.groups.find(item=>item.id===group.id)?.target??group.target})),...week.groups.filter(group=>!GROUPS.some(active=>active.id===group.id))];
+  const values=week.groups;
   const signature=JSON.stringify(week.groups.map(group=>[group.id,group.target]));
   if(!reset&&targetScope===week.start&&targetSignature===signature)return;
   targetScope=week.start;targetSignature=signature;targetBaseline=values;
@@ -392,23 +396,24 @@ function renderGym() {
   $('#training-mode-hint').hidden=!entries.length;
   $('#ideal-workout').hidden=noLift;
   const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?pace.tracksCreatine?'Creatine only':'No targets · not scored':pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to unlock the 9 gym points.'}</small></div>`;
+  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?pace.tracksCreatine?'Creatine only':'No targets · not scored':pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to score gym effort.'}</small></div>`;
   $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
+  if(pace.mode==='other')$('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?restReason:`${pace.minutes??'—'} / ${pace.minuteGoal} minutes`}</span></div>`;
   const workout=store.idealWorkout(selectedDate);
   $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets planned</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
   $('#daily-training-entries').hidden=noLift;
-  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${muscleName(entry.groupId)}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
+  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${escapeHtml(store.groupName(entry.date,entry.groupId))}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
   const weekCredit=week.groups.reduce((sum,group)=>sum+Math.min(group.completed,group.target),0);
   $('#gym-summary').textContent = `${weekCredit} / ${target}`;
   $('#gym-total-sets').textContent=total;
-  $('#weekly-rest-credits').innerHTML=`<div><span class="eyebrow">Weekly rest credits</span><strong>${pace.restCredits}<small> / 2 left</small></strong></div><p>Remaining through ${shortDate(selectedDate)}<br>Resets every Monday</p>`;
+  $('#weekly-rest-credits').innerHTML=`<div><span class="eyebrow">Weekly rest credits</span><strong>${pace.restCredits}<small> / ${pace.restAllowance} left</small></strong></div><p>Remaining through ${shortDate(selectedDate)}<br>Resets every Monday</p>`;
   $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday`;
   const volumeGroups=[...week.groups];
   for(const entry of week.entries.filter(entry=>entry.groupId!=='legs')) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
   $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
   renderTargetEditor(week);
-  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${muscleName(entry.groupId)} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
+  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${escapeHtml(store.groupName(entry.date,entry.groupId))} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
   $$('[data-remove-entry]').forEach(button=>{const entry=week.entries.find(value=>value.id===button.dataset.removeEntry);button.disabled=!!entry&&archivedDay(entry.date);});
 }
 function renderReview() {
@@ -419,11 +424,11 @@ function renderReview() {
   $('#review-steps').innerHTML = progress.sections.map((section, index) => `<button data-open-section="${section.id}" class="review-step ${section.reviewed ? 'reviewed' : ''} ${view === section.id ? 'current' : ''}"><span>${section.reviewed ? '✓' : index + 1}</span>${section.label}</button>`).join('');
   $$('[data-start-review]').forEach(button => { button.hidden=reviewing;button.textContent = progress.completedAt ? 'View day summary →' : progress.canComplete ? 'Review full day →' : `${progress.reviewedCount ? 'Continue' : 'Start'} day review →`; });
   const current=progress.sections.find(section=>section.id===view);
-  const invalidRating=current?.id==='nutrition'&&!$('#rating-value').validity.valid||current?.id==='sentiments'&&!$('#sentiments-rating').validity.valid;
+  const invalidRating=current?.id==='nutrition'&&settingsForDay(store.loadDay(selectedDate)).nutrition.mode==='vibes'&&!$('#rating-value').validity.valid||current?.id==='sentiments'&&!$('#sentiments-rating').validity.valid;
   const primary=$('#review-primary');
   primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'to-do list':current.id==='training'?'training':current.id} review`:'Continue day review →';
   primary.disabled=!!current&&!current.reviewed&&(!current.ready||invalidRating);
-  $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Enter a nutrition rating first.':'Log lifting or rest first.':'';
+  $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Finish your nutrition log first.':current.id==='sentiments'?'Add your sentiment rating first.':'Finish your training check-in first.':'';
   const now=new Date(),today=appDateKey(now);
   const showLateWarnings=selectedDate<today || selectedDate===today&&lateCheckInWindow(now);
   const scoreSections=summaryFor().sections;
@@ -485,7 +490,7 @@ function recapMarkup({final=false}={}) {
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
   if(!final&&view==='history'&&calendarFilter!=='all')return filteredRecapMarkup(day,recap);
-  const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.sets} sets</small>`:'—';
+  const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.mode==='other'?`${recap.training.minutes??'—'} min`:recap.training.sets+' sets'}</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
   return `
@@ -493,22 +498,22 @@ function recapMarkup({final=false}={}) {
       ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of ${recap.sections.length} logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
     </div>
     <div class="recap-metrics">
-      <button ${openSection('nutrition')} aria-label="Nutrition${archived?' summary':' for this day'}"><span>Nutrition</span><strong>${scoreText(day.nutrition)}<small>${day.nutrition===null?'':' / 10'}</small></strong></button>
+      <button ${openSection('nutrition')} aria-label="Nutrition${archived?' summary':' for this day'}"><span>Nutrition</span><strong>${scoreText(nutritionScore(day))}<small>${nutritionScore(day)===null?'':' / 10'}</small></strong></button>
       <button ${openSection('training')} aria-label="Training${archived?' summary':' for this day'}"><span>Training</span><strong>${training}</strong></button>
       <button ${openSection('checklists')} aria-label="To-do list${archived?' summary':' for this day'}"><span>To-do list</span><strong>${tasks}</strong></button>
     </div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
-    ${recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
+    ${recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine===null?'Not answered':recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
     ${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}
-    ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(muscleName(group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
+    ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
     ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
 }
 function filteredRecapMarkup(day,recap) {
   const id=calendarFilter,label=categoryLabels[id],section=recap.sections.find(section=>section.id===id),value=section?.score??null;
   let detail='';
-  if(id==='training')detail=`<p class="filtered-training-total">${recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.sets} total sets`:'No workout logged'}</p>${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${muscleName(group.id)}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
+  if(id==='training')detail=`<p class="filtered-training-total">${recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.mode==='other'?`${recap.training.minutes??'—'} minutes`:recap.training.sets+' total sets'}`:'No workout logged'}</p>${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
   if(id==='nutrition')detail=recap.notes.filter(note=>note.section==='nutrition').map(note=>`<section class="recap-note"><h4>Nutrition notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('');
   if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span>${escapeHtml(task.name)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
   if(id==='sentiments')detail=day.sentiments.notes.trim()?`<section class="recap-note"><h4>Sentiments</h4><p>${escapeHtml(day.sentiments.notes)}</p></section>`:'<p>No sentiments notes.</p>';
@@ -541,10 +546,10 @@ function renderAchievements(recompute=true) {
     return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.first?`First earned ${dateFormat(card.first,{month:'short',day:'numeric',year:'numeric'})}${card.latest!==card.first?`<br>Latest ${dateFormat(card.latest,{month:'short',day:'numeric',year:'numeric'})}`:''}`:'Still ahead of you'}</small></article>`;
   }).join(''):'<p class="achievement-empty">No unlocked achievements in this category yet.</p>';
 }
-function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus(); }
+function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus();customization?.paint();renderLogButton();if(view==='friends')socialUI?.paint(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
-  if(archivedDay()&&next!=='achievements')next='history';
+  if(archivedDay()&&!['achievements','friends'].includes(next))next='history';
   const changed=view!==next,mainScroll=$('#main').scrollTop;
   // Keep the navigation at the same viewport height. Deep content starts afresh
   // under the pinned strip rather than leaving a short tab scrolled into blank space.
@@ -599,6 +604,7 @@ function showFinalReview() {
 function renderFinalSentimentsState() {
   const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
   const meter=$('#final-sentiments-meter');
+  meter.closest('.final-sentiments-rating').hidden=settingsForDay(day).sentiments.rating==='hidden';
   drawScoreMeter(meter,rating,{immediate:finalSentimentPointer!==-1});
   meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
   meter.querySelector('.meter-out-of').textContent=rating===null?'not rated yet':'out of 10';
@@ -607,10 +613,11 @@ function renderFinalSentimentsState() {
   $('#final-clear-sentiments-rating').disabled=rating===null;
   $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete;
   $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
-  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':'All section reviews are confirmed. Take one last look.';
+  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':progress.sections.some(section=>section.id==='sentiments'&&!section.ready)?'Add the required sentiment rating to finish your day.':'All section reviews are confirmed. Take one last look.';
   $('#final-review-content').innerHTML=recapMarkup({final:true});
 }
 function updateRating(score, notify = false) {
+  if(settingsForDay(store.loadDay(selectedDate)).nutrition.mode==='macros')return;
   store.updateRating(selectedDate, score);
   renderRating(); renderScore(); renderReview(); renderHeader();
   if (notify) announce(score === null ? 'Nutrition rating cleared.' : `Nutrition set to ${scoreText(score)}.`);
@@ -742,15 +749,18 @@ function fitTaskFields() { if($('#task-dialog').open)$$('#task-name,[data-child-
 document.fonts.ready.then(fitTaskFields);
 document.fonts.addEventListener('loadingdone',fitTaskFields);
 window.addEventListener('resize',fitTaskFields);
-function updateFrequency() { $('#custom-weekdays').hidden=$('#task-frequency').value!=='custom';fitTaskFields(); }
+function updateFrequency() {const repeating=$('#task-frequency').value!=='once';$('#task-repeat').checked=repeating;const active=!taskEdit||!!taskEdit.templateId&&$('[name="task-edit-scope"]:checked').value==='future';$('#repeat-options').hidden=!repeating||!active;$('#custom-weekdays').hidden=!active||$('#task-frequency').value!=='custom';$$('[data-repeat-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.repeatChoice===$('#task-frequency').value)));fitTaskFields();}
+$('#task-frequency').insertAdjacentHTML('afterend','<div class="repeat-choices" role="group" aria-label="Repeat schedule"><button class="quiet-button" type="button" data-repeat-choice="daily">Every day</button><button class="quiet-button" type="button" data-repeat-choice="weekdays">Weekdays</button><button class="quiet-button" type="button" data-repeat-choice="weekly">Weekly</button><button class="quiet-button" type="button" data-repeat-choice="custom">Choose days</button></div>');
+$$('[data-repeat-choice]').forEach(button=>button.addEventListener('click',()=>{$('#task-frequency').value=button.dataset.repeatChoice;updateFrequency();}));
+$('#task-repeat').addEventListener('change',()=>{$('#task-frequency').value=$('#task-repeat').checked?'daily':'once';updateFrequency();});
 $('#task-frequency').addEventListener('change',updateFrequency);
 function renderTaskDate() {
   const date=$('#task-date').value,today=editableToday();
   taskComposeDate=date;
   $('#task-start-date').textContent=date?longDate(date):'Choose a date';
   $$('[data-task-when]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.taskWhen)===2?date>=addDays(today,2)&&date<=addDays(today,7):date===addDays(today,Number(button.dataset.taskWhen)))));
-  $('#task-week-options').hidden=!date||date<addDays(today,2)||date>addDays(today,7);
-  $('#task-week-options').innerHTML=Array.from({length:6},(_,index)=>{const key=addDays(today,index+2);return `<button type="button" class="quiet-button" data-task-date-choice="${key}" aria-pressed="${date===key}">${dateFormat(key,{weekday:'short',day:'numeric'})}</button>`;}).join('');
+  $('#task-week-options').hidden=!date||date<addDays(today,2)||date>addDays(today,7);$('#task-chosen-date').textContent=date?longDate(date):'Choose a day';
+  $('#task-week-options').innerHTML=Array.from({length:6},(_,index)=>{const key=addDays(today,index+2);return `<button type="button" class="quiet-button" data-task-date-choice="${key}" aria-pressed="${date===key}">${dateFormat(key,{weekday:'short'})+' '+Number(key.slice(-2))}</button>`;}).join('');
   $('#task-submit').textContent=taskEdit?'Save changes':date===addDays(today,1)?'Add for tomorrow':'Add task';
 }
 function renderTaskEditScope() {
@@ -759,7 +769,7 @@ function renderTaskEditScope() {
   $('.task-date-picker').hidden=recurring;
   $('.task-schedule').hidden=!!taskEdit&&!future;
   $('#custom-weekdays').hidden=(!!taskEdit&&!future)||$('#task-frequency').value!=='custom';
-  $('#task-frequency option[value="once"]').disabled=future;
+  $('#task-frequency option[value="once"]').disabled=future;$('#task-repeat').disabled=future;updateFrequency();
 }
 function appendSubtaskField(child={name:''}) {
   const row=document.createElement('div');row.className='subtask-input-row';
@@ -767,7 +777,8 @@ function appendSubtaskField(child={name:''}) {
   const input=row.querySelector('textarea');input.value=child.name;if(child.id)input.dataset.childId=child.id;
   $('#subtask-inputs').append(row);refreshNoteCarets.add([input]);return input;
 }
-function openTaskComposer(trigger,date=selectedDate) {
+function openTaskComposer(trigger,date) {
+  if(date===undefined)date=selectedDate===editableToday()&&store.getSettings().tasks.defaultDate==='tomorrow'?addDays(selectedDate,1):selectedDate;
   taskEdit=null;
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
@@ -958,16 +969,16 @@ bindMeterDrag(nutritionMeter,{min:1,scaleMin:0,read:()=>store.loadDay(selectedDa
 }});
 
 $('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${escapeHtml(group.name)}</span></label>`).join('')}</div>`;
-function renderLogButton() { $('#log-sets').textContent=`+ Log ${muscleName($('[name="muscle-group"]:checked')?.value || '')} sets`; }
+function renderLogButton() { const id=$('[name="muscle-group"]:checked')?.value;$('#log-sets').textContent=`+ Log ${store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||muscleName(id||'')} sets`; }
 $('#gym-muscles').addEventListener('change',renderLogButton);
 renderLogButton();
 $('#gym-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#gym-sets');
   try { store.addGymEntry(selectedDate, $('[name="muscle-group"]:checked')?.value, Number(input.value)); }
   catch (error) { input.setCustomValidity(error.message); input.reportValidity(); return; }
-  render(); announce(`${input.value} sets logged for ${shortDate(selectedDate)}.`);
+  render();const button=$('#log-sets'),id=$('[name="muscle-group"]:checked')?.value,name=store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||id;button.textContent=`✓ ${input.value} ${name} sets added`;button.classList.add('sets-added');acknowledge(button);setTimeout(()=>{button.classList.remove('sets-added');renderLogButton();},1600);announce(`${input.value} ${name} sets added.`);
 });
-$('#creatine-taken').addEventListener('change',event=>{store.setCreatine(selectedDate,event.target.checked);render();});
+
 $('#gym-sets').addEventListener('input', event => event.target.setCustomValidity(''));
 $$('[name="training-mode"]').forEach(input => input.addEventListener('change', () => {
   try { store.setTrainingMode(selectedDate, input.value==='no'?'rest':input.value); render(); }
@@ -994,7 +1005,7 @@ $('#finish-later').addEventListener('click', () => { reviewSessionDate = null; r
 $('#review-primary').addEventListener('click', () => {
   const progress=store.dayProgress(selectedDate),section=progress.sections.find(item=>item.id===view);
   if(!section||section.reviewed){startReview();return;}
-  if (section.id === 'nutrition' && !$('#rating-value').checkValidity()) { $('#rating-value').reportValidity(); return; }
+  if (section.id === 'nutrition' && settingsForDay(store.loadDay(selectedDate)).nutrition.mode==='vibes' && !$('#rating-value').checkValidity()) { $('#rating-value').reportValidity(); return; }
   if (section.id === 'sentiments' && !$('#sentiments-rating').checkValidity()) { $('#sentiments-rating').reportValidity(); return; }
   try { store.confirmSection(selectedDate, section.id); }
   catch (error) { announce(error.message); return; }
@@ -1018,7 +1029,7 @@ $('#submit-day').addEventListener('click',()=>{
 });
 function updateFinalSentiments(changes){
   store.updateSentiments(selectedDate,changes);
-  if(store.dayProgress(selectedDate).sections.some(section=>section.id==='sentiments'))store.confirmSection(selectedDate,'sentiments');
+  if(store.dayProgress(selectedDate).sections.some(section=>section.id==='sentiments'&&section.ready))store.confirmSection(selectedDate,'sentiments');
   renderSentiments();renderScore();renderReview();renderHeader();renderNotes();renderFinalSentimentsState();
 }
 $('#final-sentiments-notes').addEventListener('input',event=>updateFinalSentiments({notes:event.target.value}));
@@ -1143,7 +1154,7 @@ $('#confirm-reset').addEventListener('click',()=>{
   lastSavedRaw=reset.raw;storageError=null;blockedSave=false;
   captureRecordEdits(reset.snapshot);
   loaded.raw=null;loaded.error=null;loaded.snapshot=null;
-  preferences={};window.pocketTheme.apply('blue');displayName=preview?'Kieran':'Friend';motionPreference=setMotionPreference('system');
+  preferences={};window.pocketTheme.apply('blue');displayName=preview?'Kieran':'Friend';motionPreference=setMotionPreference('full');
   reviewSessionDate=null;recapDate=null;expandedTasks.clear();undoAction=null;
   $('#import-preview').hidden=true;$('#import-file').value='';$('#export-recovery').hidden=true;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#custom-weekdays').hidden=true;
@@ -1212,6 +1223,8 @@ function refreshClock() {
   const phase=`${today}:${lateCheckInWindow(now)}`;
   if(phase!==clockReviewPhase){clockReviewPhase=phase;renderReview();}
 }
+socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview});
+customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview});
 refreshClock();
 setInterval(refreshClock,15000);
 $('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';
@@ -1233,6 +1246,7 @@ cloud=mountCloud({
     render();
   },
   onUser:user=>{
+    socialUI?.setUser(user);
     if(user&&($('#welcome-dialog').open||welcomeGoogleAttempt)) {
       const name=typeof user.displayName==='string'?user.displayName.trim().slice(0,30):null;
       if(name)finishWelcome(name);
@@ -1240,7 +1254,7 @@ cloud=mountCloud({
     }
   },
   onStatus:state=>{
-    cloudLabel=state.label;renderSaveStatus();reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
+    cloudLabel=state.label;renderSaveStatus();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }
 });

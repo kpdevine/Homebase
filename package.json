@@ -4,6 +4,11 @@
   "description": "Pocket Planet dashboard with local saving and optional private Firebase sync.",
   "scripts": {
     "dev": "node scripts/serve.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:rules": "npx --yes firebase-tools@15.34.0 emulators:exec --only firestore --project demo-pocket-planet --config firebase.test.json \"node --test tests/firestore-rules.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
+    "firebase": "12.19.0"
   }
 }

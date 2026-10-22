@@ -11,8 +11,11 @@ export function reminderDue(device,status,now=new Date()) {
 // Mirrors the app's three required check-ins; completing the final review is separate.
 export function loggedFromRecord(record) {
   const day=record?.day;if(!day)return false;
-  const nutrition=typeof day.nutrition==='number'&&Number.isFinite(day.nutrition);
-  const training=['training','rest','rest-unclassified','unplanned-rest'].includes(day.trainingMode)||record.entries?.some(entry=>entry.sets>0);
+  const config=day.configuration;
+  const amount=value=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
+  const nutrition=config?.nutrition?.mode==='macros'?amount(day.food?.protein)&&amount(day.food?.calories):typeof day.nutrition==='number'&&Number.isFinite(day.nutrition);
+  const attendance=['training','rest','rest-unclassified','unplanned-rest'].includes(day.trainingMode)||record.entries?.some(entry=>entry.sets>0);
+  const training=attendance&&(!config?.training?.creatine||typeof day.creatine==='boolean')&&(config?.training?.mode!=='other'||day.trainingMode!=='training'||amount(day.trainingMinutes));
   const checklist=day.reviewed?.checklists===true||(day.checklistTouched??((day.tasks?.length??0)>0))&&(day.tasks?.length??0)>0;
   return !!(nutrition&&training&&checklist);
 }

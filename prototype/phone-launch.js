@@ -6,8 +6,8 @@
   const root=document.documentElement,ringDuration=720,exitDuration=320;
   let ready=false,imageReady=false,imageFailed=false,image,started=Date.now(),imageShown=started;
   let hiding,cleanup,deadline,hiddenAt=null,active=false;
-  let motion='system';
-  try{motion=JSON.parse(localStorage.getItem('homebase.preferences.v1'+(params.get('preview')==='1'?'.preview':'')))?.motion||'system';}catch{}
+  let motion='full';
+  try{motion=JSON.parse(localStorage.getItem('homebase.preferences.v1'+(params.get('preview')==='1'?'.preview':'')))?.motion||'full';}catch{}
   root.dataset.launchMotion=motion==='reduced'||motion!=='full'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches?'reduced':'full';
   const mascotSource=()=>`./assets/mascots/pocket-planet-${root.dataset.theme==='mars'?'mars':'blue'}.png?v=20261021-cutout`;
   function clear(){clearTimeout(hiding);clearTimeout(cleanup);clearTimeout(deadline);}

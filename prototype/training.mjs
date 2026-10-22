@@ -1,3 +1,4 @@
+import {settingsForDay,trainingReady} from './customization.mjs';
 import {GROUPS,muscleName} from './muscles.mjs';
 
 export const REST_MODES=['rest','unplanned-rest','rest-unclassified'];
@@ -16,7 +17,7 @@ export function idealWorkout(progress) {
 }
 export function workoutForDay(day,week) {
   const plan=day.workoutPlan||idealWorkout(trainingProgress({...day,trainingMode:null},{...week,entries:week.entries.filter(entry=>entry.date<day.date),days:(week.days||[]).filter(value=>value.date<day.date)}));
-  return {sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets,name:muscleName(id)})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
+  return {sets:plan.sets,groups:plan.groups.map(({id,sets})=>({id,sets,name:week.groups.find(group=>group.id===id)?.name||muscleName(id)})),targetMet:plan.targetMet,goalsMet:plan.goalsMet};
 }
 // Derived from dated records: backdated edits replay the week, never future days.
 export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
@@ -27,7 +28,7 @@ export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
   const byDate=new Map((week.days||[]).filter(value=>value.date>=start&&value.date<=day.date).map(value=>[value.date,value]));
   byDate.set(day.date,day);
   for(const entry of through)if(!byDate.has(entry.date))byDate.set(entry.date,{date:entry.date,trainingMode:'training'});
-  const totals=new Map(),classifications=[],results=new Map();let restCredits=2;
+  const totals=new Map(),classifications=[],results=new Map();const config=settingsForDay(day).training;let restCredits=config.flexDays,minutesTotal=0;
   for(const current of [...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date))) {
     const entries=through.filter(entry=>entry.date===current.date);
     let useful=0,nonUseful=0;
@@ -37,19 +38,22 @@ export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
       classifications.push({...entry,useful:credited,nonUseful:extra,weighted:credited+extra*.25});
       useful+=credited;nonUseful+=extra;totals.set(entry.groupId,previous+entry.sets);
     }
-    const dailySets=useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest||current.trainingMode==='training';
-    const goalsComplete=target>0&&week.groups.every(group=>(totals.get(group.id)||0)>=group.target);
-    const restCreditUsed=rest&&target>0&&!goalsComplete&&restCredits>0;
+    const policy=settingsForDay(current).training,other=policy.mode==='other';
+    if(other&&current.trainingMode==='training')minutesTotal+=current.trainingMinutes||0;
+    const dailySets=other?0:useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest||current.trainingMode==='training';
+    const goalsComplete=other?minutesTotal>=policy.minuteGoal*(7-policy.flexDays):target>0&&week.groups.every(group=>(totals.get(group.id)||0)>=group.target);
+    const restCreditUsed=rest&&(other||target>0)&&!goalsComplete&&restCredits>0;
     const weighted=useful+nonUseful*.25;
-    const gymScore=!logged||!target?null:rest?(goalsComplete||restCreditUsed?10:0):weighted>=dailyTarget?10:Math.min(9.9,Math.round((4+weighted/dailyTarget*6)*10)/10);
+    const gymScore=other?(!logged?null:rest?(goalsComplete||restCreditUsed?10:0):Math.min(10,Math.round((current.trainingMinutes||0)/policy.minuteGoal*100)/10)):!logged||!target?null:rest?(goalsComplete||restCreditUsed?10:0):weighted>=dailyTarget?10:Math.min(9.9,Math.round((4+weighted/dailyTarget*6)*10)/10);
     // Missing field means a record saved before daily creatine tracking existed.
-    const tracksCreatine=typeof current.creatine==='boolean';
-    const score=!logged?null:tracksCreatine?(target?Math.round((gymScore*.9+(current.creatine?1:0))*10)/10:(current.creatine?1:0)):gymScore;
+    const tracksCreatine=current.configuration?policy.creatine:typeof current.creatine==='boolean';
+    const eligible=logged&&(!current.configuration||trainingReady(current,entries));
+    const score=!eligible?null:tracksCreatine?(other||target?Math.round((gymScore*.9+(current.creatine?1:0))*10)/10:(current.creatine?1:0)):gymScore;
     if(restCreditUsed)restCredits--;
-    results.set(current.date,{score,gymScore,tracksCreatine,creatine:current.creatine,logged,excluded:logged&&!target&&!tracksCreatine,rest,restCreditUsed,restCredits,goalsComplete,dailySets,useful,nonUseful,weighted});
+    results.set(current.date,{score,gymScore,tracksCreatine,creatine:current.creatine,logged:eligible,excluded:logged&&!other&&!target&&!tracksCreatine,rest,restCreditUsed,restCredits,goalsComplete,dailySets,useful,nonUseful,weighted});
   }
   const groups=week.groups.map(group=>{const actual=totals.get(group.id)||0;return {...group,actual,credited:Math.min(actual,group.target),remaining:Math.max(0,group.target-actual)};});
   const credited=groups.reduce((sum,group)=>sum+group.credited,0),actual=through.reduce((sum,entry)=>sum+entry.sets,0);
   const suggestions=groups.filter(group=>group.remaining>0).sort((a,b)=>a.credited/a.target-b.credited/b.target||b.remaining-a.remaining||a.id.localeCompare(b.id)).slice(0,3);
-  return {...results.get(day.date),target,dailyTarget,credited,actual,elapsed:weekday+1,groups,suggestions,classifications};
+  return {...results.get(day.date),mode:config.mode,activity:config.activity,minuteGoal:config.minuteGoal,minutes:day.trainingMinutes??null,minutesTotal,restAllowance:config.flexDays,target,dailyTarget,credited,actual,elapsed:weekday+1,groups,suggestions,classifications};
 }

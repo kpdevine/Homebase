@@ -1,3 +1,4 @@
+import {normalizeSettings,settingsForDay,nutritionScore,trainingReady,sentimentReady} from './customization.mjs';
 // Calendar keys stay YYYY-MM-DD. UTC is used only for calendar arithmetic,
 // never to infer the date of a personal record from an event timestamp.
 export const DEMO_TODAY = '2026-10-15';
@@ -72,9 +73,11 @@ export function createStore(options = {}) {
   const entries = [];
   const targets = new Map();
   const templates = [];
+  const groupCatalog=new Map((options.snapshot?.groupCatalog||[]).map(group=>[group.id,group.name]));
   const sampleScores = [7.4, 6.8, 8.2, 7.1, 8.8, 8, 6.5, null, 6, 8, 7, null, 7, 8, 7];
   const sampleDailyScores = [7.1, 6.9, 8.4, 7.8, 8.6, 8, 7.3, null, 6.4, 7.2, 7, null, 7.5, 8.1, 7.6];
   let serial = 0;
+  let settings=options.snapshot?.settings?normalizeSettings(options.snapshot.settings):null;
   if(options.clientId&&!/^[A-Za-z0-9_-]{1,32}$/.test(options.clientId))throw new Error('Invalid device ID.');
   const nextId=prefix=>{serial++;return options.clientId?`${prefix}-${options.clientId}-${serial}`:`${prefix}-${serial}`;};
   const today = options.today || DEMO_TODAY;
@@ -108,14 +111,16 @@ export function createStore(options = {}) {
   }
   function loadDay(key) {
     const day = structuredClone(days.get(key) || emptyDay(key));
+    if(!day.configuration&&settings&&key>=settings.effectiveFrom){day.configuration=structuredClone(settings);if(!days.has(key))day.creatine=null;}
     for (const template of templates) if (isDue(template,key) && !day.skippedTemplates.includes(template.id) && !day.tasks.some(task=>task.templateId===template.id)) day.tasks.push(occurrence(template,key));
     return day;
   }
   function writableDay(key) { const day=loadDay(key); days.set(key,day); return day; }
   function effectiveTargets(key) {
     const start=sampleWeekStart(key),source=[...targets.keys()].filter(week=>week<=start).sort().at(-1);
-    const saved=targets.get(source);
-    return {source:source||null,groups:GROUPS.map(group=>({...group,target:saved?saved.find(value=>value.id===group.id)?.target??0:group.target}))};
+    const day=loadDay(key),frozen=day.configuration&&settings&&key<settings.effectiveFrom;
+    const saved=frozen?day.configuration.training.groups:targets.get(source);
+    return {source:source||null,groups:settingsForDay(loadDay(key)).training.groups.map(group=>({...group,target:saved?saved.find(value=>value.id===group.id)?.target??0:group.target}))};
   }
   function loadWeek(key) {
     const start=sampleWeekStart(key),end=addDays(start,6),effective=effectiveTargets(key);
@@ -146,7 +151,27 @@ export function createStore(options = {}) {
   const planningLimit=()=>options.editableToday?addDays(options.editableToday(),7):null;
   const store = {
     loadDay,
-    exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial }); },
+    exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial, ...(settings?{settings}:{}),...(groupCatalog.size?{groupCatalog:[...groupCatalog].map(([id,name])=>({id,name}))}:{}) }); },
+    getSettings() {const config=normalizeSettings(settings||undefined);if(settings)config.training.groups=effectiveTargets(options.editableToday?.()||(today>=settings.effectiveFrom?today:settings.effectiveFrom)).groups;return config;},
+    setSettings(value,key=today) {
+      const next=normalizeSettings({...value,setupComplete:true,effectiveFrom:key});
+      for(const day of days.values())if(day.date<key){const groups=effectiveTargets(day.date).groups;if(!day.configuration){day.configuration=settingsForDay(loadDay(day.date));if(day.creatine===undefined)day.configuration.training.creatine=false;}day.configuration.training.groups=structuredClone(groups);}
+      for(const group of [...(settings?.training.groups||[]),...next.training.groups])groupCatalog.set(group.id,group.name);
+      settings=next;
+      for(const day of days.values())if(day.date>=key){day.configuration=structuredClone(next);if(next.training.mode==='gym'&&entries.some(entry=>entry.date===day.date))day.trainingMode='training';for(const id of ['nutrition','training','sentiments'])invalidateReview(day,id);}
+      targets.set(sampleWeekStart(key),structuredClone(next.training.groups));
+      options.onChange?.(store.exportSnapshot());
+    },
+    updateFood(key,changes) {
+      const day=writableDay(key),food={protein:null,calories:null,...day.food,...changes};
+      if(Object.keys(changes).some(key=>!['protein','calories'].includes(key))||Object.values(food).some(value=>value!==null&&(!Number.isFinite(value)||value<0||value>50000)))throw new RangeError('Enter nonnegative calories and protein, or leave blank.');
+      day.food=food;invalidateReview(day,'nutrition');
+    },
+    updateTrainingMinutes(key,value) {
+      if(value!==null&&(!Number.isFinite(value)||value<0||value>1440))throw new RangeError('Enter 0–1440 minutes.');
+      const day=writableDay(key);day.trainingMinutes=value;invalidateReview(day,'training');
+    },
+    groupName(key,id){return effectiveTargets(key).groups.find(g=>g.id===id)?.name||groupCatalog.get(id)||ALL_GROUPS.find(g=>g.id===id)?.name||id;},
     loadTemplates() { return structuredClone(templates); },
     hasEntry(key) { return days.has(key) || entries.some(entry => entry.date === key); },
     updateRating(key, score) {
@@ -272,17 +297,19 @@ export function createStore(options = {}) {
       }
     },
     setWeekTargets(key, values) {
-      const legacyIds=effectiveTargets(key).groups.filter(group=>!GROUPS.some(active=>active.id===group.id)).map(group=>group.id);
-      if (!Array.isArray(values) || values.length < GROUPS.length || values.length > GROUPS.length+legacyIds.length || new Set(values.map(item => item.id)).size !== values.length || GROUPS.some(group=>!values.some(item=>item.id===group.id)) || values.some(item => !GROUPS.some(group => group.id === item.id)&&!legacyIds.includes(item.id) || !Number.isInteger(item.target) || item.target < 0 || item.target > 20)) throw new RangeError('Enter a whole target from 0 to 20 for each muscle group.');
-      const before=trainingScores(),week=sampleWeekStart(key), legacy=effectiveTargets(key).groups.filter(group=>!GROUPS.some(active=>active.id===group.id));
-      targets.set(week, [...GROUPS.map(group => ({ ...group, target: values.find(item => item.id === group.id).target })), ...legacy.map(group=>({...group,target:values.find(item=>item.id===group.id)?.target??group.target}))]);
+      const groups=effectiveTargets(key).groups;
+      if(!Array.isArray(values)||values.length!==groups.length||new Set(values.map(g=>g.id)).size!==groups.length||groups.some(g=>!values.some(v=>v.id===g.id))||values.some(g=>!Number.isInteger(g.target)||g.target<0||g.target>20))throw new RangeError('Enter a whole target from 0 to 20 for each group.');
+      const before=trainingScores();
+      const start=sampleWeekStart(key);
+      targets.set(start,groups.map(group=>({...group,target:values.find(v=>v.id===group.id).target})));
+      for(const day of days.values())if(day.configuration&&day.date>=start&&day.date<=addDays(start,6))for(const group of day.configuration.training.groups){const edited=values.find(v=>v.id===group.id);if(edited)group.target=edited.target;}
       reopenChangedTraining(before);
     },
     loadWeek,
     trainingProgress(key) {return trainingProgress(loadDay(key),loadWeek(key));},
     idealWorkout(key) {return workoutForDay(loadDay(key),loadWeek(key));},
     addGymEntry(date, groupId, sets) {
-      if (!ALL_GROUPS.some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
+      if (!(settings?effectiveTargets(date).groups:ALL_GROUPS).some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
       const before=trainingScores(),entry = { id: nextId('gym'), date, groupId, sets },day=writableDay(date);
       if(day.creatine===undefined)day.creatine=false;
@@ -310,7 +337,7 @@ export function createStore(options = {}) {
     },
     setTrainingMode(key, mode) {
       if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting or rest.');
-      if (mode !== 'training' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
+      if (mode !== 'training' && settingsForDay(loadDay(key)).training.mode==='gym' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
       const before=trainingScores(),day = writableDay(key),newPolicy=day.creatine===undefined;
       if(newPolicy)day.creatine=false;
       if(mode==='training')startWorkout(day);
@@ -319,18 +346,18 @@ export function createStore(options = {}) {
     dayProgress(key) {
       const day = loadDay(key);
       const dailyEntries = this.loadTrainingDay(key);
-      const ready = { nutrition: day.nutrition !== null,
-        training: ['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? dailyEntries.length === 0 : day.trainingMode === 'training',
+      const ready = { nutrition: nutritionScore(day) !== null,
+        training: trainingReady(day,dailyEntries) && (['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? (settingsForDay(day).training.mode==='other'||dailyEntries.length === 0) : day.trainingMode === 'training'),
         checklists: true };
       const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
-      sections.push({id:'sentiments',label:'Sentiments',ready:true,reviewed:day.reviewed.sentiments===true||day.reviewed.sentiments===undefined&&!!day.completedAt});
+      sections.push({id:'sentiments',label:'Sentiments',ready:sentimentReady(day),reviewed:sentimentReady(day)&&(day.reviewed.sentiments===true||day.reviewed.sentiments===undefined&&!!day.completedAt)});
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
         canComplete: sections.every(section => section.reviewed), completedAt: day.completedAt };
     },
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(section === 'nutrition' ? 'Enter a nutrition rating before confirming.' : 'Confirm gym attendance or mark this as a rest day.');
+      if (!progress.ready) throw new Error(section==='sentiments'?'Add the required sentiment rating.':section==='nutrition'?'Finish your nutrition log before confirming.':'Answer training, minutes if applicable, and creatine if enabled.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },
@@ -339,7 +366,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
       const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];

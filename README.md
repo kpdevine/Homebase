@@ -1,6 +1,6 @@
 # Pocket Planet
 
-A local dashboard for dated tasks, recurring routines, nutrition ratings, training, and history. The interface follows the owner's car radio: dark blue backlighting, indigo ink, a charcoal frame, slightly pixelated type, and a large clock. The owner's handwriting appears in tasks, notes, and the notes cursor.
+A personal dashboard for dated tasks, recurring routines, nutrition, training, history, and friend leaderboards. The interface follows the owner's car radio: dark blue backlighting, indigo ink, a charcoal frame, slightly pixelated type, and a large clock. The owner's handwriting appears in tasks, notes, and the notes cursor.
 
 **Resume:** [START-HERE.md](START-HERE.md). **Current app PRD:** [product requirements](docs/product-requirements.md).
 
@@ -36,3 +36,10 @@ Keep development local. Firebase provides Firestore, Google Authentication, and 
 Original planning files were uploaded to [kpdevine/Homebase](https://github.com/kpdevine/Homebase). The development branch is `codex/homebase-prototype`; source checkpoints are saved locally and uploaded to GitHub. Personal records and credentials stay out of Git.
 
 See [prototype guide](docs/prototype-guide.md), [app polish](docs/app-polish.md), [radio revision](docs/radio-revamp.md), and [data design proposal](docs/data-design.md).
+
+
+## Customize your planet
+
+The setup form and Settings → Tab settings configure vibes or protein/calorie goals, gym or minute-based training, custom set groups, flex rests, creatine tracking, task defaults, and sentiment ratings. Friends uses unique Google-account usernames and mutual requests. The leaderboard shows yesterday, monthly average, and logged-day counts; personal logs stay private.
+
+Developer checks: `npm.cmd test`; with developer dependencies installed and Java 21+, `npm.cmd run test:rules` exercises social access against the local demo Firestore emulator. See [Firebase sync](docs/firebase-sync.md).
