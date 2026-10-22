@@ -1257,3 +1257,4 @@ function disableSpelling(root){
 }
 disableSpelling(document.documentElement);
 new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)disableSpelling(node);}).observe(document.body,{childList:true,subtree:true});
+window.pocketLaunch?.ready();

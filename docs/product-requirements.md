@@ -140,3 +140,8 @@ Validation: 189 app tests and 2 reminder service tests; browser checks at 375×6
 
 
 Final palette adjustment: after comparing previews, the owner requested slightly less saturation. Keep the burnt rust hue and darker LCD contrast, with moderate saturation between the first muted preview and the strongest orange preview. Browser theme color and Mars manifest background track the same palette mapping. The owner chose to keep the web app after discussing the native iOS limitation: browser/install icon metadata updates automatically, but an existing iPhone Home Screen icon cannot be forcibly switched through a web API. Do not promise or require automatic native icon replacement; no native iPhone conversion is in scope.
+
+
+### iPhone opening animation — approved October 21
+
+On opening on iPhone, show the selected-theme transparent planet mascot on the app’s normal LCD background. Fill a slim circle clockwise from 6:30 over 720ms, then slide the mascot and ring off the right edge over 320ms. No sky tile or loading bar. Reopen after at least 30 seconds away with the same short sequence; quick interruptions and desktop remain unchanged. Reduced motion shows a static mascot/ring with no slide. Local render readiness controls dismissal independently of cloud sync, with a hard startup timeout and a nonblocking layer. The owner reviewed both theme variants before authorizing publication.
