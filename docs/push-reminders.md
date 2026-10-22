@@ -26,3 +26,10 @@ Physical iPhone notification delivery requires the owner's one-time permission a
 
 
 October 21 customization compatibility: logging detection also recognizes configured protein/calorie amounts, Other training minutes, and an explicit creatine answer when enabled. The evening schedule, subscription handling, and delivery behavior are unchanged. This compatibility update sends no test pushes.
+
+
+## Device-local timezone update — October 21
+
+This supersedes the earlier fixed America/Chicago schedule. Each device registers its own IANA timezone. The Worker scans every five minutes and evaluates 10:30 p.m. against that device's local clock, including daylight saving; it no longer gates all devices behind a Central-time window. Delivery remains limited to the local evening before midnight and one reminder per device/date. State reads select the local app date (previous date before 1 a.m.) separately for each registered timezone, so a sync on another device still suppresses the appropriate reminder.
+
+On the next app open/sync, an existing subscription refreshes its timezone automatically. Returning after travel refreshes it too. An app that remains closed cannot report a device timezone change until opened. No notification permission reset is needed. The current-device endpoint and owner ID scope timezone updates; other devices on the account keep their own zones. Tests cover New York/Los Angeles delivery windows, multiple local record dates, UTC offsets including India, DST, timezone validation, and owner-only updates. No test notifications are sent during deployment.

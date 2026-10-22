@@ -1,8 +1,16 @@
-export const APP_TIME_ZONE='America/Chicago';
-export function localParts(now,timeZone=APP_TIME_ZONE) {
+export function validTimeZone(value) {
+  if(typeof value!=='string'||!value||value.length>100)throw new Error('Invalid device timezone.');
+  try {new Intl.DateTimeFormat('en-US',{timeZone:value}).format();}catch{throw new Error('Invalid device timezone.');}
+  return value;
+}
+export function localParts(now,timeZone='UTC') {
   const parts=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
   const get=type=>parts.find(part=>part.type===type).value;
   return {date:`${get('year')}-${get('month')}-${get('day')}`,minutes:Number(get('hour'))*60+Number(get('minute'))};
+}
+export function reminderDate(now,timeZone) {
+  const {date,minutes}=localParts(now,timeZone);
+  return minutes<60?new Date(Date.parse(date+'T12:00:00Z')-86400000).toISOString().slice(0,10):date;
 }
 export function reminderDue(device,status,now=new Date()) {
   const {date,minutes}=localParts(now,device.time_zone);

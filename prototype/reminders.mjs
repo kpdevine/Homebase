@@ -10,7 +10,7 @@ export function mountReminders({cloud,preview}) {
   function paint(message) {
     enable.hidden=!!subscription;disableButton.hidden=!subscription;
     enable.disabled=busy||preview||!supported||ios&&!installed||!reminderConfig.apiBase||!cloud.isEnabled()||!cloud.hasUser();disableButton.disabled=busy;
-    status.textContent=message||(preview?'Reminders are available in your personal workspace.':!supported?'This browser does not support push notifications.':ios&&!installed?'Add Pocket Planet to your Home Screen, then open it there to enable reminders.':!reminderConfig.apiBase?'The reminder service is being configured.':!cloud.hasUser()||!cloud.isEnabled()?'Sign in and enable cloud sync to use reminders.':subscription?'On for this device · after 10:30 p.m. Central time, only if today is not logged.':Notification.permission==='denied'?'Notifications are blocked. Allow them in your device settings, then return here.':'Off for this device. Enable to receive one reminder after 10:30 p.m. Central time when a check-in is missing.');
+    status.textContent=message||(preview?'Reminders are available in your personal workspace.':!supported?'This browser does not support push notifications.':ios&&!installed?'Add Pocket Planet to your Home Screen, then open it there to enable reminders.':!reminderConfig.apiBase?'The reminder service is being configured.':!cloud.hasUser()||!cloud.isEnabled()?'Sign in and enable cloud sync to use reminders.':subscription?'On for this device · after 10:30 p.m. local time, only if today is not logged.':Notification.permission==='denied'?'Notifications are blocked. Allow them in your device settings, then return here.':'Off for this device. Enable to receive one reminder after 10:30 p.m. local time when a check-in is missing.');
   }
   async function call(path,body) {
     const session=await cloud.session();if(!session)throw new Error('Sign in to manage reminders.');
@@ -24,7 +24,7 @@ export function mountReminders({cloud,preview}) {
   async function syncState() {
     if(preview||!reminderConfig.apiBase||!cloud.isEnabled()||cloud.status()!=='synced'||refreshing)return;
     refreshing=true;
-    try {await call('/state',{});paint();}
+    try {await discover();await call('/state',{timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,...(subscription?{endpoint:subscription.endpoint}:{})});paint();}
     catch{if(subscription)paint('Reminders are on; the latest logging status has not reached the reminder service. Reconnect to update it.');}
     finally{refreshing=false;}
   }
@@ -45,9 +45,9 @@ export function mountReminders({cloud,preview}) {
       const session=await cloud.session();let previousOwner;try{previousOwner=localStorage.getItem(ownerKey);}catch{}
       if(subscription&&previousOwner!==session?.uid){await subscription.unsubscribe();subscription=null;}
       subscription=subscription||await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
-      await call('/subscribe',{subscription:subscription.toJSON()});
+      await call('/subscribe',{subscription:subscription.toJSON(),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
       try{localStorage.setItem(ownerKey,session.uid);}catch{}
-      paint('On for this device · after 10:30 p.m. Central time, only if today is not logged.');
+      paint('On for this device · after 10:30 p.m. local time, only if today is not logged.');
     }catch(error){if(subscription){try{await subscription.unsubscribe();}catch{}subscription=null;}paint(error.message);}
     finally{busy=false;enable.disabled=false;paint(status.textContent);}
   });
@@ -64,7 +64,7 @@ export function mountReminders({cloud,preview}) {
   window.addEventListener('online',changed);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){discover().then(changed).catch(()=>paint());}});
   // Refresh server-selected reminder status periodically; this API does not send
-  // the viewed app date. The existing Central-time schedule is separate.
+  // the viewed app date. Refresh this device's timezone after travel as well.
   setInterval(syncState,15*60*1000);
   discover().then(changed).catch(()=>paint());paint();
   return {changed,disable};

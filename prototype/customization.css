@@ -78,3 +78,11 @@
 .repeat-choices {display:grid;grid-template-columns:1fr 1fr;gap:8px}.repeat-choices button{min-height:44px;padding:10px;font-size:13px}.repeat-choices button[aria-pressed="true"]{background:var(--lcd-_253c76,#253c76);color:var(--lcd-_f0f6ff,#f0f6ff);border:1px solid var(--lcd-_dcecff,#dcecff)}
 
 .config-goal-meter{position:relative;width:70px;height:70px;touch-action:none;cursor:grab;user-select:none;color:var(--lcd-_243e78,#243e78)}.config-goal-meter svg{width:100%;height:100%;fill:none;stroke-width:11;stroke-linecap:round}.config-goal-track{stroke:var(--lcd-_334c8044,#334c8044)}.config-goal-fill{stroke:currentColor}.config-goal-meter strong{position:absolute;inset:0;display:grid;place-content:center;font-size:23px;pointer-events:none}.config-group-row{grid-template-columns:minmax(0,1fr) 70px 36px}
+
+.leaderboard .score-circle {display:inline-flex;vertical-align:middle;width:58px;height:58px;margin:0 auto;flex-shrink:0}
+.leaderboard .score-circle>span {font-size:18px}
+.leaderboard-yesterday.has-score .score-circle {filter:drop-shadow(0 0 3px var(--lcd-_d6eaff88,#d6eaff88))}
+.leaderboard .leaderboard-user-name {display:inline-block;font:400 20px/1.1 var(--font-handwriting);letter-spacing:0;text-transform:none;overflow-wrap:anywhere}
+.leaderboard .leaderboard-user-heading {font:400 20px/1.1 var(--font-handwriting);text-transform:none}
+.leaderboard td,.leaderboard th {vertical-align:middle}
+@media(max-width:1000px){.leaderboard .score-circle{width:44px;height:44px}.leaderboard .score-circle>span{font-size:15px}.leaderboard .leaderboard-user-name,.leaderboard .leaderboard-user-heading{font-size:17px}.leaderboard-rank{min-width:12px}}

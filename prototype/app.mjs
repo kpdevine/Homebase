@@ -1223,7 +1223,7 @@ function refreshClock() {
   const phase=`${today}:${lateCheckInWindow(now)}`;
   if(phase!==clockReviewPhase){clockReviewPhase=phase;renderReview();}
 }
-socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview});
+socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview,scoreCircle:circle});
 customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview});
 refreshClock();
 setInterval(refreshClock,15000);
