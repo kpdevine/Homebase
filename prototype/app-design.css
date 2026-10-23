@@ -1093,3 +1093,28 @@ html[data-motion=full] .solar-open-day.is-other .score-circle {animation:solar-d
   .solar-reaction-orbit>span {width:18px;height:18px;flex-basis:18px;margin-left:-7px}
   .solar-rank-medal {width:20px;height:24px;right:-9px;bottom:-8px}.solar-rank-medal b {font-size:9px;top:3px}
 }
+
+/* Keep native WebKit control metrics and legacy flex rules out of these controls. */
+.training-choice label>span {flex:0 1 auto;display:block;width:auto;text-align:center;line-height:1.25}
+.training-choice label {text-align:center}
+.weight-entry-editor>label {display:none}
+.weight-entry-editor>summary {position:relative;display:grid;place-items:center;width:100%;min-height:44px;padding:10px 32px;text-align:center;background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:var(--ui-radius-small)}
+.weight-entry-editor>summary::after {position:absolute;right:10px;top:50%;transform:translateY(-50%);width:20px;margin:0}
+.body-weight-controls #body-weight {appearance:textfield;-webkit-appearance:none;width:100%;min-width:0;height:46px;min-height:46px;margin:0;padding:8px;font:400 21px/1.2 var(--font-display);text-align:center;background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:var(--ui-radius-small)}
+#body-weight::-webkit-inner-spin-button,#body-weight::-webkit-outer-spin-button {-webkit-appearance:none;margin:0}
+.body-weight-controls {align-items:center}
+.weight-unit label {height:46px;min-height:46px}
+.body-weight-controls>button {width:100%;margin:0;text-align:center}
+.day-tabs #tab-today {place-items:center;gap:0;text-align:center}
+.day-tabs #tab-today .tab-label {grid-area:1/1;align-self:center;width:100%;text-align:center}
+#status,#status.visible {transform:none}
+.choose-tabs-button {width:100%;margin:0 0 12px;text-align:center}
+#open-score-info,#score-info {display:none!important}
+.leaderboard .solar-member-card.is-you {background:transparent}
+.solar-member-checkin:not(.is-logged) {background:var(--ui-active);color:var(--ui-gold);border-color:var(--ui-gold);font-weight:700;text-align:center}
+.solar-profile-avatar>.solar-you-flag {z-index:1;top:3px;left:3px;right:auto;bottom:auto;padding:3px 5px;background:var(--ui-active);color:var(--ui-light);border:1px solid var(--ui-light);font:700 8px/1.2 var(--font-ui);text-transform:uppercase}
+.friends-board>summary>.panel-heading {display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}
+.friends-board>summary #friends-handle {display:block;width:100%;text-align:center}
+.friends-board>summary {position:relative;display:block;padding-inline:28px}
+.friends-board>summary::after {position:absolute;right:0;top:50%;transform:translateY(-50%);margin:0}
+button.solar-profile-avatar:hover {border-color:var(--ui-line);box-shadow:none}

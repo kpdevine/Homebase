@@ -574,6 +574,10 @@ function setView(next, focus = false) {
   const pinned=window.scrollY>=anchorTop,scrollY=Math.min(window.scrollY,anchorTop);
   // Reserve only one viewport when the section strip is pinned.
   if(changed&&phoneLayout())$('#main').style.minHeight=pinned?`${Math.max(0,window.innerHeight-tabHeight)}px`:'';
+  if(changed&&next==='checklists'){
+    expandedTasks.clear();
+    autoExpandedTasksSeen.clear();
+  }
   view = next; render();
   // UI-03: switching phone sections must reveal the new content, including utility pages.
   if(changed&&phoneLayout()) {
@@ -718,7 +722,7 @@ for (const id of ['overview-task-list', 'task-list']) $('#' + id).addEventListen
   store.toggleTask(selectedDate, taskId); render();
   $(`#${id} [data-task-id="${taskId}"]`).focus({preventScroll:true});
   if(checked)checkOff($(`#${id} [data-task-id="${taskId}"]`));
-  announce(checked ? 'Task checked off.' : 'Task marked incomplete.');
+  // The checkbox already confirms the action; avoid a second, intrusive toast.
 });
 let pendingTaskRemoval=null;
 function confirmTaskRemoval({title,message,label,action}) {

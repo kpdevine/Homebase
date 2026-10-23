@@ -4,6 +4,7 @@ import {settingsForDay} from './customization.mjs';
 // their existing modules. Nodes are moved once so their event handlers survive.
 export function mountUIShell({getStore,getDate,getView,onDeleteTask}) {
   const $=selector=>document.querySelector(selector),$$=selector=>[...document.querySelectorAll(selector)];
+  $('#tab-today').after($('#tab-checklists'));
   const scoreDetails=document.createElement('div');scoreDetails.className='score-details';
   $('.day-score').append(scoreDetails);
   for(const selector of ['#score-range','.score-caption','#overall-description','#complete-day'])scoreDetails.append($(selector));

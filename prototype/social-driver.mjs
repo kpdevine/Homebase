@@ -47,12 +47,23 @@ export function groupClient(db,uid){
       batch.set(doc(db,'groupDirectory',ref.id),{groupId:ref.id,name,searchName:name.toLowerCase(),owner:uid,ownerUsername:own.username,createdAt:serverTimestamp()});
       addMember(batch,group,uid,own.username);batch.set(prefs,{primaryGroupId:ref.id,updatedAt:serverTimestamp()},{merge:true});await batch.commit();return group;
     },
-    async search(value){const prefix=String(value||'').trim().toLowerCase();if(prefix.length<2)return [];const result=await getDocs(query(collection(db,'groupDirectory'),orderBy('searchName'),startAt(prefix),endAt(prefix+'\uf8ff'),limit(10)));return result.docs.map(item=>({id:item.id,...item.data()}));},
+    async search(value){if(!(await getDocs(collection(db,'groupMemberships',uid,'groups'))).empty)throw new Error('Leave your Solar System before searching for another.');const prefix=String(value||'').trim().toLowerCase();if(prefix.length<2)return [];const result=await getDocs(query(collection(db,'groupDirectory'),orderBy('searchName'),startAt(prefix),endAt(prefix+'\uf8ff'),limit(10)));return result.docs.map(item=>({id:item.id,...item.data()}));},
     async request(id){const own=await identity(),group=(await getDoc(doc(db,'groupDirectory',id))).data();if(!group)throw new Error('This group is no longer available.');await setDoc(doc(db,'groupRequests',id+'~'+uid),{groupId:id,groupName:group.name,owner:group.owner,userId:uid,username:own.username,kind:'join',createdAt:serverTimestamp()});},
     async invite(id,user){const group=(await getDoc(doc(db,'friendGroups',id))).data(),person=(await getDoc(doc(db,'publicProfiles',user))).data();if(!group||group.owner!==uid)throw new Error('Only the owner can invite friends.');if(!person)throw new Error('That user is no longer available.');await setDoc(doc(db,'groupRequests',id+'~'+user),{groupId:id,groupName:group.name,owner:uid,userId:user,username:person.username,kind:'invite',createdAt:serverTimestamp()});},
     async accept(id){await runTransaction(db,async tx=>{const ref=doc(db,'groupRequests',id),snapshot=await tx.get(ref);if(!snapshot.exists())throw new Error('This request is no longer available.');const request=snapshot.data(),groupSnapshot=await tx.get(doc(db,'friendGroups',request.groupId));if(!groupSnapshot.exists())throw new Error('This group is no longer available.');const group={id:request.groupId,...groupSnapshot.data()};addMember(tx,group,request.userId,request.username);tx.delete(ref);if(request.userId===uid)tx.set(prefs,{primaryGroupId:group.id,updatedAt:serverTimestamp()},{merge:true});});},
     async dismiss(id){const batch=writeBatch(db);batch.delete(doc(db,'groupRequests',id));await batch.commit();},
     async remove(id,user=uid){const batch=writeBatch(db);batch.delete(memberRef(id,user));batch.delete(indexRef(id,user));batch.delete(scoreRef(id,user));await batch.commit();},
+    async deleteSystem(id){
+      const ref=doc(db,'friendGroups',id),group=(await getDoc(ref)).data();
+      if(!group||group.owner!==uid)throw new Error('Only the owner can delete this Solar System.');
+      if(!group.deletedAt){const batch=writeBatch(db);batch.update(ref,{deletedAt:serverTimestamp()});batch.delete(doc(db,'groupDirectory',id));batch.delete(doc(db,'solarOwnership',uid));batch.delete(indexRef(id));await batch.commit();}
+      // Admissions are now closed. Read the final membership to include anyone
+      // who joined while deletion was starting, then clean indexes in batches.
+      const members=await getDocs(collection(db,'friendGroups',id,'members'));
+      const requests=await getDocs(query(collection(db,'groupRequests'),where('owner','==',uid)));
+      const cleanup=[...members.docs.map(item=>indexRef(id,item.id)),...requests.docs.filter(item=>item.data().groupId===id).map(item=>item.ref)];
+      for(let start=0;start<cleanup.length;start+=400){const next=writeBatch(db);for(const item of cleanup.slice(start,start+400))next.delete(item);await next.commit();}
+    },
     async primary(id){await setDoc(prefs,{primaryGroupId:id,updatedAt:serverTimestamp()},{merge:true});},
     async saveAppearance(value){await setDoc(prefs,{...solarAppearance(value),updatedAt:serverTimestamp()},{merge:true});},
     async publish(ids,name,summary,days=[],appearance={}){

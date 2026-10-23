@@ -20,7 +20,7 @@ export function mountCustomization({getStore,getDate,today,render,announce,previ
     $('.config-tabs').insertAdjacentHTML('beforeend',`<button type="button" data-config-tab="${id}">${label}</button>`);
     $('#config-error').insertAdjacentHTML('beforebegin',`<section data-config-panel="${id}" hidden><h3>${label}</h3><div class="config-fields">${id==='sleep'?'<label>Goal · hours<input id="cfg-sleep-hours" type="number" min="0" max="24" step="1" inputmode="numeric" required></label><label>Additional minutes<input id="cfg-sleep-minutes" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>':'<label>Daily goal · minutes<input id="cfg-prayer-minutes" type="number" min="1" max="1440" step="1" inputmode="numeric" required></label>'}</div><p class="hint">Time toward your goal earns a proportional score, up to 10. More time never lowers your score.</p></section>`);
   }
-  $('.config-settings-links').insertAdjacentHTML('afterbegin','<button type="button" class="quiet-button" data-open-config="tabs">Choose tabs ↗</button>');
+  $('.config-settings-links').insertAdjacentHTML('beforebegin','<button type="button" class="quiet-button choose-tabs-button" data-open-config="tabs">Change my tabs</button>');
   $('.config-settings-links').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-open-config="sleep">Sleep ↗</button><button type="button" class="quiet-button" data-open-config="prayer">Prayer ↗</button>');
   let step=0,groups=[],openedFromSettings=false;
   const steps=['tabs','nutrition','training','tasks','sentiments','sleep','prayer'];

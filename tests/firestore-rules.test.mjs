@@ -101,5 +101,21 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const creations=await Promise.allSettled([nova.groups.create('First concurrent orbit'),nova.groups.create('Second concurrent orbit')]);
     assert.equal(creations.filter(value=>value.status==='fulfilled').length,1);
     assert.equal(creations.filter(value=>value.status==='rejected').length,1);
+    await assert.rejects(dana.groups.search('Orbit'),/Leave your Solar System/);
+    const charlie=socialClient(c,'charlie');await charlie.groups.request(system.id);await dana.groups.accept(system.id+'~charlie');
+    await setDoc(doc(danaDb,'users','dana','records','settings'),{format:1,payload:'private saved settings',updatedAt:serverTimestamp()});
+    await assert.rejects(eli.groups.deleteSystem(system.id),/Only the owner/);
+    await assertFails(deleteDoc(doc(danaDb,'solarOwnership','dana')));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id),{deletedAt:serverTimestamp()},{merge:true}));
+    await assertSucceeds(dana.groups.deleteSystem(system.id));
+    assert.equal((await getDoc(doc(danaDb,'groupDirectory',system.id))).exists(),false);
+    assert.equal((await getDoc(doc(danaDb,'groupMemberships','dana','groups',system.id))).exists(),false);
+    assert.equal((await getDoc(doc(c,'groupMemberships','charlie','groups',system.id))).exists(),false);
+    assert.equal((await getDoc(doc(danaDb,'users','dana','records','settings'))).data().payload,'private saved settings');
+    await assertFails(getDoc(doc(c,'friendGroups',system.id,'scores','dana')));
+    await assertFails(getDoc(doc(danaDb,'friendGroups',system.id,'scores','dana')));
+    await assertFails(getDoc(doc(danaDb,'friendGroups',system.id,'days','dana~2026-10-20')));
+    await assertFails(dana.groups.react(system.id,'eli','2026-10-20','happy'));
+    await assertSucceeds(dana.groups.create('Replacement orbit'));
   }finally{await env.cleanup();}
 });

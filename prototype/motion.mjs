@@ -54,6 +54,5 @@ export function acknowledge(element) {
   play(element,[{backgroundColor:themed('#bce8ff88'),boxShadow:`inset 3px 0 ${themed('#bce8ff')}`},{backgroundColor:'transparent',boxShadow:'inset 0 0 transparent'}],580);
 }
 export function checkOff(input) {
-  acknowledge(input?.closest('li'));
   play(input,[{transform:'scale(.85)',boxShadow:`0 0 0 0 ${themed('#c7eeff77')}`},{transform:'scale(1)',boxShadow:`0 0 0 4px ${themed('#c7eeff00')}`}],300);
 }

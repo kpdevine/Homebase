@@ -21,7 +21,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   const confirm=document.createElement('dialog');confirm.id='solar-remove-dialog';confirm.setAttribute('aria-labelledby','solar-remove-title');confirm.innerHTML='<div class="dialog-heading"><h2 id="solar-remove-title">Leave Solar System?</h2></div><p id="solar-remove-copy"></p><div class="composer-actions"><button type="button" class="quiet-button" data-solar-cancel>Cancel</button><button type="button" class="primary-button" data-solar-confirm>Confirm</button></div>';document.body.append(confirm);
   let removeTarget=null;
   confirm.querySelector('[data-solar-cancel]').onclick=()=>confirm.close();
-  confirm.querySelector('[data-solar-confirm]').onclick=()=>{const target=removeTarget;confirm.close();if(target)action(()=>api().remove(target.group,target.uid));};
+  confirm.querySelector('[data-solar-confirm]').onclick=()=>{const target=removeTarget;confirm.close();if(target)action(()=>target.deleteSystem?api().deleteSystem(target.group):api().remove(target.group,target.uid));};
   const dayDialog=document.createElement('dialog');dayDialog.id='solar-day-dialog';dayDialog.setAttribute('aria-labelledby','solar-day-title');dayDialog.innerHTML=`<div class="dialog-heading"><div><p class="eyebrow" id="solar-day-user"></p><h2 id="solar-day-title">Day score</h2></div><button class="icon-button" type="button" data-day-close aria-label="Close day reactions">×</button></div><div class="solar-day-navigation"><button type="button" class="icon-button" id="solar-day-prev" aria-label="Previous day">‹</button><span id="solar-day-date"></span><button type="button" class="icon-button" id="solar-day-next" aria-label="Next day">›</button></div><div id="solar-day-score"></div><p id="solar-day-state" class="hint" role="status"></p><div id="solar-reaction-counts" class="solar-reaction-counts"></div><section id="solar-reaction-picker"><h3>Send a little planet</h3><div class="solar-reaction-picker">${REACTIONS.map(reaction=>`<button type="button" data-react="${reaction.id}" aria-label="${reaction.label}" aria-pressed="false">${planetEmoji(reaction.id)}</button>`).join('')}</div><p class="hint">Tap your reaction again to remove it.</p></section><p id="solar-reaction-feedback" role="status"></p>`;document.body.append(dayDialog);
   dayDialog.querySelector('[data-day-close]').onclick=()=>dayDialog.close();dayDialog.addEventListener('close',()=>{const target=dayTarget,date=dayDate;dayStop?.();dayStop=null;dayTarget=null;requestAnimationFrame(()=>[...document.querySelectorAll('[data-solar-day]')].find(button=>button.dataset.solarDay===target&&button.dataset.solarDate===date)?.focus({preventScroll:true}));});
   const profileDialog=document.createElement('dialog');profileDialog.id='solar-profile-dialog';profileDialog.setAttribute('aria-labelledby','solar-profile-title');
@@ -54,8 +54,10 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   $('#solar-results').onclick=event=>{const button=event.target.closest('[data-join-solar]');if(button)action(()=>api().request(button.dataset.joinSolar));};
   $('#solar-requests').onclick=event=>{const accept=event.target.closest('[data-accept-solar]'),dismiss=event.target.closest('[data-dismiss-solar]');if(accept)action(()=>api().accept(accept.dataset.acceptSolar));if(dismiss)action(()=>api().dismiss(dismiss.dataset.dismissSolar));};
   $('#solar-invites').onclick=event=>{const button=event.target.closest('[data-invite-solar]');if(button)action(()=>api().invite(primary,button.dataset.inviteSolar));};
-  function askRemove(uid){removeTarget={uid,group:primary};const own=uid===getUser().uid;$('#solar-remove-title').textContent=own?'Leave Solar System?':'Remove member?';$('#solar-remove-copy').textContent=own?'You will leave this leaderboard. You can request to join again.':`Remove @${members.find(member=>member.uid===uid)?.username||'this user'} from ${selected()?.groupName||'this Solar System'}? Their private records are preserved.`;confirm.showModal();}
+  function askRemove(uid){confirm.querySelector('[data-solar-confirm]').textContent='Confirm';removeTarget={uid,group:primary};const own=uid===getUser().uid;$('#solar-remove-title').textContent=own?'Leave Solar System?':'Remove member?';$('#solar-remove-copy').textContent=own?'You will leave this leaderboard. You can request to join again.':`Remove @${members.find(member=>member.uid===uid)?.username||'this user'} from ${selected()?.groupName||'this Solar System'}? Their private records are preserved.`;confirm.showModal();}
   $('#leave-solar').onclick=()=>askRemove(getUser().uid);
+  $('#leave-solar').after(Object.assign(document.createElement('button'),{id:'delete-solar',type:'button',className:'text-button',textContent:'Delete this Solar System…',hidden:true}));
+  $('#delete-solar').onclick=()=>{removeTarget={group:primary,deleteSystem:true};$('#solar-remove-title').textContent='Delete Solar System?';$('#solar-remove-copy').textContent=`Remove ${selected()?.groupName||'this Solar System'} for every member? Your friendships and everyone’s private logs stay saved. You can create another system afterward.`;confirm.querySelector('[data-solar-confirm]').textContent='Delete Solar System';confirm.showModal();};
   $('#solar-member-list').onclick=event=>{const button=event.target.closest('[data-remove-member]');if(button)askRemove(button.dataset.removeMember);};
   function paintEvening(ownLogged){
     const date=today(),key=primary&&lateCheckInWindow()?primary+'~'+date:'';
@@ -81,6 +83,8 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     watchReactionBadges();paintEvening(ownLogged);
     const ownsSystem=!!state.ownedGroupId||state.groups.some(value=>value.owner===user?.uid);
     $('#solar-create').hidden=ownsSystem;
+    $('#solar-search').hidden=state.groups.length>0;
+    $('#solar-results').hidden=state.groups.length>0;
     $('#solar-edit-profile').hidden=!!group&&state.appearanceReady;$('.solar-toolbar').hidden=$('#solar-edit-profile').hidden;
     replace('#solar-choices',state.groups.filter(group=>group.id!==primary).map(group=>`<button type="button" class="quiet-button" data-primary-solar="${esc(group.id)}" aria-pressed="${group.id===primary}">${esc(group.groupName)}</button>`).join(''));
     if(state.groupsLoaded&&!state.groups.length&&profile&&!$('#solar-manage').open){$('#solar-manage').open=true;managementAutoOpened=true;}
@@ -94,6 +98,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-members').hidden=!group;
     replace('#solar-member-list',members.map(member=>`<li><strong>@${esc(member.username)}</strong>${member.uid===group?.owner?'<small>Owner</small>':owner?`<button type="button" class="text-button" data-remove-member="${esc(member.uid)}">Remove…</button>`:''}</li>`).join(''));
     $('#leave-solar').hidden=!group||owner;
+    $('#delete-solar').hidden=!owner;
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
     return {members,primary,loading,reactions:boardReactions,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
