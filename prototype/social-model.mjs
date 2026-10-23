@@ -12,4 +12,14 @@ export function leaderboardSummary(store,today){
 export function rankLeaderboard(rows,month){return [...rows].sort((a,b)=>((b.month===month?b.monthScore:null)??-1)-((a.month===month?a.monthScore:null)??-1)||(b.month===month?b.daysLogged:0)-(a.month===month?a.daysLogged:0)||a.username.localeCompare(b.username));}
 
 export const REACTIONS=[{id:'happy',label:'Happy planet',short:'Happy'},{id:'sad',label:'Sad planet',short:'Sad'},{id:'party',label:'Celebration',short:'Party'},{id:'fire',label:'On fire',short:'On fire'},{id:'sun',label:'Cool sunshine',short:'Cool'},{id:'love',label:'Love',short:'Love'},{id:'wow',label:'Amazed',short:'Wow'},{id:'sleepy',label:'Sleepy',short:'Sleepy'},{id:'strong',label:'Feeling strong',short:'Strong'},{id:'rocket',label:'Blastoff',short:'Blastoff'},{id:'martian',label:'Friendly Martian',short:'Martian'}];
+export function solarAppearance({planet='happy',vibes=''}={}) {
+  if(!REACTIONS.some(reaction=>reaction.id===planet))throw new Error('Choose a planet profile picture.');
+  if(typeof vibes!=='string'||vibes.trim().length>160)throw new Error('Keep your current vibes to 160 characters.');
+  return {planet,vibes:vibes.trim()};
+}
+export function solarMonthStats(members,month){
+  const current=members.filter(member=>member.month===month&&Number.isFinite(member.monthScore)&&member.daysLogged>0);
+  const logs=current.reduce((sum,member)=>sum+member.daysLogged,0);
+  return {logs,average:logs?Math.round(current.reduce((sum,member)=>sum+member.monthScore*member.daysLogged,0)/logs*10)/10:null};
+}
 export function sharedDays(store,today){return store.exportSnapshot().days.filter(day=>day.date<=today&&day.date>=addDays(today,-34)).map(day=>{const summary=summarizeDay(store.loadDay(day.date),store.loadTrainingDay(day.date),store.loadWeek(day.date));return {date:day.date,score:summary.score,logged:fullyLogged(summary)};}).filter(day=>day.logged&&day.score!==null).map(({date,score})=>({date,score}));}

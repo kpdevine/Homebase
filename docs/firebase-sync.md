@@ -80,3 +80,6 @@ Solar Systems use `friendGroups`, `groupDirectory`, `groupMemberships`, `groupRe
 Group-local `scores` and `days` contain validated score summaries only; group members can read these and the group's reactions. Up to 35 recent logged day scores are shared. One reaction per member/target/date can be changed or removed. Private notes, tasks, food, workout details and weight never enter these collections. Leaving/removal revokes reads and writes for that group. All eleven reaction kinds, listener queries, consent checks, invalid writes and outsider access were verified against the local Firestore emulator.
 
 Deploy the matching rules with Hosting; no new composite indexes or paid services are required for this release.
+
+
+October 22 member-card follow-up: `socialPreferences/{uid}` also stores owner-only `planet` and `vibes` (160 characters maximum); changes to primary membership merge these fields rather than replacing them. Only group score documents may include this appearance data. Ordinary friend aggregates remain score/count only. Group members can listen to shared day documents filtered by date for after-9-p.m. logging status, and see reaction senders. Security tests cover profile creation before group creation, preference preservation, outsider rejection, and invalid/oversized profile data.

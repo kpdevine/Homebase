@@ -895,3 +895,151 @@ html[data-motion=reduced] button {transition:none}
 #food-amounts>.note-save-actions {grid-column:1/-1;margin-top:0}
 
 .solar-choices .quiet-button[aria-pressed=true]:hover {background:var(--ui-active);color:var(--ui-white)}
+
+/* One identity card, with the group and its people as the visual focus. */
+body[data-view=friends] .app-shell {height:auto;max-height:none}
+body[data-view=friends] .app-shell>main {height:auto;max-height:none;flex:1 0 auto;overflow:visible;container-type:normal}
+.leaderboard .solar-hero {align-items:flex-start;gap:14px;padding:18px;margin:-1px -1px 16px;background:var(--ui-active);border:1px solid var(--ui-light);border-radius:var(--ui-radius);box-shadow:inset 0 0 18px rgb(255 255 255 / .07),0 0 12px rgb(255 230 151 / .16)}
+.solar-identity {min-width:0;flex:1}
+.leaderboard .solar-hero h2 {font:700 clamp(26px,4vw,34px)/1.35 var(--font-handwriting);color:var(--ui-white);text-transform:none;overflow-wrap:anywhere;text-shadow:0 0 7px rgb(255 255 255 / .2);margin:0 0 6px}
+#solar-subtitle {font:400 10px/1.5 var(--font-ui);color:var(--ui-gold);margin:0}
+.solar-member-count {display:grid;align-content:center;justify-items:center;flex:0 0 62px;min-height:62px;padding:7px;border:1px solid rgb(255 255 255 / .4);border-radius:4px;background:rgb(255 255 255 / .06);color:var(--ui-light)}
+.solar-member-count strong {font:700 24px/1.2 var(--font-display)}
+.solar-member-count span {font:400 8px/1.5 var(--font-ui)}
+.solar-choices:not(:empty)::before {content:'Switch Solar System';flex-basis:100%;font:400 10px/1.4 var(--font-ui);color:var(--ui-muted);margin-bottom:2px}
+.leaderboard #leaderboard-month {margin:16px 0 8px;color:var(--ui-ink)}
+.leaderboard-scroll {border:1px solid var(--ui-line-soft);border-radius:4px}
+.leaderboard thead .leaderboard-user-heading {font:400 9px/1.4 var(--font-ui)}
+.leaderboard tbody tr:last-child>* {border-bottom:0}
+.leaderboard tbody th {padding-left:10px}
+.friend-management-section {padding:14px 0;border-bottom:1px solid var(--ui-line-soft)}
+#manage-friends {border-top:0;margin-top:0;padding-top:4px}
+.friends-board h3 {display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 14px/1.4 var(--font-display);margin:0 0 10px}
+.friend-results {margin:0}
+.friend-results li:last-child {border-bottom:0}
+.friend-results li>span {flex:1;min-width:0}
+.friend-results li>span strong {display:block}
+.friend-results li small {display:block;font:400 9px/1.6 var(--font-ui);color:var(--ui-muted)}
+.friend-results .friend-empty {font:400 11px/1.6 var(--font-ui);color:var(--ui-muted);padding:4px 0}
+.friend-search {padding-top:16px;margin-bottom:12px}
+#friend-results:not(:empty) {margin-bottom:16px}
+.solar-manage {padding-top:12px}
+.solar-manage>summary {font-weight:700}
+.solar-manage h3 {font-size:15px}
+.solar-forms form {padding:12px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-inset)}
+.solar-forms label {font-size:11px}
+.solar-evening {margin-top:16px;padding:14px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
+.solar-evening-heading {display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.solar-evening h3 {font-size:16px}
+.solar-evening .eyebrow {font-size:9px;margin-bottom:3px}
+#solar-evening-members {display:grid;gap:6px;list-style:none;padding:0;margin:0 0 10px}
+#solar-evening-members li {display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:44px;padding:7px 9px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-panel)}
+#solar-evening-members .is-logged {color:var(--ui-light);background:var(--ui-active);border-color:var(--ui-light);box-shadow:inset 2px 0 var(--ui-gold)}
+.solar-checkin-icon {display:grid;place-items:center;width:22px;height:22px;border:1px solid currentColor;border-radius:50%;font:700 15px/1 var(--font-ui)}
+.is-logged .solar-checkin-icon {color:var(--ui-gold)}
+.solar-checkin-name {font:400 17px/1.3 var(--font-handwriting);overflow-wrap:anywhere}
+.solar-checkin-state {font:400 9px/1.5 var(--font-ui);text-align:right;max-width:92px}
+.solar-evening>.hint {font-size:9px;margin:0}
+@media(min-width:1001px){
+  .friends-view {grid-template-columns:minmax(0,1.5fr) minmax(280px,.85fr)}
+  .leaderboard {order:0}.friends-board {order:1}
+  .leaderboard thead .leaderboard-user-heading {font-size:10px}
+}
+@media(max-width:360px){
+  .leaderboard .solar-hero {padding:14px;gap:10px}
+  .solar-member-count {flex-basis:52px;min-height:56px}
+  .solar-checkin-state {max-width:66px;font-size:8px}
+}
+
+/* Solar System member rows follow the planet / score / current-vibes layout. */
+.friends-view {display:flex;flex-direction:column;align-items:stretch;gap:16px;width:100%;max-width:1100px;margin-inline:auto}
+.friends-board {order:1}.leaderboard {order:0}
+.friends-board>summary>.panel-heading {flex:1;margin:0}
+.friends-board>summary {gap:12px}
+.friends-board>summary h2 {font-size:18px}
+.friends-board>summary #friends-handle {font-size:17px}
+.leaderboard .solar-hero {padding:18px 20px}
+.solar-member-count {display:flex;flex-basis:140px;align-items:center;justify-content:center;gap:6px;min-height:36px}
+.solar-member-count strong {font:700 16px/1.4 var(--font-ui)}
+.solar-member-count span {font:400 11px/1.4 var(--font-ui)}
+.solar-toolbar {display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.solar-toolbar button {min-height:36px;font-size:10px;padding:8px 11px}
+.leaderboard-scroll {border:0;overflow:visible}
+.solar-member-cards {display:grid;gap:24px}
+.solar-member-card {display:grid;grid-template-columns:90px minmax(0,1fr);gap:12px;min-width:0}
+.solar-person {display:flex;flex-direction:column;gap:7px;min-width:0}
+.solar-profile-avatar {position:relative;display:grid;place-items:center;aspect-ratio:1;width:100%;min-width:0;margin:0;padding:6px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset);color:var(--ui-ink)}
+.solar-profile-avatar .planet-emoji {width:100%;height:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}
+.solar-profile-avatar>span {position:absolute;bottom:3px;right:3px;background:var(--ui-active);color:var(--ui-light);border-radius:3px;padding:3px 4px;font:400 7px/1.3 var(--font-ui)}
+button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9px rgb(255 255 255 / .2)}
+.solar-person-name {padding:5px 6px;background:var(--ui-inset);border:1px solid var(--ui-line-soft);border-radius:3px;min-width:0}
+.leaderboard .solar-person-name .leaderboard-user-name {display:block;font:700 16px/1.2 var(--font-handwriting);overflow-wrap:anywhere;text-transform:none}
+.solar-person-name small {font:400 8px/1.5 var(--font-ui)}
+.solar-member-detail {display:flex;flex-direction:column;gap:8px;min-width:0}
+.solar-score-panel {display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:10px;padding:12px 9px;min-height:110px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
+.solar-yesterday,.solar-month {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-width:0}
+.solar-stat-label {font:400 9px/1.4 var(--font-ui);color:var(--ui-ink)}
+.leaderboard .solar-yesterday .score-circle {width:60px;height:60px;min-width:60px;filter:drop-shadow(0 0 4px rgb(255 255 255 / .25))}
+.leaderboard .solar-yesterday .score-circle>span {font-size:22px}
+.solar-yesterday .solar-open-day {min-height:0;min-width:0;padding:2px;display:grid;place-items:center}
+.solar-day-hint {font:400 7px/1.3 var(--font-ui);color:var(--ui-muted)}
+.solar-other-scores {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:7px;min-width:0}
+.leaderboard .solar-month .score-circle {width:44px;height:44px;min-width:44px}
+.leaderboard .solar-month .score-circle>span {font-size:16px}
+.solar-log-count {text-align:center;min-width:0}
+.solar-log-count strong {display:block;font:700 24px/1.2 var(--font-display);color:var(--ui-ink);margin-bottom:5px}
+.solar-log-count span {display:block;font:400 8px/1.45 var(--font-ui)}
+.solar-log-count small {display:block;font:400 7px/1.5 var(--font-ui);color:var(--ui-muted);margin-top:7px}
+.solar-vibes {display:flex;align-items:center;gap:7px;min-height:38px;padding:8px 10px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-panel)}
+.solar-vibes p {flex:1;min-width:0;margin:0;font:400 11px/1.5 var(--font-ui);overflow-wrap:anywhere;white-space:pre-wrap;color:var(--ui-muted)}
+.solar-vibes.has-vibes p {color:var(--ui-ink)}
+.solar-vibes .text-button {font-size:9px;padding:2px;min-height:32px}
+.solar-member-checkin {font:400 8px/1.5 var(--font-ui);border:1px solid var(--ui-line-soft);border-radius:3px;padding:4px 6px}
+.solar-member-checkin.is-logged {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-light)}
+.solar-month-totals {display:flex;align-items:center;justify-content:center;gap:30px;max-width:420px;margin:24px auto 8px;padding:16px 22px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-inset)}
+.solar-month-totals>div {display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.solar-month-totals span {font:400 10px/1.5 var(--font-ui)}
+.solar-month-totals strong {font:700 26px/1.2 var(--font-display)}
+.solar-month-totals .score-circle {width:54px;height:54px;min-width:54px}
+.solar-month-totals .score-circle>span {font-size:19px}
+.solar-evening {margin-top:22px;padding:12px 14px}
+.solar-evening-heading {margin-bottom:5px}
+.solar-empty {padding:24px 12px;text-align:center;font-size:12px}
+#solar-profile-dialog {width:520px;max-width:calc(100vw - 24px)}
+#solar-profile-form fieldset {padding:0;border:0;margin:14px 0 22px}
+.solar-avatar-picker {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.solar-avatar-picker button {display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;min-height:78px;padding:6px 2px;background:var(--ui-inset);border:1px solid var(--ui-line-soft);border-radius:4px;color:var(--ui-ink)}
+.solar-avatar-picker .planet-emoji {width:48px;height:48px;object-fit:contain}
+.solar-avatar-picker span {font:400 8px/1.4 var(--font-ui)}
+.solar-avatar-picker button[aria-checked=true] {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-light);box-shadow:inset 0 -2px var(--ui-gold),0 0 7px rgb(255 230 151 / .2)}
+#solar-vibes-input {width:100%;height:84px;resize:vertical;max-height:180px;margin-top:6px;font:400 16px/1.4 var(--font-ui)}
+#solar-profile-form .hint {font-size:11px;margin-top:8px}
+.solar-reaction-counts {display:grid;grid-template-columns:1fr;gap:6px;text-align:left}
+.solar-reaction-chip {border-radius:5px;padding:8px;align-items:center;white-space:normal}
+.solar-reaction-chip .reaction-people {min-width:0;flex:1}
+.reaction-people strong {display:block;font:700 11px/1.4 var(--font-ui)}
+.reaction-people small {display:block;font:400 11px/1.6 var(--font-ui);overflow-wrap:anywhere}
+@media(min-width:700px){
+  .solar-member-card {grid-template-columns:140px minmax(0,1fr);gap:18px}
+  .solar-score-panel {grid-template-columns:120px minmax(0,1fr);padding:18px 24px;min-height:140px;gap:24px}
+  .leaderboard .solar-yesterday .score-circle {width:84px;height:84px;min-width:84px}
+  .leaderboard .solar-yesterday .score-circle>span {font-size:29px}
+  .leaderboard .solar-month .score-circle {width:66px;height:66px;min-width:66px}
+  .leaderboard .solar-month .score-circle>span {font-size:23px}
+  .solar-stat-label {font-size:11px}.solar-log-count strong {font-size:34px}.solar-log-count span {font-size:11px}.solar-log-count small {font-size:9px}
+  .leaderboard .solar-person-name .leaderboard-user-name {font-size:20px}.solar-person-name small {font-size:10px}
+  .solar-vibes p {font-size:13px}.solar-vibes {padding:10px 14px;min-height:46px}
+  .solar-member-checkin {font-size:10px}.solar-day-hint {font-size:9px}
+}
+@media(max-width:360px){
+  .leaderboard .solar-hero {padding:14px 12px;gap:8px}
+  .solar-member-count {flex-basis:92px;gap:4px}.solar-member-count strong {font-size:13px}.solar-member-count span {font-size:9px}
+  .leaderboard .solar-hero h2 {font-size:24px}
+  .solar-member-card {grid-template-columns:72px minmax(0,1fr);gap:8px}
+  .solar-score-panel {grid-template-columns:48px minmax(0,1fr);padding:10px 6px;gap:6px}
+  .leaderboard .solar-yesterday .score-circle {width:48px;height:48px;min-width:48px}.leaderboard .solar-yesterday .score-circle>span {font-size:18px}
+  .leaderboard .solar-month .score-circle {width:38px;height:38px;min-width:38px}.leaderboard .solar-month .score-circle>span {font-size:14px}
+  .solar-stat-label {font-size:8px}.solar-log-count strong {font-size:22px}.solar-log-count span {font-size:7px}
+  .solar-vibes {padding:6px 8px}.solar-vibes p {font-size:10px}
+  .leaderboard .solar-person-name .leaderboard-user-name {font-size:14px}
+}

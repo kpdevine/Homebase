@@ -1,9 +1,10 @@
 import {meterPath} from './model.mjs';
 import {bindMeterDrag} from './meter-drag.mjs';
 import {settingsForDay,nutritionScore,normalizeSettings,LOGGING_SECTIONS} from './customization.mjs';
+import {needsLoggingSetup} from './onboarding.mjs';
 
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export function mountCustomization({getStore,getDate,today,render,announce,preview}) {
+export function mountCustomization({getStore,getDate,today,render,announce,preview,getStartup=()=>({cloudStatus:'loading'})}) {
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const dialog=document.createElement('dialog');dialog.id='customize-dialog';dialog.className='customize-dialog';dialog.setAttribute('aria-labelledby','customize-title');
   dialog.innerHTML=`<div class="dialog-heading"><div><p class="eyebrow">POCKET PLANET</p><h2 id="customize-title">Logging settings</h2></div><button type="button" class="icon-button" data-config-close aria-label="Close setup">×</button></div><p class="hint">Choose how you log. You can change these in Settings.</p><nav class="config-tabs" aria-label="Setup sections"><button type="button" data-config-tab="nutrition">Nutrition</button><button type="button" data-config-tab="training">Training</button><button type="button" data-config-tab="tasks">To-do list</button><button type="button" data-config-tab="sentiments">Sentiments</button></nav><form id="customize-form">
@@ -96,8 +97,8 @@ export function mountCustomization({getStore,getDate,today,render,announce,previ
     const finalMeter=$('#final-sentiments-meter');if(finalMeter)finalMeter.closest('.final-sentiments-rating')?.toggleAttribute('hidden',ratingHidden);
   }
   let setupOffered=false;
-  function offerSetup(){if(setupOffered||getStore().getSettings().tabsChosen||document.querySelector('dialog[open]'))return;setupOffered=true;open();}
+  function offerSetup(){if(setupOffered||document.querySelector('dialog[open]')||!needsLoggingSetup({snapshot:getStore().exportSnapshot(),preview,...getStartup()}))return;setupOffered=true;open();}
   document.addEventListener('close',()=>setTimeout(offerSetup,50),true);
   setTimeout(offerSetup,600);
-  return {paint,open};
+  return {paint,open,offerSetup};
 }

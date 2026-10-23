@@ -62,7 +62,7 @@ export function mountUIShell({getStore,getDate,getView,onDeleteTask}) {
   const footer=$('.display-footer');footer.setAttribute('aria-label','Clock and calendar');
   $('#achievements-overview').textContent='Overview';
   $('.achievement-policy').textContent='Scores count after day review. Streaks include weekends; weeks run Monday–Sunday. Editing history updates achievements.';
-  $('#friends-view .friends-board .panel-heading h2').textContent='Find friends';
+  $('#friends-view .friends-board .panel-heading h2').textContent='Manage Friends';
   $('#friends-view .friends-board .eyebrow').textContent='';
   const guide=info.querySelector('p');guide.classList.add('score-info-intro');
   return {

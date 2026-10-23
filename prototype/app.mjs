@@ -1244,7 +1244,7 @@ function refreshClock() {
   if(phase!==clockReviewPhase){clockReviewPhase=phase;renderReview();}
 }
 socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview,scoreCircle:circle});
-customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview});
+customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview,getStartup:()=>({cloudStatus:cloud?.status()||'loading',hasUser:cloud?.hasUser()||false,error:!!storageError})});
 uiShell=mountUIShell({getStore:()=>store,getDate:()=>selectedDate,getView:()=>view,onDeleteTask:()=>{if(!taskEdit)return;const {date,id}=taskEdit;closeDialog($('#task-dialog'));taskEdit=null;removeTaskFromDay(date,id);}});
 noteSaves=mountNoteSaves({save:()=>{flushSave();return !storageError&&!blockedSave;},getDate:()=>selectedDate,isEditable:()=>!archivedDay()});
 refreshClock();
@@ -1276,6 +1276,7 @@ cloud=mountCloud({
     }
   },
   onStatus:state=>{
+    setTimeout(()=>customization?.offerSetup(),0);
     cloudLabel=state.label;renderSaveStatus();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }

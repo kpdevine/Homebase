@@ -48,7 +48,12 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     let unwatch;
     try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Friends listener did not receive the score summary.')),5000);unwatch=eli.watch(state=>{if(state.friends.some(friend=>friend.uid==='dana'&&friend.daysLogged===5)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{unwatch?.();}
     const danaDb=env.authenticatedContext('dana').firestore(),eliDb=env.authenticatedContext('eli').firestore();
+    await assertSucceeds(dana.groups.saveAppearance({planet:'martian',vibes:'Ready for a new orbit'}));
+    assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().planet,'martian');
+    await assertFails(getDoc(doc(eliDb,'socialPreferences','dana')));
+    await assertFails(setDoc(doc(eliDb,'socialPreferences','dana'),{planet:'happy',vibes:'forged',updatedAt:serverTimestamp()}));
     const system=await assertSucceeds(dana.groups.create('Weekend Orbit'));
+    assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().vibes,'Ready for a new orbit');
     assert.equal((await eli.groups.search('weekend'))[0].id,system.id);
     await assertFails(getDocs(collection(eliDb,'friendGroups',system.id,'members')));
     await assertSucceeds(eli.groups.request(system.id));
@@ -57,12 +62,19 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const forged=writeBatch(eliDb);forged.set(doc(eliDb,'friendGroups',system.id,'members','eli'),{uid:'eli',username:'eli_planet',joinedAt:serverTimestamp()});forged.set(doc(eliDb,'groupMemberships','eli','groups',system.id),{groupId:system.id,groupName:system.name,owner:'dana',ownerUsername:'dana_planet',joinedAt:serverTimestamp()});await assertFails(forged.commit());
     await assertSucceeds(dana.groups.accept(system.id+'~eli'));
     await assertSucceeds(eli.groups.primary(system.id));
-    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}]));
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}],{planet:'martian',vibes:'Ready for a new orbit'}));
+    assert.equal((await getDoc(doc(eliDb,'friendGroups',system.id,'scores','dana'))).data().vibes,'Ready for a new orbit');
+    await assertFails(setDoc(doc(danaDb,'socialScores','dana'),{uid:'dana',username:'dana_planet',...summary,vibes:'group-only message',updatedAt:serverTimestamp()}));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'scores','dana'),{uid:'dana',username:'dana_planet',...summary,planet:'invalid',updatedAt:serverTimestamp()}));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'scores','dana'),{uid:'dana',username:'dana_planet',...summary,vibes:'x'.repeat(161),updatedAt:serverTimestamp()}));
     assert.equal((await assertSucceeds(getDoc(doc(eliDb,'friendGroups',system.id,'days','dana~2026-10-20')))).data().score,9);
     await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20','fire'));
     async function listenUntil(subscribe,match){let stop;try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Solar System listener timed out')),5000);stop=subscribe(value=>{if(match(value)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{stop?.();}}
     await listenUntil((cb,error)=>eli.groups.watch(cb,error),value=>value.groups.some(group=>group.id===system.id));
     await listenUntil((cb,error)=>eli.groups.watchBoard(system.id,cb,error),value=>value.some(person=>person.uid==='dana'&&person.daysLogged===5));
+    await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-20',cb,error),value=>value.some(day=>day.uid==='dana'&&day.score===9));
+    await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.length===0);
+    await assertFails(getDocs(query(collection(c,'friendGroups',system.id,'days'),where('date','==','2026-10-20'))));
     await listenUntil((cb,error)=>dana.groups.watchDay(system.id,'dana','2026-10-20',cb,error),value=>value.day?.score===9&&value.reactions.some(reaction=>reaction.kind==='fire'));
     for(const kind of ['happy','sad','party','sun','love','wow','sleepy','strong','rocket','martian'])await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',kind));
     await assertFails(dana.groups.react(system.id,'dana','2026-10-20','happy'));
