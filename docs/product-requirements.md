@@ -195,3 +195,15 @@ Use the owner's supplied member-card mockup: one bold Kieran Solar System name a
 After 9 p.m. on the viewing device, display each member's current app-day logging status and a group count. Preserve the 1 a.m. app-day boundary. Read only the existing member-only shared score records, update through listeners, and distinguish pending/unavailable status from unlogged days.
 
 Users choose portraits from the eleven existing planet emojis and may set a message of up to 160 characters. Store preferences privately and publish only the chosen portrait/message to their Solar Systems, alongside the existing score summaries. Group creation or primary-group changes preserve these preferences. Personal notes/tasks/food/training/weight remain private. Yesterday's circle opens day navigation and emoji reactions for shared days; show the usernames behind every reaction, and allow toggling one's own reaction off.
+
+### October 23 — Social polish and 22-planet library
+
+Superseding the earlier eleven-planet limit, offer 22 reactions and profile pictures. New planets: distorted shock, laughing, crying, frustrated, thinking, wink/thumbs-up, salute, grateful, melting, smart, and blowing a kiss. Match the existing pixel Jupiter family with varied colors and connected ring-arms. The purple thumbs-up remains, with its arm connection corrected.
+
+Show up to three unique glowing reaction badges by Yesterday, with counts and overflow; tapping opens larger artwork and visible sender names in bold Kieran. Pulse other members' Yesterday circles without shifting layout. Rank monthly averages using the existing logged-day/username tie breaks and show gold, silver and bronze medals by Month circles; unlogged/stale scores have no rank. Center portrait names on iPhone and bold the actual month/year label. Tap one's portrait to edit, with no overlaid edit button. Keep one Manage Friends panel and remove redundant navigation.
+
+One user may create one Solar System, enforced atomically by an owner-only `solarOwnership/{uid}` marker. Joining other systems and choosing a primary system remain supported. Preserve existing systems through an ownership-index migration before the rule release. Do not expose private logs.
+
+Reaction and profile pickers are visual-only: show the planet artwork without visible reaction titles. Fill each square tile with the artwork, leaving only a small inset to preserve the full ring/hand silhouette. Keep accessible names for screen readers and selection states for touch/keyboard users. Received reactions show artwork, counts, and the people who reacted.
+
+Use small content-addressed WebP icons/portraits with immutable asset caching, transparent backgrounds and explicit intrinsic dimensions. Avoid stale app-code caches and promise no instant network download on a first visit. Explicitly consider real iPhone Safari/Home Screen WebKit styling; desktop phone previews are only layout checks.

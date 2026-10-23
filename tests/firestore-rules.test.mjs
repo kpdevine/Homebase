@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
+import {REACTIONS} from '../prototype/social-model.mjs';
 
 test('Firestore isolates private logs and limits social summaries to mutually accepted friends',{skip:!process.env.FIRESTORE_EMULATOR_HOST},async()=>{
   let require=createRequire(new URL('../package.json',import.meta.url));
@@ -53,6 +54,9 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertFails(getDoc(doc(eliDb,'socialPreferences','dana')));
     await assertFails(setDoc(doc(eliDb,'socialPreferences','dana'),{planet:'happy',vibes:'forged',updatedAt:serverTimestamp()}));
     const system=await assertSucceeds(dana.groups.create('Weekend Orbit'));
+    await assert.rejects(dana.groups.create('Second Orbit'),/one Solar System/);
+    await assertFails(setDoc(doc(danaDb,'solarOwnership','dana'),{owner:'dana',groupId:'another-group',createdAt:serverTimestamp()}));
+    await assertFails(getDoc(doc(eliDb,'solarOwnership','dana')));
     assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().vibes,'Ready for a new orbit');
     assert.equal((await eli.groups.search('weekend'))[0].id,system.id);
     await assertFails(getDocs(collection(eliDb,'friendGroups',system.id,'members')));
@@ -76,7 +80,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.length===0);
     await assertFails(getDocs(query(collection(c,'friendGroups',system.id,'days'),where('date','==','2026-10-20'))));
     await listenUntil((cb,error)=>dana.groups.watchDay(system.id,'dana','2026-10-20',cb,error),value=>value.day?.score===9&&value.reactions.some(reaction=>reaction.kind==='fire'));
-    for(const kind of ['happy','sad','party','sun','love','wow','sleepy','strong','rocket','martian'])await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',kind));
+    await listenUntil((cb,error)=>dana.groups.watchReactions(system.id,'2026-10-20',cb,error),value=>value.some(reaction=>reaction.target==='dana'&&reaction.kind==='fire'));
+    for(const {id:kind} of REACTIONS)await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',kind));
     await assertFails(dana.groups.react(system.id,'dana','2026-10-20','happy'));
     await assertFails(setDoc(doc(c,'friendGroups',system.id,'reactions','dana~2026-10-20~charlie'),{target:'dana',date:'2026-10-20',reactor:'charlie',username:'charlie_planet',kind:'fire',updatedAt:serverTimestamp()}));
     await assertFails(getDoc(doc(c,'friendGroups',system.id,'scores','dana')));
@@ -92,5 +97,9 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertSucceeds(eli.groups.remove(system.id));
     await assertFails(dana.groups.invite(system.id,'charlie')); // Only accepted friends can be invited.
     await eli.remove('dana');await assertFails(getDoc(doc(env.authenticatedContext('eli').firestore(),'socialScores','dana')));
+    const nova=socialClient(env.authenticatedContext('nova').firestore(),'nova');await nova.claim('nova_planet');
+    const creations=await Promise.allSettled([nova.groups.create('First concurrent orbit'),nova.groups.create('Second concurrent orbit')]);
+    assert.equal(creations.filter(value=>value.status==='fulfilled').length,1);
+    assert.equal(creations.filter(value=>value.status==='rejected').length,1);
   }finally{await env.cleanup();}
 });

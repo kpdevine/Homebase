@@ -1043,3 +1043,53 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
   .solar-vibes {padding:6px 8px}.solar-vibes p {font-size:10px}
   .leaderboard .solar-person-name .leaderboard-user-name {font-size:14px}
 }
+
+/* Explicit WebKit geometry keeps real iPhones aligned with the phone preview. */
+.leaderboard #leaderboard-month {font-weight:700}
+html {-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button {-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent}
+#main:focus,section[tabindex="-1"]:focus,.history-detail:focus {outline:none}
+.solar-person-name {display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:40px;gap:2px}
+.leaderboard .solar-person-name .leaderboard-user-name {width:100%;text-align:center;max-width:100%;margin:0;padding:1px 0 3px}
+.solar-person-name small {display:block;width:100%;text-align:center}
+.solar-profile-avatar {display:block;aspect-ratio:1/1;min-height:0;overflow:hidden}
+.solar-profile-avatar>.planet-emoji {position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);max-height:none;pointer-events:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.solar-yesterday-meter,.solar-month-meter {position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;isolation:isolate}
+.solar-yesterday .solar-open-day {overflow:visible;border:0;box-shadow:none;min-width:60px;min-height:60px;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.solar-yesterday {padding:0 9px 0 3px}
+.solar-month {padding:0 8px}
+.solar-reaction-orbit {position:absolute;z-index:2;bottom:-3px;left:calc(50% + 8px);display:flex;align-items:center;pointer-events:none;filter:drop-shadow(0 0 4px rgb(255 230 151 / .7))}
+.solar-reaction-orbit>span {position:relative;display:block;flex:0 0 22px;width:22px;height:22px;margin-left:-7px;border-radius:50%;background:var(--ui-active);border:1px solid var(--ui-light)}
+.solar-reaction-orbit .planet-emoji {display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.solar-reaction-orbit small {position:absolute;right:-3px;bottom:-4px;min-width:10px;padding:1px 2px;border-radius:3px;background:var(--ui-active);color:var(--ui-light);font:700 7px/1 var(--font-ui)}
+.solar-reaction-orbit .solar-reaction-more {position:static;white-space:nowrap;font-size:8px;margin-left:1px}
+.solar-rank-medal {position:absolute;right:-10px;bottom:-9px;width:24px;height:29px;z-index:2;filter:drop-shadow(0 0 4px rgb(255 230 151 / .35));color:var(--ui-ink);--medal-metal:var(--ui-gold)}
+.solar-rank-medal svg {display:block;width:100%;height:100%;overflow:visible}
+.solar-rank-medal circle {fill:var(--medal-metal);stroke:var(--ui-active);stroke-width:1.5}
+.solar-rank-medal .medal-inset {fill:none;stroke:rgb(255 255 255 / .6);stroke-width:1}
+.solar-rank-medal .medal-ribbon {fill:var(--ui-active);stroke:var(--medal-metal);stroke-width:1.4}
+.solar-rank-medal b {position:absolute;inset:4px 0 auto;text-align:center;font:700 11px/1.5 var(--font-ui);color:var(--ui-active)}
+.solar-rank-medal.rank-silver {--medal-metal:var(--ui-white);filter:drop-shadow(0 0 4px rgb(255 255 255 / .4))}
+.solar-rank-medal.rank-bronze {--medal-metal:rgb(218 155 106 / 1);filter:drop-shadow(0 0 4px rgb(218 155 106 / .4))}
+#solar-day-dialog .solar-reaction-chip {gap:14px;padding:12px}
+#solar-day-dialog .solar-reaction-chip>.planet-emoji {width:56px;height:56px;flex:0 0 56px;object-fit:contain;filter:drop-shadow(0 0 4px rgb(255 230 151 / .3))}
+#solar-day-dialog .reaction-people strong {font-size:12px;margin-bottom:6px}
+#solar-day-dialog .reaction-people small {font:700 20px/1.3 var(--font-handwriting);color:var(--ui-ink);padding-bottom:4px;overflow-wrap:anywhere}
+#solar-day-dialog .solar-reaction-picker {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#solar-day-dialog .solar-reaction-picker button,.solar-avatar-picker button {position:relative;aspect-ratio:1/1;min-height:0;padding:0;gap:0;overflow:hidden;justify-content:center}
+#solar-day-dialog .solar-reaction-picker .planet-emoji,.solar-avatar-picker .planet-emoji {position:absolute;inset:2px;width:calc(100% - 4px);height:calc(100% - 4px);max-width:none;max-height:none;object-fit:contain;pointer-events:none}
+@keyframes solar-day-invitation {0%,100% {filter:drop-shadow(0 0 2px rgb(255 255 255 / .25))}50% {filter:drop-shadow(0 0 7px rgb(255 241 198 / .85))}}
+html[data-motion=full] .solar-open-day.is-other .score-circle {animation:solar-day-invitation 2.6s ease-in-out infinite}
+.solar-open-day.is-other:hover .score-circle,.solar-open-day.is-other:focus-visible .score-circle {animation-play-state:paused;filter:drop-shadow(0 0 8px rgb(255 241 198 / .8))}
+@media(min-width:700px){
+  .solar-reaction-orbit>span {width:28px;height:28px;flex-basis:28px;margin-left:-8px}
+  .solar-reaction-orbit {left:calc(50% + 12px);bottom:-3px}
+  .solar-rank-medal {width:30px;height:36px;right:-13px;bottom:-10px}
+  .solar-rank-medal b {font-size:13px;top:5px}
+}
+@media(max-width:360px){
+  .solar-yesterday {padding:0 4px 0 0}.solar-month {padding:0 4px}
+  .solar-yesterday .solar-open-day {min-width:48px;min-height:48px}
+  .solar-reaction-orbit>span {width:18px;height:18px;flex-basis:18px;margin-left:-7px}
+  .solar-rank-medal {width:20px;height:24px;right:-9px;bottom:-8px}.solar-rank-medal b {font-size:9px;top:3px}
+}

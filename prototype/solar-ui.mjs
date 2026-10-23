@@ -1,19 +1,19 @@
 import {addDays} from './model.mjs';
 import {REACTIONS,solarAppearance} from './social-model.mjs';
 import {lateCheckInWindow} from './day-clock.mjs';
+import {REACTION_ASSETS} from './reaction-assets.mjs';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export const planetEmoji=(id,label='')=>`<img class="planet-emoji" src="./assets/reactions/${id}.png" alt="${esc(label)}" width="48" height="48" loading="lazy">`;
+export const planetEmoji=(id,label='',size='icon')=>`<img class="planet-emoji" src="${REACTION_ASSETS[id]?.[size]||REACTION_ASSETS.happy.icon}" alt="${esc(label)}" width="${size==='portrait'?320:160}" height="${size==='portrait'?320:160}" loading="eager" decoding="async" fetchpriority="${size==='portrait'?'high':'low'}">`;
 
 export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today,changed,action,message,scoreCircle}) {
   const $=s=>document.querySelector(s),replace=(id,html)=>{if($(id).innerHTML!==html)$(id).innerHTML=html;};
-  let state={groups:[],requests:[],invitations:[],primaryId:null},members=[],results=[],stop=null,boardStop=null,dayStop=null,primary=null,dayTarget=null,dayDate=null,dayState={day:null,reactions:[]},loading=true,run=0,eveningStop=null,eveningKey='',eveningDays=[],eveningLoading=false,eveningError=false,managementAutoOpened=false;
+  let state={groups:[],requests:[],invitations:[],primaryId:null},members=[],results=[],stop=null,boardStop=null,dayStop=null,primary=null,dayTarget=null,dayDate=null,dayState={day:null,reactions:[]},loading=true,run=0,eveningStop=null,eveningKey='',eveningDays=[],eveningLoading=false,eveningError=false,managementAutoOpened=false,reactionStop=null,reactionKey='',boardReactions=[];
   const hero=$('.leaderboard .panel-heading');hero.classList.add('solar-hero');
   hero.querySelector('h2').id='solar-title';hero.querySelector('div').classList.add('solar-identity');
   $('#solar-title').insertAdjacentHTML('afterend','<p id="solar-subtitle">My Solar System</p>');
   hero.insertAdjacentHTML('beforeend','<div id="solar-member-count" class="solar-member-count" aria-label="Members"><strong>—</strong><span>members</span></div>');
   $('.leaderboard-scroll').before($('#leaderboard-month'));
-  hero.insertAdjacentHTML('afterend','<div class="solar-toolbar"><button type="button" class="quiet-button" id="solar-edit-profile">My planet & vibes</button><button type="button" class="quiet-button" id="solar-open-friends">Manage Friends</button></div>');
-  $('#solar-open-friends').onclick=()=>{$('#friend-manager').open=true;$('#friend-manager').scrollIntoView({block:'start',behavior:'smooth'});};
+  hero.insertAdjacentHTML('afterend','<div class="solar-toolbar"><button type="button" class="quiet-button" id="solar-edit-profile">My planet & vibes</button></div>');
   $('#solar-edit-profile').onclick=()=>openProfile();
   $('.leaderboard-scroll').insertAdjacentHTML('afterend','<section id="solar-evening" class="solar-evening" aria-labelledby="solar-evening-title" hidden><div class="solar-evening-heading"><div><p class="eyebrow" id="solar-evening-date"></p><h3 id="solar-evening-title">Tonight’s check-in</h3></div><span id="solar-evening-total" class="count-pill"></span></div><p class="hint">Updates as members sync their day.</p></section>');
   $('.leaderboard .panel-heading').insertAdjacentHTML('afterend','<div id="solar-choices" class="solar-choices" role="group" aria-label="Primary Solar System"></div>');
@@ -22,11 +22,12 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   let removeTarget=null;
   confirm.querySelector('[data-solar-cancel]').onclick=()=>confirm.close();
   confirm.querySelector('[data-solar-confirm]').onclick=()=>{const target=removeTarget;confirm.close();if(target)action(()=>api().remove(target.group,target.uid));};
-  const dayDialog=document.createElement('dialog');dayDialog.id='solar-day-dialog';dayDialog.setAttribute('aria-labelledby','solar-day-title');dayDialog.innerHTML=`<div class="dialog-heading"><div><p class="eyebrow" id="solar-day-user"></p><h2 id="solar-day-title">Day score</h2></div><button class="icon-button" type="button" data-day-close aria-label="Close day reactions">×</button></div><div class="solar-day-navigation"><button type="button" class="icon-button" id="solar-day-prev" aria-label="Previous day">‹</button><span id="solar-day-date"></span><button type="button" class="icon-button" id="solar-day-next" aria-label="Next day">›</button></div><div id="solar-day-score"></div><p id="solar-day-state" class="hint" role="status"></p><div id="solar-reaction-counts" class="solar-reaction-counts"></div><section id="solar-reaction-picker"><h3>Send a little planet</h3><div class="solar-reaction-picker">${REACTIONS.map(reaction=>`<button type="button" data-react="${reaction.id}" aria-label="${reaction.label}" aria-pressed="false">${planetEmoji(reaction.id)}<small>${esc(reaction.short||reaction.label)}</small></button>`).join('')}</div><p class="hint">Tap your reaction again to remove it.</p></section><p id="solar-reaction-feedback" role="status"></p>`;document.body.append(dayDialog);
-  dayDialog.querySelector('[data-day-close]').onclick=()=>dayDialog.close();dayDialog.addEventListener('close',()=>{dayStop?.();dayStop=null;dayTarget=null;});
+  const dayDialog=document.createElement('dialog');dayDialog.id='solar-day-dialog';dayDialog.setAttribute('aria-labelledby','solar-day-title');dayDialog.innerHTML=`<div class="dialog-heading"><div><p class="eyebrow" id="solar-day-user"></p><h2 id="solar-day-title">Day score</h2></div><button class="icon-button" type="button" data-day-close aria-label="Close day reactions">×</button></div><div class="solar-day-navigation"><button type="button" class="icon-button" id="solar-day-prev" aria-label="Previous day">‹</button><span id="solar-day-date"></span><button type="button" class="icon-button" id="solar-day-next" aria-label="Next day">›</button></div><div id="solar-day-score"></div><p id="solar-day-state" class="hint" role="status"></p><div id="solar-reaction-counts" class="solar-reaction-counts"></div><section id="solar-reaction-picker"><h3>Send a little planet</h3><div class="solar-reaction-picker">${REACTIONS.map(reaction=>`<button type="button" data-react="${reaction.id}" aria-label="${reaction.label}" aria-pressed="false">${planetEmoji(reaction.id)}</button>`).join('')}</div><p class="hint">Tap your reaction again to remove it.</p></section><p id="solar-reaction-feedback" role="status"></p>`;document.body.append(dayDialog);
+  dayDialog.querySelector('[data-day-close]').onclick=()=>dayDialog.close();dayDialog.addEventListener('close',()=>{const target=dayTarget,date=dayDate;dayStop?.();dayStop=null;dayTarget=null;requestAnimationFrame(()=>[...document.querySelectorAll('[data-solar-day]')].find(button=>button.dataset.solarDay===target&&button.dataset.solarDate===date)?.focus({preventScroll:true}));});
   const profileDialog=document.createElement('dialog');profileDialog.id='solar-profile-dialog';profileDialog.setAttribute('aria-labelledby','solar-profile-title');
-  profileDialog.innerHTML=`<div class="dialog-heading"><h2 id="solar-profile-title">My planet & vibes</h2><button class="icon-button" type="button" data-profile-close aria-label="Close planet profile">×</button></div><form id="solar-profile-form"><fieldset><legend>Your planet</legend><div class="solar-avatar-picker" role="radiogroup" aria-label="Planet profile picture">${REACTIONS.map(reaction=>`<button type="button" role="radio" data-profile-planet="${reaction.id}" aria-checked="false" aria-label="${esc(reaction.label)}">${planetEmoji(reaction.id)}<span>${esc(reaction.short)}</span></button>`).join('')}</div></fieldset><label for="solar-vibes-input">Current vibes</label><textarea id="solar-vibes-input" rows="2" maxlength="160" placeholder="A little update from your orbit…"></textarea><p class="hint">Your planet and this optional message are shared with members of your Solar Systems.</p><p id="solar-profile-error" role="alert"></p><button type="submit" class="primary-button" id="solar-profile-save">Save my planet</button></form>`;
+  profileDialog.innerHTML=`<div class="dialog-heading"><h2 id="solar-profile-title">My planet & vibes</h2><button class="icon-button" type="button" data-profile-close aria-label="Close planet profile">×</button></div><form id="solar-profile-form"><fieldset><legend>Your planet</legend><div class="solar-avatar-picker" role="radiogroup" aria-label="Planet profile picture">${REACTIONS.map(reaction=>`<button type="button" role="radio" data-profile-planet="${reaction.id}" aria-checked="false" aria-label="${esc(reaction.label)}">${planetEmoji(reaction.id)}</button>`).join('')}</div></fieldset><label for="solar-vibes-input">Current vibes</label><textarea id="solar-vibes-input" rows="2" maxlength="160" placeholder="A little update from your orbit…"></textarea><p class="hint">Your planet and this optional message are shared with members of your Solar Systems.</p><p id="solar-profile-error" role="alert"></p><button type="submit" class="primary-button" id="solar-profile-save">Save my planet</button></form>`;
   document.body.append(profileDialog);let chosenPlanet='happy';
+  profileDialog.addEventListener('close',()=>requestAnimationFrame(()=>document.querySelector('[data-edit-solar-profile]')?.focus({preventScroll:true})));
   profileDialog.querySelector('[data-profile-close]').onclick=()=>profileDialog.close();
   function paintPlanetChoice(){for(const button of profileDialog.querySelectorAll('[data-profile-planet]')){const selected=button.dataset.profilePlanet===chosenPlanet;button.setAttribute('aria-checked',String(selected));button.tabIndex=selected?0:-1;}}
   function openProfile(){if(!getProfile()||!state.appearanceReady)return;const appearance=solarAppearance(state.appearance);chosenPlanet=appearance.planet;$('#solar-vibes-input').value=appearance.vibes;$('#solar-profile-error').textContent='';paintPlanetChoice();if(!profileDialog.open)profileDialog.showModal();}
@@ -38,12 +39,14 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   function watchPrimary(){
     const next=state.groups.find(group=>group.id===state.primaryId)?.id||state.groups[0]?.id||null;
     if(next===primary)return;
-    primary=next;boardStop?.();boardStop=null;members=[];loading=!!next;stopEvening();
+    primary=next;boardStop?.();boardStop=null;members=[];loading=!!next;stopEvening();stopReactions();
     if(dayDialog.open)dayDialog.close();
     if(next){const active=run;boardStop=api().watchBoard(next,rows=>{if(active!==run||primary!==next)return;members=rows;loading=false;changed();},error=>{if(active===run){loading=false;message('Solar System could not connect. '+error.message);changed();}});}
   }
   function stopEvening(){eveningStop?.();eveningStop=null;eveningKey='';eveningDays=[];eveningLoading=false;eveningError=false;}
-  function reset(){stopEvening();managementAutoOpened=false;run++;stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
+  function stopReactions(){reactionStop?.();reactionStop=null;reactionKey='';boardReactions=[];}
+  function watchReactionBadges(){const date=addDays(today(),-1),key=primary?primary+'~'+date:'';if(key===reactionKey)return;stopReactions();if(!key)return;reactionKey=key;const active=run;reactionStop=api().watchReactions(primary,date,rows=>{if(active!==run||reactionKey!==key)return;boardReactions=rows;changed();},error=>{if(active!==run||reactionKey!==key)return;boardReactions=[];message('Day reactions could not connect. '+error.message);changed();});}
+  function reset(){stopEvening();stopReactions();managementAutoOpened=false;run++;stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
   function connect(){reset();if(!api())return;const active=run;stop=api().watch(value=>{if(active!==run)return;state=value;watchPrimary();changed();},error=>{if(active===run)message('Solar Systems could not connect. '+error.message);});}
   $('#solar-create').onsubmit=event=>{event.preventDefault();action(async()=>{await api().create($('#solar-name').value);$('#solar-name').value='';});};
   $('#solar-search').onsubmit=event=>{event.preventDefault();action(async()=>{results=await api().search($('#solar-query').value);replace('#solar-results',results.length?'':'<li>No Solar Systems found.</li>');});};
@@ -75,7 +78,10 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-connected').hidden=!profile;$('#solar-title').textContent=group?.groupName||'Your Solar System';
     $('#solar-subtitle').hidden=!group;$('#solar-member-count').hidden=!group;
     $('#solar-member-count strong').textContent=loading?'—':members.length;$('#solar-member-count span').textContent=members.length===1?'member':'members';
-    paintEvening(ownLogged);
+    watchReactionBadges();paintEvening(ownLogged);
+    const ownsSystem=!!state.ownedGroupId||state.groups.some(value=>value.owner===user?.uid);
+    $('#solar-create').hidden=ownsSystem;
+    $('#solar-edit-profile').hidden=!!group&&state.appearanceReady;$('.solar-toolbar').hidden=$('#solar-edit-profile').hidden;
     replace('#solar-choices',state.groups.filter(group=>group.id!==primary).map(group=>`<button type="button" class="quiet-button" data-primary-solar="${esc(group.id)}" aria-pressed="${group.id===primary}">${esc(group.groupName)}</button>`).join(''));
     if(state.groupsLoaded&&!state.groups.length&&profile&&!$('#solar-manage').open){$('#solar-manage').open=true;managementAutoOpened=true;}
     if(group&&managementAutoOpened){$('#solar-manage').open=false;managementAutoOpened=false;}
@@ -89,7 +95,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     replace('#solar-member-list',members.map(member=>`<li><strong>@${esc(member.username)}</strong>${member.uid===group?.owner?'<small>Owner</small>':owner?`<button type="button" class="text-button" data-remove-member="${esc(member.uid)}">Remove…</button>`:''}</li>`).join(''));
     $('#leave-solar').hidden=!group||owner;
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
-    return {members,primary,loading,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
+    return {members,primary,loading,reactions:boardReactions,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
   function paintDay(){
     if(!dayTarget)return;
@@ -101,7 +107,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     const mine=dayState.reactions.find(reaction=>reaction.reactor===getUser()?.uid)?.kind;
     $('#solar-reaction-picker').hidden=own||!dayState.day;
     for(const button of dayDialog.querySelectorAll('[data-react]'))button.setAttribute('aria-pressed',String(button.dataset.react===mine));
-    replace('#solar-reaction-counts',REACTIONS.map(reaction=>{const people=dayState.reactions.filter(value=>value.kind===reaction.id);return people.length?`<span class="solar-reaction-chip" aria-label="${reaction.label}: ${esc(people.map(person=>'@'+person.username).join(', '))}">${planetEmoji(reaction.id)}<span class="reaction-people"><strong>${esc(reaction.short)} · ${people.length}</strong><small>${esc(people.map(person=>'@'+person.username).join(', '))}</small></span></span>`:'';}).join('')||'<small>No reactions yet.</small>');
+    replace('#solar-reaction-counts',REACTIONS.map(reaction=>{const people=dayState.reactions.filter(value=>value.kind===reaction.id);return people.length?`<span class="solar-reaction-chip" aria-label="${reaction.label}: ${esc(people.map(person=>'@'+person.username).join(', '))}">${planetEmoji(reaction.id)}<span class="reaction-people"><strong>${people.length} ${people.length===1?'reaction':'reactions'}</strong><small>${esc(people.map(person=>'@'+person.username).join(', '))}</small></span></span>`:'';}).join('')||'<small>No reactions yet.</small>');
   }
   function openDay(target,date){
     if(!primary||!members.some(member=>member.uid===target))return;

@@ -47,7 +47,7 @@ service cloud.firestore {
     }
     function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
     function validAppearance(data) {
-      return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian']
+      return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss']
         && data.get('vibes','') is string && data.get('vibes','').size() <= 160;
     }
     function validSummary(uid) {
@@ -86,6 +86,8 @@ service cloud.firestore {
     match /friendGroups/{group} {
       allow get: if signedIn();
       allow create: if signedIn() && request.resource.data.keys().hasOnly(['name','owner','ownerUsername','createdAt'])
+        && !exists(/databases/$(database)/documents/solarOwnership/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/solarOwnership/$(request.auth.uid)).data.groupId == group
         && self(request.resource.data.owner) && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 40
         && request.resource.data.ownerUsername == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
         && request.resource.data.createdAt == request.time
@@ -123,9 +125,16 @@ service cloud.firestore {
           && id == request.resource.data.target+'~'+request.resource.data.date+'~'+request.auth.uid
           && exists(/databases/$(database)/documents/friendGroups/$(group)/days/$(request.resource.data.target+'~'+request.resource.data.date))
           && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
-          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian'] && request.resource.data.updatedAt == request.time;
+          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss'] && request.resource.data.updatedAt == request.time;
         allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
       }
+    }
+    match /solarOwnership/{uid} {
+      allow read: if self(uid);
+      allow create: if self(uid) && request.resource.data.keys().hasOnly(['owner','groupId','createdAt'])
+        && request.resource.data.owner == uid && request.resource.data.groupId is string
+        && getAfter(/databases/$(database)/documents/friendGroups/$(request.resource.data.groupId)).data.owner == uid
+        && request.resource.data.createdAt == request.time;
     }
     match /groupDirectory/{group} {
       allow read: if signedIn();

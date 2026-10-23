@@ -83,3 +83,8 @@ Deploy the matching rules with Hosting; no new composite indexes or paid service
 
 
 October 22 member-card follow-up: `socialPreferences/{uid}` also stores owner-only `planet` and `vibes` (160 characters maximum); changes to primary membership merge these fields rather than replacing them. Only group score documents may include this appearance data. Ordinary friend aggregates remain score/count only. Group members can listen to shared day documents filtered by date for after-9-p.m. logging status, and see reaction senders. Security tests cover profile creation before group creation, preference preservation, outsider rejection, and invalid/oversized profile data.
+# October 23 social release
+
+The expanded reaction/profile allowlist contains 22 planet IDs, shared with the client model. Emulator coverage exercises every reaction through the actual driver. One-system creation uses an owner-only immutable `solarOwnership/{uid}` document created atomically with the group; Firestore rules reject a second group, including concurrent attempts. Before deploying these rules, populate missing owner markers from existing `groupDirectory` metadata; preserve every existing group and private record.
+
+Yesterday reaction badges use one group/date listener, with cleanup on group, account and date changes. Private appearance preferences are still published only to joined systems. Static icons/portraits live at content-hashed `/assets/reactions/optimized/**` URLs with `public, max-age=31536000, immutable`; app modules remain revalidated. All 22 icons plus portraits total 832,846 bytes. PNG sources remain available for future artwork edits.

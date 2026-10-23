@@ -40,7 +40,10 @@ export function groupClient(db,uid){
   }
   return {
     async create(value){const name=groupName(value),own=await identity(),ref=doc(collection(db,'friendGroups')),group={id:ref.id,name,owner:uid,ownerUsername:own.username};
+      const ownership=doc(db,'solarOwnership',uid);
+      if((await getDoc(ownership)).exists()||!(await getDocs(query(collection(db,'groupDirectory'),where('owner','==',uid),limit(1)))).empty)throw new Error('You can create one Solar System. You can still join others.');
       const batch=writeBatch(db);batch.set(ref,{name,owner:uid,ownerUsername:own.username,createdAt:serverTimestamp()});
+      batch.set(ownership,{owner:uid,groupId:ref.id,createdAt:serverTimestamp()});
       batch.set(doc(db,'groupDirectory',ref.id),{groupId:ref.id,name,searchName:name.toLowerCase(),owner:uid,ownerUsername:own.username,createdAt:serverTimestamp()});
       addMember(batch,group,uid,own.username);batch.set(prefs,{primaryGroupId:ref.id,updatedAt:serverTimestamp()},{merge:true});await batch.commit();return group;
     },
@@ -63,8 +66,10 @@ export function groupClient(db,uid){
     },
     async react(id,target,date,kind){if(kind!==null&&!REACTIONS.some(reaction=>reaction.id===kind))throw new Error('Choose a planet reaction.');const ref=doc(db,'friendGroups',id,'reactions',target+'~'+date+'~'+uid),batch=writeBatch(db);if(kind===null)batch.delete(ref);else {const own=await identity();batch.set(ref,{target,date,reactor:uid,username:own.username,kind,updatedAt:serverTimestamp()});}await batch.commit();},
     watchToday(id,date,receive,error){return onSnapshot(query(collection(db,'friendGroups',id,'days'),where('date','==',date)),snapshot=>receive(snapshot.docs.map(item=>item.data())),error);},
+    watchReactions(id,date,receive,error){return onSnapshot(query(collection(db,'friendGroups',id,'reactions'),where('date','==',date)),snapshot=>receive(snapshot.docs.map(item=>item.data())),error);},
     watchDay(id,target,date,receive,error){let day=null,reactions=[];const emit=()=>receive({day,reactions});const stops=[onSnapshot(doc(db,'friendGroups',id,'days',target+'~'+date),snapshot=>{day=snapshot.exists()?snapshot.data():null;emit();},error),onSnapshot(query(collection(db,'friendGroups',id,'reactions'),where('target','==',target),where('date','==',date)),snapshot=>{reactions=snapshot.docs.map(item=>item.data());emit();},error)];return ()=>stops.forEach(stop=>stop());},
-    watch(receive,error){let groups=[],requests=[],invitations=[],primaryId=null,groupsLoaded=false,appearance=solarAppearance(),appearanceReady=false;const emit=()=>receive({groups,requests,invitations,primaryId,groupsLoaded,appearance,appearanceReady});const stops=[
+    watch(receive,error){let groups=[],requests=[],invitations=[],primaryId=null,groupsLoaded=false,appearance=solarAppearance(),appearanceReady=false,ownedGroupId=null;const emit=()=>receive({groups,requests,invitations,primaryId,groupsLoaded,appearance,appearanceReady,ownedGroupId});const stops=[
+      onSnapshot(doc(db,'solarOwnership',uid),snapshot=>{ownedGroupId=snapshot.data()?.groupId||null;emit();},error),
       onSnapshot(collection(db,'groupMemberships',uid,'groups'),snapshot=>{groups=snapshot.docs.map(item=>({id:item.id,...item.data()}));groupsLoaded=true;emit();},error),
       onSnapshot(query(collection(db,'groupRequests'),where('owner','==',uid)),snapshot=>{requests=snapshot.docs.map(item=>({id:item.id,...item.data()}));emit();},error),
       onSnapshot(query(collection(db,'groupRequests'),where('userId','==',uid)),snapshot=>{invitations=snapshot.docs.map(item=>({id:item.id,...item.data()}));emit();},error),

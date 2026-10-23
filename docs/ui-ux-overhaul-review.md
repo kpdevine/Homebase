@@ -95,3 +95,8 @@ Automated verification: 233 tests, 232 passed and one emulator-only test skipped
 Before any approved publication, deploy the new Firestore rules with the matching app. The new group paths are intentionally unavailable on production until then. See `docs/pending-oct22-features.md` and `prototype/assets/reactions/README.md` for the feature and artwork checklists.
 
 Local visual checks for this feature draft: 390px phone Sleep entry/save (6h30m → 8.1/10 for an 8-hour goal), opening chooser and persisted choices, guided four-section final review with no weight row, Solar System creation/primary selection/owner approval, Martian reaction send/remove, and nutrition goals at 1280px desktop and 320px phone. The checked nutrition layouts have no horizontal overflow; desktop nutrition fits its viewport. Proofs are in `output/ui-review/note-save-feedback.png` and `output/ui-review/nutrition-goals-desktop.png`.
+
+
+## Standing iPhone requirement — October 23
+
+The owner explicitly requires iPhone Safari and the installed iPhone Home Screen app to be considered separately from the desktop phone-size harness. Check WebKit form-control appearance, dynamic text sizing, safe-area insets, viewport/keyboard behavior, portrait box geometry, touch focus/highlights, and thumbnail loading/caching. A desktop portrait screenshot is layout evidence, not physical iPhone certification. Preserve keyboard focus visibility on controls while preventing page-size focus outlines. Record actual device verification separately when available.

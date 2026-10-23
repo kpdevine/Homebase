@@ -10,8 +10,36 @@ export function leaderboardSummary(store,today){
   return {appDate:today,month,yesterdayDate:yesterday,yesterdayScore:logged.find(day=>day.date===yesterday)?.score??null,monthScore:monthly.length?Math.round(monthly.reduce((sum,day)=>sum+day.score,0)/monthly.length*10)/10:null,daysLogged:monthly.length,totalDaysLogged:logged.length};
 }
 export function rankLeaderboard(rows,month){return [...rows].sort((a,b)=>((b.month===month?b.monthScore:null)??-1)-((a.month===month?a.monthScore:null)??-1)||(b.month===month?b.daysLogged:0)-(a.month===month?a.daysLogged:0)||a.username.localeCompare(b.username));}
+export function monthlyRanks(rows,month){
+  const ranked=rankLeaderboard(rows,month).filter(row=>row.month===month&&Number.isFinite(row.monthScore)&&row.daysLogged>0);
+  return new Map(ranked.map((row,index)=>[row.uid,index+1]));
+}
+export function dayReactionCounts(reactions,target,date){return REACTIONS.map(reaction=>({...reaction,count:reactions.filter(value=>value.target===target&&value.date===date&&value.kind===reaction.id).length})).filter(reaction=>reaction.count);}
 
-export const REACTIONS=[{id:'happy',label:'Happy planet',short:'Happy'},{id:'sad',label:'Sad planet',short:'Sad'},{id:'party',label:'Celebration',short:'Party'},{id:'fire',label:'On fire',short:'On fire'},{id:'sun',label:'Cool sunshine',short:'Cool'},{id:'love',label:'Love',short:'Love'},{id:'wow',label:'Amazed',short:'Wow'},{id:'sleepy',label:'Sleepy',short:'Sleepy'},{id:'strong',label:'Feeling strong',short:'Strong'},{id:'rocket',label:'Blastoff',short:'Blastoff'},{id:'martian',label:'Friendly Martian',short:'Martian'}];
+export const REACTIONS=[
+  {id:'happy',label:'Happy planet',short:'Happy'},
+  {id:'sad',label:'Sad planet',short:'Sad'},
+  {id:'party',label:'Celebration',short:'Party'},
+  {id:'fire',label:'On fire',short:'On fire'},
+  {id:'sun',label:'Cool sunshine',short:'Cool'},
+  {id:'love',label:'Love',short:'Love'},
+  {id:'wow',label:'Amazed',short:'Wow'},
+  {id:'sleepy',label:'Sleepy',short:'Sleepy'},
+  {id:'strong',label:'Feeling strong',short:'Strong'},
+  {id:'rocket',label:'Blastoff',short:'Blastoff'},
+  {id:'martian',label:'Friendly Martian',short:'Martian'},
+  {id:'distorted',label:'Distorted shock',short:'Shocked'},
+  {id:'laughing',label:'Laughing',short:'Laughing'},
+  {id:'crying',label:'Crying',short:'Crying'},
+  {id:'angry',label:'Frustrated',short:'Frustrated'},
+  {id:'thinking',label:'Thinking',short:'Thinking'},
+  {id:'wink',label:'Winking',short:'Wink'},
+  {id:'salute',label:'Saluting',short:'Salute'},
+  {id:'grateful',label:'Grateful',short:'Grateful'},
+  {id:'melting',label:'Melting',short:'Melting'},
+  {id:'nerd',label:'Feeling smart',short:'Smart'},
+  {id:'kiss',label:'Blowing a kiss',short:'Kiss'}
+];
 export function solarAppearance({planet='happy',vibes=''}={}) {
   if(!REACTIONS.some(reaction=>reaction.id===planet))throw new Error('Choose a planet profile picture.');
   if(typeof vibes!=='string'||vibes.trim().length>160)throw new Error('Keep your current vibes to 160 characters.');
