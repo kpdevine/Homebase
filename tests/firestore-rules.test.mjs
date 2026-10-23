@@ -75,6 +75,25 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20','fire'));
     async function listenUntil(subscribe,match){let stop;try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Solar System listener timed out')),5000);stop=subscribe(value=>{if(match(value)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{stop?.();}}
     await listenUntil((cb,error)=>eli.groups.watch(cb,error),value=>value.groups.some(group=>group.id===system.id));
+    // Rename atomically updates discovery and existing listeners, even though
+    // older membership/request documents retain their original stored labels.
+    const charlieClient=socialClient(c,'charlie');await charlieClient.groups.request(system.id);
+    await assert.rejects(eli.groups.rename(system.id,'Stolen Orbit'),/Only the owner/);
+    for(const name of ['', '  ', 'ab', 'x'.repeat(41)])await assert.rejects(dana.groups.rename(system.id,name),/between 3 and 40/);
+    await assertFails(setDoc(doc(eliDb,'friendGroups',system.id),{name:'Stolen Orbit'},{merge:true}));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id),{name:'Incomplete rename'},{merge:true}));
+    await assertFails(setDoc(doc(danaDb,'groupDirectory',system.id),{name:'Incomplete rename',searchName:'incomplete rename'},{merge:true}));
+    const memberRename=listenUntil((cb,error)=>eli.groups.watch(cb,error),value=>value.groups.some(group=>group.id===system.id&&group.groupName==='New Orbit'));
+    const pendingRename=listenUntil((cb,error)=>charlieClient.groups.watch(cb,error),value=>value.invitations.some(request=>request.groupId===system.id&&request.groupName==='New Orbit'));
+    assert.equal(await assertSucceeds(dana.groups.rename(system.id,'  New   Orbit  ')),'New Orbit');
+    await Promise.all([memberRename,pendingRename]);
+    assert.equal((await charlieClient.groups.search('new'))[0].name,'New Orbit');
+    assert.deepEqual(await charlieClient.groups.search('weekend'),[]);
+    assert.equal((await getDoc(doc(eliDb,'groupMemberships','eli','groups',system.id))).data().groupName,'Weekend Orbit');
+    assert.equal((await getDoc(doc(danaDb,'friendGroups',system.id))).data().owner,'dana');
+    const invalidRename=writeBatch(danaDb);invalidRename.update(doc(danaDb,'friendGroups',system.id),{name:'x'.repeat(41)});invalidRename.update(doc(danaDb,'groupDirectory',system.id),{name:'x'.repeat(41),searchName:'x'.repeat(41)});await assertFails(invalidRename.commit());
+    const forgedOwner=writeBatch(danaDb);forgedOwner.update(doc(danaDb,'friendGroups',system.id),{name:'Forged Orbit',owner:'eli'});forgedOwner.update(doc(danaDb,'groupDirectory',system.id),{name:'Forged Orbit',searchName:'forged orbit'});await assertFails(forgedOwner.commit());
+    await charlieClient.groups.dismiss(system.id+'~charlie');
     await listenUntil((cb,error)=>eli.groups.watchBoard(system.id,cb,error),value=>value.some(person=>person.uid==='dana'&&person.daysLogged===5));
     await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-20',cb,error),value=>value.some(day=>day.uid==='dana'&&day.score===9));
     await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.length===0);
@@ -91,6 +110,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertSucceeds(dana.groups.remove(system.id,'eli'));
     await assertFails(getDoc(doc(eliDb,'friendGroups',system.id,'scores','dana')));
     await assertSucceeds(dana.groups.invite(system.id,'eli'));
+    const invitationRename=listenUntil((cb,error)=>eli.groups.watch(cb,error),value=>value.invitations.some(request=>request.groupId===system.id&&request.groupName==='Friends & Planets'));
+    await assertSucceeds(dana.groups.rename(system.id,'Friends & Planets'));await invitationRename;
     await assertFails(dana.groups.accept(system.id+'~eli')); // Invitations need recipient consent.
     await assertSucceeds(eli.groups.accept(system.id+'~eli'));
     await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',null));
@@ -108,6 +129,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertFails(deleteDoc(doc(danaDb,'solarOwnership','dana')));
     await assertFails(setDoc(doc(danaDb,'friendGroups',system.id),{deletedAt:serverTimestamp()},{merge:true}));
     await assertSucceeds(dana.groups.deleteSystem(system.id));
+    await assert.rejects(dana.groups.rename(system.id,'Deleted Orbit'),/no longer available/);
+    const deletedRename=writeBatch(danaDb);deletedRename.update(doc(danaDb,'friendGroups',system.id),{name:'Deleted Orbit'});deletedRename.set(doc(danaDb,'groupDirectory',system.id),{groupId:system.id,name:'Deleted Orbit',searchName:'deleted orbit',owner:'dana',ownerUsername:'dana_planet',createdAt:serverTimestamp()});await assertFails(deletedRename.commit());
     assert.equal((await getDoc(doc(danaDb,'groupDirectory',system.id))).exists(),false);
     assert.equal((await getDoc(doc(danaDb,'groupMemberships','dana','groups',system.id))).exists(),false);
     assert.equal((await getDoc(doc(c,'groupMemberships','charlie','groups',system.id))).exists(),false);

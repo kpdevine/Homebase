@@ -86,6 +86,11 @@ service cloud.firestore {
     match /friendGroups/{group} {
       allow get: if signedIn();
       allow update: if owner(group) && resource.data.get('deletedAt',null) == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 40
+        && getAfter(/databases/$(database)/documents/groupDirectory/$(group)).data.name == request.resource.data.name
+        && getAfter(/databases/$(database)/documents/groupDirectory/$(group)).data.searchName == request.resource.data.name.lower();
+      allow update: if owner(group) && resource.data.get('deletedAt',null) == null
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedAt']) && request.resource.data.deletedAt == request.time
         && !existsAfter(/databases/$(database)/documents/groupDirectory/$(group))
         && !existsAfter(/databases/$(database)/documents/solarOwnership/$(request.auth.uid))
@@ -144,6 +149,9 @@ service cloud.firestore {
     }
     match /groupDirectory/{group} {
       allow read: if signedIn();
+      allow update: if owner(group) && groupData(group).get('deletedAt',null) == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','searchName'])
+        && request.resource.data.name == groupData(group).name && request.resource.data.searchName == groupData(group).name.lower();
       allow delete: if owner(group) && groupData(group).get('deletedAt',null) != null;
       allow create: if signedIn() && request.resource.data.keys().hasOnly(['groupId','name','searchName','owner','ownerUsername','createdAt'])
         && request.resource.data.groupId == group && self(request.resource.data.owner)

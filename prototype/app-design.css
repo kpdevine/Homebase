@@ -992,7 +992,7 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-log-count small {display:block;font:400 7px/1.5 var(--font-ui);color:var(--ui-muted);margin-top:7px}
 .solar-vibes {display:flex;align-items:center;gap:7px;min-height:38px;padding:8px 10px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-panel)}
 .solar-vibes p {flex:1;min-width:0;margin:0;font:400 11px/1.5 var(--font-ui);overflow-wrap:anywhere;white-space:pre-wrap;color:var(--ui-muted)}
-.solar-vibes.has-vibes p {color:var(--ui-ink)}
+.solar-vibes.has-vibes p {color:var(--ui-ink);font:400 18px/1.35 var(--font-handwriting);letter-spacing:0}
 .solar-vibes .text-button {font-size:9px;padding:2px;min-height:32px}
 .solar-member-checkin {font:400 8px/1.5 var(--font-ui);border:1px solid var(--ui-line-soft);border-radius:3px;padding:4px 6px}
 .solar-member-checkin.is-logged {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-light)}
@@ -1012,7 +1012,7 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-avatar-picker .planet-emoji {width:48px;height:48px;object-fit:contain}
 .solar-avatar-picker span {font:400 8px/1.4 var(--font-ui)}
 .solar-avatar-picker button[aria-checked=true] {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-light);box-shadow:inset 0 -2px var(--ui-gold),0 0 7px rgb(255 230 151 / .2)}
-#solar-vibes-input {width:100%;height:84px;resize:vertical;max-height:180px;margin-top:6px;font:400 16px/1.4 var(--font-ui)}
+#solar-vibes-input {width:100%;height:84px;resize:vertical;max-height:180px;margin-top:6px;font:400 19px/1.4 'Kieran Handwriting Entry',var(--font-handwriting)}
 #solar-profile-form .hint {font-size:11px;margin-top:8px}
 .solar-reaction-counts {display:grid;grid-template-columns:1fr;gap:6px;text-align:left}
 .solar-reaction-chip {border-radius:5px;padding:8px;align-items:center;white-space:normal}

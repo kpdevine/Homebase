@@ -65,7 +65,7 @@ export function mountSocial({getStore,today,getCloud,showFriends,preview,scoreCi
     if(searchResults.length)replaceList('#friend-results',searchResults.map(r=>{const friend=data.friends.some(f=>f.uid===r.uid),sent=data.outgoing.some(q=>q.recipient===r.uid),incoming=data.incoming.some(q=>q.requester===r.uid);return `<li><strong>@${esc(r.username)}</strong><button class="quiet-button" data-add-friend="${esc(r.uid)}" ${friend||sent||incoming?'disabled':''}>${friend?'Friends':sent?'Requested':incoming?'Request received':'Add friend'}</button></li>`;}).join(''));
     $('#friend-search-form button').disabled=busy;$('#friend-search-form button').textContent=busy?'Working…':'Search';
     $('#friends-connected').setAttribute('aria-busy',String(busy));
-    document.querySelectorAll('#solar-connected button[type=submit],#solar-connected [data-primary-solar],#solar-connected [data-accept-solar],#solar-connected [data-dismiss-solar],#solar-connected [data-remove-member],#leave-solar,#solar-day-dialog [data-react]').forEach(button=>button.disabled=busy);
+    document.querySelectorAll('#solar-connected button[type=submit]:not(#solar-rename-save),#solar-connected [data-primary-solar],#solar-connected [data-accept-solar],#solar-connected [data-dismiss-solar],#solar-connected [data-remove-member],#leave-solar,#solar-day-dialog [data-react]').forEach(button=>button.disabled=busy);
     if(busy)document.querySelectorAll('#friends-view [data-add-friend],#friends-view [data-accept-friend],#friends-view [data-decline-friend],#friends-view [data-remove-friend],#friends-view [data-cancel-friend],#friends-view [data-join-solar],#friends-view [data-invite-solar]').forEach(button=>button.disabled=true);
   }
   async function publish(){

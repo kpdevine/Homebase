@@ -1,3 +1,7 @@
+## October 23 release: rename Solar Systems and handwritten statuses
+
+The owner approved publication with “push it”. Owners can rename their selected system under Manage Solar Systems. Renames update search and live labels for existing members and pending requests/invitations, without changing membership or private records. Current vibes status text and its editor use Kieran handwriting. Regular suite: 236 passing, one emulator-only skip; the emulator security suite passes separately with rename authorization, atomicity, live-label and deleted-system coverage. See docs/solar-system-renaming.md. Preserve the unrelated reminder policy edits already in the working tree.
+
 ## Approved release — October 22
 
 The owner reviewed the local draft and explicitly approved publication with **“Push all.”** This lifts the publication hold for the UI overhaul and October 22 features. Source, PRD, review notes, and selected reaction assets belong in the same GitHub release; deploy the matching app and Firestore rules to Firebase project `homebase-d3c6c` for `https://pocketplanet.day/`.
