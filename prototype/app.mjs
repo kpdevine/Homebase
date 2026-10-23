@@ -1,9 +1,12 @@
+import {mountTimeLogs} from './time-logs-ui.mjs';
+import {mountUIShell} from './ui-shell.mjs';
+import {mountNoteSaves} from './note-save.mjs';
 import {mountSocial} from './social-ui.mjs';
-import {settingsForDay,nutritionScore} from './customization.mjs';
+import {settingsForDay,nutritionScore,newUserSettings,LOGGING_SECTIONS} from './customization.mjs';
 import {mountCustomization} from './customization-ui.mjs';
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
-import { summarizeDay, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, averageDays, loggingStreak } from './scoring.mjs';
+import { summarizeDay, fullyLogged, taskScoreRange, categorySummary, scoreColor as blueScoreColor, scoreGlow, scoreReward, averageDays, loggingStreak } from './scoring.mjs';
 import {appDateKey, timeGreeting, lateCheckInWindow, createDayRollover} from './day-clock.mjs';
 import { taskProgress, scheduleLabel, orderedTasks, activeTemplates } from './tasks.mjs';
 import { handwritingCarets } from './handwriting-caret.mjs';
@@ -47,7 +50,7 @@ let maxSaveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
-let cloud=null,reminders=null,customization=null,socialUI=null,cloudLabel='';
+let cloud=null,reminders=null,customization=null,uiShell=null,noteSaves=null,socialUI=null,cloudLabel='';
 const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
 let selectedDate = appDateKey();
@@ -55,7 +58,7 @@ const dayRollover = createDayRollover(selectedDate);
 let calendarMonth = selectedDate;
 let calendarFilter='all',bodyWeightUnit='lb';
 let achievementFilter='all',achievementOrder='recent',unlockedOnly=false,achievementData=null;
-const categoryLabels={all:'Overall',nutrition:'Nutrition',training:'Training',checklists:'To-do list',sentiments:'Sentiments'};
+const categoryLabels={all:'Overall',nutrition:'Nutrition',training:'Training',checklists:'To-do list',sentiments:'Sentiments',sleep:'Sleep',prayer:'Prayer'};
 const weightText=weight=>weight?`${weight.value} ${weight.unit}`:'';
 let reviewSessionDate = null;
 let dragging = false;
@@ -110,7 +113,7 @@ motionPreference=setMotionPreference(preferences.motion);
 window.pocketTheme.apply(preferences.theme);
 const editableToday=()=>appDateKey();
 const archivedDay=(date=selectedDate)=>!isEditableDay(date,editableToday());
-let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, onChange: queueSave });
+let store = createStore({ clientId, editableToday, today: selectedDate, seed: preview, snapshot: loaded.snapshot, settings:!loaded.snapshot&&!preview?newUserSettings():undefined, onChange: queueSave });
 const achievementNotified=new Set(Array.isArray(preferences.achievementNotified)?preferences.achievementNotified.filter(id=>typeof id==='string'):[]);
 for(const card of buildAchievements(store,editableToday()).cards)if(card.count&&(card.first<editableToday()||store.loadDay(card.first).completedAt))achievementNotified.add(card.id);
 const editsKey=`homebase.record-edits.v1${suffix}`;
@@ -120,8 +123,11 @@ function captureRecordEdits(snapshot,at=Date.now()){try{recordEdits.capture(snap
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Daily training', checklists:'To-do list', sentiments:'Sentiments', history:'Calendar', achievements:'Achievements',friends:'Friends' };
-const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view', history:'history-view', achievements:'achievements-view',friends:'friends-view' };
+const viewLabels = { today:'Overview', nutrition:'Nutrition', training:'Training', checklists:'To-do list', sentiments:'Sentiments', sleep:'Sleep',prayer:'Prayer', history:'Calendar', achievements:'Achievements',friends:'Friends' };
+const panelIds = { today:'dashboard-view', nutrition:'nutrition-view', training:'training-view', checklists:'checklists-view', sentiments:'sentiments-view',sleep:'sleep-view',prayer:'prayer-view', history:'history-view', achievements:'achievements-view',friends:'friends-view' };
+const timeLogs=mountTimeLogs({getStore:()=>store,getDate:()=>selectedDate,isEditable:()=>!archivedDay(),render,draw:drawScoreMeter,number:scoreMarkup,save:()=>{flushSave();return !storageError&&!blockedSave;}});
+for(const [id,label] of [['sleep','Sleep'],['prayer','Prayer']])$('#calendar-filters').insertAdjacentHTML('beforeend',`<button data-calendar-filter="${id}" aria-pressed="false">${label}</button>`);
+
 
 function queueSave(snapshot) {
   const wasPending = !!pendingSnapshot;
@@ -135,7 +141,9 @@ function queueSave(snapshot) {
 }
 function renderSaveStatus() {
   $('#save-status').classList.toggle('has-error', !!storageError);
+  $('#save-status').classList.toggle('is-saving',!!pendingSnapshot);
   $('#save-message').textContent = storageError ? 'Changes not saved · see backups' : pendingSnapshot ? 'Saving on this device…' : preview ? 'Preview · saved separately' : cloudLabel||'Saved on this device';
+  $('#save-status').setAttribute('aria-label',$('#save-message').textContent+'. Open saving and backups.');$('#save-status').title=$('#save-message').textContent;
   $('#storage-warning').hidden = !storageError;
   $('#storage-warning').textContent = storageError ? `Local saving needs attention. ${storageError} Your current changes remain in this tab; open Settings to download a backup.` : '';
 }
@@ -186,6 +194,14 @@ function renderHeaderShortcuts() {
   for(const [id,active] of [['open-home',view==='today'&&!modal],['open-friends',view==='friends'&&!modal],['mobile-calendar',view==='history'&&!modal],['open-achievements',view==='achievements'&&!modal],['open-settings',settings],['open-score-info',info]])
     $('#'+id).setAttribute('aria-pressed',String(active));
 }
+function renderTabs() {
+  const config=settingsForDay(store.loadDay(selectedDate)),tabs=config.tabs;
+  if(Object.hasOwn(tabs,view)&&!tabs[view])view='today';
+  let number=0;
+  for(const button of $$('[data-tab]')){const id=button.dataset.tab;button.hidden=id!=='today'&&!tabs[id];const marker=button.querySelector('small');marker.hidden=id==='today';if(!button.hidden&&id!=='today')marker.textContent=String(++number).padStart(2,'0');}
+  $('.day-tabs').style.setProperty('--tab-count',number+1);$('.day-tabs').classList.toggle('many-tabs',number>4);
+  $('.overview-tasks').hidden=!tabs.checklists;$('#dashboard-view').classList.toggle('without-tasks',!tabs.checklists);
+}
 function renderHeader() {
   const archived=archivedDay();
   if(archived&&!['achievements','friends'].includes(view))view='history';
@@ -205,7 +221,7 @@ function renderHeader() {
   $('#date-short').textContent = dateFormat(selectedDate, { month:'long', day:'numeric' });
   $('#date-short').setAttribute('aria-label', `Choose date. Selected ${longDate(selectedDate)}`);
   const completed = !!store.loadDay(selectedDate).completedAt;
-  $('#day-state').textContent = view==='friends'?'Your orbit':view==='achievements'?'All-time record':archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
+  $('#day-state').textContent = view==='friends'?'Leaderboard':view==='achievements'?'All-time record':archived?'Summary only':completed ? '✓ Day complete' : isToday ? 'Day in progress' : 'Open day';
   $('#day-state').classList.toggle('complete', completed&&view!=='achievements');
   $('#calendar-day-number').textContent = Number(selectedDate.slice(-2));
   $('#overall-title').textContent = isToday ? "Today's score" : 'Daily score';
@@ -268,10 +284,10 @@ function renderScore() {
   $('#day-gradient-end').setAttribute('stop-color',scoreColor(displayScore));
   meter.setAttribute('aria-label', displayScore === null ? 'No daily score yet. Log a category to get started.' : `${range.projected?'Projected ':summary.provisional ? 'Provisional ' : ''}Daily score ${scoreText(displayScore)} out of 10.${range.projected?` Assuming all tasks completed; as low as ${scoreText(range.low)} if remaining tasks stay unchecked.`:''} ${summary.logged} of ${summary.sections.length} categories logged.`);
   $('#score-range').hidden=!range.projected;
-  $('#score-range').innerHTML=range.projected?`As high as <strong>${scoreText(range.score)}</strong> · As low as <strong>${scoreText(range.low)}</strong><span> Tasks assumed done vs. left unchecked. Unlogged nutrition and training are not assumed.</span>`:'';
-  const rewardLabel=range.projected?'With all tasks done':reward?(summary.provisional?'High so far':displayScore===10?'Perfect score':'High score'):'';
+  $('#score-range').innerHTML=range.projected?`As high as <strong>${scoreText(range.score)}</strong><br>As low as <strong>${scoreText(range.low)}</strong><span class="score-assumption"> Tasks assumed done vs. left unchecked. Unlogged nutrition and training are not assumed.</span>`:'';
+  const rewardLabel=range.projected?'Tasks assumed complete':reward?(summary.provisional?'High so far':displayScore===10?'Perfect score':'High score'):'';
   $('#score-status').textContent = [rewardLabel,day.completedAt ? 'Day complete' : summary.provisional ? `Provisional · ${summary.logged}/${summary.sections.length} logged` : 'All categories logged'].filter(Boolean).join(' · ');
-  $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount} of ${progress.sections.length} section reviews confirmed.`;
+  $('#overall-description').textContent = day.completedAt ? 'Day completed and saved.' : `${progress.reviewedCount}/${progress.sections.length} reviews confirmed`;
   const button = $('#complete-day');
   const missing = progress.sections.find(section => !section.ready);
   button.disabled = false;
@@ -428,10 +444,12 @@ function renderReview() {
   const primary=$('#review-primary');
   primary.textContent=current&&!current.reviewed?`Confirm ${current.id==='checklists'?'to-do list':current.id==='training'?'training':current.id} review`:'Continue day review →';
   primary.disabled=!!current&&!current.reviewed&&(!current.ready||invalidRating);
-  $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Finish your nutrition log first.':current.id==='sentiments'?'Add your sentiment rating first.':'Finish your training check-in first.':'';
+  $('#review-primary-hint').textContent=invalidRating?'Enter a valid rating first.':current&&!current.ready?current.id==='nutrition'?'Finish your nutrition log first.':current.id==='sentiments'?'Add your sentiment rating first.':['sleep','prayer'].includes(current.id)?'Enter your hours and minutes first.':'Finish your training check-in first.':'';
   const now=new Date(),today=appDateKey(now);
   const showLateWarnings=selectedDate<today || selectedDate===today&&lateCheckInWindow(now);
   const scoreSections=summaryFor().sections;
+  $('#review-steps').style.setProperty('--review-count',Math.max(1,progress.sections.length));
+  for(const marker of $$('.tab-check')){marker.textContent='';marker.classList.remove('late-warning');}
   for (const section of progress.sections) {
     const logged=scoreSections.find(item=>item.id===section.id),warn=section.id!=='sentiments'&&showLateWarnings&&!(logged?.logged??logged?.score!==null);
     const marker=$(`#tab-${section.id} .tab-check`);
@@ -449,6 +467,7 @@ function renderNotes() {
   const notes = store.loadDay(selectedDate).notes;
   $$('[data-notes]').forEach(input => { const value=input.dataset.notes.startsWith('sentiments')?store.loadDay(selectedDate).sentiments.notes:notes[input.dataset.notes];if(input.value!==value)input.value=value; });
   refreshNoteCarets();
+  noteSaves?.refresh();
 }
 $$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset.notes)).forEach(input => input.addEventListener('input', () => {
   store.updateNotes(selectedDate, input.dataset.notes, input.value);
@@ -471,10 +490,10 @@ function renderHistory() {
     const summary = filteredSummary(date), day = store.loadDay(date), reward=scoreReward(summary.score);
     let cell = `<button class="calendar-day ${reward} ${date.slice(0,7) === calendarMonth.slice(0,7) ? '' : 'outside-month'} ${date === selectedDate ? 'selected' : ''} ${date === today ? 'is-today' : ''}" data-calendar-date="${date}" aria-label="${longDate(date)}, ${summary.score === null ? 'no score' : `${summary.provisional ? 'provisional ' : ''}daily score ${scoreText(summary.score)} out of 10${reward?summary.score===10?', perfect score':', high score':''}`}${day.completedAt ? ', day complete' : ''}" aria-pressed="${date === selectedDate}" ${date === today ? 'aria-current="date"' : ''}><span class="calendar-date">${Number(date.slice(-2))}</span>${circle(summary.score,true)}${day.completedAt ? '<span class="calendar-complete" aria-hidden="true">✓</span>' : ''}</button>`
     cell=cell.replace('daily score ',`${filterLabel.toLowerCase()} score `);
-    const fullyLogged=summaryFor(date).requiredLogged===3;
-    cell=cell.replace('class="calendar-day ',`class="calendar-day ${fullyLogged?'is-logged ':''}${day.completedAt?'is-reviewed ':''}`);
-    if(fullyLogged)cell=cell.replace('aria-label="','aria-label="All required categories logged, ');
-    if(fullyLogged&&!day.completedAt)cell=cell.replace('</button>','<span class="calendar-logged" aria-hidden="true">●</span></button>');
+    const isLogged=fullyLogged(summaryFor(date));
+    cell=cell.replace('class="calendar-day ',`class="calendar-day ${isLogged?'is-logged ':''}${day.completedAt?'is-reviewed ':''}`);
+    if(isLogged)cell=cell.replace('aria-label="','aria-label="All required categories logged, ');
+    if(isLogged&&!day.completedAt)cell=cell.replace('</button>','<span class="calendar-logged" aria-hidden="true">●</span></button>');
     if(calendarFilter==='training'&&day.bodyWeight)cell=cell.replace('</button>',`<small class="calendar-weight">${weightText(day.bodyWeight)}</small></button>`).replace('aria-label="',`aria-label="${weightText(day.bodyWeight)}, `);
     if (index % 7 === 6) {
       const weekDates = dates.slice(index - 6, index + 1);
@@ -497,18 +516,13 @@ function recapMarkup({final=false}={}) {
     <div class="recap-score" role="group" aria-label="${recap.score===null?'No daily score yet':`Daily score ${scoreText(recap.score)} out of 10`}">
       ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of ${recap.sections.length} logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
     </div>
-    <div class="recap-metrics">
-      <button ${openSection('nutrition')} aria-label="Nutrition${archived?' summary':' for this day'}"><span>Nutrition</span><strong>${scoreText(nutritionScore(day))}<small>${nutritionScore(day)===null?'':' / 10'}</small></strong></button>
-      <button ${openSection('training')} aria-label="Training${archived?' summary':' for this day'}"><span>Training</span><strong>${training}</strong></button>
-      <button ${openSection('checklists')} aria-label="To-do list${archived?' summary':' for this day'}"><span>To-do list</span><strong>${tasks}</strong></button>
-    </div>
+    <div class="recap-metrics">${recap.sections.map(section=>`<button ${openSection(section.id)}><span>${escapeHtml(section.label)}</span><strong>${scoreText(section.score)}<small>${section.score===null?'':' / 10'}</small></strong></button>`).join('')}</div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
-    ${recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
-    ${recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine===null?'Not answered':recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
-    ${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}
-    ${recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
-    ${recap.notes.filter(note=>!final||note.section!=='nutrition').map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
-    ${!final&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
+    ${settingsForDay(day).tabs.checklists&&recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
+    ${settingsForDay(day).tabs.training&&recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine===null?'Not answered':recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
+    ${settingsForDay(day).tabs.training&&recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
+    ${recap.notes.filter(note=>settingsForDay(day).tabs[note.section]&&(!final||note.section!=='nutrition')).map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
+    ${!final&&settingsForDay(day).tabs.sentiments&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
 }
 function filteredRecapMarkup(day,recap) {
   const id=calendarFilter,label=categoryLabels[id],section=recap.sections.find(section=>section.id===id),value=section?.score??null;
@@ -516,6 +530,7 @@ function filteredRecapMarkup(day,recap) {
   if(id==='training')detail=`<p class="filtered-training-total">${recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.mode==='other'?`${recap.training.minutes??'—'} minutes`:recap.training.sets+' total sets'}`:'No workout logged'}</p>${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
   if(id==='nutrition')detail=recap.notes.filter(note=>note.section==='nutrition').map(note=>`<section class="recap-note"><h4>Nutrition notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('');
   if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span>${escapeHtml(task.name)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
+  if(['sleep','prayer'].includes(id))detail=`<p>${escapeHtml(section?.detail||'No time logged.')}</p>`;
   if(id==='sentiments')detail=day.sentiments.notes.trim()?`<section class="recap-note"><h4>Sentiments</h4><p>${escapeHtml(day.sentiments.notes)}</p></section>`:'<p>No sentiments notes.</p>';
   return `<div class="recap-score">${circle(value,true)}<div><strong>${label}</strong><p>${value===null?'Not logged':day.reviewed[id]?'Reviewed':'Logged'}${id==='sentiments'&&value===null&&day.sentiments.notes.trim()?' · notes only':''}</p></div></div>${detail}`;
 }
@@ -546,16 +561,19 @@ function renderAchievements(recompute=true) {
     return `<article class="achievement-card ${card.count?'is-unlocked':'is-locked'}"><div class="achievement-card-top"><span class="achievement-emblem">${achievementIcon(card.id)}</span><span>${labels[card.group]}</span><strong>${card.count?`${card.count}× earned`:'Locked'}</strong></div><h2>${escapeHtml(card.title)}</h2><p>${escapeHtml(card.description)}</p><div class="achievement-progress"><span>${progress}</span><progress max="${card.target}" value="${Math.min(card.target,card.value)}" aria-label="${escapeHtml(card.title)} progress"></progress></div><small class="achievement-last">${card.first?`First earned ${dateFormat(card.first,{month:'short',day:'numeric',year:'numeric'})}${card.latest!==card.first?`<br>Latest ${dateFormat(card.latest,{month:'short',day:'numeric',year:'numeric'})}`:''}`:'Still ahead of you'}</small></article>`;
   }).join(''):'<p class="achievement-empty">No unlocked achievements in this category yet.</p>';
 }
-function render() { renderHeader(); renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus();customization?.paint();renderLogButton();if(view==='friends')socialUI?.paint(); }
+function render() { renderTabs();renderHeader(); timeLogs.paint();renderTasks(); renderScore(); renderRating(); renderGym(); renderSentiments(); renderNotes(); renderReview(); if (view === 'history') renderHistory(); if(view==='achievements')renderAchievements(); if($('#weight-history-dialog').open)renderWeightHistory();renderSaveStatus();customization?.paint();renderLogButton();if(view==='friends')socialUI?.paint();uiShell?.paint(); }
 function setView(next, focus = false) {
   if (!Object.hasOwn(viewLabels, next)) return;
+  const flags=settingsForDay(store.loadDay(selectedDate)).tabs;if(Object.hasOwn(flags,next)&&!flags[next])next='today';
   if(archivedDay()&&!['achievements','friends'].includes(next))next='history';
   const changed=view!==next,mainScroll=$('#main').scrollTop;
+  const tabHeight=$('.day-tabs').getBoundingClientRect().height;
   // Keep the navigation at the same viewport height. Deep content starts afresh
   // under the pinned strip rather than leaving a short tab scrolled into blank space.
-  const scrollY=Math.min(window.scrollY,$('#tab-scroll-anchor').getBoundingClientRect().top+window.scrollY);
-  // Reserve the current document height before hiding a long phone panel.
-  if(changed&&phoneLayout())$('#main').style.minHeight=`${Math.max(0,scrollY+window.innerHeight-($('#main').getBoundingClientRect().top+scrollY))}px`;
+  const anchorTop=$('#tab-scroll-anchor').getBoundingClientRect().top+window.scrollY;
+  const pinned=window.scrollY>=anchorTop,scrollY=Math.min(window.scrollY,anchorTop);
+  // Reserve only one viewport when the section strip is pinned.
+  if(changed&&phoneLayout())$('#main').style.minHeight=pinned?`${Math.max(0,window.innerHeight-tabHeight)}px`:'';
   view = next; render();
   // UI-03: switching phone sections must reveal the new content, including utility pages.
   if(changed&&phoneLayout()) {
@@ -578,6 +596,7 @@ function startReview() {
   const progress = store.dayProgress(selectedDate);
   if (progress.completedAt) { showFinalReview(); return; }
   if (progress.canComplete) { showFinalReview(); return; }
+  if(!progress.sections.length){customization.open('tabs');return;}
   reviewSessionDate = selectedDate;
   setView((progress.sections.find(section => !section.ready) || progress.sections.find(section => !section.reviewed)).id, true);
 }
@@ -604,6 +623,7 @@ function showFinalReview() {
 function renderFinalSentimentsState() {
   const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
   const meter=$('#final-sentiments-meter');
+  $('.final-review-sentiments').hidden=!settingsForDay(day).tabs.sentiments;
   meter.closest('.final-sentiments-rating').hidden=settingsForDay(day).sentiments.rating==='hidden';
   drawScoreMeter(meter,rating,{immediate:finalSentimentPointer!==-1});
   meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
@@ -634,7 +654,7 @@ $$('[data-tab]').forEach(button => {
   button.addEventListener('click', () => {if(view!==button.dataset.tab)setView(button.dataset.tab);});
   button.addEventListener('keydown', event => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
-    const tabs = $$('[data-tab]'), index = tabs.indexOf(button);
+    const tabs = $$('[data-tab]').filter(button=>!button.hidden), index = tabs.indexOf(button);
     let next;
     if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
     else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
@@ -708,13 +728,13 @@ function confirmTaskRemoval({title,message,label,action}) {
 $('#task-removal-dialog').addEventListener('close',()=>{pendingTaskRemoval=null;});
 $('#cancel-task-removal').addEventListener('click',()=>closeDialog($('#task-removal-dialog')));
 $('#confirm-task-removal').addEventListener('click',()=>{const action=pendingTaskRemoval;closeDialog($('#task-removal-dialog'));action?.();});
-$('#task-list').addEventListener('click', event => {
-  const button = event.target.closest('[data-remove-task]'); if (!button) return;
-  const date=selectedDate,task=store.loadDay(date).tasks.find(task=>task.id===button.dataset.removeTask);if(!task)return;
+function removeTaskFromDay(date,id) {
+  const task=store.loadDay(date).tasks.find(task=>task.id===id);if(!task)return;
   const remove=()=>{const removed=store.removeTask(date,task.id);render();$('#open-task-composer').focus({preventScroll:true});announce('Task removed.',()=>{store.restoreTask(date,removed.task,removed.index);render();announce('Task restored.');});};
   if(task.templateId)confirmTaskRemoval({title:'Remove this occurrence?',message:`Remove “${task.name}” for ${longDate(date)} only? Its recurring schedule will continue on other days.`,label:'Remove for this day',action:remove});
   else remove();
-});
+}
+$('#task-list').addEventListener('click',event=>{const button=event.target.closest('[data-remove-task]');if(button)removeTaskFromDay(selectedDate,button.dataset.removeTask);});
 $('#undo-action').addEventListener('click', () => undoAction?.());
 const taskTextMeasure=document.createElement('canvas').getContext('2d');
 const taskWrapMeasure=document.createElement('div');
@@ -779,7 +799,7 @@ function appendSubtaskField(child={name:''}) {
 }
 function openTaskComposer(trigger,date) {
   if(date===undefined)date=selectedDate===editableToday()&&store.getSettings().tasks.defaultDate==='tomorrow'?addDays(selectedDate,1):selectedDate;
-  taskEdit=null;
+  taskEdit=null;$('#task-editor-delete').hidden=true;
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
@@ -789,7 +809,7 @@ function openTaskComposer(trigger,date) {
 function openTaskEditor(trigger,date,id,childId) {
   const task=store.loadDay(date).tasks.find(task=>task.id===id);if(!task)return;
   openTaskComposer(trigger,date);taskEdit={date,id,templateId:task.templateId};
-  $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;
+  $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;$('#task-editor-delete').hidden=false;$('#task-editor-delete').textContent=task.templateId?'Remove this occurrence…':'Remove this task…';
   for(const child of task.children)appendSubtaskField(child);
   if(task.templateId) {
     const template=store.loadTemplates().find(template=>template.id===task.templateId);
@@ -1225,6 +1245,8 @@ function refreshClock() {
 }
 socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview,scoreCircle:circle});
 customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview});
+uiShell=mountUIShell({getStore:()=>store,getDate:()=>selectedDate,getView:()=>view,onDeleteTask:()=>{if(!taskEdit)return;const {date,id}=taskEdit;closeDialog($('#task-dialog'));taskEdit=null;removeTaskFromDay(date,id);}});
+noteSaves=mountNoteSaves({save:()=>{flushSave();return !storageError&&!blockedSave;},getDate:()=>selectedDate,isEditable:()=>!archivedDay()});
 refreshClock();
 setInterval(refreshClock,15000);
 $('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';

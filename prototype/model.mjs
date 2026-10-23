@@ -1,4 +1,4 @@
-import {normalizeSettings,settingsForDay,nutritionScore,trainingReady,sentimentReady} from './customization.mjs';
+import {normalizeSettings,settingsForDay,nutritionScore,trainingReady,sentimentReady,enabledSections,timeScore,LOGGING_SECTIONS} from './customization.mjs';
 // Calendar keys stay YYYY-MM-DD. UTC is used only for calendar arithmetic,
 // never to infer the date of a personal record from an event timestamp.
 export const DEMO_TODAY = '2026-10-15';
@@ -50,7 +50,7 @@ export function progressColor(percent) {
 const checklist = ['Read for 20 minutes', 'Get outside for a walk', 'Take a stretch break', 'Plan tomorrow'];
 export const DAY_SECTIONS = [
   { id: 'nutrition', label: 'Nutrition' },
-  { id: 'training', label: 'Daily training' },
+  { id: 'training', label: 'Training' },
   { id: 'checklists', label: 'To-do list' },
 ];
 
@@ -77,7 +77,7 @@ export function createStore(options = {}) {
   const sampleScores = [7.4, 6.8, 8.2, 7.1, 8.8, 8, 6.5, null, 6, 8, 7, null, 7, 8, 7];
   const sampleDailyScores = [7.1, 6.9, 8.4, 7.8, 8.6, 8, 7.3, null, 6.4, 7.2, 7, null, 7.5, 8.1, 7.6];
   let serial = 0;
-  let settings=options.snapshot?.settings?normalizeSettings(options.snapshot.settings):null;
+  let settings=options.snapshot?.settings?normalizeSettings(options.snapshot.settings):options.settings?normalizeSettings(options.settings):null;
   if(options.clientId&&!/^[A-Za-z0-9_-]{1,32}$/.test(options.clientId))throw new Error('Invalid device ID.');
   const nextId=prefix=>{serial++;return options.clientId?`${prefix}-${options.clientId}-${serial}`:`${prefix}-${serial}`;};
   const today = options.today || DEMO_TODAY;
@@ -155,10 +155,11 @@ export function createStore(options = {}) {
     getSettings() {const config=normalizeSettings(settings||undefined);if(settings)config.training.groups=effectiveTargets(options.editableToday?.()||(today>=settings.effectiveFrom?today:settings.effectiveFrom)).groups;return config;},
     setSettings(value,key=today) {
       const next=normalizeSettings({...value,setupComplete:true,effectiveFrom:key});
+      const previous=normalizeSettings(settings||undefined),changed=LOGGING_SECTIONS.filter(({id})=>previous.tabs[id]!==next.tabs[id]||id!=='checklists'&&JSON.stringify(previous[id])!==JSON.stringify(next[id])).map(({id})=>id);
       for(const day of days.values())if(day.date<key){const groups=effectiveTargets(day.date).groups;if(!day.configuration){day.configuration=settingsForDay(loadDay(day.date));if(day.creatine===undefined)day.configuration.training.creatine=false;}day.configuration.training.groups=structuredClone(groups);}
       for(const group of [...(settings?.training.groups||[]),...next.training.groups])groupCatalog.set(group.id,group.name);
       settings=next;
-      for(const day of days.values())if(day.date>=key){day.configuration=structuredClone(next);if(next.training.mode==='gym'&&entries.some(entry=>entry.date===day.date))day.trainingMode='training';for(const id of ['nutrition','training','sentiments'])invalidateReview(day,id);}
+      for(const day of days.values())if(day.date>=key){day.configuration=structuredClone(next);if(next.training.mode==='gym'&&entries.some(entry=>entry.date===day.date))day.trainingMode='training';for(const id of changed)invalidateReview(day,id);}
       targets.set(sampleWeekStart(key),structuredClone(next.training.groups));
       options.onChange?.(store.exportSnapshot());
     },
@@ -170,6 +171,10 @@ export function createStore(options = {}) {
     updateTrainingMinutes(key,value) {
       if(value!==null&&(!Number.isFinite(value)||value<0||value>1440))throw new RangeError('Enter 0–1440 minutes.');
       const day=writableDay(key);day.trainingMinutes=value;invalidateReview(day,'training');
+    },
+    updateTime(key,section,minutes) {
+      if(!['sleep','prayer'].includes(section)||minutes!==null&&(!Number.isInteger(minutes)||minutes<0||minutes>1440))throw new RangeError('Enter hours and minutes up to 24 hours, or leave blank.');
+      const day=writableDay(key);if(day[section]?.minutes!==minutes){day[section]={minutes};invalidateReview(day,section);}
     },
     groupName(key,id){return effectiveTargets(key).groups.find(g=>g.id===id)?.name||groupCatalog.get(id)||ALL_GROUPS.find(g=>g.id===id)?.name||id;},
     loadTemplates() { return structuredClone(templates); },
@@ -348,16 +353,15 @@ export function createStore(options = {}) {
       const dailyEntries = this.loadTrainingDay(key);
       const ready = { nutrition: nutritionScore(day) !== null,
         training: trainingReady(day,dailyEntries) && (['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? (settingsForDay(day).training.mode==='other'||dailyEntries.length === 0) : day.trainingMode === 'training'),
-        checklists: true };
-      const sections = DAY_SECTIONS.map(section => ({ ...section, ready: ready[section.id], reviewed: day.reviewed[section.id] && ready[section.id] }));
-      sections.push({id:'sentiments',label:'Sentiments',ready:sentimentReady(day),reviewed:sentimentReady(day)&&(day.reviewed.sentiments===true||day.reviewed.sentiments===undefined&&!!day.completedAt)});
+        checklists: true, sentiments:sentimentReady(day),sleep:timeScore(day,'sleep')!==null,prayer:timeScore(day,'prayer')!==null };
+      const sections = enabledSections(day).map(section => ({ ...section, ready: ready[section.id], reviewed: !!(ready[section.id]&&(day.reviewed[section.id]===true||section.id==='sentiments'&&day.reviewed.sentiments===undefined&&day.completedAt)) }));
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
-        canComplete: sections.every(section => section.reviewed), completedAt: day.completedAt };
+        canComplete: sections.length>0&&sections.every(section => section.reviewed), completedAt: day.completedAt };
     },
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(section==='sentiments'?'Add the required sentiment rating.':section==='nutrition'?'Finish your nutrition log before confirming.':'Answer training, minutes if applicable, and creatine if enabled.');
+      if (!progress.ready) throw new Error(['sleep','prayer'].includes(section)?'Enter the hours and minutes before confirming.':section==='sentiments'?'Add the required sentiment rating.':section==='nutrition'?'Finish your nutrition log before confirming.':'Answer training, minutes if applicable, and creatine if enabled.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },
@@ -366,7 +370,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateTime','updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
       const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];

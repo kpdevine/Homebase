@@ -1,0 +1,897 @@
+/* Pocket Planet design system. Blue values are converted by build-theme.mjs.
+   Mobile is the default; wide layouts add columns instead of scaling the page. */
+:root {
+  --ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-5:24px;--ui-space-6:32px;
+  --ui-radius:6px;--ui-radius-small:4px;--ui-control:44px;
+  --ui-bg:var(--lcd-_7890bf,#7890bf);--ui-panel:var(--lcd-_94a9d0,#94a9d0);--ui-inset:var(--lcd-_a8badd,#a8badd);--ui-ink:var(--lcd-_182c59,#182c59);--ui-muted:var(--lcd-_304977,#304977);
+  --ui-line:var(--lcd-_49628f,#49628f);--ui-line-soft:var(--lcd-_49628f55,#49628f55);--ui-active:var(--lcd-_273f73,#273f73);--ui-light:var(--lcd-_edf5ff,#edf5ff);--ui-focus:var(--lcd-_e8f3ff,#e8f3ff);
+  --bg:var(--ui-bg);--panel:var(--ui-panel);--ink:var(--ui-ink);--muted:var(--ui-muted);--line:var(--ui-line-soft);
+  font-family:var(--font-ui);color-scheme:light;
+}
+*,*::before,*::after {box-sizing:border-box}
+html {min-width:280px;scrollbar-gutter:stable;scroll-behavior:auto}
+body {margin:0;padding:0;min-height:100svh;height:auto;overflow:visible;background:var(--lcd-_172235,#172235);color:var(--ui-ink);font:400 14px/1.45 var(--font-ui)}
+body::before {content:none}
+.app-shell,.is-overview .app-shell {position:relative;display:flex;flex-direction:column;width:100%;height:auto;min-height:100svh;max-width:1600px;margin:auto;padding:0 16px;background:var(--ui-bg);border:0;border-radius:0;box-shadow:none;overflow:visible;zoom:1}
+.app-shell::before {position:absolute;inset:0;content:'';z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 2px,var(--lcd-_172b5810,#172b5810) 2px 3px);opacity:.7;border-radius:inherit}
+.app-shell>* {position:relative;z-index:1}
+.app-header {display:contents}
+h1,h2,h3,h4 {color:var(--ui-ink);font-family:var(--font-display);font-weight:700;letter-spacing:0;line-height:1.15;margin:0}
+h1 {font-size:26px}h2 {font-size:22px}h3 {font-size:19px}h4 {font-size:15px}
+p {margin:0 0 12px}p:last-child {margin-bottom:0}
+.eyebrow {font:400 10px/1.4 var(--font-ui);letter-spacing:.04em;color:var(--ui-muted);margin:0 0 5px}
+.hint,.tiny-note,.section-instruction {font:400 12px/1.5 var(--font-ui);color:var(--ui-muted)}
+.icon {width:20px;height:20px;stroke-width:1.7;flex-shrink:0}
+button,a,input,textarea,select,summary {touch-action:manipulation}
+button {font-family:var(--font-ui);letter-spacing:0;transition:background-color 120ms,color 120ms,border-color 120ms,box-shadow 120ms}
+button:disabled {opacity:.5;cursor:default}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible,[tabindex='0']:focus-visible {outline:2px solid var(--ui-focus);outline-offset:3px}
+.primary-button,.quiet-button,.review-button,.adjust-button,.icon-button,.text-button,.panel-link,.calendar-launch {min-height:var(--ui-control);border-radius:var(--ui-radius-small);font-size:13px;font-weight:400;line-height:1.25;white-space:normal;text-decoration:none;transform:none}
+.primary-button,.review-button {padding:12px 16px;color:var(--ui-light);background:var(--ui-active);border:1px solid var(--ui-active);box-shadow:inset 0 1px var(--lcd-_ffffff19,#ffffff19)}
+.quiet-button,.adjust-button {padding:10px 13px;color:var(--ui-ink);background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);box-shadow:none}
+.text-button,.panel-link {padding:10px 0;color:var(--ui-ink);background:transparent;border:0;box-shadow:none}
+.icon-button {display:inline-grid;place-items:center;width:44px;height:44px;min-width:44px;margin:0;padding:0;border:1px solid var(--ui-line);background:var(--lcd-_b5c5e333,#b5c5e333);color:var(--ui-ink);font-size:25px;box-shadow:none}
+.primary-button:hover:not(:disabled),.review-button:hover:not(:disabled) {background:var(--lcd-_1d315f,#1d315f);border-color:var(--lcd-_1d315f,#1d315f)}
+.quiet-button:hover:not(:disabled),.icon-button:hover:not(:disabled),.adjust-button:hover:not(:disabled) {background:var(--lcd-_c1d1ee66,#c1d1ee66)}
+button:active:not(:disabled) {box-shadow:inset 0 2px 3px var(--lcd-_182c5933,#182c5933);transform:none}
+.text-button:hover {text-decoration:underline;text-underline-offset:4px}
+button[aria-pressed='true'],button[aria-selected='true'] {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff)}
+input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]),textarea,select {min-width:0;max-width:100%;min-height:44px;font:400 16px/1.4 var(--font-ui);color:var(--ui-ink);background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:var(--ui-radius-small);box-shadow:inset 0 1px 2px var(--lcd-_182c5912,#182c5912);padding:10px 12px}
+input::placeholder,textarea::placeholder {color:var(--lcd-_3c5280,#3c5280);opacity:1}
+label,legend,.file-label {font:400 12px/1.4 var(--font-ui);color:var(--ui-ink)}
+fieldset {min-width:0}
+summary {min-height:44px;display:flex;align-items:center;gap:8px;cursor:pointer;font:400 13px/1.4 var(--font-ui);color:var(--ui-ink);list-style:none}
+summary::-webkit-details-marker {display:none}
+summary::after {content:'+';font:400 21px/1 var(--font-ui);margin-left:auto;flex:0 0 20px;text-align:center}
+details[open]>summary::after {content:'−'}
+details>summary {border-bottom:1px solid transparent}
+details[open]>summary {border-bottom-color:var(--ui-line-soft);margin-bottom:12px}
+.panel,.day-score,.breakdown-panel {min-width:0;background:var(--lcd-_acc0df26,#acc0df26);border:1px solid var(--ui-line);border-radius:var(--ui-radius);box-shadow:inset 0 1px var(--lcd-_dfebff22,#dfebff22);padding:16px}
+.panel-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.panel-heading h2,.panel-heading h3 {font-size:20px}
+.count-pill,.state-pill {display:inline-flex;align-items:center;justify-content:center;min-height:28px;min-width:30px;padding:5px 8px;border:1px solid var(--ui-line-soft);border-radius:var(--ui-radius-small);background:var(--lcd-_b6c9e526,#b6c9e526);color:var(--ui-ink);font-size:10px;line-height:1.35;white-space:nowrap}
+.state-pill.complete {color:var(--ui-light);background:var(--ui-active);border-color:var(--ui-active)}
+/* The header has one compact date row and one consistent row of utility icons. */
+.top-row {display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:6px 8px;height:auto;min-height:0;padding:10px 0 12px;margin:0;border-bottom:1px solid var(--ui-line-soft)}
+.day-navigation {display:flex;align-items:center;min-width:0;margin:0;gap:0;grid-column:1;grid-row:1}
+.day-navigation .icon-button {border:0;background:transparent;width:40px;min-width:40px}
+.date-button {min-width:0;flex:1;min-height:44px;padding:8px 2px;background:transparent;border:0;font-size:13px;white-space:nowrap;letter-spacing:0}
+.day-navigation .quiet-button {margin:0 0 0 4px;min-width:48px;padding:8px;font-size:11px}
+.save-status {display:grid;place-content:center;grid-column:2;grid-row:1;width:44px;min-height:44px;padding:0;margin:0;background:none;border:0}
+.save-dot {display:block;width:8px;height:8px;border:1px solid var(--ui-ink);border-radius:50%;background:var(--ui-ink);box-shadow:none}
+#save-message {display:none}
+.save-status.is-saving .save-dot {background:transparent;border-style:dotted}
+.save-status.has-error .save-dot {width:11px;height:11px;border-radius:2px;background:var(--lcd-_d9e8ff,#d9e8ff)}
+.header-shortcuts {grid-column:1/-1;grid-row:2;display:flex;justify-content:space-between;align-items:center;gap:4px;margin:0;padding:0}
+.top-row .header-shortcuts>button,.top-row #open-score-info {width:44px;min-width:44px;height:44px;min-height:44px;border:1px solid var(--ui-line);border-radius:4px;background:var(--lcd-_b5c5e333,#b5c5e333);margin:0;padding:0}
+.header-shortcuts .icon {width:21px;height:21px;filter:none}
+.header-shortcuts .calendar-button-label {display:none}
+.top-row .header-shortcuts>button[aria-pressed=true] {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff)}
+.greeting-row {height:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:0;padding:18px 0 16px;margin:0}
+.greeting-row .eyebrow {font-size:10px;line-height:1.4;margin:0 0 6px}
+.greeting-row #page-title {font:700 25px/1.12 var(--font-display);max-height:none;display:block;overflow:visible;letter-spacing:0;-webkit-line-clamp:unset;text-wrap:balance}
+.greeting-row .state-pill {max-width:96px;white-space:normal;text-align:center;flex-shrink:0}
+.greeting-dot {color:inherit}
+.day-tabs {position:sticky;top:0;z-index:30;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;width:auto;max-width:none;padding:8px 8px;margin:0 -16px;background:var(--ui-bg);border:0;border-block:1px solid var(--ui-line);border-radius:0;box-shadow:0 5px 10px var(--lcd-_20396b12,#20396b12);isolation:isolate}
+.day-tabs>button {position:relative;display:grid;grid-template-rows:10px 1fr;align-items:center;justify-content:stretch;gap:5px;min-width:0;min-height:58px;height:auto;margin:0;padding:6px 5px;background:var(--lcd-_aec2e32b,#aec2e32b);color:var(--ui-ink);border:1px solid var(--ui-line-soft);border-radius:3px;font:400 10px/1.2 var(--font-ui);white-space:normal;text-align:left}
+.day-tabs>button small {position:static;inset:auto;font:400 9px/1 var(--font-ui);color:inherit;opacity:.7}
+.day-tabs .tab-label {display:block;min-width:0;padding:0;text-align:center;line-height:1.25;overflow-wrap:normal}
+.day-tabs>button[aria-selected=true] {color:var(--ui-light);background:var(--ui-active);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff);filter:none}
+.day-tabs .tab-check {position:absolute;right:4px;top:4px;margin:0;width:16px;height:16px;color:inherit;filter:none}
+.day-tabs .tab-check .icon {display:block;width:15px;height:15px;stroke-width:2.3}
+#tab-scroll-anchor {display:block;height:0}
+.app-shell>main {display:block;flex:1;min-height:0;padding:20px 0 24px;overflow:visible;scrollbar-gutter:auto}
+.detail-view {display:block;height:auto;min-height:0;padding:0;overflow:visible}
+.detail-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:0;margin:0 0 12px;padding:0}
+.detail-heading .section-instruction {font-size:11px;margin:0}
+.detail-heading .quiet-button {min-height:36px;padding:8px 10px;font-size:11px}
+.selected-day-notice,.storage-warning {padding:12px;border:1px solid var(--ui-line);border-radius:4px;background:var(--lcd-_b9ccec33,#b9ccec33);margin:0 0 16px;font-size:12px;line-height:1.5}
+.selected-day-notice {display:flex;align-items:center;justify-content:space-between;gap:10px}
+.selected-day-notice strong,.selected-day-notice span {display:block;font-size:11px}
+.selected-day-notice .quiet-button {min-width:76px;max-width:90px;padding:8px;font-size:10px}
+/* Overview: immediate score, usable list, then compact category breakdown. */
+.overview-board {display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:'score' 'tasks' 'breakdown';gap:16px;padding:0;min-height:0;overflow:visible}
+.day-score {grid-area:score;display:grid;grid-template-columns:144px minmax(0,1fr);align-items:center;gap:8px 12px;text-align:left;padding:16px}
+.score-heading {grid-column:1/-1;margin:0 0 2px;text-align:left}
+.score-heading h2 {font-size:21px;margin:0}
+.hero-meter {grid-column:1;width:144px;max-width:100%;margin:0 0 14px;align-self:center;overflow:visible}
+.hero-score .meter-number {font-size:62px;line-height:1;letter-spacing:0}
+.hero-score .meter-out-of,.nutrition-score .meter-out-of {font:400 10px/1.3 var(--font-ui);margin-top:5px;margin-inline:auto;max-width:95px;text-align:center;text-wrap:balance}
+.score-details {grid-column:2;min-width:0;display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.score-range {margin:0;font:400 11px/1.5 var(--font-ui);color:var(--ui-ink);text-align:left}
+.score-range strong {font:700 18px var(--font-display)}
+.score-range .score-assumption {display:none}
+.score-caption {display:block;text-align:left;margin:0}
+#score-status {display:block;margin:0;padding:0;border:0;background:none;border-radius:0;font:400 10px/1.5 var(--font-ui);color:var(--ui-muted)}
+.score-description {margin:0;text-align:left;font:400 10px/1.5 var(--font-ui);max-width:none;color:var(--ui-muted)}
+.score-action {width:100%;min-width:0;max-width:100%;min-height:44px;padding:10px;font-size:11px;display:inline-flex;justify-content:space-between}
+.score-action.is-complete {background:var(--ui-active);border-color:var(--ui-active);color:var(--ui-light)}
+.meter-endpoint {bottom:-7px;font:400 10px/1 var(--font-ui);color:var(--ui-ink);text-shadow:none;background:var(--ui-bg);border-radius:2px;padding:2px 3px}
+.meter-endpoint.start {left:29%}.meter-endpoint.end {right:27%}
+.overview-tasks {grid-area:tasks;display:flex;flex-direction:column;min-height:0;height:auto;padding:16px;background:var(--lcd-_acc0df26,#acc0df26)}
+.overview-tasks .panel-heading {margin-bottom:4px}
+#overview-tasks-title,#tasks-title,#tomorrow-title,#later-title {font:700 25px/1.15 var(--font-handwriting);text-transform:none;letter-spacing:0;padding:4px 0 8px;margin:0;overflow:visible}
+.task-heading-actions {display:flex;align-items:center;gap:8px}
+.task-scroll {min-height:0;max-height:none;overflow:visible;margin:4px 0 0;scrollbar-gutter:auto}
+.task-list,.child-tasks {list-style:none;margin:0;padding:0}
+.task-list li.task-group {display:block;border:0;border-bottom:1px solid var(--ui-line-soft);padding:0;min-height:0}
+.task-row {display:flex;align-items:flex-start;gap:3px;min-width:0;min-height:44px;padding:0}
+.task-list .task-row>label,.child-tasks li>label {display:flex;align-items:flex-start;gap:10px;padding:12px 0;min-height:44px;flex:1;min-width:0;cursor:pointer}
+.task-list label>span,.child-tasks label>span {display:block;min-width:0;font:400 18px/1.12 var(--font-handwriting);letter-spacing:0;overflow:visible;overflow-wrap:anywhere;transform:none;padding:0;margin:0}
+.task-list input,.child-tasks input {appearance:none;display:grid;place-content:center;flex:0 0 19px;width:19px;height:19px;padding:0;margin:0;border:1.5px solid var(--ui-line);border-radius:3px;background:var(--lcd-_b3c7e73b,#b3c7e73b);transform:none;position:relative;top:0}
+.task-list input:checked,.child-tasks input:checked {background:var(--ui-active);border-color:var(--ui-active)}
+.task-list input:checked::after,.child-tasks input:checked::after {content:'✓';color:var(--ui-light);font:700 13px/1 var(--font-ui)}
+.task-list input:checked+span {color:var(--ui-muted);opacity:.7;text-decoration-color:var(--ui-muted)}
+.recurring-label {display:block;font:400 8px/1.3 var(--font-ui);letter-spacing:.02em;margin:5px 0 0;color:var(--ui-muted);opacity:.8}
+.task-list .expand-task,.task-list .edit-task,.child-tasks .edit-task {display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;min-height:44px;margin:0;padding:0;background:none;border:0;border-radius:3px;color:var(--ui-ink);font:400 10px var(--font-ui)}
+.task-list .edit-task .icon {width:17px;height:17px}
+.task-list .remove-task {display:none}
+.child-tasks {padding:0 0 6px 29px;margin:0}
+.child-tasks li {display:flex;align-items:flex-start;gap:4px;border:0;padding:0;min-height:0}
+.child-tasks label>span {font-size:17px}
+.task-card-actions {display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;margin-top:8px;border-top:1px solid var(--ui-line-soft)}
+.task-card-actions .panel-link,.task-card-actions .text-button {margin:0;padding:4px 0;border:0;width:auto;min-height:36px;font-size:11px}
+.empty-tasks {display:grid;gap:4px;padding:20px 0!important;font-size:12px;line-height:1.5;color:var(--ui-muted)}
+.empty-tasks strong {font-size:14px;color:var(--ui-ink)}
+.breakdown-panel {grid-area:breakdown;display:block;padding:16px}
+.breakdown-panel .panel-heading {margin-bottom:10px}
+.breakdown-panel .panel-heading h2 {font-size:18px}
+.breakdown-panel .eyebrow,.breakdown-panel .tiny-note {display:none}
+.breakdown-list {display:grid;gap:6px}
+.breakdown-item,.breakdown-item.nutrition,.breakdown-item.training,.breakdown-item.checklists,.breakdown-item.sentiments {display:flex;align-items:center;gap:12px;min-height:80px;width:100%;padding:10px;background:transparent;border:1px solid var(--ui-line-soft);border-radius:4px;box-shadow:none;text-align:left}
+.breakdown-copy strong {font:400 12px/1.3 var(--font-ui);color:var(--ui-ink)}
+.breakdown-copy small {font:400 10px/1.4 var(--font-ui);margin-top:4px;color:var(--ui-muted)}
+.breakdown-state {font:400 9px/1.3 var(--font-ui);gap:4px;margin-top:5px;color:var(--ui-muted)}
+.breakdown-state .icon {width:12px;height:12px}
+.breakdown-chevron {font-size:20px;color:var(--ui-ink)}
+.breakdown-item .score-circle {width:50px;height:50px;margin:0;flex:0 0 50px}
+.breakdown-item .score-circle>span {font-size:17px}
+.daily-note {padding:12px 0 0;margin:0;gap:8px}
+.daily-note p {font:400 10px/1.5 var(--font-ui);color:var(--ui-muted)}
+.note-dot {margin-top:5px;background:var(--ui-muted);width:4px;height:4px}
+.display-footer {display:none}
+/* Daily inputs: clear primary controls and secondary detail on demand. */
+.nutrition-editor {display:block;width:100%;max-width:none;height:auto;max-height:none;overflow:visible;padding:16px;container-type:normal}
+.nutrition-guidance,.meter-help {display:none}
+.nutrition-body {display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start;flex:none}
+.nutrition-log {min-width:0;display:flex;flex-direction:column;align-items:center}
+.nutrition-body #nutrition-meter {width:196px;max-width:100%;margin:0 auto 20px}
+.nutrition-score .meter-number {font-size:69px;letter-spacing:0;line-height:1}
+.nutrition-meter {touch-action:none;cursor:grab;position:relative}
+.nutrition-meter svg {display:block;overflow:visible}
+.rating-controls {display:flex;align-items:center;justify-content:center;gap:8px;margin:0}
+.rating-controls .adjust-button {width:44px;height:44px;min-height:44px;padding:0;font-size:22px}
+.rating-controls input {width:76px;height:44px;min-height:44px;padding:4px;text-align:center;font:400 23px/1 var(--font-display)}
+.nutrition-notes {min-width:0;align-self:stretch;display:flex;flex-direction:column;gap:8px;padding:0;margin:0}
+.nutrition-notes-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0;min-height:32px}
+.nutrition-notes label,.training-notes label,.sentiments-notes label {display:block;margin:0;font:400 12px/1.4 var(--font-ui);text-transform:none;letter-spacing:0}
+.nutrition-notes label span,.training-notes label span {font-size:10px;color:var(--ui-muted)}
+.nutrition-notes-heading .text-button {min-height:32px;font-size:10px;padding:4px 0}
+.notes-input-shell {min-width:0;flex:none;max-width:100%}
+.note-save-actions {display:flex;justify-content:flex-end;margin:8px 0 0;min-width:0}
+.note-save-button {width:90px;min-height:44px;padding:9px 12px;font:400 11px/1.3 var(--font-ui)}
+.note-save-button.is-saved {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-active)}
+textarea[data-notes],.nutrition-notes textarea[data-notes],.training-notes textarea[data-notes],#sentiments-notes,#final-sentiments-notes {width:100%;font:400 19px/1.25 'Kieran Handwriting Entry',var(--font-handwriting);height:150px;min-height:120px;max-height:420px;resize:vertical;padding:12px;background:var(--lcd-_b3c6e54d,#b3c6e54d);border:1px solid var(--ui-line);border-radius:4px;letter-spacing:0;box-shadow:inset 0 1px 2px var(--lcd-_182c5912,#182c5912)}
+.rating-description {font:400 10px/1.4 var(--font-ui);margin:0;color:var(--ui-muted)}
+.nutrition-macros {display:grid;gap:12px;min-width:0}
+.food-amounts {display:grid;gap:14px;min-width:0;width:100%;margin:0}
+.food-amounts label {display:grid;grid-template-columns:1fr;gap:7px;font:400 11px var(--font-ui)}
+.food-amounts input {width:100%;font:400 22px/1.2 var(--font-display);min-height:50px;padding:10px}
+.food-amounts .hint {font-size:10px}
+.nutrition-mode-macros .nutrition-body {grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.nutrition-mode-macros .nutrition-log {justify-content:center;align-self:center}
+.nutrition-mode-macros #nutrition-meter {width:150px}
+.nutrition-mode-macros .nutrition-score .meter-number {font-size:52px}
+.nutrition-mode-macros .nutrition-notes {grid-column:1/-1}
+.training-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start;height:auto;min-height:0}
+.daily-training-card,.weekly-training {padding:16px;min-height:0;height:auto;overflow:visible}
+.training-checkins {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin:0 0 16px}
+.training-choice,.creatine-choice {display:grid;grid-template-columns:1fr 1fr;gap:6px;border:0;padding:0;margin:0;min-width:0}
+.training-choice legend {font:400 11px/1.35 var(--font-ui);margin:0 0 9px;padding:0;min-height:15px}
+.training-choice label {position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;height:auto;padding:10px 6px;margin:0;color:var(--ui-ink);background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);border-radius:4px}
+.training-choice label span {font:400 12px var(--font-ui)}
+.training-choice label input {position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.training-choice label:has(input:checked) {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff)}
+.training-choice label:has(input:focus-visible) {outline:2px solid var(--ui-focus);outline-offset:3px}
+.creatine-check {padding:0;margin:0;background:none;border:0}
+.daily-training-card>#training-mode-hint {font-size:10px;margin:0 0 12px}
+.training-pace {display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:12px;border:1px solid var(--ui-line-soft);background:var(--lcd-_b4c7e526,#b4c7e526);border-radius:4px;min-height:0}
+.training-pace .score-circle {width:58px;height:58px;flex:0 0 58px;margin:0}
+.training-pace strong {font:400 15px var(--font-display);display:block}
+.training-pace span:not(.score-circle):not(.score-circle>span),.training-pace small {display:block;font:400 11px/1.5 var(--font-ui);margin-top:4px;color:var(--ui-muted)}
+.ideal-workout {padding:12px;margin:0 0 16px;border:1px solid var(--ui-line-soft);background:transparent;border-radius:4px}
+.ideal-workout-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ideal-workout-heading h4 {font:400 13px var(--font-ui)}
+.ideal-workout-heading>span {font-size:9px;color:var(--ui-muted)}
+.ideal-workout ul {display:grid;grid-template-columns:1fr;gap:0;margin:0;padding:0;list-style:none}
+.ideal-workout li {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--ui-line-soft);font:400 12px var(--font-ui)}
+.ideal-workout li:last-child {border-bottom:0}
+.ideal-workout li strong {font:400 17px var(--font-display)}
+.ideal-workout li small {font:400 10px var(--font-ui)}
+.ideal-workout p,.training-empty p {font:400 11px/1.5 var(--font-ui);margin:0}
+.gym-form {display:grid;grid-template-columns:80px minmax(0,1fr);align-items:end;gap:12px;padding:0;margin:0;border:0}
+#gym-muscles {grid-column:1/-1;width:100%;padding:0;border:0;margin:0}
+#gym-muscles legend {font:400 11px/1.4 var(--font-ui);margin:0 0 9px}
+.muscle-choices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0}
+.muscle-choices label {position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:9px 6px;margin:0;border:1px solid var(--ui-line);border-radius:4px;background:var(--lcd-_b5c5e333,#b5c5e333);overflow:visible;cursor:pointer}
+.muscle-choices input {position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.muscle-choices span {display:block;min-width:0;font:400 11px/1.3 var(--font-ui);overflow-wrap:anywhere;text-align:center}
+.muscle-choices label:has(input:checked) {color:var(--ui-light);background:var(--ui-active);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff)}
+.muscle-choices label:has(input:focus-visible) {outline:2px solid var(--ui-focus);outline-offset:3px}
+.gym-form>div>label {font-size:11px;margin-bottom:6px}
+#gym-sets {height:46px;min-height:46px;text-align:center;padding:8px;font:400 21px var(--font-display)}
+#log-sets {min-width:0;min-height:46px;font-size:12px;white-space:normal;padding:10px}
+.training-gaps,.training-notes-details,.routine-manager {border-top:1px solid var(--ui-line-soft);padding-top:6px;margin-top:16px}
+.muscle-suggestions {padding:0;margin:0;background:none;border:0}
+.muscle-suggestions>div {display:grid;grid-template-columns:1fr;gap:8px}
+.muscle-suggestions h4 {display:none}
+.muscle-suggestions>div>span {display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px}
+.muscle-suggestions small {font-size:10px}
+.body-weight-form {display:block;margin:16px 0;padding:12px;background:var(--lcd-_b4c7e526,#b4c7e526);border:1px solid var(--ui-line-soft);border-radius:4px}
+.weight-highlight {display:block;margin:0}
+.weight-highlight>div {display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.weight-highlight span {font:400 11px var(--font-ui)}
+#body-weight-current {font:400 27px/1.1 var(--font-display);letter-spacing:0}
+#body-weight-current small {font:400 12px var(--font-ui)}
+#body-weight-current .weight-missing {font:400 12px var(--font-ui);color:var(--ui-muted)}
+.weight-entry-editor {padding:0;margin:4px 0 0;border:0}
+.weight-entry-editor summary {min-height:36px;font-size:11px;padding:0}
+.body-weight-controls {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:8px}
+.body-weight-controls input {width:100%;height:44px}
+.body-weight-controls>button {grid-column:1/-1;font-size:11px}
+.weight-unit {display:flex;gap:4px;border:0;padding:0;margin:0}
+.weight-unit label {min-height:44px;min-width:40px;display:grid;place-content:center;margin:0;background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);border-radius:3px;position:relative}
+.weight-unit input {position:absolute;opacity:0;width:1px;height:1px}
+.weight-unit label:has(:checked) {background:var(--ui-active);color:var(--ui-light)}
+.body-weight-status {display:flex;align-items:center;gap:8px;justify-content:space-between;margin-top:8px}
+.body-weight-status p {font-size:10px;margin:0}
+.body-weight-status button {font-size:10px;min-height:32px}
+.daily-training-entries {margin:16px 0 0}
+.daily-training-entries ul,.gym-log ul {list-style:none;padding:0;margin:0}
+.daily-training-entries li,.gym-log li {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--ui-line-soft);font-size:11px}
+.daily-training-entries li strong {font-size:12px;font-weight:400}
+.daily-training-entries li small {display:block;font-size:10px;margin-top:3px}
+.daily-training-entries button,.gym-log button {min-height:44px;font-size:10px;flex-shrink:0}
+.training-empty {font-size:11px;padding:4px 0}
+.training-empty strong {font:400 13px var(--font-ui)}
+.training-notes {margin:0}
+.gym-totals {display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin:12px 0}
+.gym-totals>div {padding:0;background:none;border:0}
+.gym-totals span {display:block;font-size:10px;color:var(--ui-muted);margin-bottom:4px}
+.gym-totals strong {font:400 25px/1.1 var(--font-display)}
+#gym-week-label {font-size:10px;margin:0 0 12px}
+.weekly-rest-credits {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:var(--lcd-_b4c7e526,#b4c7e526);border:1px solid var(--ui-line-soft);border-radius:4px;margin:0 0 12px}
+.weekly-rest-credits strong {display:block;font:400 28px/1.1 var(--font-display);margin-top:4px}
+.weekly-rest-credits strong small {font:400 11px var(--font-ui)}
+.weekly-rest-credits p {font:400 10px/1.5 var(--font-ui);margin:0;color:var(--ui-muted)}
+.weekly-progress-details {margin:0;border:0;padding:0}
+.weekly-progress-details>summary {font-size:12px}
+.gym-groups {display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;margin-top:8px}
+.gym-group-heading {display:flex;align-items:start;justify-content:space-between;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.gym-group-heading span {font:400 11px/1.4 var(--font-ui)}
+.gym-group-heading small {font-size:9px}
+.gym-progress {height:5px;background:var(--lcd-_324d7c33,#324d7c33);border-radius:1px;overflow:hidden}
+.gym-progress span {display:block;height:100%;border-radius:1px}
+.over-target {font-size:9px;margin:4px 0 0}
+.target-editor {margin-top:16px;padding-top:4px;border-top:1px solid var(--ui-line-soft)}
+.target-editor .hint {font-size:10px}
+#target-inputs {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 8px;margin:16px 0}
+.target-control {padding:0;background:none;border:0;min-width:0}
+.target-control h4 {font:400 11px var(--font-ui);text-align:center;margin:0 0 8px;min-height:16px}
+.target-meter {position:relative;width:120px;max-width:100%;margin:auto;touch-action:none}
+.target-meter svg {width:100%;overflow:visible}
+.target-number {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.target-number strong {font:400 34px/1 var(--font-display)}
+.target-number small {font:400 8px var(--font-ui);margin-top:4px}
+.target-endpoint {font:400 8px var(--font-ui);bottom:0}
+.target-adjustments {display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
+.target-adjustments .adjust-button {width:44px;height:40px;min-height:40px;padding:0;font-size:20px}
+.target-editor-actions {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.target-editor-actions button {font-size:11px}
+.sentiments-editor {display:grid;grid-template-columns:1fr;gap:20px;padding:16px;align-items:start}
+.sentiments-notes {min-width:0}
+.sentiments-notes label {margin-bottom:9px}
+.sentiments-rating {display:grid;grid-template-columns:144px minmax(0,1fr);align-items:center;gap:8px 12px;min-width:0}
+.sentiments-rating>label,.sentiments-rating>p:last-child {grid-column:1/-1;margin:0;font-size:11px}
+#sentiments-meter {grid-column:1;grid-row:2/5;width:144px;margin:0 0 16px;max-width:100%}
+#sentiments-meter .meter-number {font-size:53px}
+.sentiments-rating .rating-controls {grid-column:2;gap:4px;flex-wrap:wrap}
+.sentiments-rating .rating-controls input {width:100%;height:44px;order:-1}
+.sentiments-rating .rating-controls button {width:calc(50% - 2px)}
+#sentiments-score-hint {font-size:10px;grid-column:2;margin:0}
+#clear-sentiments-rating {grid-column:2;min-height:36px;font-size:10px;padding:5px 0}
+.sentiments-rating>p:last-child {display:none}
+/* To-do planning cards use the same list rhythm rather than oversized columns. */
+#checklists-view {display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+#checklists-view>.detail-heading {grid-column:1/-1;margin:0}
+.checklist-editor,.tomorrow-plan,.later-plan {padding:16px;min-height:0}
+.checklist-editor .panel-heading,.tomorrow-plan .panel-heading,.later-plan .panel-heading {align-items:center;min-height:58px;margin:0 0 8px}
+#tasks-date,#tomorrow-date,#later-dates {margin:0 0 4px;font-size:9px;line-height:1.3}
+.task-progress {height:3px;margin:0 0 8px;background:var(--lcd-_324d7c33,#324d7c33)}
+.task-progress>span {display:block;height:100%}
+#task-summary {font-size:10px;margin:0 0 8px}
+.task-tools {display:flex;align-items:center;gap:10px;border-top:1px solid var(--ui-line-soft);padding:10px 0 0;margin-top:10px}
+.task-tools>span {display:none}
+.task-tools>button {width:100%;font-size:12px}
+.routine-manager {font-size:12px;margin-top:12px;padding-top:4px}
+.routine-manager ul {padding:0;margin:0;list-style:none}
+.routine-manager li {display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--ui-line-soft);padding:8px 0}
+.routine-manager strong {font:400 18px/1.2 var(--font-handwriting)}
+.routine-manager small {display:block;font-size:9px;line-height:1.5;margin-top:5px}
+.routine-manager button {min-height:44px;max-width:90px;text-align:right;font-size:10px}
+#tomorrow-tasks,#later-tasks {list-style:none;padding:0;margin:0}
+.planned-task {display:flex;gap:8px;align-items:start;padding:9px 0;border-bottom:1px solid var(--ui-line-soft)}
+.planned-task>span {flex:1;min-width:0;font:400 18px/1.15 var(--font-handwriting);overflow-wrap:anywhere}
+.planned-task strong {font:400 18px/1.15 var(--font-handwriting);overflow-wrap:anywhere}
+.planned-task small {display:block;font:400 9px/1.4 var(--font-ui);margin-top:5px}
+.planned-task button {width:40px;min-width:40px;min-height:44px;padding:0;flex-shrink:0}
+.planning-date {display:block;border-bottom:1px solid var(--ui-line-soft);padding:6px 0}
+.planning-date>button {font-size:10px;padding:4px 0;min-height:36px}
+.planning-date>ul {list-style:none;padding:0;margin:0}
+.planning-empty {padding:8px 0 12px;font:400 11px var(--font-ui);color:var(--ui-muted)}
+.tomorrow-actions {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-top:10px}
+.tomorrow-actions button {font-size:11px;min-height:40px}
+/* Shared dialogs: scroll the content, keep the title and final actions reachable. */
+dialog,dialog#task-dialog,.customize-dialog,.username-dialog,.final-review-dialog,.scoring-dialog,.weight-history-dialog {position:fixed;inset:0;width:calc(100% - 16px);max-width:640px;height:fit-content;min-height:0;max-height:calc(var(--visible-height,100dvh) - 24px);margin:auto;padding:18px 16px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-bg);color:var(--ui-ink);box-shadow:0 16px 48px var(--lcd-_101c3d66,#101c3d66);overflow:auto;overscroll-behavior:contain;scroll-padding-block:76px 80px;font-size:13px}
+dialog::backdrop {background:var(--lcd-_142343aa,#142343aa);backdrop-filter:blur(3px)}
+dialog .dialog-heading {position:sticky;top:-18px;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 12px;margin:-4px 0 16px;background:var(--ui-bg);border-bottom:1px solid var(--ui-line-soft);box-shadow:none}
+dialog .dialog-heading h2 {font-size:23px;letter-spacing:0}
+dialog .dialog-heading .icon-button {flex:0 0 44px;font-size:25px}
+dialog p {font-size:12px;line-height:1.55;margin-bottom:12px}
+dialog .hint {font-size:11px;line-height:1.5}
+.composer-actions,.final-review-actions,.reset-actions {position:sticky;bottom:-18px;z-index:4;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;background:var(--ui-bg);padding:12px 0 14px;margin:16px 0 -4px;border-top:1px solid var(--ui-line-soft)}
+.composer-actions button,.final-review-actions button,.reset-actions button {flex:1;min-width:0;min-height:46px;font-size:12px}
+#task-editor-delete {flex:0 0 100%;font-size:11px;justify-content:flex-start;padding:8px 0;min-height:36px}
+.task-composer {display:block;margin:0}
+.task-composer>label,.composer-label {display:block;margin:0 0 9px;font-size:12px}
+.task-writing-field {position:relative;min-width:0;margin:0 0 16px;background:var(--lcd-_b3c6e54d,#b3c6e54d);border-bottom:1px solid var(--ui-line);border-radius:3px}
+.task-composer .handwriting-input,.task-composer [data-child-name] {width:100%;min-height:0;background:transparent;box-shadow:none;border:0;border-bottom:0;border-radius:0;font-family:'Kieran Handwriting Entry',var(--font-handwriting);font-size:19px;line-height:1.1;resize:none;overflow:hidden}
+.task-writing-field:focus-within {outline:2px solid var(--ui-focus);outline-offset:2px}
+.task-writing-field textarea:focus-visible {outline:none}
+.task-date-picker {border:0;padding:0;margin:20px 0 16px;min-width:0}
+.task-date-picker legend {font-size:12px;margin-bottom:9px}
+#task-dialog .task-date-shortcuts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#task-dialog .task-date-shortcuts button {min-height:48px;padding:8px 5px;font-size:11px;line-height:1.3}
+#task-dialog #task-week-options {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+#task-dialog #task-week-options button {min-height:44px;font-size:11px}
+.task-chosen-date {font-size:11px;font-weight:400;margin:10px 0 4px}
+.task-exact-date summary {font-size:11px;min-height:36px}
+.task-exact-date {margin-top:0}
+.task-exact-date>label {display:block;font-size:11px;margin-bottom:6px}
+#task-date {display:block;width:100%;max-width:100%;min-width:0;min-height:44px;margin-top:5px}
+.task-schedule {padding:12px 0;border-block:1px solid var(--ui-line-soft);margin:0 0 16px}
+.repeat-toggle {display:flex;align-items:center;gap:12px;min-height:44px;margin:0;font-size:12px}
+.repeat-toggle input {width:20px;height:20px;flex:0 0 20px;accent-color:var(--ui-active);margin:0}
+#repeat-options {padding:8px 0 0}
+.repeat-choices {display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.repeat-choices button {min-height:44px;font-size:11px;padding:9px}
+#repeat-options>p {font-size:10px;margin:10px 0 0;color:var(--ui-muted)}
+#custom-weekdays {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;border:0;padding:0;margin:0 0 16px}
+#custom-weekdays legend {grid-column:1/-1;margin-bottom:8px;font-size:11px}
+#custom-weekdays label {display:grid;place-items:center;position:relative;min-width:0;min-height:40px;margin:0;padding:8px 0;border:1px solid var(--ui-line);border-radius:3px;background:var(--lcd-_b5c5e333,#b5c5e333);font-size:9px}
+#custom-weekdays input {position:absolute;opacity:0;width:1px;height:1px}
+#custom-weekdays label:has(:checked) {background:var(--ui-active);color:var(--ui-light)}
+.subtask-input-row {display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:8px;align-items:start;margin:0 0 12px}
+.subtask-input-row .task-writing-field {margin:0}
+.subtask-input-row .remove-task {width:40px;height:44px;padding:0;font-size:22px;background:none;border:0;color:var(--ui-ink)}
+var(--lcd-_add,#add)-subtask {font-size:11px;min-height:40px}
+.composer-error,#config-error,#username-error,.reset-message {font-size:11px;line-height:1.5;color:var(--ui-ink);font-weight:700}
+.task-edit-scope {margin:0 0 16px;padding:0;border:0;display:grid;gap:8px}
+.task-edit-scope label {display:flex;align-items:center;gap:9px;min-height:44px;padding:10px;border:1px solid var(--ui-line-soft);border-radius:4px}
+.task-edit-scope input {accent-color:var(--ui-active);width:19px;height:19px;margin:0}
+/* Setup and settings share the same options, spacing and control states. */
+.config-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:0 0 20px;position:sticky;top:55px;background:var(--ui-bg);padding:6px 0;z-index:3}
+.config-tabs button {min-height:44px;padding:7px 3px;border:1px solid var(--ui-line);border-radius:3px;background:var(--lcd-_b5c5e333,#b5c5e333);font:400 10px/1.25 var(--font-ui);color:var(--ui-ink)}
+.config-tabs button[aria-pressed=true] {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff)}
+[data-config-panel]>h3 {font-size:19px;margin-bottom:16px}
+.config-options {display:grid;gap:8px;border:0;padding:0;margin:16px 0}
+.config-options legend {font-size:12px;margin:0 0 10px;padding:0}
+.config-options label,.config-toggle {display:flex;align-items:center;gap:12px;min-height:48px;padding:12px;border:1px solid var(--ui-line);border-radius:4px;background:var(--lcd-_b5c5e333,#b5c5e333);cursor:pointer;margin:0}
+.config-options label:has(input:checked) {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff)}
+.config-options input,.config-toggle input {width:19px;height:19px;flex:0 0 19px;accent-color:var(--ui-active);margin:0}
+.config-options span,.config-toggle span {display:grid;gap:4px;font-size:12px}
+.config-options small,.config-toggle small {font:400 10px/1.45 var(--font-ui)}
+.config-fields {display:grid;grid-template-columns:1fr;gap:14px;margin:16px 0}
+.config-fields label {display:grid;gap:7px;font-size:12px;font-weight:400}
+.config-fields input {width:100%}
+.config-group-heading {display:flex;justify-content:space-between;gap:8px;align-items:center;margin:20px 0 10px}
+.config-group-heading h4 {font:400 13px var(--font-ui)}
+.config-group-heading span {font-size:9px}
+.config-group-row {display:grid;grid-template-columns:minmax(0,1fr) 68px 36px;gap:8px;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--ui-line-soft);padding-bottom:8px}
+.config-group-row>input {width:100%;font-size:16px}
+.config-goal-meter {width:68px;height:68px;color:var(--ui-ink)}
+.config-goal-meter strong {font-size:23px}
+.config-group-row button {width:36px;min-height:44px;font-size:22px;padding:0}
+.settings-section {padding:16px 0;margin:0;border-top:1px solid var(--ui-line-soft)}
+.settings-section h3 {font:400 14px var(--font-ui);margin:0 0 10px}
+.settings-section p {font-size:11px;line-height:1.5}
+.settings-section summary {font-size:13px}
+.settings-settings-links,.config-settings-links {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.config-settings-links button {font-size:11px;justify-content:space-between;min-height:44px}
+.settings-group {border-top:1px solid var(--ui-line-soft);padding:0;margin:0}
+.settings-group>summary {min-height:54px;font-size:13px}
+.settings-group .settings-section {border:0;padding:4px 0 16px}
+#preferences-form {padding:0 0 18px;margin:0}
+#preferences-form label {display:block;font-size:12px;margin-bottom:8px}
+.name-control {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.name-control input {width:100%}
+.name-control button {font-size:11px;padding:10px}
+.name-save-feedback {font-size:10px;margin:6px 0 0}
+.theme-options {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-options button {display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 8px;font-size:11px;border:1px solid var(--ui-line);border-radius:4px;background:var(--lcd-_b5c5e333,#b5c5e333)}
+.theme-options button[aria-pressed=true] {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff)}
+.theme-swatch {width:16px;height:16px;border-radius:2px;border:1px solid var(--lcd-_e1eeff88,#e1eeff88)}
+.motion-controls {display:flex;align-items:end;gap:8px;flex-wrap:wrap}
+.motion-controls>div {flex:1;min-width:0}
+.motion-controls label {display:block;margin-bottom:7px;font-size:11px}
+.motion-controls select {width:100%}
+.cloud-actions {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cloud-actions button {font-size:11px;min-height:44px;padding:10px 12px}
+.cloud-conflicts {border:1px solid var(--ui-line);background:var(--lcd-_b4c7e544,#b4c7e544);padding:12px;border-radius:4px;margin-top:12px}
+.cloud-conflicts strong {font:700 12px var(--font-ui)}
+.cloud-conflicts button {width:100%;margin-top:8px;white-space:normal}
+.file-label {display:block;margin:16px 0 8px;font-size:11px}
+input[type=file] {max-width:100%;font:400 11px/1.5 var(--font-ui);min-height:44px}
+input[type=file]::file-selector-button {min-height:40px;margin-right:8px;padding:8px 12px;background:var(--lcd-_b5c5e333,#b5c5e333);color:var(--ui-ink);border:1px solid var(--ui-line);border-radius:4px;font:400 11px var(--font-ui)}
+.reset-settings {margin-top:12px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.reset-settings .quiet-button {width:100%;justify-content:flex-start;background:none}
+#welcome-dialog,#sync-prompt,.username-dialog,.reset-dialog {max-width:460px}
+#welcome-dialog h2,.username-dialog h2 {font-size:27px;margin:0 0 12px}
+#welcome-form,#username-form {display:grid;gap:9px;margin-top:18px}
+#welcome-form label,#username-form label {font-size:12px}
+#welcome-name,#new-username {width:100%}
+#welcome-form .primary-button,#welcome-google,#claim-username {width:100%;min-height:48px;margin-top:6px}
+.welcome-or {display:flex;justify-content:center;align-items:center;gap:12px;font-size:11px;margin:14px 0;color:var(--ui-muted)}
+.welcome-or::before,.welcome-or::after {content:'';height:1px;background:var(--ui-line-soft);flex:1}
+#welcome-status,#username-error {font-size:11px}
+/* Review stays in one place, with clear progress and one confirmation action. */
+.review-banner {position:static;display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 16px;padding:14px;border:1px solid var(--ui-line);border-radius:6px;background:var(--lcd-_b4c7e533,#b4c7e533);box-shadow:none}
+.review-banner>div:first-child {margin:0}
+.review-banner strong {font:400 14px var(--font-display)}
+.review-banner>div>span {font-size:10px;margin-top:4px}
+.review-steps {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:0}
+.review-step {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:6px 2px;font-size:9px;line-height:1.2;background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line-soft);border-radius:3px}
+.review-step>span {display:grid;place-content:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--ui-line);font:400 10px var(--font-ui)}
+.review-step.reviewed>span {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-active)}
+.review-step.current {background:var(--ui-active);color:var(--ui-light);border-color:var(--lcd-_d8e8ff,#d8e8ff)}
+.review-banner-actions {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;margin:0;padding:0;border:0}
+.review-banner-actions .review-hint {grid-column:1/-1;margin:0;font-size:10px}
+.review-banner-actions .review-button {min-width:0;padding:10px;font-size:11px}
+#finish-later {font-size:10px;padding:8px}
+.final-review-dialog {max-width:760px}
+.final-review-content {max-height:none;overflow:visible}
+.recap-score {display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:0;border:0;background:none}
+.recap-score .score-circle {width:70px;height:70px;margin:0;flex:0 0 70px}
+.recap-score .score-circle>span {font-size:23px}
+.recap-score p {font-size:10px;margin:6px 0 0}
+.recap-score small {font-size:9px}
+.recap-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 16px}
+.recap-metrics button {padding:10px 6px;min-height:72px;text-align:center;background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line-soft);border-radius:4px;min-width:0}
+.recap-metrics span {display:block;font:400 10px/1.3 var(--font-ui);margin-bottom:8px}
+.recap-metrics strong {font:400 23px/1 var(--font-display)}
+.recap-metrics small {font:400 9px/1.3 var(--font-ui)}
+.recap-section {margin:0 0 12px;padding:12px 0;border:0;border-top:1px solid var(--ui-line-soft)}
+.recap-section h4,.recap-section summary {font:400 12px var(--font-ui)}
+.recap-section h4>span,.recap-section summary>span {font:400 10px var(--font-ui);margin-left:auto}
+.recap-tasks {max-height:none;overflow:visible;margin:0;padding:0;list-style:none}
+.recap-tasks li {display:flex;align-items:baseline;gap:9px;padding:8px 0;font:400 18px/1.12 var(--font-handwriting)}
+.recap-tasks .recap-child {padding-left:20px;font-size:17px}
+.recap-check {font:400 12px var(--font-ui);flex:0 0 12px}
+.recap-training {list-style:none;padding:0;margin:8px 0 0}
+.recap-training li {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;font-size:11px}
+.recap-body-weight,.recap-creatine {display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 0;margin:0;border-top:1px solid var(--ui-line-soft);font-size:11px}
+.recap-body-weight strong {font:400 23px var(--font-display)}
+.recap-note p {font:400 18px/1.25 var(--font-handwriting);margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.final-review-sentiments {padding:16px 0 0;margin:0;border-top:1px solid var(--ui-line-soft)}
+.final-review-sentiments h3 {font-size:18px;margin-bottom:12px}
+.final-sentiments-body {display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:12px;align-items:start}
+.final-sentiments-writing {min-width:0}
+.final-sentiments-writing label {display:block;font-size:11px;margin-bottom:8px}
+#final-sentiments-notes {height:180px;min-height:180px;font-size:18px}
+.final-sentiments-rating {min-width:0;text-align:center;padding:0}
+.final-rating-heading {font-size:10px;margin-bottom:9px;line-height:1.4}
+#final-sentiments-meter {width:110px;margin:0 0 15px}
+#final-sentiments-meter .meter-number {font-size:38px}
+#final-sentiments-meter .meter-out-of {font-size:8px;max-width:70px;margin-top:4px}
+#final-clear-sentiments-rating {min-height:44px;font-size:10px;padding:7px 0;max-width:100%}
+.score-info-nav {display:flex;gap:4px;flex-wrap:wrap;overflow:visible;padding:4px 0 8px;margin:0 0 16px;scrollbar-width:thin;position:sticky;top:58px;z-index:3;background:var(--ui-bg)}
+.score-info-nav button {flex:1 1 80px;min-height:40px;padding:8px 10px;font-size:11px;border:1px solid var(--ui-line);border-radius:3px;background:var(--lcd-_b5c5e333,#b5c5e333)}
+.score-info-section {padding:14px 0;margin:0;border-top:1px solid var(--ui-line-soft)}
+.score-info-section h3 {font-size:18px;margin:0 0 12px}
+.score-info-section p,.scoring-explanation li {font:400 12px/1.65 var(--font-ui);margin-bottom:12px}
+.score-info-section .scoring-example {padding:12px;background:var(--lcd-_b4c7e533,#b4c7e533);border:1px solid var(--ui-line-soft);border-radius:4px}
+/* Calendar and the graph deliberately use the full phone width. */
+.history-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start;height:auto;min-height:0}
+.calendar-summary {display:flex;align-items:center;gap:20px;flex:1;min-width:0}
+.monthly-score {display:flex;align-items:center;gap:10px}
+.monthly-score .score-circle {width:52px;height:52px;margin:0;flex:0 0 52px}
+.monthly-score strong {font:400 12px var(--font-ui)}
+.monthly-score small {display:block;font:400 9px/1.5 var(--font-ui);margin-top:4px}
+.calendar-streak {display:grid;gap:4px;font:400 10px/1.4 var(--font-ui);color:var(--ui-muted)}
+.calendar-streak strong {font:400 23px/1 var(--font-display);color:var(--ui-ink)}
+.calendar-tools {display:flex;align-items:start;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.calendar-filters,.achievement-filters {display:flex;gap:4px;flex-wrap:wrap;min-width:0;overflow:visible}
+.calendar-filters {flex:1 1 100%}
+.calendar-filters button,.achievement-filters button {min-height:40px;flex:0 1 auto;padding:9px 10px;font:400 10px/1.3 var(--font-ui);color:var(--ui-ink);background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);border-radius:3px}
+.calendar-filters button[aria-pressed=true],.achievement-filters button[aria-pressed=true] {color:var(--ui-light);background:var(--ui-active);border-color:var(--lcd-_d8e8ff,#d8e8ff)}
+.calendar-weight-launch {min-height:40px;font-size:11px;padding:8px 12px}
+.calendar-card {padding:14px 4px;margin:0 -12px;border-radius:4px;min-width:0;width:auto;overflow:visible}
+.calendar-card .panel-heading {padding:0 10px;margin:0 0 10px}
+.calendar-card h3 {font-size:21px}
+.month-navigation {display:flex;gap:4px}
+.month-navigation button {width:40px;min-width:40px;height:40px;min-height:40px}
+.calendar-weekdays,.calendar-week {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px}
+.calendar-weekdays {font:400 9px/1.3 var(--font-ui);margin-bottom:6px;text-align:center}
+.calendar-weekdays span {padding:5px 0;min-width:0}
+.week-average-heading {font-size:8px}
+.week-average-heading small {display:none}
+.calendar {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px 2px;overflow:visible}
+.calendar-week {min-width:0}
+.calendar-day,.calendar-week-score {position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:67px;padding:6px 1px;margin:0;border:1px solid var(--ui-line-soft);border-radius:3px;background:var(--lcd-_acc1e322,#acc1e322);color:var(--ui-ink);box-shadow:none}
+.calendar-day .calendar-date {font:400 10px/1 var(--font-ui);line-height:1}
+.calendar-day .score-circle,.calendar-week-score .score-circle {display:inline-block;width:30px;height:30px;margin:0;flex:0 0 30px}
+.calendar-day .score-circle>span,.calendar-week-score .score-circle>span {font-size:10px}
+.calendar-day[aria-pressed=true],.calendar-day.selected {background:var(--lcd-_bfd3ef66,#bfd3ef66);color:var(--ui-ink);border-color:var(--lcd-_e6f2ff,#e6f2ff);box-shadow:inset 0 0 0 1px var(--lcd-_d8eaff88,#d8eaff88)}
+.calendar-day.is-logged {background:var(--lcd-_bcd1ee44,#bcd1ee44);border-color:var(--lcd-_b4cfee99,#b4cfee99)}
+.calendar-day.is-reviewed {border-color:var(--lcd-_e4f2ff,#e4f2ff);box-shadow:inset 0 -2px var(--lcd-_e4f2ff,#e4f2ff)}
+.calendar-day.is-future {opacity:.45}
+.calendar-day.outside-month {opacity:.45}
+.calendar-week-score {border-left:1px solid var(--ui-line);background:var(--lcd-_304d7d19,#304d7d19)}
+.calendar-week-score>small {font-size:7px}
+.calendar-legend {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 10px 0;margin:0;font:400 9px/1.4 var(--font-ui)}
+.history-detail {padding:16px;min-height:0;max-height:none;overflow:visible;scroll-margin-top:84px}
+.history-detail>.eyebrow {display:none}
+.history-detail h3 {font-size:22px;margin:0 0 16px}
+#back-to-calendar {display:block;min-height:36px;font-size:11px;margin:0 0 12px}
+#history-content {max-height:none;overflow:visible}
+#open-selected-day {width:100%;font-size:12px;margin-top:16px}
+.weight-history-dialog {width:calc(100% - 16px);max-width:900px}
+.weight-chart-tools {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.weight-chart-tools>div {display:flex;gap:4px}
+.weight-chart-tools button {min-height:40px;padding:8px 10px;font-size:10px}
+.weight-chart-summary {font-size:11px;line-height:1.5;margin:0 0 12px}
+#weight-chart {position:relative;min-width:0;width:100%;overflow:visible;border:1px solid var(--ui-line-soft);border-radius:4px;padding:4px;background:var(--lcd-_b2c6e522,#b2c6e522)}
+#weight-chart>svg {display:block;width:100%;height:auto;min-height:210px;overflow:visible}
+.weight-day-card {max-width:170px;width:170px;padding:9px;background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:4px;box-shadow:0 4px 12px var(--lcd-_13244733,#13244733);z-index:5;pointer-events:none}
+.weight-day-card .score-circle svg {height:100%;min-height:0}
+.weight-day-card .score-circle {width:32px;height:32px;margin:0}
+.weight-day-card .score-circle>span {font-size:11px}
+.weight-day-card strong {font-size:13px}
+.weight-day-card small,.weight-day-card span {font-size:9px}
+.weight-chart-data {margin-top:12px}
+.weight-chart-data table {width:100%;border-collapse:collapse;font-size:11px}
+.weight-chart-data td,.weight-chart-data th {padding:8px;text-align:left;border-bottom:1px solid var(--ui-line-soft)}
+/* Achievements and social screens use the same surfaces and compact filters. */
+.achievements-view {display:flex;flex-direction:column;gap:16px;height:auto;min-height:0;overflow:visible}
+.achievements-view>.detail-heading {margin:0}
+.achievements-summary {display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:6px;margin:0;flex:none}
+.achievements-summary>div {grid-column:auto;display:flex;flex-direction:column;align-items:start;justify-content:center;gap:6px;padding:12px 10px;background:var(--lcd-_b2c7e544,#b2c7e544);border:1px solid var(--ui-line);border-radius:4px;min-width:0;min-height:82px}
+.achievements-summary strong {font:400 25px/1 var(--font-display)}
+.achievements-summary strong small {font:400 11px var(--font-ui)}
+.achievements-summary span {font:400 9px/1.4 var(--font-ui)}
+.achievement-total {padding-left:10px}
+.achievement-total>.icon {position:static;width:18px;height:18px;transform:none;filter:none}
+.achievement-streaks {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0;flex:none}
+.achievement-streaks>div {display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;padding:12px;background:var(--lcd-_b7cbea55,#b7cbea55);border:1px solid var(--ui-line);border-radius:4px;min-width:0}
+.achievement-streaks span,.achievement-streaks small {font:400 10px/1.4 var(--font-ui)}
+.achievement-streaks strong {font:400 27px/1 var(--font-display)}
+.achievement-tools {position:static;display:flex;align-items:start;gap:8px;flex-wrap:wrap;padding:0;margin:0;background:transparent;border:0;box-shadow:none;min-height:0}
+#achievement-filters {flex:1 1 100%}
+#achievement-order {flex:1}
+#achievement-unlocked-only {font-size:10px;min-height:40px;padding:8px 10px}
+.achievement-catalog {overflow:visible;min-height:0;max-height:none;height:auto;flex:none;scrollbar-gutter:auto}
+.achievement-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;overflow:visible;max-height:none}
+.achievement-card {display:flex;flex-direction:column;padding:12px;background:var(--lcd-_acc2e333,#acc2e333);border:1px solid var(--ui-line);border-radius:4px;min-width:0;min-height:190px;box-shadow:none}
+.achievement-card.is-earned {background:var(--lcd-_b8cfee55,#b8cfee55);border-color:var(--lcd-_c8dfff,#c8dfff);box-shadow:inset 0 2px var(--lcd-_e6f2ff55,#e6f2ff55)}
+.achievement-card-heading {display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.achievement-glyph {width:25px;height:25px;flex:0 0 25px;padding:0;background:none;border:0;filter:none}
+.achievement-glyph svg {width:100%;height:100%}
+.achievement-card-heading>span:not(.achievement-glyph),.achievement-card-heading>strong {font:400 8px/1.3 var(--font-ui)}
+.achievement-card-heading>strong {margin-left:auto}
+.achievement-card h2 {font:400 15px/1.2 var(--font-display);margin:0 0 8px;letter-spacing:0}
+.achievement-card p {font:400 10px/1.5 var(--font-ui);margin:0 0 12px}
+.achievement-progress {margin-top:auto;font:400 9px/1.4 var(--font-ui)}
+.achievement-progress progress {width:100%;height:4px;margin:7px 0 0;accent-color:var(--ui-active)}
+.achievement-last {font:400 8px/1.5 var(--font-ui);margin-top:8px;color:var(--ui-muted)}
+.achievement-policy {font:400 10px/1.5 var(--font-ui);margin:16px 0 0;color:var(--ui-muted)}
+.friends-view {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;overflow:visible;min-height:0;height:auto}
+.friends-board,.leaderboard {padding:16px;min-width:0}
+.friends-board {order:1}.leaderboard {order:0}
+.friends-board .panel-heading .eyebrow {display:none}
+.friends-board .panel-heading h2,.leaderboard .panel-heading h2 {font-size:20px}
+.friends-board .hint,.leaderboard>.hint {font:400 10px/1.5 var(--font-ui)}
+#friends-handle {font:400 18px var(--font-handwriting);overflow-wrap:anywhere;min-width:0}
+.friend-search>label {font-size:12px}
+.friend-search>div {display:flex;align-items:center;gap:8px;margin-top:8px;min-width:0}
+.friend-search input {width:100%;min-width:0;font-size:16px}
+.friend-search button {flex:0 0 auto;font-size:11px;min-height:44px;padding:10px}
+.friend-results {padding:0;margin:12px 0;list-style:none}
+.friend-results li {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--ui-line-soft);font-size:11px}
+.friend-results strong {font:400 18px/1.2 var(--font-handwriting);margin-right:auto;min-width:0;overflow-wrap:anywhere}
+.friend-results button {font-size:10px;min-height:44px;padding:8px}
+.leaderboard-scroll {width:100%;overflow-x:auto}
+.leaderboard table {width:100%;border-collapse:collapse;table-layout:fixed;font:400 10px var(--font-ui);text-align:center}
+.leaderboard th,.leaderboard td {padding:12px 4px;border-bottom:1px solid var(--ui-line-soft);min-width:0;vertical-align:middle}
+.leaderboard thead {background:var(--lcd-_304c7c19,#304c7c19);color:var(--ui-ink)}
+.leaderboard thead th {font:400 9px/1.4 var(--font-ui)}
+.leaderboard thead th:first-child {width:34%;text-align:left}
+.leaderboard thead th:last-child {width:20%}
+.leaderboard .leaderboard-user-heading {font:400 17px/1.2 var(--font-handwriting)}
+.leaderboard tbody th {text-align:left;font-weight:400}
+.leaderboard .leaderboard-user-name {font:400 17px/1.15 var(--font-handwriting);overflow-wrap:anywhere;word-break:break-word}
+.leaderboard-rank {display:none}
+.leaderboard td small,.leaderboard th small {display:block;font:400 8px/1.5 var(--font-ui);margin-top:3px;color:var(--ui-muted)}
+.leaderboard .score-circle {display:inline-block;width:44px;height:44px;min-width:44px;margin:0;vertical-align:middle}
+.leaderboard .score-circle>span {font-size:15px}
+.leaderboard .is-you {background:var(--lcd-_b4c9e744,#b4c9e744)}
+.leaderboard-yesterday.has-score .score-circle {filter:drop-shadow(0 0 3px var(--lcd-_d6eaff88,#d6eaff88))}
+#leaderboard-note,#friends-state {font-size:10px;line-height:1.5;margin:12px 0 0}
+#friends-state:empty {display:none}
+#manage-friends {margin-top:16px;border-top:1px solid var(--ui-line-soft)}
+/* Feedback never displaces content or moves the score. */
+.status-toast,#status {position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));top:auto;width:auto;max-width:620px;margin:0 auto;padding:12px 14px;min-height:44px;border:1px solid var(--lcd-_dbeaff,#dbeaff);background:var(--ui-active);color:var(--ui-light);border-radius:5px;box-shadow:0 4px 18px var(--lcd-_13244744,#13244744);z-index:90;font:400 12px/1.5 var(--font-ui);pointer-events:none}
+#status.visible {pointer-events:auto}
+#status-message {min-width:0}
+#undo-action {min-height:44px;padding:8px;font-size:12px;color:var(--ui-light)}
+.achievement-unlock {position:fixed;inset:auto 12px max(12px,env(safe-area-inset-bottom));max-width:540px;margin:0 auto;z-index:100;padding:16px;background:var(--ui-bg);color:var(--ui-ink);border:1px solid var(--lcd-_deefff,#deefff);border-radius:6px;box-shadow:0 8px 24px var(--lcd-_13244766,#13244766)}
+.achievement-unlock-heading h2 {font-size:18px}
+.achievement-unlock-badges {max-height:220px;overflow:auto}
+.achievement-unlock .quiet-button {width:100%;margin-top:12px;font-size:12px}
+@media(min-width:700px) {
+  .app-shell,.is-overview .app-shell {padding-inline:24px}
+  .top-row {grid-template-columns:minmax(0,1fr) auto auto;gap:12px;padding:12px 0}
+  .day-navigation {grid-column:1;max-width:370px}
+  .save-status {grid-column:2;width:auto;padding:0 8px;display:flex;gap:7px}
+  #save-message {display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+  .header-shortcuts {grid-column:3;grid-row:1;justify-content:flex-end;gap:5px}
+  .greeting-row {padding-block:20px}
+  .greeting-row #page-title {font-size:30px}
+  .day-tabs {margin-inline:-24px;padding-inline:24px;gap:8px}
+  .day-tabs>button {min-height:54px;font-size:12px;grid-template-rows:9px 1fr;padding:7px 12px}
+  .day-tabs .tab-label {text-align:left}
+  .day-tabs .tab-check {right:9px;top:18px}
+  .app-shell>main {padding:24px 0 28px}
+  .overview-board {grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-areas:'score tasks' 'breakdown breakdown';gap:20px}
+  .day-score {grid-template-columns:160px minmax(0,1fr)}
+  .hero-meter {width:160px}
+  .hero-score .meter-number {font-size:70px}
+  .breakdown-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .nutrition-body {grid-template-columns:230px minmax(0,1fr);gap:32px;align-items:center}
+  .nutrition-body #nutrition-meter {width:220px}
+  .nutrition-mode-macros .nutrition-body {grid-template-columns:210px minmax(0,1fr) minmax(0,1fr);gap:20px}
+  .nutrition-mode-macros .nutrition-notes {grid-column:auto}
+  .nutrition-mode-macros #nutrition-meter {width:200px}
+  .nutrition-mode-macros .nutrition-score .meter-number {font-size:65px}
+  .nutrition-notes textarea[data-notes] {height:210px}
+  .training-grid {grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+  .muscle-choices {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sentiments-editor {grid-template-columns:minmax(0,1fr) 270px;gap:28px}
+  .sentiments-rating {grid-template-columns:1fr;justify-items:center}
+  #sentiments-meter {grid-column:1;grid-row:auto;width:180px;max-width:100%;margin:0 0 18px}
+  #sentiments-meter .meter-number {font-size:64px}
+  .sentiments-rating .rating-controls {grid-column:1;flex-wrap:nowrap;gap:8px}
+  .sentiments-rating .rating-controls input {width:76px;order:0}
+  .sentiments-rating .rating-controls button {width:44px}
+  #sentiments-score-hint,#clear-sentiments-rating {grid-column:1;text-align:center}
+  #sentiments-notes {height:270px}
+  #checklists-view {grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .checklist-editor,.tomorrow-plan,.later-plan {padding:14px}
+  .task-list label>span {font-size:18px}
+  .task-list .task-row>label {gap:8px}
+  .task-row .edit-task {width:32px;flex-basis:32px}
+  .task-row .expand-task {width:32px;flex-basis:32px}
+  .calendar-tools {align-items:center}
+  .calendar-filters {flex:1;flex-wrap:wrap}
+  .calendar-card {padding:20px;margin:0}
+  .calendar-card .panel-heading {padding:0}
+  .calendar-weekdays,.calendar-week {gap:5px}
+  .calendar-day,.calendar-week-score {min-height:82px;padding:8px 3px}
+  .calendar-day .score-circle,.calendar-week-score .score-circle {width:42px;height:42px;flex-basis:42px}
+  .calendar-day .score-circle>span,.calendar-week-score .score-circle>span {font-size:14px}
+  .calendar-weekdays {font-size:10px}
+  .calendar-weekdays .week-average-heading {font-size:9px}
+  .calendar-legend {padding-inline:0}
+  .achievement-grid {grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .achievement-card {padding:16px;min-height:200px}
+  .achievement-card h2 {font-size:17px}
+  .achievement-card p {font-size:11px}
+  .achievement-card-heading>span:not(.achievement-glyph),.achievement-card-heading>strong {font-size:9px}
+  .achievement-tools {align-items:center}
+  #achievement-filters {flex:1 1 100%}
+  .achievement-glyph {width:30px;height:30px;flex-basis:30px}
+  .achievements-summary strong {font-size:32px}
+  .achievement-streaks>div {padding:16px}
+  .friends-view {grid-template-columns:minmax(240px,.8fr) minmax(0,1.4fr);gap:20px}
+  .friends-board {order:0}.leaderboard {order:1}
+  .leaderboard th,.leaderboard td {padding:16px 8px}
+  .leaderboard .score-circle {width:56px;height:56px;min-width:56px}
+  .leaderboard .score-circle>span {font-size:19px}
+  .leaderboard thead th {font-size:10px}
+  .leaderboard .leaderboard-user-name,.leaderboard .leaderboard-user-heading {font-size:19px}
+  dialog,dialog#task-dialog,.customize-dialog,.username-dialog,.final-review-dialog,.scoring-dialog,.weight-history-dialog {width:calc(100% - 48px);padding:24px;max-height:calc(var(--visible-height,100dvh) - 48px)}
+  dialog .dialog-heading {top:-24px;padding:16px 0;margin-top:-8px}
+  .composer-actions,.final-review-actions,.reset-actions {bottom:-24px;margin-bottom:-8px;padding-bottom:16px}
+  .config-tabs {top:60px}
+  .config-fields {grid-template-columns:1fr 1fr}
+  .final-sentiments-body {grid-template-columns:minmax(0,1fr) 150px;gap:20px}
+  #final-sentiments-meter {width:150px}
+  #final-sentiments-meter .meter-number {font-size:51px}
+  #final-sentiments-meter .meter-out-of {font-size:10px}
+  #final-sentiments-notes {height:220px;min-height:180px}
+  .status-toast,#status {left:auto;right:24px;bottom:24px;width:min(520px,calc(100% - 48px))}
+}
+@media(min-width:1100px) {
+  body {padding:16px}
+  .app-shell,.is-overview .app-shell {min-height:calc(100svh - 32px);border:1px solid var(--lcd-_35486b,#35486b);border-radius:10px;padding-inline:28px;box-shadow:0 10px 40px var(--lcd-_0e192a55,#0e192a55)}
+  .day-tabs {margin-inline:-28px;padding-inline:28px;top:0}
+  .greeting-row {padding-block:18px}
+  .greeting-row #page-title {font-size:30px}
+  .overview-board {grid-template-columns:minmax(0,1.05fr) minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:'tasks score breakdown';align-items:stretch;gap:20px}
+  .day-score {display:flex;flex-direction:column;align-items:center;justify-content:start;gap:0;padding:18px}
+  .score-heading {align-self:stretch;margin-bottom:10px}
+  .hero-meter {width:210px;max-width:100%;margin:0 0 16px;flex:none}
+  .hero-score .meter-number {font-size:88px}
+  .score-details {width:100%;gap:10px;text-align:center;margin-top:6px}
+  .score-range,.score-caption,.score-description {text-align:center}
+  .score-range {font-size:12px}
+  .score-range strong {font-size:19px}
+  #score-status,.score-description {font-size:10px}
+  .score-action {font-size:12px;margin-top:2px}
+  .breakdown-list {grid-template-columns:minmax(0,1fr);gap:8px}
+  .breakdown-item {min-height:80px;padding:10px}
+  .overview-tasks .task-scroll {max-height:420px;overflow-y:auto;scrollbar-gutter:stable}
+  .task-card-actions {margin-top:auto}
+  .display-footer {display:none;min-height:0;height:auto;padding:12px 0 20px;margin:0;border:0;border-top:1px solid var(--ui-line-soft);position:relative;inset:auto;background:none;box-shadow:none}
+  .is-overview .display-footer {display:flex;align-items:end;justify-content:space-between;gap:20px}
+  .live-clock {min-width:0;display:flex;flex-direction:column}
+  #clock-time {font:400 124px/.95 var(--font-display);letter-spacing:-.025em}
+  #clock-time small {font:700 17px var(--font-ui);margin-left:10px;color:var(--ui-ink)}
+  #clock-date {font:400 10px var(--font-ui);margin-top:8px}
+  .calendar-launch {display:flex;align-items:center;gap:10px;padding:0;min-height:48px;color:var(--ui-ink);background:none;border:0;font-size:13px}
+  .calendar-launch>.icon {width:18px;height:18px;margin-left:8px}
+  .calendar-icon,.calendar-icon>.icon {width:38px;height:38px}
+  #calendar-day-number {top:19px;font-size:9px}
+  .calendar-launch-detail {font-size:9px;margin-top:4px}
+  .nutrition-editor {padding:24px;max-width:100%}
+  .nutrition-body {grid-template-columns:260px minmax(0,1fr);gap:40px;max-width:1000px;margin:auto}
+  .nutrition-body #nutrition-meter {width:230px}
+  .nutrition-mode-macros .nutrition-body {grid-template-columns:240px minmax(200px,.8fr) minmax(260px,1fr);gap:32px;max-width:none}
+  .training-grid {grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px}
+  .daily-training-card,.weekly-training {padding:20px}
+  .muscle-choices {grid-template-columns:repeat(4,minmax(0,1fr))}
+  .training-checkins {max-width:540px}
+  .ideal-workout ul {grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .ideal-workout li {padding:7px 0;border:0;flex-direction:column;align-items:start;gap:6px}
+  .gym-groups {gap:16px 20px}
+  #target-inputs {grid-template-columns:repeat(4,minmax(0,1fr))}
+  .target-meter {width:104px}
+  .target-number strong {font-size:30px}
+  .target-adjustments {gap:8px}
+  .target-adjustments .adjust-button {width:36px;height:36px;min-height:36px}
+  .history-grid {grid-template-columns:minmax(0,1.5fr) minmax(310px,.9fr);gap:20px}
+  .history-detail {position:sticky;top:92px}
+  #back-to-calendar {display:none}
+  .calendar-day,.calendar-week-score {min-height:78px}
+  .calendar-day .score-circle,.calendar-week-score .score-circle {width:38px;height:38px;flex-basis:38px}
+  .calendar-day .score-circle>span,.calendar-week-score .score-circle>span {font-size:13px}
+  .achievement-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
+  #achievement-filters {flex:1 1 auto}
+  #achievement-order {flex:0 0 auto}
+  .achievements-summary {grid-template-columns:1.2fr 1fr 1fr}
+  .achievements-summary>div {min-height:86px;padding:16px}
+  .achievement-streaks>div {grid-template-columns:1fr auto auto}
+}
+@media(max-height:600px) and (min-width:700px) and (max-width:1099px) {
+  .top-row {padding-block:6px}.greeting-row {padding-block:10px}.greeting-row #page-title {font-size:23px}
+  .day-tabs {padding-block:5px;gap:6px}.day-tabs>button {min-height:46px;grid-template-rows:8px 1fr;gap:3px;font-size:10px}
+  .app-shell>main {padding-top:14px}.overview-board {gap:12px;grid-template-columns:1fr 1fr;grid-template-areas:'score tasks' 'breakdown breakdown'}
+  .day-score {grid-template-columns:130px minmax(0,1fr);padding:12px}.hero-meter {width:130px}.hero-score .meter-number {font-size:56px}
+  .score-heading h2 {font-size:18px}.breakdown-list {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nutrition-body {grid-template-columns:190px minmax(0,1fr);gap:24px}.nutrition-body #nutrition-meter {width:170px}.nutrition-score .meter-number {font-size:56px}
+  .nutrition-notes textarea[data-notes] {height:130px;min-height:110px}.nutrition-mode-macros .nutrition-body {grid-template-columns:160px 1fr 1fr}
+  .sentiments-editor {grid-template-columns:1fr 260px}.sentiments-rating {grid-template-columns:130px 1fr;gap:8px 12px}
+  #sentiments-meter {grid-column:1;grid-row:2/5;width:130px}#sentiments-meter .meter-number {font-size:46px}
+  .sentiments-rating .rating-controls {grid-column:2;flex-wrap:wrap}.sentiments-rating .rating-controls input {width:100%;order:-1}.sentiments-rating .rating-controls button {width:44px}
+  #sentiments-score-hint,#clear-sentiments-rating {grid-column:2}.sentiments-editor textarea[data-notes] {height:160px;min-height:120px}
+  .display-footer {display:none}
+  dialog .dialog-heading {position:relative;top:0;padding-top:0}.config-tabs,.score-info-nav {position:relative;top:0}
+}
+@media(max-width:359px) {
+  .app-shell,.is-overview .app-shell {padding-inline:12px}.day-tabs {margin-inline:-12px;padding-inline:5px;gap:3px}
+  .day-tabs>button {font-size:9px;padding-inline:3px}.header-shortcuts {gap:3px}
+  .top-row .header-shortcuts>button,.top-row #open-score-info {width:44px;min-width:44px}
+  .greeting-row #page-title {font-size:22px}.greeting-row .state-pill {font-size:9px;max-width:72px;padding:5px}
+  .day-score {grid-template-columns:120px minmax(0,1fr);gap:10px;padding:12px}.hero-meter {width:120px}.hero-score .meter-number {font-size:52px}
+  .score-heading h2 {font-size:19px}.score-range strong {font-size:16px}.score-action {font-size:10px;padding:9px}
+  .task-list label>span {font-size:17px}.task-row .edit-task {width:32px;flex-basis:32px}.task-list .expand-task {width:30px;flex-basis:30px}
+  .sentiments-rating {grid-template-columns:130px minmax(0,1fr)}#sentiments-meter {width:130px}
+  .calendar-card {margin-inline:-10px}.calendar-weekdays,.calendar-week {gap:1px}.calendar-day,.calendar-week-score {min-height:61px}
+  .calendar-day .score-circle,.calendar-week-score .score-circle {width:27px;height:27px;flex-basis:27px}.calendar-day .score-circle>span,.calendar-week-score .score-circle>span {font-size:9px}
+  .calendar-legend {font-size:8px;padding-inline:6px}.calendar-weekdays {font-size:8px}
+  .final-sentiments-body {grid-template-columns:minmax(0,1fr) 96px;gap:10px}#final-sentiments-meter {width:96px}#final-sentiments-meter .meter-number {font-size:34px}
+  .leaderboard .score-circle {width:38px;height:38px;min-width:38px}.leaderboard .score-circle>span {font-size:13px}.leaderboard .leaderboard-user-name {font-size:16px}
+}
+@media(prefers-reduced-motion:reduce) {html:not([data-motion=full]) * {scroll-behavior:auto;transition-duration:0ms}}
+html[data-motion=reduced] button {transition:none}
+
+.calendar-day:has(.calendar-weight){min-height:82px}.calendar-weight{display:block;position:static;inset:auto;font:400 7px/1.3 var(--font-ui);white-space:nowrap}.calendar-complete,.calendar-logged{position:absolute;top:3px;right:3px;font-size:8px}.training-checkins:has(.creatine-check[hidden]){grid-template-columns:1fr;max-width:260px}body:is([data-view=history],[data-view=achievements],[data-view=friends]) .review-banner{display:none}
+
+@media(max-width:699px) {
+  html {scrollbar-gutter:auto}
+  .greeting-row {padding-block:14px;height:auto}
+  .greeting-row .eyebrow,.greeting-row .state-pill {display:none}
+  .greeting-row #page-title {font-size:25px;text-wrap:normal}
+}
+
+.weight-day-card>strong {font:400 11px/1.3 var(--font-ui)}
+.weight-day-card .weight-day-scores strong {font:400 9px/1.3 var(--font-ui)}
+
+.day-tabs .tab-check.late-warning {display:grid;place-content:center;width:18px;height:18px;background:var(--ui-active);color:var(--ui-light);border:1px solid var(--ui-light);border-radius:3px}
+.day-tabs .tab-check.late-warning .icon {width:14px;height:14px;stroke-width:2}
+.breakdown-state.is-missing {font-size:10px;color:var(--ui-ink);gap:5px}
+.breakdown-state.is-missing .icon {width:16px;height:16px;stroke-width:2;color:var(--ui-ink);filter:none}
+
+/* Optional sections and warm LCD highlights. */
+:root {--ui-gold:hsl(43 100% 80%);--ui-white:hsl(216 100% 99%)}
+.food-field-goal {display:block;margin-top:6px;color:var(--ui-ink);font:400 11px/1.4 var(--font-ui)}
+.quiet-button.note-save-button.is-saved {background:var(--ui-gold);border-color:var(--ui-gold);color:var(--lcd-rgb_51_36_22_,rgb(51 36 22));box-shadow:0 0 8px rgb(255 230 151 / .3)}
+.day-tabs {grid-template-columns:repeat(var(--tab-count,5),minmax(0,1fr))}
+.day-tabs #tab-today {grid-template-rows:1fr;align-content:center}
+.review-steps {grid-template-columns:repeat(var(--review-count,4),minmax(0,1fr))}
+.config-tabs {display:flex;flex-wrap:wrap;gap:4px;position:relative;top:0}
+.config-tabs button {flex:1 1 80px}
+.tab-options {grid-template-columns:repeat(2,minmax(0,1fr))}
+.tab-options label {padding:10px;min-height:52px}
+.time-log-card {max-width:800px;margin-inline:auto}
+.time-log-card h2 {font-size:22px}
+.time-log-body {display:grid;gap:16px;align-items:center}
+.time-score-meter {width:220px;max-width:100%;margin:auto;pointer-events:none}
+.time-log-fields {min-width:0}
+.time-goal {display:inline-block;background:var(--ui-gold);color:var(--lcd-rgb_51_36_22_,rgb(51 36 22));border:1px solid var(--lcd-rgb_255_248_216_,rgb(255 248 216));border-radius:4px;padding:8px 12px;margin:0 0 18px;font-size:12px}
+.time-duration {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0;padding:0;border:0}
+.time-duration legend {margin-bottom:8px}
+.time-duration label {display:grid;gap:6px}
+.time-duration input {width:100%}
+.time-log-actions {display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.time-log-actions [role=status] {font-size:11px}
+.time-error:empty {display:none}
+.time-error {margin-top:8px;font-size:12px}
+.overview-board.without-tasks {grid-template-columns:minmax(0,1fr);grid-template-areas:'score' 'breakdown'}
+@media(min-width:700px){.time-log-body{grid-template-columns:250px minmax(0,1fr)}.overview-board.without-tasks{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-areas:'score breakdown'}.overview-board.without-tasks .day-score{grid-column:1}.overview-board.without-tasks .breakdown-panel{grid-column:2}}
+@media(max-width:699px){.day-tabs.many-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.review-steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Solar Systems share scores, not personal journal content. */
+.solar-choices {display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.solar-choices:empty {display:none}
+.solar-choices button {font-size:11px;padding:8px 10px}
+.solar-choices button[aria-pressed=true] {border-color:var(--ui-gold);box-shadow:inset 0 -2px var(--ui-gold),0 0 7px rgb(255 230 151 / .2)}
+.solar-manage {border-top:1px solid var(--ui-line);margin-top:16px;padding-top:8px}
+.solar-manage h3 {font-size:16px;margin:18px 0 8px}
+.solar-forms {display:grid;gap:16px}
+.solar-forms form>div {display:flex;gap:8px;margin-top:6px}
+.solar-forms input {width:100%;flex:1;min-width:0}
+.solar-forms button {flex:0 0 auto}
+.friend-results li>span {min-width:0;flex:1}
+.friend-results li>span small {display:block;font-size:10px;margin-top:4px;overflow-wrap:anywhere}
+.solar-open-day {display:inline-grid;place-items:center;padding:4px;min-height:56px;min-width:56px;border:1px solid transparent;background:transparent;border-radius:50%;color:inherit}
+.solar-open-day:hover {border-color:var(--ui-gold);background:rgb(255 230 151 / .13)}
+#solar-day-dialog {width:380px;max-width:calc(100vw - 24px);height:fit-content}
+.solar-day-navigation {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-block:8px 14px}
+#solar-day-score {display:grid;place-items:center;margin:8px 0 12px}
+#solar-day-score .score-circle {width:88px;height:88px;font-size:27px}
+#solar-day-state {font-size:11px;text-align:center}
+#solar-reaction-picker h3 {font-size:16px;margin:16px 0 12px}
+.solar-reaction-picker {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.solar-reaction-picker button {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:70px;padding:5px 1px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-inset);color:var(--ui-ink)}
+.solar-reaction-picker button[aria-pressed=true] {border-color:var(--ui-gold);background:var(--ui-active);color:var(--ui-white);box-shadow:inset 0 -2px var(--ui-gold),0 0 8px rgb(255 230 151 / .3)}
+.planet-emoji {display:block;width:44px;height:44px;object-fit:contain;image-rendering:pixelated;filter:none}
+.solar-reaction-picker small {font:400 9px/1.25 var(--font-ui);overflow-wrap:anywhere}
+.solar-reaction-counts {display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.solar-reaction-chip {display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 3px;background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:20px;font-size:12px}
+.solar-reaction-chip .planet-emoji {width:28px;height:28px}
+#solar-reaction-feedback {font-size:11px;color:var(--ui-ink);margin-top:10px}
+@media(min-width:700px){.solar-forms{grid-template-columns:repeat(2,minmax(0,1fr))}.friends-view{align-items:start}}
+
+#food-amounts>.note-save-actions {grid-column:1/-1;margin-top:0}
+
+.solar-choices .quiet-button[aria-pressed=true]:hover {background:var(--ui-active);color:var(--ui-white)}

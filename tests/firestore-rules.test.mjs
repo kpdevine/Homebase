@@ -47,6 +47,38 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     assert.equal((await getDoc(doc(env.authenticatedContext('eli').firestore(),'socialScores','dana'))).data().daysLogged,5);
     let unwatch;
     try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Friends listener did not receive the score summary.')),5000);unwatch=eli.watch(state=>{if(state.friends.some(friend=>friend.uid==='dana'&&friend.daysLogged===5)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{unwatch?.();}
+    const danaDb=env.authenticatedContext('dana').firestore(),eliDb=env.authenticatedContext('eli').firestore();
+    const system=await assertSucceeds(dana.groups.create('Weekend Orbit'));
+    assert.equal((await eli.groups.search('weekend'))[0].id,system.id);
+    await assertFails(getDocs(collection(eliDb,'friendGroups',system.id,'members')));
+    await assertSucceeds(eli.groups.request(system.id));
+    await assertFails(eli.groups.accept(system.id+'~eli'));
+    // A member plus its index cannot be forged without consuming owner-approved consent.
+    const forged=writeBatch(eliDb);forged.set(doc(eliDb,'friendGroups',system.id,'members','eli'),{uid:'eli',username:'eli_planet',joinedAt:serverTimestamp()});forged.set(doc(eliDb,'groupMemberships','eli','groups',system.id),{groupId:system.id,groupName:system.name,owner:'dana',ownerUsername:'dana_planet',joinedAt:serverTimestamp()});await assertFails(forged.commit());
+    await assertSucceeds(dana.groups.accept(system.id+'~eli'));
+    await assertSucceeds(eli.groups.primary(system.id));
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}]));
+    assert.equal((await assertSucceeds(getDoc(doc(eliDb,'friendGroups',system.id,'days','dana~2026-10-20')))).data().score,9);
+    await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20','fire'));
+    async function listenUntil(subscribe,match){let stop;try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Solar System listener timed out')),5000);stop=subscribe(value=>{if(match(value)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{stop?.();}}
+    await listenUntil((cb,error)=>eli.groups.watch(cb,error),value=>value.groups.some(group=>group.id===system.id));
+    await listenUntil((cb,error)=>eli.groups.watchBoard(system.id,cb,error),value=>value.some(person=>person.uid==='dana'&&person.daysLogged===5));
+    await listenUntil((cb,error)=>dana.groups.watchDay(system.id,'dana','2026-10-20',cb,error),value=>value.day?.score===9&&value.reactions.some(reaction=>reaction.kind==='fire'));
+    for(const kind of ['happy','sad','party','sun','love','wow','sleepy','strong','rocket','martian'])await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',kind));
+    await assertFails(dana.groups.react(system.id,'dana','2026-10-20','happy'));
+    await assertFails(setDoc(doc(c,'friendGroups',system.id,'reactions','dana~2026-10-20~charlie'),{target:'dana',date:'2026-10-20',reactor:'charlie',username:'charlie_planet',kind:'fire',updatedAt:serverTimestamp()}));
+    await assertFails(getDoc(doc(c,'friendGroups',system.id,'scores','dana')));
+    await assertFails(getDoc(doc(eliDb,'users','dana','records','settings')));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'days','dana~2026-10-20'),{uid:'dana',username:'dana_planet',date:'2026-10-20',score:9,notes:'private',updatedAt:serverTimestamp()}));
+    await assertFails(dana.groups.remove(system.id)); // The owner must remain a member.
+    await assertSucceeds(dana.groups.remove(system.id,'eli'));
+    await assertFails(getDoc(doc(eliDb,'friendGroups',system.id,'scores','dana')));
+    await assertSucceeds(dana.groups.invite(system.id,'eli'));
+    await assertFails(dana.groups.accept(system.id+'~eli')); // Invitations need recipient consent.
+    await assertSucceeds(eli.groups.accept(system.id+'~eli'));
+    await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20',null));
+    await assertSucceeds(eli.groups.remove(system.id));
+    await assertFails(dana.groups.invite(system.id,'charlie')); // Only accepted friends can be invited.
     await eli.remove('dana');await assertFails(getDoc(doc(env.authenticatedContext('eli').firestore(),'socialScores','dana')));
   }finally{await env.cleanup();}
 });

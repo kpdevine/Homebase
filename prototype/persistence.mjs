@@ -1,4 +1,4 @@
-import {normalizeSettings,settingsForDay,nutritionScore,sentimentReady,trainingReady} from './customization.mjs';
+import {normalizeSettings,settingsForDay,nutritionScore,sentimentReady,trainingReady,enabledSections,timeScore} from './customization.mjs';
 import { FREQUENCIES } from './tasks.mjs';
 import { ALL_GROUPS } from './muscles.mjs';
 export const STORAGE_KEY = 'homebase.local.v1'; // Keep the storage key so v1 data migrates in place.
@@ -57,7 +57,7 @@ export function validateSnapshot(value) {
     assert(day.reviewed && sectionIds.every(id => typeof day.reviewed[id] === 'boolean'), 'review state.');
     assert(validTimestamp(day.completedAt), 'completion timestamp.');
     assert(!day.reviewed.nutrition || nutritionScore(day) !== null, 'nutrition review without a rating.');
-    assert(!day.completedAt || sectionIds.every(id => day.reviewed[id]), 'incomplete section reviews.');
+    assert(!day.completedAt || enabledSections(day).filter(section=>section.id!=='sentiments').every(({id})=>day.reviewed[id]===true), 'incomplete section reviews.');
     const notes = day.notes === undefined ? { nutrition:'', training:'' } : day.notes;
     assert(notes && ['nutrition','training'].every(id => typeof notes[id] === 'string' && notes[id].length <= 5000), 'notes.');
     const comment=day.comment??'';
@@ -67,9 +67,10 @@ export function validateSnapshot(value) {
     const sentiments=day.sentiments===undefined?{notes:'',rating:null}:day.sentiments;
     assert(sentiments&&typeof sentiments.notes==='string'&&sentiments.notes.length<=5000&&(sentiments.rating===null||typeof sentiments.rating==='number'&&Number.isFinite(sentiments.rating)&&sentiments.rating>=0&&sentiments.rating<=10&&Math.abs(sentiments.rating*10-Math.round(sentiments.rating*10))<1e-8),'sentiments.');
     assert(day.reviewed.sentiments===undefined||typeof day.reviewed.sentiments==='boolean','sentiments review state.');
-    assert(!day.completedAt||day.reviewed.sentiments!==false,'incomplete sentiments review.');
+    assert(!day.completedAt||!settingsForDay(day).tabs.sentiments||day.reviewed.sentiments!==false,'incomplete sentiments review.');
     // Keep legacy blank-review payloads unchanged; the model honors their completion.
-    const reviewed={...Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])),...(day.reviewed.sentiments!==undefined?{sentiments:day.reviewed.sentiments}:day.completedAt&&sentiments.notes.trim()&&sentiments.rating!==null?{sentiments:true}:{})};
+    for(const id of ['sleep','prayer']){assert(day[id]===undefined||day[id]&&Object.keys(day[id]).every(key=>key==='minutes')&&(day[id].minutes===null||Number.isInteger(day[id].minutes)&&day[id].minutes>=0&&day[id].minutes<=1440),id+' minutes.');assert(day.reviewed[id]===undefined||typeof day.reviewed[id]==='boolean',id+' review.');assert(!day.reviewed[id]||timeScore(day,id)!==null,id+' review without time.');}
+    const reviewed={...Object.fromEntries(sectionIds.map(id => [id, day.reviewed[id]])),...Object.fromEntries(['sleep','prayer'].filter(id=>day.reviewed[id]!==undefined).map(id=>[id,day.reviewed[id]])),...(day.reviewed.sentiments!==undefined?{sentiments:day.reviewed.sentiments}:day.completedAt&&sentiments.notes.trim()&&sentiments.rating!==null?{sentiments:true}:{})};
     let workoutPlan;
     if(day.workoutPlan!==undefined) {
       const plan=day.workoutPlan;
@@ -84,7 +85,7 @@ export function validateSnapshot(value) {
     assert(food===undefined||food&&['protein','calories'].every(key=>food[key]===null||typeof food[key]==='number'&&Number.isFinite(food[key])&&food[key]>=0&&food[key]<=50000),'nutrition amounts.');
     assert(day.trainingMinutes===undefined||day.trainingMinutes===null||typeof day.trainingMinutes==='number'&&Number.isFinite(day.trainingMinutes)&&day.trainingMinutes>=0&&day.trainingMinutes<=1440,'training minutes.');
     assert(!day.reviewed.sentiments||sentimentReady(day),'required sentiment rating.');
-    return { ...(configuration?{configuration}:{}),...(food?{food:{protein:food.protein,calories:food.calories}}:{}),...(day.trainingMinutes!==undefined?{trainingMinutes:day.trainingMinutes}:{}),date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
+    return { ...Object.fromEntries(['sleep','prayer'].filter(id=>day[id]!==undefined).map(id=>[id,{minutes:day[id].minutes}])),...(configuration?{configuration}:{}),...(food?{food:{protein:food.protein,calories:food.calories}}:{}),...(day.trainingMinutes!==undefined?{trainingMinutes:day.trainingMinutes}:{}),date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);

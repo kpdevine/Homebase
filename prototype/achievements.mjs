@@ -1,5 +1,5 @@
 import {addDays, sampleWeekStart} from './model.mjs';
-import {summarizeDay} from './scoring.mjs';
+import {summarizeDay,fullyLogged} from './scoring.mjs';
 import {trainingProgress} from './training.mjs';
 
 export function streakStats(dates,today,block=1) {
@@ -63,7 +63,7 @@ export function buildAchievements(store,today) {
   const sentimentDays=completed.filter(record=>score(record,'sentiments')!==null);
   daily('sentiments-9','sentiments','A day to remember','Rate your sentiments 9+ and finish the full day review.',sentimentDays,record=>score(record,'sentiments')>=9,
     Math.max(0,...sentimentDays.map(record=>score(record,'sentiments'))),9);
-  const loggedDates=records.filter(record=>record.summary.requiredLogged===3).map(record=>record.date),strongDates=completed.filter(record=>record.summary.score>=9).map(record=>record.date);
+  const loggedDates=records.filter(record=>fullyLogged(record.summary)).map(record=>record.date),strongDates=completed.filter(record=>record.summary.score>=9).map(record=>record.date);
   for(const [type,dates,blocks,label] of [['logging',loggedDates,[3,7,14,30,60],'days with all three required categories logged'],['strong',strongDates,[3,7,14],'completed days scoring 9+']]) {
     for(const target of blocks) {
       const streak=streakStats(dates,today,target);

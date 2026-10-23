@@ -1,10 +1,11 @@
 import {collection,doc,getDoc,getDocs,query,where,orderBy,startAt,endAt,limit,onSnapshot,runTransaction,writeBatch,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
-import {username} from './social-model.mjs';
+import {username,groupName,REACTIONS} from './social-model.mjs';
 
 export function socialClient(db,uid){
   const profile=doc(db,'publicProfiles',uid);
   return {
     uid,
+    groups:groupClient(db,uid),
     async profile(){const snapshot=await getDoc(profile);return snapshot.exists()?snapshot.data():null;},
     async claim(value){const name=username(value),handle=doc(db,'handles',name);return runTransaction(db,async tx=>{const [existing,own]=await Promise.all([tx.get(handle),tx.get(profile)]);if(own.exists())return own.data();if(existing.exists())throw new Error('That username is taken. Try another.');const data={uid,username:name,createdAt:serverTimestamp()};tx.set(handle,data);tx.set(profile,data);return {uid,username:name};});},
     async search(value){const prefix=String(value||'').trim().toLowerCase();if(!/^[a-z][a-z0-9_]{0,19}$/.test(prefix))return [];const result=await getDocs(query(collection(db,'handles'),orderBy('username'),startAt(prefix),endAt(prefix+'\uf8ff'),limit(10)));return result.docs.map(item=>item.data()).filter(item=>item.uid!==uid);},
@@ -22,5 +23,51 @@ export function socialClient(db,uid){
         friendStops=friends.map(id=>onSnapshot(doc(db,'socialScores',id),value=>{if(value.exists())scores.set(id,value.data());emit();},error));emit();
       },error)];return ()=>{stops.forEach(stop=>stop());friendStops.forEach(stop=>stop());};
     },
+  };
+}
+
+// Group summaries live under the group, separately from private day records and
+// day reactions. Membership requires an approved request or accepted invite.
+export function groupClient(db,uid){
+  const memberRef=(id,user=uid)=>doc(db,'friendGroups',id,'members',user);
+  const indexRef=(id,user=uid)=>doc(db,'groupMemberships',user,'groups',id);
+  const scoreRef=(id,user=uid)=>doc(db,'friendGroups',id,'scores',user);
+  const prefs=doc(db,'socialPreferences',uid);
+  async function identity(){const value=(await getDoc(doc(db,'publicProfiles',uid))).data();if(!value)throw new Error('Choose your username first.');return value;}
+  function addMember(batch,group,user,name){
+    batch.set(memberRef(group.id,user),{uid:user,username:name,joinedAt:serverTimestamp()});
+    batch.set(indexRef(group.id,user),{groupId:group.id,groupName:group.name,owner:group.owner,ownerUsername:group.ownerUsername,joinedAt:serverTimestamp()});
+  }
+  return {
+    async create(value){const name=groupName(value),own=await identity(),ref=doc(collection(db,'friendGroups')),group={id:ref.id,name,owner:uid,ownerUsername:own.username};
+      const batch=writeBatch(db);batch.set(ref,{name,owner:uid,ownerUsername:own.username,createdAt:serverTimestamp()});
+      batch.set(doc(db,'groupDirectory',ref.id),{groupId:ref.id,name,searchName:name.toLowerCase(),owner:uid,ownerUsername:own.username,createdAt:serverTimestamp()});
+      addMember(batch,group,uid,own.username);batch.set(prefs,{primaryGroupId:ref.id,updatedAt:serverTimestamp()});await batch.commit();return group;
+    },
+    async search(value){const prefix=String(value||'').trim().toLowerCase();if(prefix.length<2)return [];const result=await getDocs(query(collection(db,'groupDirectory'),orderBy('searchName'),startAt(prefix),endAt(prefix+'\uf8ff'),limit(10)));return result.docs.map(item=>({id:item.id,...item.data()}));},
+    async request(id){const own=await identity(),group=(await getDoc(doc(db,'groupDirectory',id))).data();if(!group)throw new Error('This group is no longer available.');await setDoc(doc(db,'groupRequests',id+'~'+uid),{groupId:id,groupName:group.name,owner:group.owner,userId:uid,username:own.username,kind:'join',createdAt:serverTimestamp()});},
+    async invite(id,user){const group=(await getDoc(doc(db,'friendGroups',id))).data(),person=(await getDoc(doc(db,'publicProfiles',user))).data();if(!group||group.owner!==uid)throw new Error('Only the owner can invite friends.');if(!person)throw new Error('That user is no longer available.');await setDoc(doc(db,'groupRequests',id+'~'+user),{groupId:id,groupName:group.name,owner:uid,userId:user,username:person.username,kind:'invite',createdAt:serverTimestamp()});},
+    async accept(id){await runTransaction(db,async tx=>{const ref=doc(db,'groupRequests',id),snapshot=await tx.get(ref);if(!snapshot.exists())throw new Error('This request is no longer available.');const request=snapshot.data(),groupSnapshot=await tx.get(doc(db,'friendGroups',request.groupId));if(!groupSnapshot.exists())throw new Error('This group is no longer available.');const group={id:request.groupId,...groupSnapshot.data()};addMember(tx,group,request.userId,request.username);tx.delete(ref);if(request.userId===uid)tx.set(prefs,{primaryGroupId:group.id,updatedAt:serverTimestamp()});});},
+    async dismiss(id){const batch=writeBatch(db);batch.delete(doc(db,'groupRequests',id));await batch.commit();},
+    async remove(id,user=uid){const batch=writeBatch(db);batch.delete(memberRef(id,user));batch.delete(indexRef(id,user));batch.delete(scoreRef(id,user));await batch.commit();},
+    async primary(id){await setDoc(prefs,{primaryGroupId:id,updatedAt:serverTimestamp()});},
+    async publish(ids,name,summary,days=[]){
+      for(const id of ids){
+        const existing=await getDocs(query(collection(db,'friendGroups',id,'days'),where('uid','==',uid))),desired=new Map(days.map(day=>[uid+'~'+day.date,day]));
+        const mutations=[{ref:scoreRef(id),value:{uid,username:name,...summary,updatedAt:serverTimestamp()}}];
+        for(const item of existing.docs){const value=desired.get(item.id);if(!value)mutations.push({ref:item.ref,value:null});else if(item.data().score===value.score)desired.delete(item.id);}
+        for(const [key,day] of desired)mutations.push({ref:doc(db,'friendGroups',id,'days',key),value:{uid,username:name,...day,updatedAt:serverTimestamp()}});
+        for(let start=0;start<mutations.length;start+=200){const batch=writeBatch(db);for(const mutation of mutations.slice(start,start+200)){if(mutation.value)batch.set(mutation.ref,mutation.value);else batch.delete(mutation.ref);}await batch.commit();}
+      }
+    },
+    async react(id,target,date,kind){if(kind!==null&&!REACTIONS.some(reaction=>reaction.id===kind))throw new Error('Choose a planet reaction.');const ref=doc(db,'friendGroups',id,'reactions',target+'~'+date+'~'+uid),batch=writeBatch(db);if(kind===null)batch.delete(ref);else {const own=await identity();batch.set(ref,{target,date,reactor:uid,username:own.username,kind,updatedAt:serverTimestamp()});}await batch.commit();},
+    watchDay(id,target,date,receive,error){let day=null,reactions=[];const emit=()=>receive({day,reactions});const stops=[onSnapshot(doc(db,'friendGroups',id,'days',target+'~'+date),snapshot=>{day=snapshot.exists()?snapshot.data():null;emit();},error),onSnapshot(query(collection(db,'friendGroups',id,'reactions'),where('target','==',target),where('date','==',date)),snapshot=>{reactions=snapshot.docs.map(item=>item.data());emit();},error)];return ()=>stops.forEach(stop=>stop());},
+    watch(receive,error){let groups=[],requests=[],invitations=[],primaryId=null;const emit=()=>receive({groups,requests,invitations,primaryId});const stops=[
+      onSnapshot(collection(db,'groupMemberships',uid,'groups'),snapshot=>{groups=snapshot.docs.map(item=>({id:item.id,...item.data()}));emit();},error),
+      onSnapshot(query(collection(db,'groupRequests'),where('owner','==',uid)),snapshot=>{requests=snapshot.docs.map(item=>({id:item.id,...item.data()}));emit();},error),
+      onSnapshot(query(collection(db,'groupRequests'),where('userId','==',uid)),snapshot=>{invitations=snapshot.docs.map(item=>({id:item.id,...item.data()}));emit();},error),
+      onSnapshot(prefs,snapshot=>{primaryId=snapshot.data()?.primaryGroupId||null;emit();},error)];return ()=>stops.forEach(stop=>stop());
+    },
+    watchBoard(id,receive,error){let members=[],scores=new Map();const emit=()=>receive(members.map(member=>({...member,...scores.get(member.uid)})));const stops=[onSnapshot(collection(db,'friendGroups',id,'members'),snapshot=>{members=snapshot.docs.map(item=>item.data());emit();},error),onSnapshot(collection(db,'friendGroups',id,'scores'),snapshot=>{scores=new Map(snapshot.docs.map(item=>[item.id,item.data()]));emit();},error)];return ()=>stops.forEach(stop=>stop());},
   };
 }

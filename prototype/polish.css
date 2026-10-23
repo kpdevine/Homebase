@@ -82,7 +82,7 @@ h1 {font-size:clamp(27px,2.8vw,40px);letter-spacing:.025em}
 .task-row .remove-task {opacity:.62}
 .task-row:hover .remove-task,.task-row .remove-task:focus-visible {opacity:1}
 .task-list label:hover>span {text-shadow:0 0 3px var(--lcd-_a5d7f733,#a5d7f733)}
-.empty-tasks {display:flex!important;flex-direction:column;justify-content:center;align-items:flex-start;gap:7px;padding:24px 0;font-size:12px;line-height:1.5}
+.empty-tasks {display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:7px;padding:24px 0;font-size:12px;line-height:1.5}
 .empty-tasks strong {font:400 20px/1.5 var(--font-handwriting);margin-bottom:5px;color:var(--ink)}
 .empty-task-mark {font-size:26px;opacity:.55}
 .overview-tasks .panel-link {border-color:var(--lcd-_2d4d8970,#2d4d8970);min-height:32px;padding:7px 0 0;font-size:12px}

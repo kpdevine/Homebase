@@ -1,0 +1,11445 @@
+{
+  "initial": [
+    {
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          961
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          16,
+          326,
+          346,
+          869
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            96,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            229,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            247,
+            723,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            295,
+            723,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          1610
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          16,
+          278,
+          346,
+          1566
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            33,
+            436,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            481,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            566,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 390,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          358,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          358,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          390,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          358,
+          586
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          16,
+          326,
+          358,
+          462
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          1688
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          16,
+          506,
+          346,
+          1416
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          5889
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          16,
+          793,
+          346,
+          5259
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          870
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          37,
+          456,
+          58,
+          20
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1089
+        ],
+        ".day-score": [
+          12,
+          278,
+          284,
+          253
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            29,
+            628,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            673,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            774,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          520
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          29,
+          343,
+          250,
+          394
+        ],
+        "#nutrition-meter": [
+          29,
+          372,
+          118,
+          113
+        ],
+        "#nutrition-notes": [
+          29,
+          587,
+          250,
+          150
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          975
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          12,
+          326,
+          284,
+          883
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            89,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            218,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            181,
+            723,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            229,
+            723,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1625
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          12,
+          278,
+          284,
+          1581
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            29,
+            436,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            481,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            582,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          554
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          12,
+          326,
+          284,
+          462
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1736
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          12,
+          550,
+          284,
+          1420
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          6614
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          12,
+          793,
+          284,
+          5970
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          902
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          33,
+          461,
+          55,
+          18
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "large",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          1063
+        ],
+        ".day-score": [
+          16,
+          278,
+          386,
+          262
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            33,
+            637,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            682,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            747,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "large",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 430,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          398,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          398,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          430,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          398,
+          674
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          33,
+          343,
+          364,
+          379
+        ],
+        "#nutrition-meter": [
+          45,
+          349,
+          150,
+          143
+        ],
+        "#nutrition-notes": [
+          33,
+          572,
+          364,
+          150
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "large",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          961
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          16,
+          326,
+          386,
+          869
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            96,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            229,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            287,
+            723,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            335,
+            723,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "large",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          1590
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          16,
+          278,
+          386,
+          1546
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            33,
+            436,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            481,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            546,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "large",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 430,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          398,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          398,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          430,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          398,
+          674
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          16,
+          326,
+          398,
+          447
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "large",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          1666
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          16,
+          506,
+          386,
+          1394
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "large",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          5777
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          16,
+          779,
+          386,
+          5161
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "large",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        430,
+        932
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 418,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          386,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          386,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          418,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          386,
+          857
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          37,
+          456,
+          58,
+          20
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          611
+        ],
+        ".day-score": [
+          24,
+          195,
+          386,
+          323
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            439,
+            275,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            439,
+            320,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            439,
+            385,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          299
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          41,
+          259,
+          750,
+          175
+        ],
+        "#nutrition-meter": [
+          41,
+          261,
+          160,
+          153
+        ],
+        "#nutrition-notes": [
+          516,
+          299,
+          275,
+          130
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          688
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          24,
+          243,
+          784,
+          598
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            104,
+            305,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            237,
+            305,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            333,
+            639,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            381,
+            639,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          861
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          24,
+          195,
+          784,
+          819
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            39,
+            409,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            454,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            560,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          437
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          24,
+          243,
+          784,
+          347
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          1699
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          24,
+          411,
+          784,
+          1441
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          50
+        ],
+        ".day-tabs": [
+          0,
+          114,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          172,
+          784,
+          4133
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          24,
+          542,
+          784,
+          3680
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          50
+        ],
+        ".day-tabs": [
+          0,
+          114,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          172,
+          784,
+          581
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          347,
+          367,
+          65,
+          22
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "tablet",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          836
+        ],
+        ".day-score": [
+          24,
+          268,
+          388,
+          413
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            448,
+            349,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            448,
+            394,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            448,
+            479,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "tablet",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          836
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          41,
+          333,
+          726,
+          250
+        ],
+        "#nutrition-meter": [
+          46,
+          352,
+          200,
+          191
+        ],
+        "#nutrition-notes": [
+          529,
+          373,
+          238,
+          210
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "tablet",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          836
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          24,
+          316,
+          760,
+          598
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            104,
+            378,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            237,
+            378,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            327,
+            713,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            371,
+            713,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "tablet",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          871
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          24,
+          268,
+          760,
+          819
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            39,
+            485,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            530,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            635,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "tablet",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          836
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          24,
+          316,
+          760,
+          389
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "tablet",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          1683
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          24,
+          454,
+          760,
+          1445
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "tablet",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          4295
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          27,
+          626,
+          754,
+          3818
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "tablet",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        820,
+        1080
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 808,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          760,
+          76
+        ],
+        ".greeting-row": [
+          24,
+          76,
+          760,
+          96
+        ],
+        ".day-tabs": [
+          0,
+          172,
+          808,
+          72
+        ],
+        "#main": [
+          24,
+          244,
+          760,
+          836
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          338,
+          449,
+          65,
+          22
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "desktop",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          284
+        ],
+        ".day-score": [
+          451,
+          224,
+          399,
+          326
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            49,
+            289,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            279,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            49,
+            325,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            315,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            49,
+            377,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            367,
+            26,
+            35
+          ]
+        ],
+        [
+          "open-checklist",
+          "Open to-do list",
+          [
+            49,
+            508,
+            88,
+            29
+          ]
+        ],
+        [
+          "plan-tomorrow",
+          "Plan tomorrow →",
+          [
+            350,
+            508,
+            72,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          56,
+          282,
+          1152,
+          200
+        ],
+        "#nutrition-meter": [
+          60,
+          286,
+          184,
+          176
+        ],
+        "#nutrition-notes": [
+          703,
+          314,
+          505,
+          168
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            36,
+            224,
+            97,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          36,
+          263,
+          1191,
+          477
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1131,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            103,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            209,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "weight-editor-label",
+          "Edit weight",
+          [
+            63,
+            557,
+            588,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            587,
+            595,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            623,
+            595,
+            1,
+            1
+          ]
+        ],
+        [
+          "remove-body-weight",
+          "Remove weight",
+          [
+            591,
+            675,
+            59,
+            26
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            738,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            773,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            865,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            900,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            991,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1027,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            1118,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1153,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            738,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            773,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            865,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            900,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            991,
+            1004,
+            29,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          36,
+          224,
+          1191,
+          619
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1131,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            367,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            357,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            403,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            393,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            455,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            445,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "Fri, Oct 23 →",
+          [
+            850,
+            336,
+            50,
+            29
+          ]
+        ],
+        [
+          "",
+          "Sat, Oct 24 →",
+          [
+            850,
+            404,
+            53,
+            29
+          ]
+        ],
+        [
+          "",
+          "Sun, Oct 25 →",
+          [
+            850,
+            493,
+            55,
+            29
+          ]
+        ],
+        [
+          "",
+          "Mon, Oct 26 →",
+          [
+            850,
+            562,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "Tue, Oct 27 →",
+          [
+            850,
+            651,
+            54,
+            29
+          ]
+        ],
+        [
+          "",
+          "Wed, Oct 28 →",
+          [
+            850,
+            719,
+            57,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          36,
+          263,
+          1191,
+          27
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1131,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "clear-sentiments-rating",
+          "Remove rating",
+          [
+            1072,
+            513,
+            55,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          36,
+          372,
+          1191,
+          673
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "history-today",
+          "Jump to today",
+          [
+            1150,
+            257,
+            77,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          38,
+          473,
+          1187,
+          2217
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "achievements-overview",
+          "Overview",
+          [
+            1170,
+            224,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "All",
+          [
+            36,
+            427,
+            27,
+            32
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          499,
+          368,
+          52,
+          17
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "wide",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          364
+        ],
+        ".day-score": [
+          524,
+          224,
+          414,
+          326
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            108,
+            289,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            458,
+            279,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            108,
+            325,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            458,
+            315,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            108,
+            377,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            458,
+            367,
+            26,
+            35
+          ]
+        ],
+        [
+          "open-checklist",
+          "Open to-do list",
+          [
+            108,
+            508,
+            88,
+            29
+          ]
+        ],
+        [
+          "plan-tomorrow",
+          "Plan tomorrow →",
+          [
+            423,
+            508,
+            72,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          114,
+          282,
+          1195,
+          200
+        ],
+        "#nutrition-meter": [
+          118,
+          286,
+          184,
+          176
+        ],
+        "#nutrition-notes": [
+          780,
+          314,
+          529,
+          168
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            94,
+            224,
+            97,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          94,
+          263,
+          1234,
+          477
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1232,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            161,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            268,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "weight-editor-label",
+          "Edit weight",
+          [
+            121,
+            557,
+            611,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            669,
+            595,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            705,
+            595,
+            1,
+            1
+          ]
+        ],
+        [
+          "remove-body-weight",
+          "Remove weight",
+          [
+            673,
+            675,
+            59,
+            26
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            822,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            857,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            954,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            989,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            1086,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1121,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            1217,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1252,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            822,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            857,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            954,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            989,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            1086,
+            1004,
+            29,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          94,
+          224,
+          1234,
+          619
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1232,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            106,
+            367,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            460,
+            357,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            106,
+            403,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            460,
+            393,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            106,
+            455,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            460,
+            445,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "Fri, Oct 23 →",
+          [
+            937,
+            336,
+            50,
+            29
+          ]
+        ],
+        [
+          "",
+          "Sat, Oct 24 →",
+          [
+            937,
+            404,
+            53,
+            29
+          ]
+        ],
+        [
+          "",
+          "Sun, Oct 25 →",
+          [
+            937,
+            493,
+            55,
+            29
+          ]
+        ],
+        [
+          "",
+          "Mon, Oct 26 →",
+          [
+            937,
+            562,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "Tue, Oct 27 →",
+          [
+            937,
+            651,
+            54,
+            29
+          ]
+        ],
+        [
+          "",
+          "Wed, Oct 28 →",
+          [
+            937,
+            719,
+            57,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          94,
+          263,
+          1234,
+          27
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Start day review →",
+          [
+            1232,
+            224,
+            97,
+            29
+          ]
+        ],
+        [
+          "clear-sentiments-rating",
+          "Remove rating",
+          [
+            1174,
+            513,
+            55,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          94,
+          372,
+          1234,
+          658
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "history-today",
+          "Jump to today",
+          [
+            1251,
+            257,
+            77,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          97,
+          473,
+          1229,
+          2217
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "achievements-overview",
+          "Overview",
+          [
+            1271,
+            224,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "All",
+          [
+            94,
+            427,
+            27,
+            32
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "wide",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        1440,
+        900
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1423,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          94,
+          13,
+          1234,
+          61
+        ],
+        ".greeting-row": [
+          94,
+          74,
+          1234,
+          74
+        ],
+        ".day-tabs": [
+          72,
+          148,
+          1279,
+          57
+        ],
+        "#main": [
+          94,
+          205,
+          1234,
+          502
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          573,
+          368,
+          52,
+          17
+        ]
+      },
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    }
+  ],
+  "final": [
+    {
+      "size": "small",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1090
+        ],
+        ".day-score": [
+          12,
+          278,
+          284,
+          254
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            29,
+            629,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            673,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            774,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          593
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          29,
+          343,
+          250,
+          467
+        ],
+        "#nutrition-meter": [
+          56,
+          343,
+          196,
+          187
+        ],
+        "#nutrition-notes": [
+          29,
+          660,
+          250,
+          150
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Set nutrition score",
+          [
+            154,
+            579,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          877
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          12,
+          326,
+          284,
+          785
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            89,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            218,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            181,
+            625,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            229,
+            625,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1625
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          12,
+          278,
+          284,
+          1581
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            29,
+            436,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            481,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            29,
+            582,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "small",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          567
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          12,
+          340,
+          284,
+          462
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          1733
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          12,
+          548,
+          284,
+          1420
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          6499
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          12,
+          696,
+          284,
+          5952
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "small",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        320,
+        740
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 308,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          12,
+          0,
+          284,
+          124
+        ],
+        ".greeting-row": [
+          12,
+          124,
+          284,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          308,
+          76
+        ],
+        "#main": [
+          12,
+          258,
+          284,
+          902
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          33,
+          469,
+          55,
+          18
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "phone",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          1088
+        ],
+        ".day-score": [
+          16,
+          278,
+          346,
+          267
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            33,
+            642,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            687,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            772,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "phone",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          593
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          33,
+          343,
+          312,
+          467
+        ],
+        "#nutrition-meter": [
+          91,
+          343,
+          196,
+          187
+        ],
+        "#nutrition-notes": [
+          33,
+          660,
+          312,
+          150
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Set nutrition score",
+          [
+            189,
+            579,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "phone",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          863
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          16,
+          326,
+          346,
+          771
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            96,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            229,
+            388,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            247,
+            625,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            295,
+            625,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "phone",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          1610
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          16,
+          278,
+          346,
+          1566
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            33,
+            436,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            481,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            33,
+            566,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "phone",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 390,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          358,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          358,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          390,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          358,
+          586
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          16,
+          326,
+          358,
+          462
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "phone",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          1677
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          16,
+          495,
+          346,
+          1416
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "phone",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          5773
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          16,
+          677,
+          346,
+          5259
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "phone",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        390,
+        844
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 378,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          16,
+          0,
+          346,
+          124
+        ],
+        ".greeting-row": [
+          16,
+          124,
+          346,
+          58
+        ],
+        ".day-tabs": [
+          0,
+          182,
+          378,
+          76
+        ],
+        "#main": [
+          16,
+          258,
+          346,
+          870
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          37,
+          463,
+          59,
+          20
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          611
+        ],
+        ".day-score": [
+          24,
+          195,
+          386,
+          323
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            439,
+            275,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            439,
+            320,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            439,
+            385,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          350
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          41,
+          259,
+          750,
+          226
+        ],
+        "#nutrition-meter": [
+          51,
+          259,
+          170,
+          162
+        ],
+        "#nutrition-notes": [
+          255,
+          299,
+          536,
+          130
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Set nutrition score",
+          [
+            135,
+            463,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          688
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          24,
+          243,
+          784,
+          598
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            104,
+            305,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            237,
+            305,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            333,
+            541,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            381,
+            541,
+            1,
+            1
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          861
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          24,
+          195,
+          784,
+          819
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            39,
+            409,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            454,
+            19,
+            19
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            39,
+            560,
+            19,
+            19
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "landscape",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          437
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          24,
+          243,
+          784,
+          347
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          59
+        ],
+        ".day-tabs": [
+          0,
+          123,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          181,
+          784,
+          1699
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          24,
+          411,
+          784,
+          1441
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          50
+        ],
+        ".day-tabs": [
+          0,
+          114,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          172,
+          784,
+          4133
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          24,
+          542,
+          784,
+          3680
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "landscape",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        844,
+        390
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 832,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          24,
+          0,
+          784,
+          64
+        ],
+        ".greeting-row": [
+          24,
+          64,
+          784,
+          50
+        ],
+        ".day-tabs": [
+          0,
+          114,
+          832,
+          58
+        ],
+        "#main": [
+          24,
+          172,
+          784,
+          581
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          347,
+          374,
+          65,
+          22
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    },
+    {
+      "size": "desktop",
+      "control": "tab-today",
+      "view": "today",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          284
+        ],
+        ".day-score": [
+          451,
+          224,
+          399,
+          326
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "",
+          [
+            49,
+            289,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            279,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            49,
+            325,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            315,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            49,
+            377,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            384,
+            367,
+            26,
+            35
+          ]
+        ],
+        [
+          "open-checklist",
+          "Open to-do list",
+          [
+            49,
+            508,
+            88,
+            29
+          ]
+        ],
+        [
+          "plan-tomorrow",
+          "Plan tomorrow →",
+          [
+            350,
+            508,
+            72,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-nutrition",
+      "view": "nutrition",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          231,
+          282,
+          800,
+          227
+        ],
+        "#nutrition-meter": [
+          243,
+          282,
+          184,
+          176
+        ],
+        "#nutrition-notes": [
+          471,
+          314,
+          560,
+          168
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Continue day review →",
+          [
+            36,
+            224,
+            114,
+            29
+          ]
+        ],
+        [
+          "",
+          "Set nutrition score",
+          [
+            335,
+            491,
+            1,
+            1
+          ]
+        ],
+        [
+          "clear-rating",
+          "Remove rating",
+          [
+            976,
+            282,
+            55,
+            26
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-training",
+      "view": "training",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          36,
+          263,
+          1191,
+          477
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Continue day review →",
+          [
+            1113,
+            224,
+            114,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            103,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            209,
+            316,
+            1,
+            1
+          ]
+        ],
+        [
+          "weight-editor-label",
+          "Edit weight",
+          [
+            63,
+            479,
+            588,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            587,
+            517,
+            1,
+            1
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            623,
+            517,
+            1,
+            1
+          ]
+        ],
+        [
+          "remove-body-weight",
+          "Remove weight",
+          [
+            591,
+            597,
+            59,
+            26
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            738,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            773,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            865,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            900,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            991,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1027,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            1118,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            1153,
+            857,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            738,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            773,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            865,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "+",
+          [
+            900,
+            1004,
+            29,
+            29
+          ]
+        ],
+        [
+          "",
+          "−",
+          [
+            991,
+            1004,
+            29,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-checklists",
+      "view": "checklists",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          36,
+          224,
+          1191,
+          619
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Continue day review →",
+          [
+            1113,
+            224,
+            114,
+            29
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            367,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            357,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            403,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            393,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            48,
+            455,
+            15,
+            15
+          ]
+        ],
+        [
+          "",
+          "",
+          [
+            387,
+            445,
+            26,
+            35
+          ]
+        ],
+        [
+          "",
+          "Sat, Oct 24 →",
+          [
+            850,
+            336,
+            53,
+            29
+          ]
+        ],
+        [
+          "",
+          "Sun, Oct 25 →",
+          [
+            850,
+            404,
+            55,
+            29
+          ]
+        ],
+        [
+          "",
+          "Mon, Oct 26 →",
+          [
+            850,
+            493,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "Tue, Oct 27 →",
+          [
+            850,
+            562,
+            54,
+            29
+          ]
+        ],
+        [
+          "",
+          "Wed, Oct 28 →",
+          [
+            850,
+            651,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "Thu, Oct 29 →",
+          [
+            850,
+            719,
+            55,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "tab-sentiments",
+      "view": "sentiments",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          36,
+          263,
+          1191,
+          27
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "",
+          "Continue day review →",
+          [
+            1113,
+            224,
+            114,
+            29
+          ]
+        ],
+        [
+          "clear-sentiments-rating",
+          "Remove rating",
+          [
+            1072,
+            513,
+            55,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "mobile-calendar",
+      "view": "history",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          36,
+          360,
+          1191,
+          673
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "history-today",
+          "Jump to today",
+          [
+            1150,
+            251,
+            77,
+            29
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "open-achievements",
+      "view": "achievements",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          38,
+          473,
+          1187,
+          2211
+        ],
+        ".leaderboard-user-name": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": [
+        [
+          "achievements-overview",
+          "Overview",
+          [
+            1170,
+            224,
+            57,
+            29
+          ]
+        ],
+        [
+          "",
+          "All",
+          [
+            36,
+            427,
+            27,
+            32
+          ]
+        ]
+      ]
+    },
+    {
+      "size": "desktop",
+      "control": "open-friends",
+      "view": "friends",
+      "viewport": [
+        1280,
+        800
+      ],
+      "scroll": [
+        0,
+        0
+      ],
+      "width": 1263,
+      "overflow": [],
+      "boxes": {
+        ".top-row": [
+          36,
+          13,
+          1191,
+          61
+        ],
+        ".greeting-row": [
+          36,
+          74,
+          1191,
+          74
+        ],
+        ".day-tabs": [
+          13,
+          148,
+          1236,
+          57
+        ],
+        "#main": [
+          36,
+          205,
+          1191,
+          422
+        ],
+        ".day-score": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".nutrition-body": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-meter": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#nutrition-notes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".training-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "#checklists-view": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".sentiments-editor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".history-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".achievement-grid": [
+          0,
+          0,
+          0,
+          0
+        ],
+        ".leaderboard-user-name": [
+          499,
+          374,
+          52,
+          17
+        ]
+      },
+      "creatine": [
+        {
+          "hidden": true,
+          "display": "none",
+          "html": "<div class=\"creatine-check\" hidden=\"\"><fieldset class=\"training-choice creatine-choice\"><legend>Creatine today?</legend>"
+        }
+      ],
+      "userLabel": "User",
+      "userFont": "\"Kieran Handwriting LCD\", \"Kieran Handwriting\", cursive",
+      "smallControls": []
+    }
+  ]
+}

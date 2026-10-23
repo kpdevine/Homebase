@@ -1,0 +1,15 @@
+/* Compatibility styles stay in one low-priority layer while the shared design
+   system owns layout and controls. Keep feature-specific meter/caret behavior. */
+@import url('./typography.css') layer(legacy);
+@import url('./styles.css') layer(legacy);
+@import url('./display.css') layer(legacy);
+@import url('./radio.css') layer(legacy);
+@import url('./polish.css') layer(legacy);
+@import url('./dropdowns.css') layer(legacy);
+@import url('./review.css') layer(legacy);
+@import url('./workspace.css') layer(legacy);
+@import url('./mobile.css') layer(legacy);
+@import url('./achievements.css') layer(legacy);
+@import url('./cohesion.css') layer(legacy);
+@import url('./refinements.css') layer(legacy);
+@import url('./customization.css') layer(legacy);

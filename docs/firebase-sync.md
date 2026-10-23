@@ -69,3 +69,14 @@ The private `settings` record now carries logging configuration and a catalog of
 Separate social collections contain only usernames (`handles`, `publicProfiles`), friend requests, reciprocal friendships, and aggregate `socialScores`. Only the owner writes their summary; only accepted friends or that owner can read it. A summary contains yesterday's score, monthly average, monthly/all-time logged counts, date keys, and updated timestamp. No private-record permission is widened. Rankings are client-derived personal-tracking scores rather than a tamper-proof competition service.
 
 Install developer dependencies with `npm.cmd ci`. With Java 21+ available, run `npm.cmd run test:rules`: it uses an isolated `demo-pocket-planet` emulator and never production records. Ordinary tests run with `npm.cmd test`; the emulator-only test is skipped outside that command. The access test verifies unique usernames, prefix queries, private log isolation, pending/accepted friend access, reciprocal acceptance, score shape/ranges, live listeners, and removal revocation.
+
+
+## Solar Systems and optional trackers — October 22
+
+Private settings also contain the selected logging tabs, `tabsChosen`, and Sleep/Prayer time goals. Their daily minutes and review flags remain inside the existing owner-only daily record. Earlier dates retain their own configuration. No private-record permissions are widened.
+
+Solar Systems use `friendGroups`, `groupDirectory`, `groupMemberships`, `groupRequests`, and owner-only `socialPreferences`. Admission requires an owner-approved join request or an invitation accepted by its recipient. Member documents and their private membership indexes are created and removed atomically. Owners remain members. Directory entries contain only system names and owner usernames.
+
+Group-local `scores` and `days` contain validated score summaries only; group members can read these and the group's reactions. Up to 35 recent logged day scores are shared. One reaction per member/target/date can be changed or removed. Private notes, tasks, food, workout details and weight never enter these collections. Leaving/removal revokes reads and writes for that group. All eleven reaction kinds, listener queries, consent checks, invalid writes and outsider access were verified against the local Firestore emulator.
+
+Deploy the matching rules with Hosting; no new composite indexes or paid services are required for this release.

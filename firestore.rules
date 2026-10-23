@@ -45,10 +45,9 @@ service cloud.firestore {
       allow create: if signedIn() && accepted();
       allow delete: if self(owner) || self(friend);
     }
-    match /socialScores/{uid} {
-      function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
-      allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
-      allow create, update: if self(uid)
+    function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
+    function validSummary(uid) {
+      return self(uid)
         && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt'])
         && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
         && request.resource.data.appDate is string && request.resource.data.appDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
@@ -57,6 +56,104 @@ service cloud.firestore {
         && score(request.resource.data.yesterdayScore) && score(request.resource.data.monthScore)
         && request.resource.data.daysLogged is int && request.resource.data.daysLogged >= 0 && request.resource.data.daysLogged <= 31
         && request.resource.data.totalDaysLogged is int && request.resource.data.totalDaysLogged >= request.resource.data.daysLogged && request.resource.data.totalDaysLogged <= 20000
+        && request.resource.data.updatedAt == request.time;
+    }
+    match /socialScores/{uid} {
+      allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
+      allow create, update: if validSummary(uid);
+    }
+    function member(group,uid) {return exists(/databases/$(database)/documents/friendGroups/$(group)/members/$(uid));}
+    function owner(group) {return signedIn() && get(/databases/$(database)/documents/friendGroups/$(group)).data.owner == request.auth.uid;}
+    function groupData(group) {return getAfter(/databases/$(database)/documents/friendGroups/$(group)).data;}
+    function admission(group,uid) {
+      let invitation=get(/databases/$(database)/documents/groupRequests/$(group+'~'+uid)).data;
+      return invitation.groupId == group && invitation.userId == uid && invitation.owner == groupData(group).owner
+        && ((invitation.kind == 'join' && owner(group)) || (invitation.kind == 'invite' && self(uid)))
+        && !existsAfter(/databases/$(database)/documents/groupRequests/$(group+'~'+uid));
+    }
+    function mayAdmit(group,uid) {return signedIn() && ((self(uid) && groupData(group).owner == uid) || admission(group,uid));}
+    function mayRemove(group,uid) {
+      return signedIn() && groupData(group).owner != uid && (self(uid) || owner(group))
+        && !existsAfter(/databases/$(database)/documents/friendGroups/$(group)/members/$(uid))
+        && !existsAfter(/databases/$(database)/documents/groupMemberships/$(uid)/groups/$(group))
+        && !existsAfter(/databases/$(database)/documents/friendGroups/$(group)/scores/$(uid));
+    }
+    match /friendGroups/{group} {
+      allow get: if signedIn();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['name','owner','ownerUsername','createdAt'])
+        && self(request.resource.data.owner) && request.resource.data.name is string && request.resource.data.name.size() >= 3 && request.resource.data.name.size() <= 40
+        && request.resource.data.ownerUsername == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/groupDirectory/$(group)).data.name == request.resource.data.name
+        && existsAfter(/databases/$(database)/documents/friendGroups/$(group)/members/$(request.auth.uid));
+      match /members/{uid} {
+        allow read: if signedIn() && member(group,request.auth.uid);
+        allow create: if mayAdmit(group,uid) && request.resource.data.keys().hasOnly(['uid','username','joinedAt'])
+          && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
+          && request.resource.data.joinedAt == request.time
+          && getAfter(/databases/$(database)/documents/groupMemberships/$(uid)/groups/$(group)).data.groupId == group;
+        allow delete: if mayRemove(group,uid);
+      }
+      match /scores/{uid} {
+        allow read: if signedIn() && member(group,request.auth.uid);
+        allow create,update: if member(group,uid) && validSummary(uid);
+        allow delete: if mayRemove(group,uid);
+      }
+      match /days/{id} {
+        allow read: if signedIn() && member(group,request.auth.uid);
+        allow create,update: if signedIn() && member(group,request.auth.uid)
+          && request.resource.data.keys().hasOnly(['uid','username','date','score','updatedAt'])
+          && self(request.resource.data.uid) && id == request.auth.uid+'~'+request.resource.data.date
+          && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
+          && request.resource.data.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          && request.resource.data.score is number && score(request.resource.data.score) && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && member(group,request.auth.uid) && self(resource.data.uid);
+      }
+      match /reactions/{id} {
+        allow read: if signedIn() && member(group,request.auth.uid);
+        allow create,update: if signedIn() && member(group,request.auth.uid)
+          && request.resource.data.keys().hasOnly(['target','date','reactor','username','kind','updatedAt'])
+          && self(request.resource.data.reactor) && request.resource.data.target != request.auth.uid
+          && member(group,request.resource.data.target)
+          && id == request.resource.data.target+'~'+request.resource.data.date+'~'+request.auth.uid
+          && exists(/databases/$(database)/documents/friendGroups/$(group)/days/$(request.resource.data.target+'~'+request.resource.data.date))
+          && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
+          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian'] && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
+      }
+    }
+    match /groupDirectory/{group} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['groupId','name','searchName','owner','ownerUsername','createdAt'])
+        && request.resource.data.groupId == group && self(request.resource.data.owner)
+        && request.resource.data.name == groupData(group).name && request.resource.data.searchName == groupData(group).name.lower()
+        && request.resource.data.ownerUsername == groupData(group).ownerUsername && request.resource.data.createdAt == request.time;
+    }
+    match /groupMemberships/{uid}/groups/{group} {
+      allow read: if self(uid);
+      allow create: if mayAdmit(group,uid) && request.resource.data.keys().hasOnly(['groupId','groupName','owner','ownerUsername','joinedAt'])
+        && request.resource.data.groupId == group && request.resource.data.groupName == groupData(group).name
+        && request.resource.data.owner == groupData(group).owner && request.resource.data.ownerUsername == groupData(group).ownerUsername
+        && request.resource.data.joinedAt == request.time
+        && getAfter(/databases/$(database)/documents/friendGroups/$(group)/members/$(uid)).data.uid == uid;
+      allow delete: if mayRemove(group,uid);
+    }
+    match /groupRequests/{id} {
+      allow read,delete: if signedIn() && (resource.data.owner == request.auth.uid || resource.data.userId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['groupId','groupName','owner','userId','username','kind','createdAt'])
+        && id == request.resource.data.groupId+'~'+request.resource.data.userId
+        && request.resource.data.owner == groupData(request.resource.data.groupId).owner && request.resource.data.groupName == groupData(request.resource.data.groupId).name
+        && request.resource.data.userId != request.resource.data.owner && !member(request.resource.data.groupId,request.resource.data.userId)
+        && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.resource.data.userId)).data.username
+        && request.resource.data.createdAt == request.time
+        && ((request.resource.data.kind == 'join' && self(request.resource.data.userId))
+          || (request.resource.data.kind == 'invite' && owner(request.resource.data.groupId)
+            && exists(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(request.resource.data.userId))));
+    }
+    match /socialPreferences/{uid} {
+      allow read: if self(uid);
+      allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt'])
+        && request.resource.data.primaryGroupId is string && existsAfter(/databases/$(database)/documents/friendGroups/$(request.resource.data.primaryGroupId)/members/$(uid))
         && request.resource.data.updatedAt == request.time;
     }
     match /users/{userId}/records/{recordId} {

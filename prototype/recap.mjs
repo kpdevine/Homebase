@@ -1,5 +1,5 @@
 import {settingsForDay} from './customization.mjs';
-import {summarizeDay} from './scoring.mjs';
+import {summarizeDay,fullyLogged} from './scoring.mjs';
 import {orderedTasks} from './tasks.mjs';
 
 // Read-only presentation data. Opening a recap must never create a check-in.
@@ -12,12 +12,12 @@ export function dailyRecap(day, entries=[], week) {
     ...summary,
     completed:!!day.completedAt,
     reviewed:Object.values(day.reviewed).filter(Boolean).length,
-    state:day.completedAt?'Day complete':summary.requiredLogged===3?'All categories logged':summary.logged?'Partly logged':'Not logged',
+    state:day.completedAt?'Day complete':fullyLogged(summary)?'All categories logged':summary.logged?'Partly logged':'Not logged',
     hasActivity:summary.logged>0||notes.length>0||!!day.sentiments?.notes.trim()||!!day.bodyWeight,
     bodyWeight:day.bodyWeight?{...day.bodyWeight}:null,
-    checklistLogged:summary.sections.find(section=>section.id==='checklists').score!==null,
+    checklistLogged:summary.sections.find(section=>section.id==='checklists')?.score!=null,
     tasks:orderedTasks(day.tasks).map(task=>({name:task.name,done:task.done,recurring:!!task.templateId,children:(task.children||[]).map(child=>({name:child.name,done:child.done}))})),
-    training:{mode:settingsForDay(day).training.mode,minutes:day.trainingMinutes??null,creatine:settingsForDay(day).training.creatine?day.creatine:undefined,rest:['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode),planned:day.trainingMode==='rest',unplanned:day.trainingMode==='unplanned-rest',score:summary.sections.find(section=>section.id==='training').score,sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:settingsForDay(day).training.mode==='other'?[]:[...groups].map(([id,sets])=>({id,sets}))},
+    training:{mode:settingsForDay(day).training.mode,minutes:day.trainingMinutes??null,creatine:settingsForDay(day).training.creatine?day.creatine:undefined,rest:['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode),planned:day.trainingMode==='rest',unplanned:day.trainingMode==='unplanned-rest',score:summary.sections.find(section=>section.id==='training')?.score??null,sets:entries.reduce((sum,entry)=>sum+entry.sets,0),groups:settingsForDay(day).training.mode==='other'?[]:[...groups].map(([id,sets])=>({id,sets}))},
     notes,
   };
 }

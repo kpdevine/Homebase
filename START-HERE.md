@@ -1,3 +1,11 @@
+## Approved release — October 22
+
+The owner reviewed the local draft and explicitly approved publication with **“Push all.”** This lifts the publication hold for the UI overhaul and October 22 features. Source, PRD, review notes, and selected reaction assets belong in the same GitHub release; deploy the matching app and Firestore rules to Firebase project `homebase-d3c6c` for `https://pocketplanet.day/`.
+
+The release includes explicit Save feedback, optional trackers plus Sleep/Prayer, an opening tab chooser, and friend groups renamed Solar Systems with eleven custom planet reactions. Status messages were explicitly cancelled. See `docs/pending-oct22-features.md` and the October 22 section of `docs/ui-ux-overhaul-review.md`. Normal checks: 233 total, 232 passed, one emulator-only skip; that security test passes separately against the local Firestore emulator. No production personal records or notification sends were used for QA.
+
+The opening chooser persists `tabsChosen`; fresh workspaces begin with To-do enabled. Prior records retain original categories/scoring. Framework and device-platform choices remain open.
+
 # Pocket Planet — resume here
 
 Saved October 18, 2026 (America/Chicago).
