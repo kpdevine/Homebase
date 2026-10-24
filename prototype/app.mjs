@@ -474,6 +474,9 @@ $$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset
   renderReview(); renderHeader(); renderScore();
 }));
 function renderHistory() {
+  const tabs=store.getSettings().tabs;
+  if(calendarFilter!=='all'&&!tabs[calendarFilter])calendarFilter='all';
+  $$('[data-calendar-filter]').forEach(button=>{button.hidden=button.dataset.calendarFilter!=='all'&&!tabs[button.dataset.calendarFilter];});
   $('#open-weight-history').hidden=calendarFilter!=='training';
   $('#calendar-month').textContent = dateFormat(calendarMonth, { month:'long', year:'numeric' });
   const today = appDateKey();

@@ -1,3 +1,7 @@
+## October 24 release: typed set goals and enabled Calendar tabs
+
+The owner requested both changes with "Make and push." Settings → Training uses numeric weekly set goals (whole numbers, 0–20). Calendar shows Overall plus the user's currently enabled modules, and falls back to Overall when a selected module is disabled. Historical data is preserved. Regular suite: 236 passing, one emulator-only skip; no rule changes. Phone sample QA verified numeric validation/save persistence and Calendar module visibility/reset. See docs/october-24-settings-calendar.md. Preserve the unrelated reminder policy edits.
+
 ## October 23 release: rename Solar Systems and handwritten statuses
 
 The owner approved publication with “push it”. Owners can rename their selected system under Manage Solar Systems. Renames update search and live labels for existing members and pending requests/invitations, without changing membership or private records. Current vibes status text and its editor use Kieran handwriting. Regular suite: 236 passing, one emulator-only skip; the emulator security suite passes separately with rename authorization, atomicity, live-label and deleted-system coverage. See docs/solar-system-renaming.md. Preserve the unrelated reminder policy edits already in the working tree.

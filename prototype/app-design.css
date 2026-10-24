@@ -399,8 +399,7 @@ var(--lcd-_add,#add)-subtask {font-size:11px;min-height:40px}
 .config-group-heading span {font-size:9px}
 .config-group-row {display:grid;grid-template-columns:minmax(0,1fr) 68px 36px;gap:8px;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--ui-line-soft);padding-bottom:8px}
 .config-group-row>input {width:100%;font-size:16px}
-.config-goal-meter {width:68px;height:68px;color:var(--ui-ink)}
-.config-goal-meter strong {font-size:23px}
+.config-group-row>[data-group-target] {min-width:0;min-height:46px;padding:8px;text-align:center;appearance:textfield;-webkit-appearance:none}
 .config-group-row button {width:36px;min-height:44px;font-size:22px;padding:0}
 .settings-section {padding:16px 0;margin:0;border-top:1px solid var(--ui-line-soft)}
 .settings-section h3 {font:400 14px var(--font-ui);margin:0 0 10px}
