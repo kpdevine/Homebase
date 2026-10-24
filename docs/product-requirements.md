@@ -15,6 +15,13 @@ These current requirements supersede older tab and Training presentation descrip
 - Use matching card spacing, borders, headings and fonts throughout Training, including a separate Training notes card. This week's training stays fully expanded with no nested progress/targets disclosure. Keep a styled Edit weekly targets action. Remove Ideal workout and Weekly muscle gaps from the interface.
 - Solar System Yesterday changes at midnight in the viewing user's local device timezone. Refresh on midnight and when the app becomes visible; read the corresponding shared day records so another member's older summary cannot determine the date. Keep personal record logging and Tonight's check-in on the existing 1 a.m. day cutoff.
 
+## October 24 web and Solar layout follow-up
+
+- Desktop follows the landscape demo's two-column score/tasks arrangement, with Breakdown below. Use natural document height at normal scale; no fixed-height clipping, nested score scrolling or clock overlap. Long lists push subsequent content down. Preserve responsive module and Calendar layouts.
+- Center dialogs inside the currently visible viewport, including mobile keyboard height and viewport panning offsets. Keep the active textarea visible by scrolling its dialog, preserve drafts during resizing/rotation, and prevent background scrolling while a modal is open. Text entry must not resize or reorient the page.
+- Under each Solar member, vibes spans the full width below both the nametag and score details. Make the owner annotation smaller than the name. See [implementation and verification](october-24-web-solar-layout.md).
+- On mobile, Settings uses readable section cards and a single section picker for module configuration. Module selection is a full-width list with names, Enabled/Disabled status, checkboxes and 44px ordering controls. Preserve the user's scroll position when changing controls. Overview's label follows the same grid position and alignment as the other module names.
+
 ## Purpose and delivery
 
 Pocket Planet is a personal daily dashboard for computer, phone, and a landscape display. Development stays local. Firebase Authentication, Firestore, and classic Hosting provide optional private sync and the shared app on the free Spark plan, with no billing, Analytics, or Gemini. The production framework, display hardware, and future Spotify integration remain open.

@@ -1,4 +1,5 @@
 import {mountTimeLogs} from './time-logs-ui.mjs';
+import {mountViewport} from './viewport.mjs';
 import {mountUIShell} from './ui-shell.mjs';
 import {mountNoteSaves} from './note-save.mjs';
 import {mountSocial} from './social-ui.mjs';
@@ -1297,9 +1298,7 @@ cloud=mountCloud({
 
 reminders=mountReminders({cloud,preview});
 
-// iOS reports keyboard viewport height independently of the layout viewport.
-function updateVisibleHeight(){document.documentElement.style.setProperty('--visible-height',`${window.visualViewport?.height||window.innerHeight}px`);}
-window.visualViewport?.addEventListener('resize',updateVisibleHeight);updateVisibleHeight();
+mountViewport({window,document});
 function disableSpelling(root){
   if(root.nodeType!==1)return;
   const fields=[...(root.matches('input,textarea,[contenteditable]')?[root]:[]),...root.querySelectorAll('input,textarea,[contenteditable]')];

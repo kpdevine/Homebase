@@ -73,9 +73,9 @@ details[open]>summary {border-bottom-color:var(--ui-line-soft);margin-bottom:12p
 .greeting-row .state-pill {max-width:96px;white-space:normal;text-align:center;flex-shrink:0}
 .greeting-dot {color:inherit}
 .day-tabs {position:sticky;top:0;z-index:30;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;width:auto;max-width:none;padding:8px 8px;margin:0 -16px;background:var(--ui-bg);border:0;border-block:1px solid var(--ui-line);border-radius:0;box-shadow:0 5px 10px var(--lcd-_20396b12,#20396b12);isolation:isolate}
-.day-tabs>button {position:relative;display:grid;grid-template-rows:10px 1fr;align-items:center;justify-content:stretch;gap:5px;min-width:0;min-height:58px;height:auto;margin:0;padding:6px 5px;background:var(--lcd-_aec2e32b,#aec2e32b);color:var(--ui-ink);border:1px solid var(--ui-line-soft);border-radius:3px;font:400 10px/1.2 var(--font-ui);white-space:normal;text-align:left}
-.day-tabs>button small {position:static;inset:auto;font:400 9px/1 var(--font-ui);color:inherit;opacity:.7}
-.day-tabs .tab-label {display:block;min-width:0;padding:0;text-align:center;line-height:1.25;overflow-wrap:normal}
+.day-tabs>button {position:relative;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:10px 1fr;align-items:center;justify-content:stretch;gap:5px;min-width:0;min-height:58px;height:auto;margin:0;padding:6px 5px;background:var(--lcd-_aec2e32b,#aec2e32b);color:var(--ui-ink);border:1px solid var(--ui-line-soft);border-radius:3px;font:400 10px/1.2 var(--font-ui);white-space:normal;text-align:left}
+.day-tabs>button small {position:static;inset:auto;grid-column:1;grid-row:1;font:400 9px/1 var(--font-ui);color:inherit;opacity:.7}
+.day-tabs .tab-label {display:block;grid-column:1;grid-row:2;width:100%;min-width:0;padding:0;text-align:center;line-height:1.25;overflow-wrap:normal}
 .day-tabs>button[aria-selected=true] {color:var(--ui-light);background:var(--ui-active);border-color:var(--lcd-_d8e8ff,#d8e8ff);box-shadow:inset 0 -2px var(--lcd-_e6f2ff,#e6f2ff);filter:none}
 .day-tabs .tab-check {position:absolute;right:4px;top:4px;margin:0;width:16px;height:16px;color:inherit;filter:none}
 .day-tabs .tab-check .icon {display:block;width:15px;height:15px;stroke-width:2.3}
@@ -835,7 +835,6 @@ html[data-motion=reduced] button {transition:none}
 .food-field-goal {display:block;margin-top:6px;color:var(--ui-ink);font:400 11px/1.4 var(--font-ui)}
 .quiet-button.note-save-button.is-saved {background:var(--ui-gold);border-color:var(--ui-gold);color:var(--lcd-rgb_51_36_22_,rgb(51 36 22));box-shadow:0 0 8px rgb(255 230 151 / .3)}
 .day-tabs {grid-template-columns:repeat(var(--tab-count,5),minmax(0,1fr))}
-.day-tabs #tab-today {grid-template-rows:1fr;align-content:center}
 .review-steps {grid-template-columns:repeat(var(--review-count,4),minmax(0,1fr))}
 .config-tabs {display:flex;flex-wrap:wrap;gap:4px;position:relative;top:0}
 .config-tabs button {flex:1 1 80px}
@@ -1104,8 +1103,6 @@ html[data-motion=full] .solar-open-day.is-other .score-circle {animation:solar-d
 .body-weight-controls {align-items:center}
 .weight-unit label {height:46px;min-height:46px}
 .body-weight-controls>button {width:100%;margin:0;text-align:center}
-.day-tabs #tab-today {place-items:center;gap:0;text-align:center}
-.day-tabs #tab-today .tab-label {grid-area:1/1;align-self:center;width:100%;text-align:center}
 #status,#status.visible {transform:none}
 .choose-tabs-button {width:100%;margin:0 0 12px;text-align:center}
 #open-score-info,#score-info {display:none!important}
@@ -1216,3 +1213,81 @@ html[data-motion=reduced] .daily-training-card>.workout-logging {animation:none}
 .workout-logging #gym-muscle::picker-icon {display:none}
 .workout-logging #gym-muscle option {text-align:left;text-align-last:left}
 .workout-logging #gym-muscle[data-pointer-focus]:focus {outline:none;border-color:var(--ui-line);box-shadow:inset 0 1px 2px var(--lcd-_182c5912,#182c5912)}
+
+/* A modal is centered in the space above the keyboard, including Safari's pan. */
+dialog,dialog#task-dialog,.customize-dialog,.username-dialog,.final-review-dialog,.scoring-dialog,.weight-history-dialog {inset:auto;top:calc(var(--visible-top,0px) + var(--visible-height,100dvh)/2);left:calc(var(--visible-left,0px) + var(--visible-width,100vw)/2);margin:0;transform:translate(-50%,-50%);max-width:min(640px,calc(var(--visible-width,100vw) - 24px))}
+html:has(dialog[open]) {overflow:hidden}
+#solar-profile-dialog {max-width:min(520px,calc(var(--visible-width,100vw) - 24px))}
+#solar-vibes-input {min-height:64px;resize:none;scroll-margin-block:12px}
+.solar-member-detail {display:contents}
+.solar-member-card>.solar-person {grid-column:1;grid-row:1}
+.solar-member-card .solar-score-panel {grid-column:2;grid-row:1}
+.solar-member-card .solar-vibes {grid-column:1/-1;grid-row:2}
+.solar-person-name small.solar-owner-label {font:400 7px/1.3 var(--font-ui)}
+.config-section-picker {display:none}
+.config-fields label.config-toggle {display:flex;align-items:center;gap:12px}
+.config-options.tab-options {grid-template-columns:minmax(0,1fr);gap:10px}
+.tab-options .module-choice {display:grid;grid-template-columns:minmax(0,1fr) 94px;gap:8px;align-items:stretch;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset);padding:6px}
+.tab-options .module-choice:has(input:checked) {background:var(--ui-active);border-color:var(--ui-light);color:var(--ui-light)}
+.tab-options .module-choice>label,.tab-options .module-choice>label:has(input:checked) {min-width:0;min-height:52px;padding:6px;gap:10px;border:0;background:none;color:inherit}
+.tab-options .module-choice>label span {min-width:0;display:grid;gap:4px;overflow-wrap:normal}
+.tab-options .module-choice strong {font:400 14px/1.3 var(--font-ui)}
+.tab-options .module-choice small {font:400 11px/1.3 var(--font-ui);opacity:.85}
+.tab-options .module-choice:has(input:checked) input {accent-color:var(--ui-light)}
+.tab-options .module-order-actions {gap:6px;align-items:center}
+.tab-options .module-order-actions button {width:44px;min-width:44px;min-height:44px;padding:8px;border-color:currentColor;color:inherit;background:transparent;font-size:20px}
+.tab-options .module-order-actions button:disabled {opacity:.25}
+@media(max-width:699px) {
+  #settings-dialog,#customize-dialog {padding:18px 16px}
+  #settings-dialog .dialog-heading,#customize-dialog .dialog-heading {position:relative;top:0;padding:0 0 14px;margin:0 0 18px}
+  #settings-dialog .dialog-heading h2,#customize-dialog .dialog-heading h2 {font-size:23px}
+  #customize-dialog>.hint {display:none}
+  #customize-dialog .config-tabs {display:none}
+  .config-section-picker {display:grid;gap:8px;margin:0 0 22px;font:400 13px/1.4 var(--font-ui)}
+  #config-section-select {width:100%;min-height:48px;font-size:16px}
+  #customize-dialog [data-config-panel]>h3 {font-size:21px;margin-bottom:10px}
+  #settings-dialog p,#customize-dialog .hint {font-size:12px;line-height:1.55}
+  #customize-dialog .config-options:not(.tab-options) {grid-template-columns:1fr}
+  #customize-dialog .config-options:not(.tab-options) span,#customize-dialog .config-toggle span {font-size:14px}
+  #customize-dialog .config-options small,#customize-dialog .config-toggle small {font-size:12px}
+  #customize-dialog .config-fields label {font-size:13px}
+  #customize-dialog .composer-actions {bottom:-18px;margin:20px 0 -4px;padding:12px 0 14px}
+  #customize-dialog .composer-actions button {font-size:14px}
+  #settings-dialog .settings-group {margin:12px 0;border:1px solid var(--ui-line);border-radius:5px;padding:0 14px;background:var(--lcd-_b5c5e333,#b5c5e333)}
+  #settings-dialog .settings-group>summary {min-height:56px;font-size:14px}
+  #settings-dialog .settings-section h3 {font:700 16px/1.3 var(--font-ui)}
+  #settings-dialog .config-settings-links {grid-template-columns:1fr 1fr;gap:8px}
+  #settings-dialog .config-settings-links button {min-height:46px;font-size:12px}
+  #settings-dialog .choose-tabs-button {width:100%;min-height:48px;font-size:14px;text-align:left}
+  #settings-dialog .name-control {grid-template-columns:minmax(0,1fr)}
+  #settings-dialog .name-control button {justify-self:start}
+}
+
+/* Wide screens keep the landscape composition and grow with their content.
+   Reset legacy display scaling and size containment before arranging cards. */
+@media(min-width:1001px) {
+  html {height:auto;min-height:100%;overflow:auto}
+  body {zoom:1;height:auto;min-height:100svh}
+  .app-shell,.is-overview .app-shell {height:auto;max-width:1240px}
+  .app-shell>main {container-type:normal;flex:1 0 auto;height:auto;max-height:none}
+  .app-shell>main>.detail-view {flex:none;container-type:normal}
+  .overview-board {grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto;grid-template-areas:'score tasks' 'breakdown breakdown';align-items:start;gap:20px;height:auto;flex:none}
+  .day-score {container-type:normal;display:grid;grid-template-columns:170px minmax(0,1fr);align-items:center;align-self:stretch;justify-content:normal;gap:12px 16px;height:auto;max-height:none;padding:20px;overflow:visible}
+  .score-heading {grid-column:1/-1;margin:0 0 2px}
+  .day-score .hero-meter {width:170px;max-width:100%;margin:0 0 14px}
+  .hero-score .meter-number {font-size:72px}
+  .score-details {grid-column:2;width:100%;margin:0;text-align:left}
+  .score-range,.score-caption,.score-description {text-align:left}
+  .overview-tasks .task-scroll {height:auto;max-height:none;overflow:visible;scrollbar-gutter:auto}
+  .task-card-actions {margin-top:12px}
+  .breakdown-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .display-footer {flex:none;margin-top:0}
+  #clock-time {font-size:72px;line-height:1}
+  .nutrition-editor,.sentiments-editor {container-type:normal;flex:none;height:auto;max-height:none;overflow:visible}
+  .nutrition-notes textarea[data-notes],.sentiments-editor textarea[data-notes] {max-height:none}
+  .training-grid,.history-grid {flex:none;grid-template-rows:auto;align-items:start;height:auto}
+  .training-grid>.panel,.calendar-card,.checklist-editor,.tomorrow-plan,.later-plan {height:auto;max-height:none;overflow:visible}
+  .daily-training-card {display:block}
+  .app-shell>main>#checklists-view {grid-template-rows:auto auto;align-items:start}
+  .checklist-editor .task-list,#later-tasks {max-height:none;overflow:visible}
+}
