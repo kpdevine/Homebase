@@ -1,7 +1,9 @@
 import {mountSolarSystems,planetEmoji} from './solar-ui.mjs';
 import {username,leaderboardSummary,rankLeaderboard,sharedDays,REACTIONS,solarMonthStats,monthlyRanks,dayReactionCounts} from './social-model.mjs';
+import {localDateKey,millisecondsUntilLocalMidnight} from './day-clock.mjs';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export function mountSocial({getStore,today,getCloud,showFriends,preview,scoreCircle}){
+export function mountSocial({getStore,today:appToday,getCloud,showFriends,preview,scoreCircle}){
+  const today=()=>localDateKey();
   const $=s=>document.querySelector(s);
   $('#open-home').insertAdjacentHTML('afterend','<button id="open-friends" class="icon-button" type="button" aria-label="Friends and leaderboard" title="Friends" aria-pressed="false"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v3"/></svg></button>');
   $('#main').insertAdjacentHTML('beforeend',`<section id="friends-view" class="friends-view" hidden><section class="panel friends-board"><div class="panel-heading"><div><p class="eyebrow">YOUR ORBIT</p><h2>Manage Friends</h2></div><strong id="friends-handle"></strong></div><p id="friends-state" role="status"></p><div id="friends-signin"><p>Sign in with Google and pick a username to find your friends.</p><button id="friends-google" class="primary-button" type="button">Sign in with Google</button></div><div id="friends-connected" hidden><section id="manage-friends" class="friend-management-section"><h3>Current friends <span id="friend-count" class="count-pill">0</span></h3><ul id="friend-list" class="friend-results"></ul></section><form id="friend-search-form" class="friend-search"><h3>Add a friend</h3><label for="friend-search" class="sr-only">Find a username</label><div><input id="friend-search" type="search" autocomplete="off" maxlength="20" placeholder="Search username" required><button class="quiet-button" type="submit">Search</button></div></form><ul id="friend-results" class="friend-results"></ul><section id="friend-requests-section" class="friend-management-section"><h3>Requests</h3><ul id="friend-requests" class="friend-results"></ul></section><p class="hint">Accepted friends see scores and logged-day counts. Your notes, tasks, meals, workouts, and weight stay private.</p></div></section><section class="panel leaderboard"><div class="panel-heading"><div><p id="leaderboard-month" class="eyebrow"></p><h2>Leaderboard</h2></div></div><p class="hint">Ranked by average across logged days this month. Unlogged days don’t enter the average.</p><div class="leaderboard-scroll"><div id="leaderboard-rows" class="solar-member-cards"></div></div><section id="solar-month-totals" class="solar-month-totals" aria-label="Solar System monthly totals"></section><p class="hint" id="leaderboard-note"></p></section></section>`);
@@ -21,7 +23,7 @@ export function mountSocial({getStore,today,getCloud,showFriends,preview,scoreCi
   function prompt(){if(needsUsername&&!document.querySelector('dialog[open]'))dialog.showModal();}
   document.addEventListener('close',()=>setTimeout(prompt,80),true);
   async function action(work){if(busy)return;busy=true;message('Updating…');paint();try{await work();message('');}catch(error){message(error.code==='permission-denied'?'Could not access friends. Please reconnect and try again.':error.message);}finally{busy=false;paint();}}
-  const solarUI=mountSolarSystems({getClient:()=>client,getUser:()=>user,getProfile:()=>profile,getFriends:()=>data.friends,today,changed:()=>{paint();publish();},action,message,scoreCircle});
+  const solarUI=mountSolarSystems({getClient:()=>client,getUser:()=>user,getProfile:()=>profile,getFriends:()=>data.friends,today,checkInDate:appToday,changed:()=>{paint();publish();},action,message,scoreCircle});
   async function setUser(next){
     const run=++epoch;solarUI.reset();stop?.();stop=null;client=null;profile=null;user=next;data={incoming:[],outgoing:[],friends:[]};searchResults=[];searchSerial++;$('#friend-results').innerHTML='';lastPublished='';needsUsername=false;removeId=null;if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();paint();if(!user)return;
     // Auth callbacks can run before mountCloud returns its controller.
@@ -41,7 +43,7 @@ export function mountSocial({getStore,today,getCloud,showFriends,preview,scoreCi
     $('#friends-handle').textContent=profile?'@'+profile.username:preview?'Preview':'';
     $('#friends-signin').hidden=!!profile||preview;$('#friends-connected').hidden=!profile;
     $('#leaderboard-month').textContent=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-15T12:00:00Z'));
-    const system=solarUI.paint({ownLogged:sharedDays(getStore(),date).some(day=>day.date===date)});
+    const system=solarUI.paint({ownLogged:sharedDays(getStore(),appToday()).some(day=>day.date===appToday())});
     const rows=rankLeaderboard(system.members.map(member=>member.uid===user?.uid?{...member,...own}:member),month);
     const ranks=monthlyRanks(rows,month);
     const rowsHtml=rows.length?rows.map(row=>{
@@ -74,7 +76,10 @@ export function mountSocial({getStore,today,getCloud,showFriends,preview,scoreCi
     const run=epoch,driver=client;publishing=true;try{await driver.publish(profile.username,summary);if(run===epoch&&ids.length)await driver.groups.publish(ids,profile.username,summary,days,appearance);if(run===epoch)lastPublished=signature;}catch(error){if(run===epoch)message('Your private data is saved; leaderboard update will retry. '+error.message);}finally{publishing=false;}
   }
   $('#leaderboard-rows').addEventListener('click',event=>{const button=event.target.closest('[data-solar-day]');if(button)solarUI.openDay(button.dataset.solarDay,button.dataset.solarDate);if(event.target.closest('[data-edit-solar-profile]'))solarUI.openProfile();});
-  setInterval(()=>{if(document.visibilityState==='visible'){paint();publish();}},30000);
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){paint();publish();}});
+  let midnightTimer;
+  function scheduleMidnight(){clearTimeout(midnightTimer);midnightTimer=setTimeout(()=>{paint();publish();scheduleMidnight();},millisecondsUntilLocalMidnight());}
+  scheduleMidnight();
+  setInterval(()=>{if(document.visibilityState==='visible'){paint();publish();scheduleMidnight();}},30000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){paint();publish();scheduleMidnight();}});
   return {setUser,paint,publish};
 }

@@ -143,8 +143,11 @@ test('missing nutrition and unanswered gym cannot be confirmed; attendance can',
   store.confirmSection(key, 'training');
   store.addGymEntry(key, 'legs', 4);
   store.confirmSection(key, 'training');
-  assert.throws(() => store.setTrainingMode(key, 'rest'));
-  assert.equal(store.loadDay(key).trainingMode, 'training');
+  store.setTrainingMode(key, 'rest');
+  assert.equal(store.loadDay(key).trainingMode, 'rest');
+  assert.equal(store.loadTrainingDay(key).length,0);
+  assert.equal(store.loadDay(key).draftTrainingEntries[0].sets,4);
+  store.setTrainingMode(key, 'training');store.confirmSection(key,'training');
   store.confirmSection(key, 'checklists'); // An explicitly reviewed empty list is valid.
   assert.equal(store.dayProgress(key).reviewedCount, 2);
 });

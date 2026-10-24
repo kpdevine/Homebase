@@ -38,7 +38,7 @@ test('subscriptions accept standard push services and reject arbitrary URLs, cre
 test('custom food and training check-ins suppress reminders only after their configured inputs are answered',()=>{
   const store=createStore({seed:false}),date='2026-10-21',settings=store.getSettings();settings.nutrition.mode='macros';settings.training.mode='other';store.setSettings(settings,date);
   store.updateFood(date,{protein:150,calories:2000});store.confirmSection(date,'checklists');store.setTrainingMode(date,'training');
-  const check=()=>loggedFromRecord({day:store.loadDay(date),entries:[]});assert.equal(check(),false);store.updateTrainingMinutes(date,20);assert.equal(check(),false);store.setCreatine(date,false);assert.equal(check(),true);
+  const check=()=>loggedFromRecord({day:store.loadDay(date),entries:[]});assert.equal(check(),false);store.updateTrainingMinutes(date,20);assert.equal(check(),true);store.setCreatine(date,true);assert.equal(check(),true);
 });
 
 

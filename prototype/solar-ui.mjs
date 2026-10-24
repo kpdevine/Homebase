@@ -5,7 +5,7 @@ import {REACTION_ASSETS} from './reaction-assets.mjs';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const planetEmoji=(id,label='',size='icon')=>`<img class="planet-emoji" src="${REACTION_ASSETS[id]?.[size]||REACTION_ASSETS.happy.icon}" alt="${esc(label)}" width="${size==='portrait'?320:160}" height="${size==='portrait'?320:160}" loading="eager" decoding="async" fetchpriority="${size==='portrait'?'high':'low'}">`;
 
-export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today,changed,action,message,scoreCircle}) {
+export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today,checkInDate=today,changed,action,message,scoreCircle}) {
   const $=s=>document.querySelector(s),replace=(id,html)=>{if($(id).innerHTML!==html)$(id).innerHTML=html;};
   let state={groups:[],requests:[],invitations:[],primaryId:null},members=[],results=[],stop=null,boardStop=null,dayStop=null,primary=null,dayTarget=null,dayDate=null,dayState={day:null,reactions:[]},loading=true,run=0,eveningStop=null,eveningKey='',eveningDays=[],eveningLoading=false,eveningError=false,managementAutoOpened=false,reactionStop=null,reactionKey='',boardReactions=[];
   const hero=$('.leaderboard .panel-heading');hero.classList.add('solar-hero');
@@ -39,18 +39,26 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   $('.solar-avatar-picker').onkeydown=event=>{const offset={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[event.key];if(!offset)return;event.preventDefault();chosenPlanet=REACTIONS[(REACTIONS.findIndex(reaction=>reaction.id===chosenPlanet)+offset+REACTIONS.length)%REACTIONS.length].id;paintPlanetChoice();profileDialog.querySelector(`[data-profile-planet="${chosenPlanet}"]`).focus();};
   $('#solar-profile-form').onsubmit=async event=>{event.preventDefault();const button=$('#solar-profile-save'),active=run;button.disabled=true;button.textContent='Saving…';$('#solar-profile-error').textContent='';try{await api().saveAppearance(solarAppearance({planet:chosenPlanet,vibes:$('#solar-vibes-input').value}));if(active!==run)return;profileDialog.close();message('Planet profile saved.');changed();}catch(error){if(active===run)$('#solar-profile-error').textContent=error.message;}finally{button.disabled=false;button.textContent='Save my planet';}};
   const api=()=>getClient()?.groups;
+  let yesterdayStop=null,yesterdayKey='',yesterdayDays=[],yesterdayReady=false;
+  function stopYesterday(){yesterdayStop?.();yesterdayStop=null;yesterdayKey='';yesterdayDays=[];yesterdayReady=false;}
+  function watchYesterday(){
+    const date=addDays(today(),-1),key=primary?primary+'~'+date:'';
+    if(key===yesterdayKey)return;
+    stopYesterday();if(!key)return;yesterdayKey=key;const active=run;
+    yesterdayStop=api().watchToday(primary,date,days=>{if(active!==run||yesterdayKey!==key)return;yesterdayDays=days;yesterdayReady=true;changed();},error=>{if(active!==run||yesterdayKey!==key)return;message('Yesterday’s scores could not connect. '+error.message);});
+  }
   const selected=()=>state.groups.find(group=>group.id===primary);
   function watchPrimary(){
     const next=state.groups.find(group=>group.id===state.primaryId)?.id||state.groups[0]?.id||null;
     if(next===primary)return;
-    primary=next;boardStop?.();boardStop=null;members=[];loading=!!next;stopEvening();stopReactions();
+    primary=next;boardStop?.();boardStop=null;members=[];loading=!!next;stopEvening();stopReactions();stopYesterday();
     if(dayDialog.open)dayDialog.close();
     if(next){const active=run;boardStop=api().watchBoard(next,rows=>{if(active!==run||primary!==next)return;members=rows;loading=false;changed();},error=>{if(active===run){loading=false;message('Solar System could not connect. '+error.message);changed();}});}
   }
   function stopEvening(){eveningStop?.();eveningStop=null;eveningKey='';eveningDays=[];eveningLoading=false;eveningError=false;}
   function stopReactions(){reactionStop?.();reactionStop=null;reactionKey='';boardReactions=[];}
   function watchReactionBadges(){const date=addDays(today(),-1),key=primary?primary+'~'+date:'';if(key===reactionKey)return;stopReactions();if(!key)return;reactionKey=key;const active=run;reactionStop=api().watchReactions(primary,date,rows=>{if(active!==run||reactionKey!==key)return;boardReactions=rows;changed();},error=>{if(active!==run||reactionKey!==key)return;boardReactions=[];message('Day reactions could not connect. '+error.message);changed();});}
-  function reset(){stopEvening();stopReactions();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
+  function reset(){stopEvening();stopReactions();stopYesterday();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
   function connect(){reset();if(!api())return;const active=run;stop=api().watch(value=>{if(active!==run)return;state=value;watchPrimary();changed();},error=>{if(active===run)message('Solar Systems could not connect. '+error.message);});}
   $('#solar-create').onsubmit=event=>{event.preventDefault();action(async()=>{await api().create($('#solar-name').value);$('#solar-name').value='';});};
   $('#solar-search').onsubmit=event=>{event.preventDefault();action(async()=>{results=await api().search($('#solar-query').value);replace('#solar-results',results.length?'':'<li>No Solar Systems found.</li>');});};
@@ -64,7 +72,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   $('#delete-solar').onclick=()=>{removeTarget={group:primary,deleteSystem:true};$('#solar-remove-title').textContent='Delete Solar System?';$('#solar-remove-copy').textContent=`Remove ${selected()?.groupName||'this Solar System'} for every member? Your friendships and everyone’s private logs stay saved. You can create another system afterward.`;confirm.querySelector('[data-solar-confirm]').textContent='Delete Solar System';confirm.showModal();};
   $('#solar-member-list').onclick=event=>{const button=event.target.closest('[data-remove-member]');if(button)askRemove(button.dataset.removeMember);};
   function paintEvening(ownLogged){
-    const date=today(),key=primary&&lateCheckInWindow()?primary+'~'+date:'';
+    const date=checkInDate(),key=primary&&lateCheckInWindow()?primary+'~'+date:'';
     $('#solar-evening').hidden=!key;
     if(!key){if(eveningKey)stopEvening();return;}
     if(key!==eveningKey){
@@ -84,7 +92,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-connected').hidden=!profile;$('#solar-title').textContent=group?.groupName||'Your Solar System';
     $('#solar-subtitle').hidden=!group;$('#solar-member-count').hidden=!group;
     $('#solar-member-count strong').textContent=loading?'—':members.length;$('#solar-member-count span').textContent=members.length===1?'member':'members';
-    watchReactionBadges();paintEvening(ownLogged);
+    watchReactionBadges();watchYesterday();paintEvening(ownLogged);
     const ownsSystem=!!state.ownedGroupId||state.groups.some(value=>value.owner===user?.uid);
     $('#solar-create').hidden=ownsSystem;
     $('#solar-rename').hidden=!owner;
@@ -109,7 +117,9 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#leave-solar').hidden=!group||owner;
     $('#delete-solar').hidden=!owner;
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
-    return {members,primary,loading,reactions:boardReactions,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
+    const yesterday=addDays(today(),-1),scores=new Map(yesterdayDays.map(day=>[day.uid,day.score]));
+    const datedMembers=members.map(member=>({...member,yesterdayDate:yesterday,yesterdayScore:yesterdayReady?scores.get(member.uid)??null:member.yesterdayDate===yesterday?member.yesterdayScore??null:null}));
+    return {members:datedMembers,primary,loading,reactions:boardReactions,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
   function paintDay(){
     if(!dayTarget)return;

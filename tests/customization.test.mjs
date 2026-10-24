@@ -17,8 +17,8 @@ test('macro scoring rewards meeting both goals without punishing more protein or
   store.updateFood(monday,{protein:0,calories:0});assert.equal(score(),5);
   assert.throws(()=>store.updateFood(monday,{protein:-1}));
 });
-test('new training asks an explicit creatine answer and disabling it restores all ten training points',()=>{
-  const store=configured();store.setTrainingMode(monday,'rest');assert.equal(store.loadDay(monday).creatine,null);assert.equal(store.dayProgress(monday).sections[1].ready,false);
+test('unchecked creatine means not taken and disabling tracking restores all ten training points',()=>{
+  const store=configured();store.setTrainingMode(monday,'rest');assert.equal(store.loadDay(monday).creatine,false);assert.equal(store.dayProgress(monday).sections[1].ready,true);
   store.setCreatine(monday,false);assert.equal(store.trainingProgress(monday).score,9);store.confirmSection(monday,'training');
   const settings=store.getSettings();settings.training.creatine=false;store.setSettings(settings,monday);assert.equal(store.trainingProgress(monday).score,10);assert.equal(store.dayProgress(monday).sections[1].ready,true);
 });

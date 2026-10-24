@@ -2,7 +2,7 @@ import {mountTimeLogs} from './time-logs-ui.mjs';
 import {mountUIShell} from './ui-shell.mjs';
 import {mountNoteSaves} from './note-save.mjs';
 import {mountSocial} from './social-ui.mjs';
-import {settingsForDay,nutritionScore,newUserSettings,LOGGING_SECTIONS} from './customization.mjs';
+import {settingsForDay,nutritionScore,newUserSettings,LOGGING_SECTIONS,orderedModules} from './customization.mjs';
 import {mountCustomization} from './customization-ui.mjs';
 
 import { GROUPS, DAY_SECTIONS, addDays, adjustScore, createStore, isEditableDay, meterPath, meterPoint, monthGrid, moveMonth, scoreFromPoint } from './model.mjs';
@@ -70,7 +70,6 @@ let taskEdit=null;
 let weightHistoryDays=90;
 let weightChartUnit='lb';
 let weightPointPinned=false;
-$('#body-weight-form').insertAdjacentHTML('afterbegin','<div class="weight-highlight"><div><span>Body weight</span><strong id="body-weight-current">—</strong></div></div>');
 const calendarTools=document.createElement('div');calendarTools.className='calendar-tools';
 $('#calendar-filters').before(calendarTools);calendarTools.append($('#calendar-filters'));
 calendarTools.insertAdjacentHTML('beforeend','<button id="open-weight-history" type="button" class="calendar-weight-launch quiet-button" hidden>Weight graph ↗</button>');
@@ -82,19 +81,22 @@ $('#back-to-calendar').addEventListener('click',()=>{$('.calendar-card').scrollI
 
 $('#body-weight-form>label').innerHTML='Log weight <small>(optional)</small>';
 $('#training-pace').after($('#body-weight-form'));
-// UI-04: keep saved weight prominent without permanently expanding its editor.
-const weightEditor=document.createElement('details');weightEditor.className='weight-entry-editor';
-weightEditor.innerHTML='<summary id="weight-editor-label">Log weight</summary>';
-$('#body-weight-form').append(weightEditor);
-for(const field of [...$('#body-weight-form').children])if(field!==weightEditor&&!field.classList.contains('weight-highlight'))weightEditor.append(field);
+const weightEditor=document.createElement('dialog');weightEditor.id='weight-entry-dialog';weightEditor.setAttribute('aria-labelledby','weight-entry-title');
+weightEditor.innerHTML='<div class="dialog-heading"><h2 id="weight-entry-title">Enter your weight</h2><button type="button" class="icon-button" id="close-weight-entry" aria-label="Close weight entry">×</button></div>';
+$('#body-weight-form').before(Object.assign(document.createElement('button'),{id:'weight-editor-label',type:'button',className:'quiet-button weight-entry-launch',textContent:"Log today’s weight"}));
+weightEditor.append($('#body-weight-form'));document.body.append(weightEditor);
+$('#weight-editor-label').onclick=()=>{renderGym();weightEditor.showModal();$('#body-weight').focus();};
+$('#close-weight-entry').onclick=()=>weightEditor.close();
+weightEditor.addEventListener('close',()=>{$('#weight-editor-label').focus({preventScroll:true});cloud?.resume();});
 let weightEditorDate=null;
+const setEditor=document.createElement('dialog');setEditor.id='set-entry-dialog';setEditor.setAttribute('aria-labelledby','set-entry-title');setEditor.innerHTML='<div class="dialog-heading"><h2 id="set-entry-title">Edit set count</h2><button type="button" class="icon-button" id="close-set-entry" aria-label="Close set editor">×</button></div><p id="set-entry-context" class="hint"></p><form id="set-entry-form"><label for="set-entry-count">Number of sets</label><input id="set-entry-count" type="number" min="1" max="100" step="1" inputmode="numeric" required><p id="set-entry-error" role="alert"></p><div class="composer-actions"><button type="button" class="quiet-button" id="cancel-set-entry">Cancel</button><button type="submit" class="primary-button">Save set count</button></div></form>';document.body.append(setEditor);
+let editingSetId=null,editingSetDate=null;
+$('#close-set-entry').onclick=$('#cancel-set-entry').onclick=()=>setEditor.close();
+setEditor.addEventListener('close',()=>{const id=editingSetId;editingSetId=null;requestAnimationFrame(()=>[...document.querySelectorAll('[data-edit-entry]')].find(button=>button.dataset.editEntry===id)?.focus({preventScroll:true}));cloud?.resume();});
+$('#set-entry-form').onsubmit=event=>{event.preventDefault();try{store.updateGymEntry(editingSetId,Number($('#set-entry-count').value));setEditor.close();render();announce('Set count saved.');}catch(error){$('#set-entry-error').textContent=error.message;}};
 // UI-05: recommendations precede logging; optional supporting detail stays available.
-$('#gym-form').before($('#ideal-workout'));
-const gapsDetails=document.createElement('details');gapsDetails.className='training-gaps';
-gapsDetails.innerHTML='<summary>Weekly muscle gaps</summary>';$('#muscle-suggestions').before(gapsDetails);gapsDetails.append($('#muscle-suggestions'));
-const notesDetails=document.createElement('details');notesDetails.className='training-notes-details';
-notesDetails.innerHTML='<summary>Training notes (optional)</summary>';$('.training-notes').before(notesDetails);notesDetails.append($('.training-notes'));
-let trainingNotesDate=null;
+const notesDetails=document.createElement('section');notesDetails.className='panel training-notes-card';notesDetails.setAttribute('aria-labelledby','training-notes-title');
+notesDetails.innerHTML='<div class="panel-heading"><div><p class="eyebrow">OPTIONAL</p><h3 id="training-notes-title">Training notes</h3></div></div>';$('.training-notes').before(notesDetails);notesDetails.append($('.training-notes'));$('.training-notes>label').classList.add('sr-only');
 
 $('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button">+ Plan a task</button></div></section>');
 const todayTaskHeading=document.createElement('div');
@@ -196,6 +198,8 @@ function renderHeaderShortcuts() {
 }
 function renderTabs() {
   const config=settingsForDay(store.loadDay(selectedDate)),tabs=config.tabs;
+  const order=['today',...store.getSettings().moduleOrder],nav=$('.day-tabs');
+  order.forEach((id,index)=>{const button=$(`[data-tab="${id}"]`);if(button&&nav.children[index]!==button)nav.insertBefore(button,nav.children[index]||null);});
   if(Object.hasOwn(tabs,view)&&!tabs[view])view='today';
   let number=0;
   for(const button of $$('[data-tab]')){const id=button.dataset.tab;button.hidden=id!=='today'&&!tabs[id];const marker=button.querySelector('small');marker.hidden=id==='today';if(!button.hidden&&id!=='today')marker.textContent=String(++number).padStart(2,'0');}
@@ -388,8 +392,10 @@ $('#target-inputs').addEventListener('keydown',event=>{
   else if(event.key==='Home'||event.key==='End'){event.preventDefault();changeTarget(id,event.key==='Home'?0:20);}
 });
 $('#cancel-targets').addEventListener('click',()=>{renderTargetEditor(store.loadWeek(selectedDate),true);cloud?.resume();announce('Target edits discarded. Saved targets are unchanged.');});
+function setEntryActions(entry){return `<div class="set-entry-actions"><strong>${entry.sets}<small> sets</small></strong><button type="button" class="quiet-button" data-edit-entry="${entry.id}" aria-label="Edit ${escapeHtml(store.groupName(entry.date,entry.groupId))} set count from ${shortDate(entry.date)}">Edit</button><button type="button" class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${escapeHtml(store.groupName(entry.date,entry.groupId))} sets from ${shortDate(entry.date)}">Remove</button></div>`;}
 function renderGym() {
   const day = store.loadDay(selectedDate), entries = store.loadTrainingDay(selectedDate), week = store.loadWeek(selectedDate),pace=store.trainingProgress(selectedDate);
+  if(setEditor.open&&editingSetDate!==selectedDate&& !week.entries.some(entry=>entry.id===editingSetId))setEditor.close();
   $('#training-date').textContent = `Entries for ${longDate(selectedDate)}.`;
   if(!weightEditor.open||weightEditorDate!==selectedDate) {
     $('#body-weight').value=day.bodyWeight?.value??'';bodyWeightUnit=day.bodyWeight?.unit??'lb';
@@ -397,40 +403,37 @@ function renderGym() {
     $('#body-weight').max=bodyWeightUnit==='kg'?700:1500;
   }
   updateWeightDraftHint();
-  $('#body-weight-current').innerHTML=day.bodyWeight?`${day.bodyWeight.value.toFixed(1)} <small>${day.bodyWeight.unit}</small>`:'<span class="weight-missing">Not logged</span>';
   $('#remove-body-weight').hidden=!day.bodyWeight;
-  $('#weight-editor-label').textContent=day.bodyWeight?'Edit weight':'Log weight';
-  if(weightEditorDate!==selectedDate){weightEditor.open=false;weightEditorDate=selectedDate;}
-  if(trainingNotesDate!==selectedDate){notesDetails.open=!!day.notes.training;trainingNotesDate=selectedDate;}
+  $('#weight-editor-label').disabled=archivedDay();
+  if(weightEditorDate!==selectedDate){if(weightEditor.open)weightEditor.close();weightEditorDate=selectedDate;}
 
   $('#creatine-taken').checked=day.creatine===true;
   $('#creatine-taken').disabled=archivedDay();
-  $('#creatine-status').textContent=day.creatine===true?'✓ Taken':'Not checked';
+  $('#creatine-status').textContent=day.creatine===true?'Taken':'Not taken yet';
   const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
-  $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=input.value==='no'&&entries.length>0; });
+  $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=archivedDay(); });
   $('#gym-form').hidden=day.trainingMode!=='training';
-  $('#training-mode-hint').hidden=!entries.length;
-  $('#ideal-workout').hidden=noLift;
-  const restReason=pace.goalsComplete?'All weekly goals met · rest covered':pace.restCreditUsed?'Rest day covered':'Weekly rest allowance used up';
-  $('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged&&!pace.target?pace.tracksCreatine?'Creatine only':'No targets · not scored':pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?(pace.target?restReason:'Rest recorded · gym not scored'):`${pace.useful} goal set${pace.useful===1?"":"s"}${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?"":"s"}`:""}`}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'Set weekly targets to score gym effort.'}</small></div>`;
-  $('#muscle-suggestions').innerHTML=`<h4 id="muscle-suggestions-title">Most needed for your goal</h4>${pace.suggestions.length?`<div>${pace.suggestions.map(group=>`<span><strong>${escapeHtml(group.name)}</strong><small>${group.remaining} sets remaining</small></span>`).join('')}</div>`:pace.target?'<p>All weekly targets met.</p>':'<p>No muscle targets set. Your total sets still stay in your log.</p>'}`;
-  if(pace.mode==='other')$('#training-pace').innerHTML=`${circle(pace.score,true)}<div><strong>${pace.logged?`Training · ${scoreText(pace.score)} / 10`:'Training · not logged'}</strong><span>${pace.rest?restReason:`${pace.minutes??'—'} / ${pace.minuteGoal} minutes`}</span></div>`;
-  const workout=store.idealWorkout(selectedDate);
-  $('#ideal-workout').innerHTML=`<div class="ideal-workout-heading"><h4>Ideal workout today</h4>${workout.sets?`<span>${workout.sets} goal sets planned</span>`:''}</div>${workout.groups.length?`<ul>${workout.groups.map(group=>`<li><span>${escapeHtml(group.name)}</span><strong>${group.sets}<small> set${group.sets===1?'':'s'}</small></strong></li>`).join('')}</ul>`:`<p>${!pace.target?'Set weekly targets to build your plan.':workout.goalsMet?'All weekly goals are complete.':workout.targetMet?'Today’s set target is met.':'No goal sets remaining.'}</p>`}`;
+  $('#training-mode-hint').hidden=!day.draftTrainingEntries?.length;
+  $('#training-mode-hint').textContent='Your set entries are saved as a draft while No is selected. Choose Yes to restore them.';
+  const creatineDetail=settingsForDay(day).training.creatine?`<span class="training-creatine-detail">${day.creatine===true?'Creatine taken':'Creatine not taken'}</span>`:'';
+  $('#training-pace').setAttribute('role','img');$('#training-pace').setAttribute('aria-label',`Training score ${scoreText(pace.score??0)} out of 10. ${day.trainingMode==='training'?`${pace.useful} goal sets completed. `:''}${settingsForDay(day).training.creatine?(day.creatine?'Creatine taken.':'Creatine not taken.'):''}${pace.logged?'':' Training is not logged yet.'}`);
+  const restReason=pace.goalsComplete?'All weekly goals met':pace.restCreditUsed?'Flexible rest credit used':'No flexible rest credits remaining';
+  $('#training-pace').innerHTML=`${circle(pace.score??0,true)}<div>${day.trainingMode==='training'?`<span>${pace.useful} goal set${pace.useful===1?'':'s'} completed${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?'':'s'}`:''}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'No weekly targets set.'}</small>`:''}${pace.rest?`<small>${restReason}</small>`:''}${creatineDetail}</div>`;
+  if(pace.mode==='other')$('#training-pace').innerHTML=`${circle(pace.score??0,true)}<div>${pace.rest?`<small>${restReason}</small>`:day.trainingMode==='training'?`<span>${pace.minutes??'—'} / ${pace.minuteGoal} minutes</span>`:''}${creatineDetail}</div>`;
   $('#daily-training-entries').hidden=noLift;
-  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${escapeHtml(store.groupName(entry.date,entry.groupId))}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym attendance logged':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
+  $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${escapeHtml(store.groupName(entry.date,entry.groupId))}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span>${setEntryActions(entry)}</li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym set logging':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
   const weekCredit=week.groups.reduce((sum,group)=>sum+Math.min(group.completed,group.target),0);
   $('#gym-summary').textContent = `${weekCredit} / ${target}`;
   $('#gym-total-sets').textContent=total;
-  $('#weekly-rest-credits').innerHTML=`<div><span class="eyebrow">Weekly rest credits</span><strong>${pace.restCredits}<small> / ${pace.restAllowance} left</small></strong></div><p>Remaining through ${shortDate(selectedDate)}<br>Resets every Monday</p>`;
+  $('#weekly-rest-credits').innerHTML=`<div><span class="eyebrow">Flexible rest credits</span><strong>${pace.restCredits}<small> / ${pace.restAllowance} left</small></strong></div><p>Remaining through ${shortDate(selectedDate)}<br>Resets every Monday</p>`;
   $('#gym-week-label').textContent = `${shortDate(week.start)} – ${shortDate(week.end)} · Monday–Sunday`;
   const volumeGroups=[...week.groups];
   for(const entry of week.entries.filter(entry=>entry.groupId!=='legs')) if(!volumeGroups.some(group=>group.id===entry.groupId)) volumeGroups.push({id:entry.groupId,name:muscleName(entry.groupId),target:null,completed:week.entries.filter(item=>item.groupId===entry.groupId).reduce((sum,item)=>sum+item.sets,0)});
-  $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%;background:${scoreColor(group.completed / group.target * 10)}"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
+  $('#gym-groups').innerHTML = volumeGroups.length ? volumeGroups.map(group => `<div><div class="gym-group-heading"><span>${escapeHtml(group.name)}</span><span>${group.completed} <small>${group.target ? `/ ${group.target} sets` : 'sets · no target'}</small></span></div>${group.target?`<div class="gym-progress" role="img" aria-label="${escapeHtml(group.name)}: ${group.completed} of ${group.target} sets"><span style="width:${Math.min(100, group.completed / group.target * 100)}%"></span></div>${group.completed > group.target ? `<p class="over-target">${group.completed - group.target} over target</p>` : ''}`:''}</div>`).join('') : '<p class="hint">No targets for this week yet. Add them below; your sets are still saved.</p>';
   renderTargetEditor(week);
-  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${escapeHtml(store.groupName(entry.date,entry.groupId))} · ${entry.sets} sets</span><button class="text-button" data-remove-entry="${entry.id}" aria-label="Remove ${entry.sets} ${entry.groupId} sets from ${shortDate(entry.date)}">Remove</button></li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
-  $$('[data-remove-entry]').forEach(button=>{const entry=week.entries.find(value=>value.id===button.dataset.removeEntry);button.disabled=!!entry&&archivedDay(entry.date);});
+  $('#gym-log').innerHTML = week.entries.length ? `<ul>${week.entries.map(entry => `<li><span>${shortDate(entry.date)} · ${escapeHtml(store.groupName(entry.date,entry.groupId))}</span>${setEntryActions(entry)}</li>`).join('')}</ul>` : '<p class="hint">No entries this week.</p>';
+  $$('[data-remove-entry],[data-edit-entry]').forEach(button=>{const entry=week.entries.find(value=>value.id===(button.dataset.removeEntry||button.dataset.editEntry));button.disabled=!!entry&&archivedDay(entry.date);});
 }
 function renderReview() {
   const progress = store.dayProgress(selectedDate), reviewing = reviewSessionDate === selectedDate && !progress.completedAt;
@@ -474,7 +477,8 @@ $$('[data-notes]').filter(input=>['nutrition','training'].includes(input.dataset
   renderReview(); renderHeader(); renderScore();
 }));
 function renderHistory() {
-  const tabs=store.getSettings().tabs;
+  const settings=store.getSettings(),tabs=settings.tabs,filters=$('#calendar-filters');
+  orderedModules(settings).forEach(({id},index)=>{const button=$(`[data-calendar-filter="${id}"]`);if(filters.children[index+1]!==button)filters.insertBefore(button,filters.children[index+1]||null);});
   if(calendarFilter!=='all'&&!tabs[calendarFilter])calendarFilter='all';
   $$('[data-calendar-filter]').forEach(button=>{button.hidden=button.dataset.calendarFilter!=='all'&&!tabs[button.dataset.calendarFilter];});
   $('#open-weight-history').hidden=calendarFilter!=='training';
@@ -522,7 +526,7 @@ function recapMarkup({final=false}={}) {
     <div class="recap-metrics">${recap.sections.map(section=>`<button ${openSection(section.id)}><span>${escapeHtml(section.label)}</span><strong>${scoreText(section.score)}<small>${section.score===null?'':' / 10'}</small></strong></button>`).join('')}</div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${settingsForDay(day).tabs.checklists&&recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
-    ${settingsForDay(day).tabs.training&&recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine===null?'Not answered':recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
+    ${settingsForDay(day).tabs.training&&recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
     ${settingsForDay(day).tabs.training&&recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>settingsForDay(day).tabs[note.section]&&(!final||note.section!=='nutrition')).map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
     ${!final&&settingsForDay(day).tabs.sentiments&&(day.sentiments.notes.trim()||day.sentiments.rating!==null)?`<section class="recap-section recap-note sentiment-recap"><h4>${archived?'Sentiments':'<button class="text-button" data-open-section="sentiments">Sentiments</button>'}<span>${day.sentiments.rating===null?'Notes only · not scored':`${scoreText(day.sentiments.rating)} / 10 · included in score`}</span></h4>${day.sentiments.notes.trim()?`<p>${escapeHtml(day.sentiments.notes)}</p>`:''}</section>`:''}`;
@@ -877,11 +881,10 @@ function updateWeightDraftHint() {
   $('#body-weight-status').textContent=changed?'Unsaved weight · choose Save weight.':saved?`${weightText(saved)} saved for ${shortDate(selectedDate)}`:'Separate from your gym score.';
 }
 $('#body-weight').addEventListener('input',updateWeightDraftHint);
-weightEditor.addEventListener('toggle',()=>{if(!weightEditor.open){renderGym();cloud?.resume();}});
 $('#body-weight-form').addEventListener('submit',event=>{
   event.preventDefault();const input=$('#body-weight');
   if(!input.checkValidity()){input.reportValidity();return;}
-  try {store.updateBodyWeight(selectedDate,{value:Number(input.value),unit:bodyWeightUnit});render();weightEditor.open=false;$('#weight-editor-label').focus();announce('Body weight saved.');}
+  try {store.updateBodyWeight(selectedDate,{value:Number(input.value),unit:bodyWeightUnit});weightEditor.close();render();announce('Body weight saved.');}
   catch(error){announce(error.message);}
 });
 $$('[name="weight-unit"]').forEach(input=>input.addEventListener('change',()=>{
@@ -995,15 +998,17 @@ bindMeterDrag(nutritionMeter,{min:1,scaleMin:0,read:()=>store.loadDay(selectedDa
   if(score!==null)announce(`Nutrition set to ${scoreText(score)}.`);
 }});
 
-$('#gym-muscles').innerHTML = `<legend>Muscle group</legend><div class="muscle-choices">${GROUPS.map((group,index)=>`<label><input type="radio" name="muscle-group" value="${group.id}" ${index===0?'checked':''} required><span>${escapeHtml(group.name)}</span></label>`).join('')}</div>`;
-function renderLogButton() { const id=$('[name="muscle-group"]:checked')?.value;$('#log-sets').textContent=`+ Log ${store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||muscleName(id||'')} sets`; }
+$('#gym-muscles').innerHTML = `<label for="gym-muscle">Muscle group</label><select id="gym-muscle" name="muscle-group" required>${GROUPS.map(group=>`<option value="${group.id}">${escapeHtml(group.name)}</option>`).join('')}</select>`;
+function renderLogButton() { const id=$('[name="muscle-group"]')?.value;$('#log-sets').textContent=`+ Log ${store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||muscleName(id||'')} sets`; }
 $('#gym-muscles').addEventListener('change',renderLogButton);
+$('#gym-muscles').addEventListener('pointerdown',event=>{if(event.target.id==='gym-muscle')event.target.dataset.pointerFocus='true';});
+$('#gym-muscles').addEventListener('keydown',event=>{if(event.target.id==='gym-muscle')delete event.target.dataset.pointerFocus;});
 renderLogButton();
 $('#gym-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#gym-sets');
-  try { store.addGymEntry(selectedDate, $('[name="muscle-group"]:checked')?.value, Number(input.value)); }
+  try { store.addGymEntry(selectedDate, $('[name="muscle-group"]')?.value, Number(input.value)); }
   catch (error) { input.setCustomValidity(error.message); input.reportValidity(); return; }
-  render();const button=$('#log-sets'),id=$('[name="muscle-group"]:checked')?.value,name=store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||id;button.textContent=`✓ ${input.value} ${name} sets added`;button.classList.add('sets-added');acknowledge(button);setTimeout(()=>{button.classList.remove('sets-added');renderLogButton();},1600);announce(`${input.value} ${name} sets added.`);
+  render();const button=$('#log-sets'),id=$('[name="muscle-group"]')?.value,name=store.loadWeek(selectedDate).groups.find(g=>g.id===id)?.name||id;button.textContent=`✓ ${input.value} ${name} sets added`;button.classList.add('sets-added');acknowledge(button);setTimeout(()=>{button.classList.remove('sets-added');renderLogButton();},1600);announce(`${input.value} ${name} sets added.`);
 });
 
 $('#gym-sets').addEventListener('input', event => event.target.setCustomValidity(''));
@@ -1012,6 +1017,7 @@ $$('[name="training-mode"]').forEach(input => input.addEventListener('change', (
   catch (error) { announce(error.message); renderGym(); }
 }));
 for (const id of ['daily-training-entries','gym-log']) $('#' + id).addEventListener('click', event => {
+  const edit=event.target.closest('[data-edit-entry]');if(edit){const entry=store.loadWeek(selectedDate).entries.find(value=>value.id===edit.dataset.editEntry);if(!entry||archivedDay(entry.date))return;editingSetId=entry.id;editingSetDate=entry.date;$('#set-entry-context').textContent=`${store.groupName(entry.date,entry.groupId)} · ${longDate(entry.date)}`;$('#set-entry-count').value=entry.sets;$('#set-entry-error').textContent='';setEditor.showModal();$('#set-entry-count').select();return;}
   const button = event.target.closest('[data-remove-entry]'); if (!button) return;
   store.removeGymEntry(button.dataset.removeEntry); render(); $('#gym-sets').focus({preventScroll:true}); announce('Set entry removed. Lifting status is unchanged.');
 });

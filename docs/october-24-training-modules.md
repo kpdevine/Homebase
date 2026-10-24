@@ -1,0 +1,19 @@
+# October 24 Training and Modules release
+
+The owner approved publication with “And then push all.” Deliver this revision together through GitHub and Firebase Hosting, including the source, requirements and verification notes. This follows the typed settings goals and enabled Calendar modules release.
+
+Training begins with unselected attendance. Yes reveals lifting inside the daily card with a short sliding animation; No hides it and preserves any sets as a draft. Reduced-motion preferences disable the animation. Drafts survive backups and cloud records, retain IDs, and contribute no scores or weekly volume until restored by Yes. Editing a set count preserves its ID and replays affected scoring/rest-credit reviews.
+
+Creatine is a single checkbox independent of lifting attendance, phrased “Have you taken creatine today?” with a one-line question. Unchecked does not block review. The compact bottom-left Log today's weight action opens a dialog, matching the Yes/No button styling. Muscle group and Sets use explicit grid columns and row placement, labels above, and a div-based group to avoid native fieldset layout differences. Muscle names use the regular UI face.
+
+Training Score details remains a separate matching card with its header on one line, using the same 20px heading style as the other cards, and a fixed 66px numeric circle. Its text says Creatine taken / Creatine not taken; goal sets completed only appears for lifting days. Rest-day credit says Flexible rest credit used. Training notes uses a matching card. This week's training is fully expanded, with a styled target editor. Ideal workout and Weekly muscle gaps are removed from the visible page. The weight launcher is a compact 34px-high button with 11px UI text and 6px/10px padding, retaining the Yes/No surface and border styling.
+
+Modules replaces user-facing tabs terminology. Settings supports enabled-module ordering, persisted with validation and a legacy default. Main navigation and Calendar follow it while Overview stays first and Calendar excludes disabled modules.
+
+Solar System uses calendar midnight in the viewer's device timezone for Yesterday, including DST-length days. It subscribes to the corresponding shared group day records, refreshes immediately at midnight, resumes when visible, and checks every 30 seconds for timezone changes. Tonight's check-in and personal logging retain the 1 a.m. grace period. Member scores still depend on their records being synced.
+
+Validation: 242 regular tests, 241 passed, one emulator-only skip. New coverage exercises editable-set replay, paused-draft round trips/identity validation, module-order persistence, checkbox readiness, and midnight timers across timezones, year end, and 23/25-hour DST days. No Firestore rule changes. Browser sample QA checked blank attendance, Yes/No draft restoration, creatine, weight dialog, set editing, module ordering, and phone layout. Windows viewport checks do not certify physical iPhone Safari behavior.
+
+Preview: http://127.0.0.1:4196/review?view=phone&scenario=account. Sample records are isolated from production. Keep unrelated server/reminders/policy.mjs edits out of this release.
+
+Visual refinements: rest credits use an opaque 2px outline. Weekly set meters use dark fills on light tracks, 8px high with a dark border. Muscle selection and its options are left-aligned with 12px leading padding and a separate right-edge arrow; this picker uses native select appearance rather than the shared experimental base-select styling. Pointer selection returns to a normal border while keyboard focus retains its indicator. The weight action sits closer to the bottom-left card corner, with 24px separation below the gym log in normal flow to prevent overlap. The empty lifting log says Gym set logging. Overview and Training both use Flexible rest credit used.

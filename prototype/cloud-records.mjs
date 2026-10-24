@@ -29,6 +29,7 @@ export function recordsSnapshot(records,serial=0) {
     const match=/^(?:task|gym|routine|child)-(\d+)$/.exec(id);if(match)result.serial=Math.max(result.serial,Number(match[1]));
   }
   result.days.sort((a,b)=>a.date.localeCompare(b.date));result.templates.sort((a,b)=>a.id.localeCompare(b.id));result.targets.sort((a,b)=>a[0].localeCompare(b[0]));
+  for(const entry of result.days.flatMap(day=>day.draftTrainingEntries||[])){const match=/^gym-(\d+)$/.exec(entry.id);if(match)result.serial=Math.max(result.serial,Number(match[1]));}
   return validateSnapshot(result);
 }
 export function recordChanges(base,next) {

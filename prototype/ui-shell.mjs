@@ -14,12 +14,15 @@ export function mountUIShell({getStore,getDate,getView,onDeleteTask}) {
   $('.nutrition-notes').before(macros);
   const checkins=document.createElement('div');checkins.className='training-checkins';
   const attendance=$('.daily-training-card>.training-choice');attendance.before(checkins);
-  checkins.append(attendance,$('.creatine-check'));
-  const weekly=document.createElement('details');weekly.className='weekly-progress-details';
-  weekly.innerHTML='<summary>Weekly progress & targets</summary>';
-  $('#gym-groups').before(weekly);
-  for(const selector of ['#gym-groups','.target-editor','#toggle-gym-log','#gym-log'])weekly.append($(selector));
-  weekly.open=matchMedia('(min-width:700px)').matches;
+  const daily=$('.daily-training-card'),primary=document.createElement('div');primary.className='training-daily-column';daily.before(primary);primary.append(daily);
+  daily.insertAdjacentHTML('afterbegin','<div class="panel-heading"><div><p class="eyebrow">DAILY TRAINING</p><h3>Today’s training</h3></div></div>');
+  checkins.append(attendance);checkins.after($('.creatine-check'));$('.creatine-check').after($('#weight-editor-label'));
+  const score=document.createElement('section');score.className='panel training-score-card';score.setAttribute('aria-labelledby','training-score-title');score.innerHTML='<div class="panel-heading"><div><p class="eyebrow">DAILY SCORE</p><h3 id="training-score-title">Training Score details</h3></div></div>';score.append($('#training-pace'));primary.append(score);
+  const workout=document.createElement('section');workout.id='workout-logging';workout.className='workout-logging';workout.setAttribute('aria-labelledby','workout-log-title');workout.innerHTML='<div class="workout-reveal-body"><div class="panel-heading"><div><p class="eyebrow">TODAY’S WORKOUT</p><h3 id="workout-log-title">Log your lifting</h3></div></div></div>';
+  daily.insertBefore(workout,$('#weight-editor-label'));
+  for(const selector of ['#other-training-log','#gym-form','#daily-training-entries'])workout.firstElementChild.append($(selector));
+  const notes=$('.training-notes-card');primary.append(notes);
+  const weekly=$('.weekly-training');
 
   const settings=$('#settings-dialog');
   const groups=new Map();
@@ -71,6 +74,7 @@ export function mountUIShell({getStore,getDate,getView,onDeleteTask}) {
       const config=settingsForDay(getStore().loadDay(getDate()));
       document.body.dataset.view=getView();document.body.classList.toggle('nutrition-mode-macros',config.nutrition.mode==='macros');
       macros.hidden=config.nutrition.mode!=='macros';weekly.hidden=config.training.mode==='other';
+      workout.hidden=getStore().loadDay(getDate()).trainingMode!=='training';notes.hidden=workout.hidden;$('#workout-log-title').textContent=config.training.mode==='other'?'Log your training':'Log your lifting';
       $('#score-range>span')?.classList.add('score-assumption');
     },
   };

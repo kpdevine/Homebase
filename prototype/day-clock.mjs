@@ -6,6 +6,12 @@ export function localDateKey(date = new Date(), timeZone) {
   return `${part('year')}-${part('month')}-${part('day')}`;
 }
 
+// Device-local midnight, including 23/25-hour daylight-saving days.
+export function millisecondsUntilLocalMidnight(date=new Date()) {
+  const next=new Date(date);next.setHours(24,0,0,0);
+  return Math.max(1,next.getTime()-date.getTime());
+}
+
 export function localHour(date = new Date(), timeZone) {
   return Number(new Intl.DateTimeFormat('en-US', {timeZone, hour:'numeric', hourCycle:'h23'}).format(date));
 }

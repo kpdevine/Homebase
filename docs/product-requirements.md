@@ -1,6 +1,19 @@
 # Pocket Planet product requirements
 
-Updated October 21, 2026. This is the current application specification; older design documents retain the planning history.
+Updated October 24, 2026. This is the current application specification; older design documents retain the planning history.
+
+## October 24 Training and Modules revision
+
+These current requirements supersede older tab and Training presentation descriptions below. See [implementation and verification](october-24-training-modules.md).
+
+- Call optional daily sections Modules. Settings allows enabling them and ordering them with up/down controls. Overview remains first. Calendar shows only enabled modules in the chosen order. Older saved settings receive the default order without changing their recorded scoring setup.
+- A fresh training day starts with neither Yes nor No selected. Log your lifting slides open inside Today's training only after Yes; selecting No collapses it. Existing set entries become a reversible draft while No is selected and do not count toward scores or weekly totals. Yes restores their original identities.
+- Use the standalone checkbox question “Have you taken creatine today?” on one line. Unchecked means not taken yet and does not block review. Keep it available independently of attendance.
+- Use a compact “Log today’s weight” button at the bottom left of Today's training, styled like unselected Yes/No. It opens the weight dialog; no weight input or saved weight value appears directly in this card.
+- Muscle group and Sets appear on one row with labels above. Use normal UI type for muscle names. Existing set counts are editable, with whole numbers from 1–100; edits recalculate affected training progress and reviews.
+- Keep Training Score details separate from lifting entry, with a one-line header and a fixed numeric score circle. Show Creatine taken or Creatine not taken. Only lifting days show the goal-sets-completed detail. Rest credit copy is “Flexible rest credit used.”
+- Use matching card spacing, borders, headings and fonts throughout Training, including a separate Training notes card. This week's training stays fully expanded with no nested progress/targets disclosure. Keep a styled Edit weekly targets action. Remove Ideal workout and Weekly muscle gaps from the interface.
+- Solar System Yesterday changes at midnight in the viewing user's local device timezone. Refresh on midnight and when the app becomes visible; read the corresponding shared day records so another member's older summary cannot determine the date. Keep personal record logging and Tonight's check-in on the existing 1 a.m. day cutoff.
 
 ## Purpose and delivery
 

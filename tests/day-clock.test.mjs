@@ -53,6 +53,23 @@ test('late logging warnings remain active throughout the grace hour',()=>{
     assert.equal(lateCheckInWindow(new Date(`2026-10-21T${time}Z`),'UTC'),expected,time);
 });
 
+test('Solar midnight timers follow device timezone and daylight-saving day length',()=>{
+  const moduleURL=new URL('../prototype/day-clock.mjs',import.meta.url).href;
+  for(const [zone,instant,hours] of [
+    ['Asia/Tokyo','2026-10-20T15:00:00Z',24],
+    ['America/Los_Angeles','2026-10-21T06:59:59Z',1/3600],
+    ['America/Chicago','2026-03-08T06:00:00Z',23],
+    ['America/Chicago','2026-11-01T05:00:00Z',25],
+    ['UTC','2026-12-31T23:30:00Z',0.5],
+  ]){
+    const child=spawnSync(process.execPath,['--input-type=module','-e',`import {millisecondsUntilLocalMidnight,localDateKey,appDateKey} from ${JSON.stringify(moduleURL)};const at=new Date(${JSON.stringify(instant)});const delay=millisecondsUntilLocalMidnight(at);console.log(JSON.stringify({delay,before:localDateKey(at),after:localDateKey(new Date(+at+delay)),record:appDateKey(new Date(+at+delay))}));`],{env:{...process.env,TZ:zone},encoding:'utf8'});
+    assert.equal(child.status,0,child.stderr);
+    const result=JSON.parse(child.stdout);assert.equal(result.delay,hours*3600000,zone);
+    assert.notEqual(result.before,result.after,zone);
+    assert.equal(result.record,result.before,'Solar changes date at midnight while logging keeps its grace hour');
+  }
+});
+
 test('an open Today screen follows rollover after editing finishes, only once',()=>{
   const rollover=createDayRollover('2026-10-20');
   assert.equal(rollover.tick('2026-10-20'),null);

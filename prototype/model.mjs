@@ -111,7 +111,7 @@ export function createStore(options = {}) {
   }
   function loadDay(key) {
     const day = structuredClone(days.get(key) || emptyDay(key));
-    if(!day.configuration&&settings&&key>=settings.effectiveFrom){day.configuration=structuredClone(settings);if(!days.has(key))day.creatine=null;}
+    if(!day.configuration&&settings&&key>=settings.effectiveFrom){day.configuration=structuredClone(settings);if(!days.has(key))day.creatine=false;}
     for (const template of templates) if (isDue(template,key) && !day.skippedTemplates.includes(template.id) && !day.tasks.some(task=>task.templateId===template.id)) day.tasks.push(occurrence(template,key));
     return day;
   }
@@ -128,6 +128,7 @@ export function createStore(options = {}) {
     return {start,end,targetSource:effective.source,groups:effective.groups.map(group=>({...group,completed:weekEntries.filter(entry=>entry.groupId===group.id).reduce((sum,entry)=>sum+entry.sets,0)})),entries:structuredClone(weekEntries),days:structuredClone([...days.values()].filter(day=>day.date>=start&&day.date<=end))};
   }
   function trainingScores() {return new Map([...days.values()].map(day=>[day.date,trainingProgress(day,loadWeek(day.date)).score]));}
+  function restoreDraftTraining(day){if(day.draftTrainingEntries){entries.push(...day.draftTrainingEntries);delete day.draftTrainingEntries;}}
   function startWorkout(day) {
     if(day.workoutPlan)return;
     const plan=workoutForDay(day,loadWeek(day.date));
@@ -317,6 +318,7 @@ export function createStore(options = {}) {
       if (!(settings?effectiveTargets(date).groups:ALL_GROUPS).some(group => group.id === groupId)) throw new RangeError('Choose a known muscle group.');
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new RangeError('Enter a whole number from 1 to 100 sets.');
       const before=trainingScores(),entry = { id: nextId('gym'), date, groupId, sets },day=writableDay(date);
+      restoreDraftTraining(day);
       if(day.creatine===undefined)day.creatine=false;
       startWorkout(day);
       entries.push(entry);
@@ -324,6 +326,14 @@ export function createStore(options = {}) {
       invalidateReview(day, 'training');
       reopenChangedTraining(before);
       return entry.id;
+    },
+    updateGymEntry(id,sets) {
+      const entry=entries.find(entry=>entry.id===id);
+      if(!entry)throw new Error('This set entry is no longer available.');
+      if(!Number.isInteger(sets)||sets<1||sets>100)throw new RangeError('Enter a whole number from 1 to 100 sets.');
+      if(entry.sets===sets)return;
+      const before=trainingScores(),day=writableDay(entry.date);
+      entry.sets=sets;invalidateReview(day,'training');reopenChangedTraining(before);
     },
     removeGymEntry(id) {
       const index = entries.findIndex(entry => entry.id === id);
@@ -342,10 +352,10 @@ export function createStore(options = {}) {
     },
     setTrainingMode(key, mode) {
       if (!['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(mode)) throw new RangeError('Choose lifting or rest.');
-      if (mode !== 'training' && settingsForDay(loadDay(key)).training.mode==='gym' && entries.some(entry => entry.date === key)) throw new Error('Remove this day’s set entries before marking it as a no-lift day.');
       const before=trainingScores(),day = writableDay(key),newPolicy=day.creatine===undefined;
       if(newPolicy)day.creatine=false;
-      if(mode==='training')startWorkout(day);
+      if(mode==='training'){restoreDraftTraining(day);startWorkout(day);}
+      else if(settingsForDay(day).training.mode==='gym'){const draft=entries.filter(entry=>entry.date===key);if(draft.length){day.draftTrainingEntries=draft;for(let index=entries.length-1;index>=0;index--)if(entries[index].date===key)entries.splice(index,1);}}
       if (day.trainingMode !== mode || newPolicy) { day.trainingMode = mode; invalidateReview(day, 'training');reopenChangedTraining(before); }
     },
     dayProgress(key) {
@@ -361,7 +371,7 @@ export function createStore(options = {}) {
     confirmSection(key, section) {
       const progress = this.dayProgress(key).sections.find(item => item.id === section);
       if (!progress) throw new Error('Unknown day section.');
-      if (!progress.ready) throw new Error(['sleep','prayer'].includes(section)?'Enter the hours and minutes before confirming.':section==='sentiments'?'Add the required sentiment rating.':section==='nutrition'?'Finish your nutrition log before confirming.':'Answer training, minutes if applicable, and creatine if enabled.');
+      if (!progress.ready) throw new Error(['sleep','prayer'].includes(section)?'Enter the hours and minutes before confirming.':section==='sentiments'?'Add the required sentiment rating.':section==='nutrition'?'Finish your nutrition log before confirming.':'Answer training and enter minutes if applicable.');
       writableDay(key).reviewed[section] = true;
       if(section==='checklists') writableDay(key).checklistTouched=true;
     },
@@ -370,10 +380,10 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateTime','updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateTime','updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'updateGymEntry','removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
-      const date=method==='removeGymEntry'?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];
+      const date=['removeGymEntry','updateGymEntry'].includes(method)?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];
       if(options.editableToday&&date&&!isEditableDay(date,options.editableToday()))throw new Error('Days more than a week ago are summary only.');
       const result = original.apply(store, args); options.onChange?.(store.exportSnapshot()); return result;
     };
