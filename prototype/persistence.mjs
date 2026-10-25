@@ -6,7 +6,7 @@ const groupIds = ALL_GROUPS.map(group=>group.id);
 const sectionIds = ['nutrition', 'training', 'checklists'];
 const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(`${value}T12:00:00Z`).toISOString().slice(0, 10) === value;
 const validId = value => typeof value === 'string' && value.length > 0 && value.length <= 100 && /^[A-Za-z0-9_-]+$/.test(value);
-const validScore = value => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 1 && value <= 10 && Math.abs(value * 100 - Math.round(value * 100)) < 1e-8;
+const validScore = value => value === null || typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 10 && Math.abs(value * 100 - Math.round(value * 100)) < 1e-8;
 const validTimestamp = value => value === null || typeof value === 'string' && Number.isFinite(Date.parse(value));
 const assert = (condition, message) => { if (!condition) throw new Error(`Invalid Pocket Planet backup: ${message}`); };
 

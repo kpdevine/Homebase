@@ -40,8 +40,8 @@ export function meterPath(radius = 82, center = 110) {
   const last = meterPoint(10, radius, center);
   return `M ${first.x} ${first.y} A ${radius} ${radius} 0 1 1 ${last.x} ${last.y}`;
 }
-export function validateScore(score) { return typeof score === 'number' && Number.isFinite(score) && score >= 1 && score <= 10 && Math.abs(score * 100 - Math.round(score * 100)) < 1e-8; }
-export function adjustScore(score, direction) { return score === null ? 1 : Math.max(1, Math.min(10, (direction > 0 ? Math.floor(score * 10 + 1e-8) + 1 : Math.ceil(score * 10 - 1e-8) - 1) / 10)); }
+export function validateScore(score) { return typeof score === 'number' && Number.isFinite(score) && score >= 0 && score <= 10 && Math.abs(score * 100 - Math.round(score * 100)) < 1e-8; }
+export function adjustScore(score, direction) { return score === null ? 0 : Math.max(0, Math.min(10, (direction > 0 ? Math.floor(score * 10 + 1e-8) + 1 : Math.ceil(score * 10 - 1e-8) - 1) / 10)); }
 export function scorePercent(score) { return score === null ? null : score * 10; }
 // Shared by score rings and completion bars. Missing values remain neutral.
 export function progressColor(percent) {
@@ -181,7 +181,7 @@ export function createStore(options = {}) {
     loadTemplates() { return structuredClone(templates); },
     hasEntry(key) { return days.has(key) || entries.some(entry => entry.date === key); },
     updateRating(key, score) {
-      if (score !== null && !validateScore(score)) throw new RangeError('Enter a rating from 1 to 10 with at most two decimal places, or leave it unentered.');
+      if (score !== null && !validateScore(score)) throw new RangeError('Enter a rating from 0 to 10 with at most two decimal places, or leave it unentered.');
       const day = writableDay(key);
       if (day.nutrition !== score) { day.nutrition = score; invalidateReview(day, 'nutrition'); }
     },

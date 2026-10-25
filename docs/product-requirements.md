@@ -1,6 +1,12 @@
 # Pocket Planet product requirements
 
-Updated October 24, 2026. This is the current application specification; older design documents retain the planning history.
+Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
+
+## October 25 orbital meters
+
+The approved orbital meter replaces score-ring presentation throughout the app: continuous bright fills with a dark edge and soft glow, theme-aware rails, centered passive values including decimals, and closer digit spacing for 10. Visible “out of 10” captions are removed while accessible labels retain the scale. Editable controls use a larger planet that changes expression by whole-number score band; four new retro faces mix with seven existing reactions. Passive displays omit the handle. Weekly set targets retain their 0–20 range and scale the treatment accordingly.
+
+Nutrition ratings now accept 0–10 in all entry paths and validated backups/cloud records. Zero is logged and reviewable; blank remains unentered. Ring gestures have hard stops at each pole, cannot wrap through the bottom gap, and clear their pointer focus highlight when dragging ends. Keyboard focus and reduced motion remain supported. See [implementation and checks](october-25-orbital-meter.md).
 
 ## October 24 Training and Modules revision
 

@@ -3,6 +3,7 @@ const running=new WeakMap(),active=new Set(),values=new WeakMap();
 const system=window.matchMedia('(prefers-reduced-motion: reduce)');
 let preference='full';
 const enabled=()=>preference==='full'||preference==='system'&&!system.matches;
+const ringLayers=path=>[path,...path.parentElement.querySelectorAll('.meter-edge,.meter-bloom,.score-circle-outline,.score-circle-bloom')];
 
 function applyPreference() {
   document.documentElement.dataset.motion=enabled()?'full':'reduced';
@@ -30,18 +31,17 @@ export function sweepRings(container) {
     if(target&&Number.parseFloat(target)>0) {
       const frames=[{strokeDasharray:'0 100'},{strokeDasharray:target}];
       const options={delay:Math.min(index*35,140),easing:'steps(20,end)'};
-      play(path,frames,780,options);
-      const outline=path.parentElement.querySelector('.score-circle-outline');
-      if(outline)play(outline,frames,780,options);
+      for(const layer of ringLayers(path))play(layer,frames,780,options);
     }
   });
 }
 export function setMeter(path,percent,{immediate=false}={}) {
   const target=`${percent} 100`,previous=values.get(path);
-  path.setAttribute('stroke-dasharray',target);values.set(path,target);
-  if(immediate) {running.get(path)?.cancel();return;}
+  const layers=ringLayers(path);
+  for(const layer of layers)layer.setAttribute('stroke-dasharray',target);values.set(path,target);
+  if(immediate) {for(const layer of layers)running.get(layer)?.cancel();return;}
   if(previous!==undefined&&previous!==target&&path.getClientRects().length) {
-    play(path,[{strokeDasharray:previous},{strokeDasharray:target}],420,{easing:'steps(14,end)'});
+    for(const layer of layers)play(layer,[{strokeDasharray:previous},{strokeDasharray:target}],420,{easing:'steps(14,end)'});
     const number=path.closest('.hero-meter,.nutrition-meter')?.querySelector('.meter-number');
     play(number,[{opacity:.45},{opacity:1}],240);
   }

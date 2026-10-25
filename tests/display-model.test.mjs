@@ -128,6 +128,6 @@ test('target editing is per week and rejected targets leave the week intact', ()
 test('change hook emits a valid detached snapshot only after successful mutations', () => {
   const changes=[];const store=createStore({seed:false,onChange:snapshot=>changes.push(snapshot)});
   store.addTask(DEMO_TODAY,'One');assert.equal(changes.length,1);validateSnapshot(changes[0]);
-  assert.throws(()=>store.updateRating(DEMO_TODAY,0));assert.equal(changes.length,1);
+  assert.throws(()=>store.updateRating(DEMO_TODAY,-.01));assert.equal(changes.length,1);
   changes[0].days[0].tasks[0].name='External';assert.equal(store.loadDay(DEMO_TODAY).tasks[0].name,'One');
 });

@@ -1,3 +1,7 @@
+## October 25 approved orbital meter
+
+The owner approved the local orbital meter for the app and requested publication wherever score meters appear. The final refinements accept Nutrition zero, remove visible “out of 10” labels, center passive whole/fraction values, tighten 10, prevent drag wrapping across the poles, and clear pointer highlight after release. Four new simple pixel faces mix with seven existing icons; all rings share the contrast/glow treatment. Regular suite: 254 tests, 253 passed, one emulator-only skip. See docs/october-25-orbital-meter.md. Deliver matching GitHub source and Firebase Hosting; preserve unrelated server/reminders/policy.mjs changes.
+
 ## October 24 web and Solar follow-up
 
 The Training/Modules release is published as 82f483dd84b5ccec693759ba7cfbe35b4ceea6ff and its 13 changed app files matched pocketplanet.day after deployment. The owner then requested the actual web layout follow the landscape demo, Current vibes remain visible while typing, and vibes span below both identity and score details with a smaller owner annotation. They also requested readable mobile settings and Overview label alignment. The follow-up removes inherited desktop scaling and size containment, restores natural card heights, adds shared VisualViewport-aware modal placement, and gives module settings full-width rows and a mobile section picker. See docs/october-24-web-solar-layout.md. Deliver source, documentation and verification together through the usual GitHub/Firebase workflow. Preserve unrelated server/reminders/policy.mjs changes.

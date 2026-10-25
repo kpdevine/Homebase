@@ -16,6 +16,7 @@ import { mountCloud } from './cloud-ui.mjs';
 import {mountReminders} from './reminders.mjs';
 import { muscleName } from './muscles.mjs';
 import { bindMeterDrag } from './meter-drag.mjs';
+import {drawOrbitalMeter,orbitalCircle} from './orbital-meter.mjs';
 import { buildAchievements,sortAchievements,firstAchievementUnlocks } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
 import {needsWelcome,profileName} from './onboarding.mjs';
@@ -174,23 +175,10 @@ function announce(message, undo = null) {
 }
 function summaryFor(date = selectedDate) { return summarizeDay(store.loadDay(date), store.loadTrainingDay(date),store.loadWeek(date)); }
 function circle(score,reward=false) {
-  const arc=`d="${meterPath(20,24)}" pathLength="100" stroke-dasharray="${score === null ? 0 : score * 10} 100"`;
-  return `<span class="score-circle ${score === null ? 'no-score' : ''} ${reward?scoreReward(score):''}" style="--score-color:${scoreColor(score)};--score-glow:${reward?scoreGlow(score)/2:0}px" aria-hidden="true"><svg viewBox="0 0 48 48">${reward&&score===10?'<circle class="reward-halo" cx="24" cy="24" r="23"/>':''}<path class="score-circle-track" d="${meterPath(20,24)}"/><path class="score-circle-fill score-circle-outline" ${arc}/><path class="score-circle-fill" ${arc}/></svg><span>${scoreText(score)}</span></span>`;
+  return orbitalCircle(score,scoreText(score),{theme:document.documentElement.dataset.theme,classes:reward?scoreReward(score):''});
 }
 function drawScoreMeter(meter,score,{immediate=false}={}) {
-  meter.classList.add('standard-score-meter');
-  const svg=meter.querySelector('svg'),size=Number(svg.getAttribute('viewBox').split(/\s+/)[2]),unit=size/240,center=size/2,radius=86*unit;
-  let halo=svg.querySelector('.score-halo');
-  if(!halo){halo=document.createElementNS('http://www.w3.org/2000/svg','circle');halo.setAttribute('class','score-halo');svg.insertBefore(halo,svg.querySelector('.meter-track'));}
-  for(const [name,value] of Object.entries({cx:center,cy:center,r:101*unit}))halo.setAttribute(name,value);
-  for(const name of ['meter-track','meter-fill']){const path=svg.querySelector('.'+name);path.setAttribute('d',meterPath(radius,center));path.style.strokeWidth=10*unit;}
-  meter.style.setProperty('--score-color',scoreColor(score));meter.style.setProperty('--score-glow',`${scoreGlow(score)}px`);
-  meter.classList.toggle('score-high',!!scoreReward(score));meter.classList.toggle('score-perfect',score===10);
-  setMeter(svg.querySelector('.meter-fill'),score===null?0:score*10,{immediate});
-  const knob=svg.querySelector('.meter-knob');
-  if(knob){const point=meterPoint(1+(score??0)*.9,radius,center);knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);knob.setAttribute('r',4*unit);knob.style.removeProperty('opacity');}
-  meter.querySelectorAll('.sentiment-endpoint').forEach(endpoint=>endpoint.classList.add('meter-endpoint'));
-  if(!meter.querySelector('.meter-endpoint'))meter.insertAdjacentHTML('beforeend','<span class="meter-endpoint start" aria-hidden="true">0</span><span class="meter-endpoint end" aria-hidden="true">10</span>');
+  drawOrbitalMeter(meter,score,{setFill:setMeter,immediate});
 }
 function renderHeaderShortcuts() {
   const settings=$('#settings-dialog').hasAttribute('open'),info=$('#score-dialog').hasAttribute('open'),modal=settings||info;
@@ -303,7 +291,7 @@ function renderScore() {
     const state = progress.sections.find(item => item.id === section.id) || {ready:true,reviewed:false};
     const missing = section.score === null&&!section.excluded || !state.ready;
     const status=section.optional && !progress.sections.some(item=>item.id===section.id)?'Included in score':missing?'Not logged yet':state.reviewed?'Reviewed':'Ready to review';
-    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${status}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail)}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(status==='Included in score'||state.reviewed?'check':missing?'warning':'arrow')}${status}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
+    return `<button class="breakdown-item ${section.id}" data-open-section="${section.id}" aria-label="Open ${section.label}. ${section.detail}. ${status}">${circle(section.score)}<span class="breakdown-copy"><strong>${section.label}</strong><small>${escapeHtml(section.detail.replace(/ out of 10\b/g,""))}</small><span class="breakdown-state ${missing?'is-missing':''} ${state.reviewed ? 'reviewed' : ''}">${icon(status==='Included in score'||state.reviewed?'check':missing?'warning':'arrow')}${status}</span></span><span class="breakdown-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
   $('#overview-note').textContent = day.completedAt ? 'Day completed. Editing an entry reopens its review.' : progress.canComplete ? 'All section reviews confirmed. Check your full-day summary before completing the day.' : 'Check off individual tasks, confirm each section’s review, then review the full day.';
 }
@@ -312,12 +300,12 @@ function renderRating() {
   drawScoreMeter(meter,score,{immediate:dragging||document.activeElement===$('#rating-value')});
   meter.querySelector('.meter-number').innerHTML = scoreMarkup(score);
   meter.querySelector('.meter-out-of').textContent = score === null ? 'not rated yet' : 'out of 10';
-  meter.setAttribute('aria-valuenow', score ?? 1);
-  meter.setAttribute('aria-valuetext', score === null ? 'Not rated. Adjust to enter a rating from 1 to 10 in steps of 0.1.' : `${scoreText(score)} out of 10`);
+  meter.setAttribute('aria-valuenow', score ?? 0);
+  meter.setAttribute('aria-valuetext', score === null ? 'Not rated. Adjust to enter a rating from 0 to 10 in steps of 0.1.' : `${scoreText(score)} out of 10`);
   if (document.activeElement !== $('#rating-value')) $('#rating-value').value = score === null ? '' : scoreText(score);
   $('#rating-description').textContent = score === null ? 'No rating entered yet.' : `Your rating: ${scoreText(score)} / 10`;
   $('#clear-rating').disabled = score === null;
-  $('#rating-minus').disabled = score === 1; $('#rating-plus').disabled = score === 10;
+  $('#rating-minus').disabled = score === 0; $('#rating-plus').disabled = score === 10;
 }
 function renderSentiments() {
   const {rating}=store.loadDay(selectedDate).sentiments,input=$('#sentiments-rating'),meter=$('#sentiments-meter');
@@ -374,7 +362,7 @@ function paintTarget(id) {
   const meter=$(`[data-target-meter="${id}"]`),value=targetDraft.get(id),point=meterPoint(1+value/20*9);
   meter.setAttribute('aria-valuenow',value);meter.setAttribute('aria-valuetext',value===0?'0 sets. No goal for this muscle.':`${value} sets per week`);
   meter.querySelector('.target-number strong').textContent=value;
-  setMeter(meter.querySelector('.meter-fill'),value*5,{immediate:targetDrag!==null});
+  drawOrbitalMeter(meter,value,{setFill:setMeter,max:20,immediate:targetDrag!==null});
   const knob=meter.querySelector('.meter-knob');knob.setAttribute('cx',point.x);knob.setAttribute('cy',point.y);
   $(`[data-adjust-target="${id}"][data-direction="-1"]`).disabled=value===0;
   $(`[data-adjust-target="${id}"][data-direction="1"]`).disabled=value===20;
@@ -917,7 +905,7 @@ function showWeightPointCard(point) {
   const change=weightDayChange(store.exportSnapshot(),context.date,weightChartUnit);
   const changeLabel=change===null?'No previous-day weight':`${change>0?'+':change<0?'−':''}${Math.abs(change).toFixed(1)} ${weightChartUnit} vs previous day`;
   $$('#weight-chart [data-weight-date]').forEach(item=>{item.classList.toggle('is-active',item===point);item.setAttribute('aria-expanded',String(item===point));});
-  card.innerHTML=`<strong>${dateFormat(context.date,{month:'short',day:'numeric',year:'numeric'})} weigh-in</strong><span class="weight-day-change">${changeLabel}</span><span>Previous day · ${shortDate(context.previousDate)}</span><div class="weight-day-scores">${[['Nutrition',context.nutrition],['Training',context.training]].map(([label,score])=>`<div>${circle(score,true)}<strong>${label}</strong><small>${score===null?'Not logged':'out of 10'}</small></div>`).join('')}</div>`;
+  card.innerHTML=`<strong>${dateFormat(context.date,{month:'short',day:'numeric',year:'numeric'})} weigh-in</strong><span class="weight-day-change">${changeLabel}</span><span>Previous day · ${shortDate(context.previousDate)}</span><div class="weight-day-scores">${[['Nutrition',context.nutrition],['Training',context.training]].map(([label,score])=>`<div>${circle(score,true)}<strong>${label}</strong><small>${score===null?'Not logged':''}</small></div>`).join('')}</div>`;
   card.hidden=false;
   const chart=$('#weight-chart'),origin=chart.getBoundingClientRect(),anchor=point.querySelector('.weight-point').getBoundingClientRect(),scale=origin.width/chart.offsetWidth;
   const x=(anchor.left+anchor.width/2-origin.left)/scale-chart.clientLeft,y=(anchor.top+anchor.height/2-origin.top)/scale-chart.clientTop;
@@ -988,12 +976,12 @@ nutritionMeter.addEventListener('keydown', event => {
   const current = store.loadDay(selectedDate).nutrition; let next;
   if (['ArrowUp','ArrowRight'].includes(event.key)) next = adjustScore(current, 1);
   else if (['ArrowDown','ArrowLeft'].includes(event.key)) next = adjustScore(current, -1);
-  else if (event.key === 'Home') next = 1;
+  else if (event.key === 'Home') next = 0;
   else if (event.key === 'End') next = 10;
   else return;
   event.preventDefault(); updateRating(next);
 });
-bindMeterDrag(nutritionMeter,{min:1,scaleMin:0,read:()=>store.loadDay(selectedDate).nutrition,change:updateRating,onStart:()=>dragging=true,onEnd:()=>{
+bindMeterDrag(nutritionMeter,{min:0,scaleMin:0,read:()=>store.loadDay(selectedDate).nutrition,change:updateRating,onStart:()=>dragging=true,onEnd:()=>{
   dragging=false;
   const score=store.loadDay(selectedDate).nutrition;
   if(score!==null)announce(`Nutrition set to ${scoreText(score)}.`);

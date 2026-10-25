@@ -1,0 +1,35 @@
+{
+  "generator": "Built-in image_gen; no CLI/API fallback",
+  "direction": "Mix four new score expressions with seven existing app icons. Modest varied eyes, no oversized glossy anime styling.",
+  "basePrompt": "Use case: stylized-concept. Make ONE new transparent score emoji for the Pocket Planet orbital meter. Image 1 is the CORRECTED score-7 character and style reference; image 2 is the original app mascot reference. Match this round blue striped Jupiter planet identity, deep navy chunky outline, flat periwinkle/icy blue cloud bands, and simple retro pixel face. Fresh expression and pose as specified below. Eye shapes MAY vary between dots, short bars, closed arcs, and chevrons but must be modest-sized simple solid navy pixel forms, NEVER oversized glossy human/anime eyes. No sclera, white eyeballs, pupils, glints, lashes, blush, makeup, cute shiny cheeks or chibi styling. Facial features together take up only about 25-30% of planet diameter, in the upper middle of its body. Exactly two ring-shaped arms, attached directly to the sphere, each ending in its own hand; no independent floating orbit rings. Consistent square composition: full character centered with comfortable transparent margins, approximately 82% canvas width; no crop. Crisp stepped pixel-art silhouette, 64x64 logical game-sprite forms enlarged without smoothing, restrained colors, no painterly rendering or texture noise. Must read well at a 56px handle size. True alpha transparency outside silhouette and through arm loops. No text, numeral, label, sky, checkerboard, ground, sticker edge, shadows, glow, watermark or extra characters. ",
+  "newExpressions": [
+    {
+      "score": 0,
+      "label": "Wiped out",
+      "detail": "Wiped out and overwhelmed: eyes are two tiny navy X shapes, a small zigzag downturned mouth; both attached ring-hands at the temples. No tears, no white eyeballs. Comically exhausted like a retro game sprite, friendly and never scary."
+    },
+    {
+      "score": 3,
+      "label": "Worn out",
+      "detail": "Worn out but hanging in: eyes are two short heavy half-closed solid navy bars, one lower than the other; a small crooked flat mouth. One attached ring-hand rubs the forehead, other hand rests against lower belly. No white eyes or pupils, no tears."
+    },
+    {
+      "score": 5,
+      "label": "Okay",
+      "detail": "Neutral okay day: two modest solid navy oval-dot eyes with no whites or shine, short level eyebrows and a simple straight navy horizontal mouth. Both connected ring-arms sit relaxed at the sides; not smiling, not sad. Flat understated face."
+    }
+  ],
+  "retainedNewScore": 7,
+  "existingScores": {
+    "1": "crying",
+    "2": "sad",
+    "4": "thinking",
+    "6": "happy",
+    "8": "strong",
+    "9": "party",
+    "10": "fire"
+  },
+  "retainedScore7Prompt": "Use case: stylized-concept. Create ONE fresh transparent pixel-art Pocket Planet score emoji, score 7: quietly proud/confident. The attached image is the exact original mascot STYLE reference. Match its simple tiny face, retro game-sprite proportions, blue striped Jupiter body and deep navy chunky outline. Face must occupy ONLY the upper central 22% of the planet's diameter: exactly TWO TINY SOLID NAVY SQUARE DOT EYES, each just 2 by 2 pixels on a 64x64 logical pixel grid; NO white eye shapes, NO irises, NO glints or highlights. Two short straight navy eyebrows, a small closed stepped upward smile with no lips and no teeth. NO blush or cheek marks. Keep the face restrained, dry and playful like a classic 8-bit game character. Do not enlarge facial features. Same round blue/periwinkle Jupiter sphere, flat icy-blue swirling bands, exactly two attached ring-arms, both hands at hips in a confident pose. Full character at 82% canvas width, centered in a square with transparent margins. Crisp 64x64 logical pixel-art forms enlarged without smoothing; flat limited colors; strong readable silhouette. True alpha transparency outside the character and inside the arm loops. No text, score numerals, props, stars, crown, sky, floor, sticker border, checkerboard, watermark, glow or shadows. No anime/manga styling, no big glossy human eyes, no eyelashes, no makeup, no kawaii/chibi face, no soft rendering. One character only.",
+  "shippedDirectory": "prototype/assets/score-planets",
+  "originals": "Retained in the local experiments/orbital-meter/assets/scores directory."
+}

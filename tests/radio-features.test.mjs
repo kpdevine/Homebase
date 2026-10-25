@@ -8,7 +8,7 @@ const read=store=>key=>summarizeDay(store.loadDay(key),store.loadTrainingDay(key
 test('tenth controls snap old quarter ratings in the requested direction and preserve typed precision',()=>{
  assert.equal(adjustScore(8.6,1),8.7);assert.equal(adjustScore(8.6,-1),8.5);
  assert.equal(adjustScore(8.75,1),8.8);assert.equal(adjustScore(8.75,-1),8.7);
- const store=createStore({seed:false});for(const rating of [8.6,8.25,9.99,1,10]){store.updateRating(date,rating);assert.equal(store.loadDay(date).nutrition,rating);validateSnapshot(store.exportSnapshot());}
+ const store=createStore({seed:false});for(const rating of [8.6,8.25,9.99,0,.01,1,10]){store.updateRating(date,rating);assert.equal(store.loadDay(date).nutrition,rating);validateSnapshot(store.exportSnapshot());}
  assert.throws(()=>store.updateRating(date,8.255));
 });
 test('optional dated notes round-trip and editing reopens only their section',()=>{

@@ -6,7 +6,7 @@ function control(options={}) {
   const surface=new EventTarget(),meter=new EventTarget();let value=5,captured=null;
   meter.ownerDocument={defaultView:surface};
   meter.querySelector=()=>({getBoundingClientRect:()=>({left:0,top:0,width:220,height:210})});
-  meter.classList={add(){},remove(){}};meter.focus=()=>{};
+  meter.classList={add(){},remove(){}};meter.focus=()=>meter.ownerDocument.activeElement=meter;meter.blur=()=>meter.ownerDocument.activeElement=null;
   meter.setPointerCapture=id=>captured=id;
   meter.hasPointerCapture=id=>id===captured;
   meter.releasePointerCapture=()=>captured=null;
@@ -17,7 +17,7 @@ function control(options={}) {
     (type==='pointerdown'||type==='lostpointercapture'?meter:surface).dispatchEvent(event);
     return event;
   };
-  return {send,value:()=>value,captured:()=>captured};
+  return {send,value:()=>value,captured:()=>captured,focused:()=>meter.ownerDocument.activeElement===meter};
 }
 test('mouse dragging from the number adjusts continuously, keeps capture, and stops on release',()=>{
   const meter=control();
@@ -64,11 +64,25 @@ test('target drags clamp to whole sets and ratings respect their configured mini
   assert.equal(nutrition.value(),1);
 });
 
-test('nutrition uses the shared zero-to-ten arc while retaining a minimum rating of one',()=>{
-  const nutrition=control({min:1,scaleMin:0});
+test('nutrition reaches zero at the shared arc endpoint',()=>{
+  const nutrition=control({min:0,scaleMin:0});
   nutrition.send('pointerdown',28,110);assert.equal(nutrition.value(),2.3);
   nutrition.send('pointermove',192,110);assert.equal(nutrition.value(),7.7);
+  // Return along the legal arc; crossing the bottom gap now has a hard stop.
+  nutrition.send('pointermove',110,28);nutrition.send('pointermove',28,110);
   const radians=105*Math.PI/180;
   nutrition.send('pointermove',110+82*Math.cos(radians),110+82*Math.sin(radians));
-  assert.equal(nutrition.value(),1);
+  assert.equal(nutrition.value(),0);
+});
+
+test('captured score gestures cannot wrap either pole and release their focus highlight',()=>{
+  const at=degrees=>({x:110+82*Math.cos(degrees*Math.PI/180),y:110+82*Math.sin(degrees*Math.PI/180)});
+  const low=at(105),high=at(75);
+  for(const [start,end,expected] of [[high,low,10],[low,high,0]]){
+    const meter=control({min:0});
+    meter.send('pointerdown',start.x,start.y);assert.equal(meter.focused(),true);
+    meter.send('pointermove',end.x,end.y);assert.equal(meter.value(),expected);
+    meter.send('pointerup',end.x,end.y);assert.equal(meter.value(),expected);
+    assert.equal(meter.focused(),false);assert.equal(meter.captured(),null);
+  }
 });

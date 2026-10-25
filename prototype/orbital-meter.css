@@ -1,0 +1,36 @@
+/* Approved October 25 orbital meter. Runtime palettes retain the local study's
+   contrast in both themes without recoloring the existing reaction artwork. */
+.orbital-meter{position:relative;aspect-ratio:1;container-type:inline-size;isolation:isolate;overflow:visible}
+.orbital-meter svg{display:block;width:100%;height:auto;overflow:visible}
+.orbital-meter .score-halo,.orbital-meter .meter-knob{display:none}
+.orbital-meter .meter-track{fill:none;stroke:var(--orbit-rail);stroke-opacity:1;stroke-linecap:round}
+.orbital-meter .meter-fill{fill:none;stroke:var(--orbit-fill);stroke-linecap:round;filter:none}
+.orbital-meter .meter-edge{fill:none;stroke:var(--orbit-edge);stroke-linecap:round;filter:none}
+.orbital-meter .meter-bloom{fill:none;stroke:var(--orbit-fill);stroke-linecap:round;opacity:.85;filter:blur(var(--orbit-glow));pointer-events:none}
+.orbital-meter :is(.hero-score,.nutrition-score,.target-number){position:absolute;inset:0;padding:0;display:block;pointer-events:none}
+.orbital-meter :is(.hero-score,.nutrition-score) .meter-number,.orbital-meter .target-number strong{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:flex-start;justify-content:center;width:max-content;margin:0;padding:0;line-height:1;letter-spacing:0;white-space:nowrap;color:var(--ui-ink);text-shadow:none;-webkit-text-stroke:0}
+.orbital-meter .score-whole{display:inline;line-height:1}
+.orbital-meter .score-fraction{position:static;display:inline;font-size:.48em;line-height:1;padding-top:.09em;margin:0;letter-spacing:0}
+.orbital-meter :is(.hero-score,.nutrition-score) .meter-out-of,.orbital-meter .target-number small{position:absolute;left:15%;right:15%;top:64%;bottom:auto;width:auto;max-width:none;margin:0;padding:0;font:700 clamp(11px,5cqw,15px)/1.2 var(--font-ui);text-align:center;white-space:normal;color:var(--ui-ink)}
+.orbital-meter .target-number small{font-size:clamp(9px,7cqw,11px)}
+.orbital-meter .meter-endpoint.start{left:36%;right:auto;top:auto;bottom:0;transform:translateX(-50%)}
+.orbital-meter .meter-endpoint.end{left:64%;right:auto;top:auto;bottom:0;transform:translateX(-50%)}
+.orbital-planet{position:absolute;width:clamp(44px,23cqw,56px);height:clamp(44px,23cqw,56px);transform:translate(-50%,-50%);z-index:2;pointer-events:none;filter:drop-shadow(0 1px 0 var(--ui-light)) drop-shadow(0 -1px 0 var(--ui-light)) drop-shadow(1px 0 0 var(--ui-light)) drop-shadow(-1px 0 0 var(--ui-light))}
+.orbital-planet img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;user-select:none;-webkit-user-select:none}
+.orbital-meter:not([role=slider]) .orbital-planet,.orbital-meter[aria-disabled=true] .orbital-planet{display:none}
+.orbital-score-circle{position:relative;isolation:isolate}
+.orbital-score-circle svg{display:block;width:100%;height:100%;overflow:visible}
+.orbital-score-circle svg>path{fill:none;stroke-linecap:round;stroke-width:3}
+.orbital-score-circle .score-circle-track{stroke:var(--orbit-rail);stroke-opacity:1;stroke-dasharray:none}
+.orbital-score-circle .score-circle-bloom{stroke:var(--orbit-fill);stroke-width:4.4;opacity:.85;filter:blur(var(--orbit-glow))}
+.orbital-score-circle .score-circle-outline{stroke:var(--orbit-edge);stroke-width:4.2;filter:none}
+.orbital-score-circle .score-circle-fill{stroke:var(--orbit-fill);stroke-width:3;filter:none}
+.orbital-score-circle>span{position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;margin:0;padding:0;transform:none;line-height:1;letter-spacing:0;text-align:center;white-space:nowrap;color:var(--ui-ink);text-shadow:none}
+.orbital-score-circle.score-high::after{content:none}
+@media(prefers-reduced-motion:reduce){.orbital-meter path,.orbital-score-circle path{transition:none}}
+:is(#overall-meter,#nutrition-meter,#sentiments-meter,#final-sentiments-meter,.time-score-meter).orbital-meter .meter-number{font-size:clamp(28px,31cqw,94px)}
+.orbital-meter :is(.hero-score,.nutrition-score) .meter-out-of,.orbital-meter .target-number small{top:70%}
+.orbital-meter .meter-out-of{display:none}
+.orbital-meter.score-ten .score-whole,.orbital-meter.score-ten .target-number strong,.orbit-ten-number{letter-spacing:-.12em;padding-right:.12em}
+.score-circle.orbital-score-circle>span>.orbit-ten-number{display:inline-block;font:inherit;line-height:1;margin:0;color:inherit;text-shadow:inherit}
+#training-pace .orbital-score-circle .orbit-ten-number{display:inline-block;font:inherit;line-height:1;margin:0;color:inherit}

@@ -51,7 +51,7 @@ test('rating edits stay with their day, retain missing values, and leave illustr
   store.updateRating(DEMO_TODAY, null);
   assert.equal(store.loadDay(DEMO_TODAY).nutrition, null);
   assert.equal(store.loadDay(DEMO_TODAY).sampleOverall, original.sampleOverall);
-  for (const invalid of [0, 11, 2.555, NaN, Infinity, undefined, '7']) assert.throws(() => store.updateRating(DEMO_TODAY, invalid), RangeError);
+  for (const invalid of [-.01, 11, 2.555, NaN, Infinity, undefined, '7']) assert.throws(() => store.updateRating(DEMO_TODAY, invalid), RangeError);
   store.updateRating(DEMO_TODAY, 1);
   assert.equal(store.loadDay(DEMO_TODAY).nutrition, 1);
   assert.equal(store.loadDay('2027-01-01').nutrition, null);
@@ -64,9 +64,10 @@ test('tenth adjustments avoid floating-point drift and clamp at both ends', () =
   assert.equal(adjustScore(score, 1), 10);
   for (let index = 0; index < 90; index++) score = adjustScore(score, -1);
   assert.equal(score, 1);
-  assert.equal(adjustScore(score, -1), 1);
-  assert.equal(adjustScore(null, 1), 1);
-  assert.equal(adjustScore(null, -1), 1);
+  assert.equal(adjustScore(score, -1), .9);
+  assert.equal(adjustScore(0, -1), 0);
+  assert.equal(adjustScore(null, 1), 0);
+  assert.equal(adjustScore(null, -1), 0);
   assert.equal(adjustScore(7.9, 1), 8);
 });
 
