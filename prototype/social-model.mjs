@@ -16,6 +16,12 @@ export function monthlyRanks(rows,month){
 }
 export function dayReactionCounts(reactions,target,date){return REACTIONS.map(reaction=>({...reaction,count:reactions.filter(value=>value.target===target&&value.date===date&&value.kind===reaction.id).length})).filter(reaction=>reaction.count);}
 
+export function solarDisplayedDay(member,today){
+  const current=member.todayDate===today&&member.todayReviewComplete===true;
+  const date=current?today:addDays(today,-1);
+  return {date,label:current?'Today':'Yesterday',score:current?member.todayScore??null:member.yesterdayDate===date?member.yesterdayScore??null:null};
+}
+
 export const REACTIONS=[
   {id:'happy',label:'Happy planet',short:'Happy'},
   {id:'sad',label:'Sad planet',short:'Sad'},
@@ -50,4 +56,4 @@ export function solarMonthStats(members,month){
   const logs=current.reduce((sum,member)=>sum+member.daysLogged,0);
   return {logs,average:logs?Math.round(current.reduce((sum,member)=>sum+member.monthScore*member.daysLogged,0)/logs*10)/10:null};
 }
-export function sharedDays(store,today){return store.exportSnapshot().days.filter(day=>day.date<=today&&day.date>=addDays(today,-34)).map(day=>{const summary=summarizeDay(store.loadDay(day.date),store.loadTrainingDay(day.date),store.loadWeek(day.date));return {date:day.date,score:summary.score,logged:fullyLogged(summary)};}).filter(day=>day.logged&&day.score!==null).map(({date,score})=>({date,score}));}
+export function sharedDays(store,today){return store.exportSnapshot().days.filter(day=>day.date<=today&&day.date>=addDays(today,-34)).map(day=>{const summary=summarizeDay(store.loadDay(day.date),store.loadTrainingDay(day.date),store.loadWeek(day.date));return {date:day.date,score:summary.score,logged:fullyLogged(summary),reviewComplete:!!day.completedAt};}).filter(day=>day.logged&&day.score!==null).map(({date,score,reviewComplete})=>({date,score,reviewComplete}));}

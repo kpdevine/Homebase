@@ -1,3 +1,7 @@
+## October 25 Solar System rating day
+
+The owner requested Yesterday until the member's review is complete, then Today, with an explicit label. The selected day also controls badges and reaction navigation. Shared day scores now include a member-protected boolean reviewComplete, and publication detects completion-only changes. Viewer-local midnight and the separate 1 a.m. check-in boundary are retained. Regular suite: 258 tests, 257 passed, one emulator-only skip; the Firestore emulator security suite passes separately. See docs/october-25-solar-reviewed-rating.md. Deploy Hosting and Firestore rules together through the usual GitHub/Firebase workflow; preserve unrelated server/reminders/policy.mjs changes.
+
 ## October 25 approved orbital meter
 
 The owner approved the local orbital meter for the app and requested publication wherever score meters appear. The final refinements accept Nutrition zero, remove visible “out of 10” labels, center passive whole/fraction values, tighten 10, prevent drag wrapping across the poles, and clear pointer highlight after release. Four new simple pixel faces mix with seven existing icons; all rings share the contrast/glow treatment. Regular suite: 254 tests, 253 passed, one emulator-only skip. See docs/october-25-orbital-meter.md. Deliver matching GitHub source and Firebase Hosting; preserve unrelated server/reminders/policy.mjs changes.

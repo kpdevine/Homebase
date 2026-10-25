@@ -8,6 +8,10 @@ The approved orbital meter replaces score-ring presentation throughout the app: 
 
 Nutrition ratings now accept 0–10 in all entry paths and validated backups/cloud records. Zero is logged and reviewable; blank remains unentered. Ring gestures have hard stops at each pole, cannot wrap through the bottom gap, and clear their pointer focus highlight when dragging ends. Keyboard focus and reduced motion remain supported. See [implementation and checks](october-25-orbital-meter.md).
 
+## October 25 Solar System displayed day
+
+Each member's main rating displays Today only after that member's full review is complete for the viewer-local calendar date; otherwise it displays Yesterday. Label, score, reaction badges and day-detail/reaction link must use the same date. Reopening the review returns the display to Yesterday; a missing yesterday remains a dash. Monthly averages and rankings are unchanged, and personal logging/late check-in retain the 1 a.m. app-day boundary. Shared day documents carry only the existing score summary plus a completion boolean, with the same member privacy boundary. See [implementation and checks](october-25-solar-reviewed-rating.md).
+
 ## October 24 Training and Modules revision
 
 These current requirements supersede older tab and Training presentation descriptions below. See [implementation and verification](october-24-training-modules.md).

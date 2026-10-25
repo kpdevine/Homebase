@@ -48,7 +48,7 @@ test('turning off To-do removes its projection and does not inflate a leaderboar
   store.updateTime(date,'sleep',360);store.updateTime(date,'prayer',10);
   assert.deepEqual(taskScoreRange(summary(store)),{score:6.3,low:6.3,projected:false});
   assert.equal(leaderboardSummary(store,addDays(date,1)).daysLogged,1);
-  assert.deepEqual(sharedDays(store,addDays(date,1)),[{date,score:6.3}]);
+  assert.deepEqual(sharedDays(store,addDays(date,1)),[{date,score:6.3,reviewComplete:false}]);
 });
 test('Overview alone creates neither a fabricated score nor a completable empty review',()=>{
   const config=newUserSettings();config.tabs.checklists=false;const store=createStore({seed:false,today:date,settings:config});

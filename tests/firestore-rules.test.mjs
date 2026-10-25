@@ -97,6 +97,19 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await listenUntil((cb,error)=>eli.groups.watchBoard(system.id,cb,error),value=>value.some(person=>person.uid==='dana'&&person.daysLogged===5));
     await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-20',cb,error),value=>value.some(day=>day.uid==='dana'&&day.score===9));
     await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.length===0);
+    // The completion bit must publish even when the numerical score is unchanged.
+    const sharedDay=(reviewComplete)=>[{date:'2026-10-20',score:9,reviewComplete:false},{date:'2026-10-21',score:8,reviewComplete}];
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,sharedDay(false)));
+    await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.some(day=>day.uid==='dana'&&day.score===8&&day.reviewComplete===false));
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,sharedDay(true)));
+    await listenUntil((cb,error)=>eli.groups.watchToday(system.id,'2026-10-21',cb,error),value=>value.some(day=>day.uid==='dana'&&day.score===8&&day.reviewComplete===true));
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,sharedDay(false)));
+    assert.equal((await getDoc(doc(eliDb,'friendGroups',system.id,'days','dana~2026-10-21'))).data().reviewComplete,false);
+    const invalidDay={uid:'dana',username:'dana_planet',date:'2026-10-21',score:8,reviewComplete:'yes',updatedAt:serverTimestamp()};
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'days','dana~2026-10-21'),invalidDay));
+    await assertFails(setDoc(doc(eliDb,'friendGroups',system.id,'days','dana~2026-10-21'),{...invalidDay,reviewComplete:true}));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'days','dana~2026-10-21'),{...invalidDay,reviewComplete:true,notes:'private'}));
+    await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}]));
     await assertFails(getDocs(query(collection(c,'friendGroups',system.id,'days'),where('date','==','2026-10-20'))));
     await listenUntil((cb,error)=>dana.groups.watchDay(system.id,'dana','2026-10-20',cb,error),value=>value.day?.score===9&&value.reactions.some(reaction=>reaction.kind==='fire'));
     await listenUntil((cb,error)=>dana.groups.watchReactions(system.id,'2026-10-20',cb,error),value=>value.some(reaction=>reaction.target==='dana'&&reaction.kind==='fire'));

@@ -71,7 +71,7 @@ export function groupClient(db,uid){
       for(const id of ids){
         const existing=await getDocs(query(collection(db,'friendGroups',id,'days'),where('uid','==',uid))),desired=new Map(days.map(day=>[uid+'~'+day.date,day]));
         const mutations=[{ref:scoreRef(id),value:{uid,username:name,...summary,...solarAppearance(appearance),updatedAt:serverTimestamp()}}];
-        for(const item of existing.docs){const value=desired.get(item.id);if(!value)mutations.push({ref:item.ref,value:null});else if(item.data().score===value.score)desired.delete(item.id);}
+        for(const item of existing.docs){const value=desired.get(item.id);if(!value)mutations.push({ref:item.ref,value:null});else if(item.data().score===value.score&&item.data().reviewComplete===value.reviewComplete)desired.delete(item.id);}
         for(const [key,day] of desired)mutations.push({ref:doc(db,'friendGroups',id,'days',key),value:{uid,username:name,...day,updatedAt:serverTimestamp()}});
         for(let start=0;start<mutations.length;start+=200){const batch=writeBatch(db);for(const mutation of mutations.slice(start,start+200)){if(mutation.value)batch.set(mutation.ref,mutation.value);else batch.delete(mutation.ref);}await batch.commit();}
       }
