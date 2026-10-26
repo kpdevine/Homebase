@@ -24,8 +24,8 @@ export function mountSocial({getStore,today:appToday,getCloud,showFriends,previe
   document.addEventListener('close',()=>setTimeout(prompt,80),true);
   async function action(work){if(busy)return;busy=true;message('Updating…');paint();try{await work();message('');}catch(error){message(error.code==='permission-denied'?'Could not access friends. Please reconnect and try again.':error.message);}finally{busy=false;paint();}}
   const solarUI=mountSolarSystems({getClient:()=>client,getUser:()=>user,getProfile:()=>profile,getFriends:()=>data.friends,today,checkInDate:appToday,changed:()=>{paint();publish();},action,message,scoreCircle});
-  $('.solar-toolbar').insertAdjacentHTML('beforeend','<button id="change-username" type="button" class="quiet-button" hidden>Change username</button>');
-  $('#change-username').onclick=()=>{if(!profile)return;$('#username-title').textContent='Change username';$('#new-username').value=profile.username;$('#username-error').textContent='';$('#claim-username').textContent='Save username';$('#cancel-username').hidden=false;dialog.showModal();$('#new-username').select();};
+  $('.solar-toolbar').insertAdjacentHTML('beforeend','<button id="change-username" type="button" class="quiet-button" hidden>Change username</button><a id="username-live-link" href="https://pocketplanet.day/?open=solar" class="text-button" hidden>Change your real username on Pocket Planet ↗</a>');
+  $('#change-username').onclick=()=>{if(!profile||preview)return;$('#username-title').textContent='Change username';$('#new-username').value=profile.username;$('#username-error').textContent='';$('#claim-username').textContent='Save username';$('#cancel-username').hidden=false;dialog.showModal();$('#new-username').select();};
   async function setUser(next){
     const run=++epoch;solarUI.reset();stop?.();stop=null;client=null;profile=null;user=next;data={incoming:[],outgoing:[],friends:[]};searchResults=[];searchSerial++;$('#friend-results').innerHTML='';lastPublished='';needsUsername=false;removeId=null;if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();paint();if(!user)return;
     // Auth callbacks can run before mountCloud returns its controller.
@@ -42,7 +42,7 @@ export function mountSocial({getStore,today:appToday,getCloud,showFriends,previe
   $('#friend-list').onclick=event=>{const button=event.target.closest('[data-remove-friend]');if(!button||busy)return;removeId=button.dataset.removeFriend;$('#remove-friend-name').textContent='@'+(data.friends.find(friend=>friend.uid===removeId)?.username||'this user');removeDialog.showModal();};
   function paint(){
     const date=today(),month=date.slice(0,7),own=leaderboardSummary(getStore(),date);
-    $('#change-username').hidden=!profile;$('#change-username').disabled=busy;$('#friends-handle').textContent=profile?'@'+profile.username:preview?'Preview':'';
+    $('#change-username').hidden=!profile;$('#change-username').disabled=busy||preview;$('#change-username').title=preview?'The disconnected demo cannot check or reserve real usernames.':'';$('#username-live-link').hidden=!preview||!profile;$('#friends-handle').textContent=profile?'@'+profile.username:preview?'Preview':'';
     $('#friends-signin').hidden=!!profile||preview;$('#friends-connected').hidden=!profile;
     $('#leaderboard-month').textContent=new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(month+'-15T12:00:00Z'));
     const system=solarUI.paint({ownLogged:sharedDays(getStore(),appToday()).some(day=>day.date===appToday())});

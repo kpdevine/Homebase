@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
+## Reaction and workout interaction refinements
+
+A second tap on the same score or vibes message dismisses its reaction bubble. The target remains uncovered, and the bubble visibly associates each reaction with its authors. Own-planet choices are larger, with a compact layout for keyboard space. Displayed text/numbers do not select on tapping; editable fields retain selection. Alternate workout Save collapses the editor into a summary with Edit workout and No workout today. The latter uses ordinary rest scoring and any available credit. Disconnected previews cannot change or claim real usernames and link to the signed-in app instead. See [behavior and validation](reaction-toggle-and-workout-polish.md).
+
 ## October 25 quick reactions and editable usernames
 
 Score and whole-vibes taps open a small anchored reaction bubble with every planet visible without scrolling. Use six columns normally and five on narrow phones so small-iPhone emojis remain readable. Keep badges at the top right of their target. My planet & vibes fits the text field, all planet choices and Save on one sheet, adapting to keyboard space. Solar Systems offers Change username: reserve an available valid name atomically, preserve the UID and all records, and release the old handle. Live friend and member names follow the public profile; pending membership requests remain acceptable after renaming. See [behavior and checks](october-25-quick-reactions-usernames.md). This supersedes the full reaction picker as the default score/vibes tap interaction.

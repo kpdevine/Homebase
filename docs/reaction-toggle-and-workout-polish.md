@@ -1,0 +1,13 @@
+# Reaction and workout interaction refinements
+
+The owner requested second-tap dismissal, visible reaction authors, larger own-planet choices, no selection highlighting on displayed text/numbers, and an alternate-workout summary after saving. They also reported that the disconnected demo accepted a taken username.
+
+Scores and vibes now toggle their own reaction bubble closed on a second tap. A captured pointer sequence prevents the closing tap from immediately reopening the bubble; keyboard activation also toggles by a stable target key. The popup makes room above its target when neither side has enough space, preserving an uncovered target for dismissal. Browser QA used actual taps because locator auto-centering could move the target beneath the fixed popup. Actual second taps on both the score and vibes closed it. Reaction groups now visibly show the planet, reaction name and usernames, resolving current group names where available.
+
+The own-planet editor uses larger six-column desktop and five-column phone choices, while switching to a compact grid when the visible area is less than 450px high. All 22 choices, text field and Save remain in the sheet. App text and displayed numbers disable selection and touch callouts; inputs, textareas and editable content retain normal editing/selection.
+
+The alternate workout form collapses after Save and shows the saved description with Edit workout and **No workout today**. The latter restores normal rest behavior; it does not promise a flex credit exists. The previous model's credit allocation and score rules are unchanged.
+
+The local Solar System sample used a fake rename method that rejected only a placeholder test name. This did not check production handles or rename a real account, so the earlier blanket uniqueness answer was misleading in that demo. Preview mode now disables Change username and offers an explicit link to the signed-in live workspace. The ignored sample also refuses fake renames. The real client's atomic handle reservation and Firestore rules remain unchanged; their collision and authorization checks passed in the previous expanded emulator suite.
+
+Validation: regular suite 265 tests, 264 passed with one emulator-only skip. Browser checks covered visible reaction names, actual second-tap dismissal for both targets, all reaction choices on a 320px phone, larger profile planets, selection disabled on labels but enabled in the textarea, preview rename disabled, and saving/editing/restoring an alternate workout in the separate preview workspace. No production usernames, statuses, reactions or private logs were changed during QA. Deploy Hosting only; preserve unrelated reminder policy edits.

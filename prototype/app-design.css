@@ -198,6 +198,8 @@ textarea[data-notes],.nutrition-notes textarea[data-notes],.training-notes texta
 #alternate-workout-description {display:block;width:100%;min-height:90px;resize:vertical;font:400 14px/1.5 var(--font-ui)}
 .alternate-workout-actions {display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
 #alternate-workout-status {margin-bottom:0}
+#alternate-workout-status:empty {display:none}
+#alternate-workout-summary {white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;font:400 14px/1.5 var(--font-ui)}
 .training-choice legend {font:400 11px/1.35 var(--font-ui);margin:0 0 9px;padding:0;min-height:15px}
 .training-choice label {position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;height:auto;padding:10px 6px;margin:0;color:var(--ui-ink);background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);border-radius:4px}
 .training-choice label span {font:400 12px var(--font-ui)}
@@ -1237,6 +1239,8 @@ html:has(dialog[open]) {overflow:hidden}
 .solar-person-name small.solar-owner-label {font:400 7px/1.3 var(--font-ui)}
 
 /* Quick reactions stay anchored to the score or the whole vibes message. */
+body,body * {user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]:not([contenteditable=false]),[contenteditable]:not([contenteditable=false]) * {user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
 .reaction-bubble {position:fixed;z-index:1000;width:min(360px,calc(var(--visible-width,100vw) - 16px));padding:10px;border:1px solid var(--ui-line);border-radius:16px;background:var(--ui-bg);box-shadow:0 7px 25px rgb(0 0 0 / .3);color:var(--ui-ink)}
 .reaction-bubble[hidden] {display:none}
 .reaction-bubble::after {content:'';position:absolute;left:var(--bubble-tail,50%);bottom:-6px;width:10px;height:10px;background:var(--ui-bg);border-right:1px solid var(--ui-line);border-bottom:1px solid var(--ui-line);transform:translateX(-50%) rotate(45deg)}
@@ -1252,8 +1256,10 @@ html:has(dialog[open]) {overflow:hidden}
 .reaction-bubble-footer .text-button {min-height:24px;padding:0;font-size:9px}
 .reaction-bubble-counts {display:flex;flex-wrap:wrap;gap:4px}
 .reaction-bubble-counts:not(:empty) {margin-bottom:6px}
-.reaction-bubble-counts>span {display:inline-flex;align-items:center;gap:2px;font:700 10px/1 var(--font-ui)}
-.reaction-bubble-counts .planet-emoji {width:22px;height:22px;object-fit:contain}
+.reaction-bubble-counts>span {display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:4px 6px;border:1px solid var(--ui-line-soft);border-radius:6px;background:var(--ui-inset);font:700 10px/1 var(--font-ui)}
+.reaction-bubble-counts .planet-emoji {width:28px;height:28px;flex:0 0 28px;object-fit:contain}
+.reaction-bubble-people {display:grid;gap:3px;min-width:0}
+.reaction-bubble-people small {font:700 15px/1.2 var(--font-handwriting);overflow-wrap:anywhere}
 @media(max-width:350px){.reaction-bubble-picker {grid-template-columns:repeat(5,minmax(0,1fr))}.reaction-bubble-picker button {height:48px}.reaction-bubble-picker .planet-emoji {max-height:44px}}
 .solar-vibes {position:relative;display:block;padding:0;min-height:54px}
 .solar-vibes-surface {position:relative;display:block;width:100%;min-height:68px;padding:14px 12px 8px;border:0;border-radius:4px;background:transparent;color:var(--ui-ink);text-align:left;cursor:pointer}
@@ -1275,8 +1281,11 @@ html:has(dialog[open]) {overflow:hidden}
 #solar-profile-form {display:grid;gap:6px;margin:0}
 #solar-profile-form>label,#solar-profile-form legend {font:400 11px/1.3 var(--font-ui)}
 #solar-profile-form fieldset {margin:0;padding:0;min-width:0}
-#solar-profile-form .solar-avatar-picker {grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:5px 0 0}
-#solar-profile-form .solar-avatar-picker button {aspect-ratio:auto;height:clamp(26px,calc((var(--visible-height,100dvh) - 270px)/3),54px);min-height:0}
+#solar-profile-form .solar-avatar-picker {grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:5px 0 0}
+#solar-profile-form .solar-avatar-picker button {aspect-ratio:auto;height:clamp(28px,calc((var(--visible-height,100dvh) - 245px)/4),64px);min-height:0}
+@media(max-width:480px){#solar-profile-form .solar-avatar-picker {grid-template-columns:repeat(5,minmax(0,1fr))}#solar-profile-form .solar-avatar-picker button {height:clamp(28px,calc((var(--visible-height,100dvh) - 245px)/5),54px)}}
+#solar-profile-dialog.is-short .solar-avatar-picker {grid-template-columns:repeat(8,minmax(0,1fr))}
+#solar-profile-dialog.is-short .solar-avatar-picker button {height:clamp(26px,calc((var(--visible-height,100dvh) - 270px)/3),40px)}
 #solar-vibes-input {height:clamp(32px,calc((var(--visible-height,100dvh) - 280px)*.3),64px);min-height:32px;margin:0;line-height:1.2;padding:7px}
 #solar-profile-error:empty {display:none}
 #solar-profile-error {margin:0;font-size:11px}

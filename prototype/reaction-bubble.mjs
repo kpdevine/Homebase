@@ -4,7 +4,7 @@ export function mountReactionBubble({planetEmoji}){
   const bubble=document.createElement('div');bubble.className='reaction-bubble';bubble.hidden=true;bubble.setAttribute('role','dialog');bubble.setAttribute('aria-label','Planet reactions');
   bubble.innerHTML=`<div class="reaction-bubble-heading"><strong></strong><button type="button" class="icon-button" aria-label="Close reactions">×</button></div><div class="reaction-bubble-counts"></div><div class="reaction-bubble-picker">${REACTIONS.map(row=>`<button type="button" data-bubble-react="${row.id}" aria-label="${esc(row.label)}" aria-pressed="false">${planetEmoji(row.id)}</button>`).join('')}</div><div class="reaction-bubble-footer"><span role="status"></span><button type="button" class="text-button" data-bubble-details>View day</button></div>`;
   document.body.append(bubble);
-  const title=bubble.querySelector('strong'),counts=bubble.querySelector('.reaction-bubble-counts'),picker=bubble.querySelector('.reaction-bubble-picker'),status=bubble.querySelector('[role=status]'),details=bubble.querySelector('[data-bubble-details]');let config=null,busy=false;
+  const title=bubble.querySelector('strong'),counts=bubble.querySelector('.reaction-bubble-counts'),picker=bubble.querySelector('.reaction-bubble-picker'),status=bubble.querySelector('[role=status]'),details=bubble.querySelector('[data-bubble-details]');let config=null,busy=false,closingAnchor=null;
   function close({focus=false}={}){if(!config)return;const previous=config,trigger=previous.anchor();config=null;bubble.hidden=true;previous.onClose?.();if(focus)trigger?.focus({preventScroll:true});}
   function position(){
     if(!config||bubble.hidden)return;const anchor=config.anchor();if(!anchor?.isConnected){close();return;}
@@ -13,18 +13,27 @@ export function mountReactionBubble({planetEmoji}){
     const above=rect.top-box.height-10>=top+8,y=above?rect.top-box.height-10:Math.min(rect.bottom+10,top+height-box.height-8);
     bubble.style.left=x+'px';bubble.style.top=Math.max(top+8,y)+'px';bubble.dataset.side=above?'above':'below';bubble.style.setProperty('--bubble-tail',Math.max(16,Math.min(box.width-16,rect.left+rect.width/2-x))+'px');
   }
+  function makeRoom(){
+    const anchor=config?.anchor();if(!anchor)return;
+    const rect=anchor.getBoundingClientRect(),box=bubble.getBoundingClientRect(),view=window.visualViewport,top=view?.offsetTop||0,height=view?.height||innerHeight;
+    const above=rect.top-top-18,below=top+height-rect.bottom-18;
+    // A large chooser must not cover the control that toggles it. If neither
+    // side has room, move the page just enough to fit it above the target.
+    if(box.height>above&&box.height>below&&scrollY>0&&box.height+rect.height+26<height)window.scrollBy({top:-Math.min(scrollY,box.height-above+1),behavior:'instant'});
+  }
   function paint(){
     if(!config)return;title.textContent=config.title;const rows=config.rows||[],mine=rows.find(row=>row.reactor===config.user)?.kind;
-    counts.innerHTML=REACTIONS.map(kind=>{const people=rows.filter(row=>row.kind===kind.id);return people.length?`<span title="${esc(people.map(row=>'@'+row.username).join(', '))}" aria-label="${esc(kind.label+': '+people.map(row=>'@'+row.username).join(', '))}">${planetEmoji(kind.id)}<b>${people.length}</b></span>`:'';}).join('');
+    counts.innerHTML=REACTIONS.map(kind=>{const people=rows.filter(row=>row.kind===kind.id),names=people.map(row=>'@'+row.username).join(', ');return people.length?`<span aria-label="${esc(kind.label+': '+names)}">${planetEmoji(kind.id)}<span class="reaction-bubble-people"><b>${esc(kind.short)}${people.length>1?' · '+people.length:''}</b><small>${esc(names)}</small></span></span>`:'';}).join('');
     picker.hidden=!!config.own;for(const button of picker.children){button.setAttribute('aria-pressed',String(button.dataset.bubbleReact===mine));button.disabled=busy||config.loading||config.canReact===false;}
-    details.hidden=!config.onDetails;status.textContent=config.loading?'Loading…':config.feedback||(config.own?(rows.length?'Your reactions':'No reactions yet'):'Tap again to remove');position();
+    details.hidden=!config.onDetails;status.textContent=config.loading?'Loading…':config.feedback||(config.own?(rows.length?'Your reactions':'No reactions yet'):'Tap again to remove');makeRoom();position();
   }
   function show(next){close();config=next;busy=false;bubble.hidden=false;paint();(config.own||config.loading?bubble.querySelector('.reaction-bubble-heading button'):picker.querySelector('[aria-pressed=true]')||picker.firstElementChild).focus({preventScroll:true});}
   bubble.querySelector('.reaction-bubble-heading button').onclick=()=>close({focus:true});
   details.onclick=()=>{const open=config?.onDetails;close();open?.();};
   picker.onclick=async event=>{const button=event.target.closest('[data-bubble-react]');if(!button||!config||busy||button.disabled)return;const current=config,kind=(config.rows||[]).find(row=>row.reactor===config.user)?.kind===button.dataset.bubbleReact?null:button.dataset.bubbleReact;busy=true;paint();try{const notified=await current.onReact(kind);if(config===current)config.feedback=kind?notified===false?'Saved · alert unavailable':'Reaction sent':'Reaction removed';}catch(error){if(config===current)config.feedback=error.message;}finally{if(config===current){busy=false;paint();}}};
-  document.addEventListener('pointerdown',event=>{if(config&&!bubble.contains(event.target)&&!config.anchor()?.contains(event.target))close();});
+  document.addEventListener('pointerdown',event=>{closingAnchor=null;if(!config||bubble.contains(event.target))return;const anchor=config.anchor();if(anchor?.contains(event.target))closingAnchor=anchor;close();},true);
+  document.addEventListener('click',event=>{if(!closingAnchor)return;const anchor=closingAnchor;closingAnchor=null;if(anchor.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();}},true);
   document.addEventListener('keydown',event=>{if(config&&event.key==='Escape'){event.preventDefault();close({focus:true});}});
   window.addEventListener('resize',position);window.visualViewport?.addEventListener('resize',position);window.addEventListener('scroll',position,true);
-  return {show,close,update(value){if(config){Object.assign(config,value);paint();}},isOpen:()=>!!config};
+  return {show,close,update(value){if(config){Object.assign(config,value);paint();}},isOpen:key=>!!config&&(key===undefined||config.key===key)};
 }
