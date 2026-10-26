@@ -1,11 +1,11 @@
 import {collection,doc,getDoc,getDocs,query,where,orderBy,startAt,endAt,limit,onSnapshot,runTransaction,writeBatch,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
 import {username,groupName,REACTIONS,solarAppearance} from './social-model.mjs';
 
-export function socialClient(db,uid){
+export function socialClient(db,uid,options={}){
   const profile=doc(db,'publicProfiles',uid);
   return {
     uid,
-    groups:groupClient(db,uid),
+    groups:groupClient(db,uid,options),
     async profile(){const snapshot=await getDoc(profile);return snapshot.exists()?snapshot.data():null;},
     async claim(value){const name=username(value),handle=doc(db,'handles',name);return runTransaction(db,async tx=>{const [existing,own]=await Promise.all([tx.get(handle),tx.get(profile)]);if(own.exists())return own.data();if(existing.exists())throw new Error('That username is taken. Try another.');const data={uid,username:name,createdAt:serverTimestamp()};tx.set(handle,data);tx.set(profile,data);return {uid,username:name};});},
     async search(value){const prefix=String(value||'').trim().toLowerCase();if(!/^[a-z][a-z0-9_]{0,19}$/.test(prefix))return [];const result=await getDocs(query(collection(db,'handles'),orderBy('username'),startAt(prefix),endAt(prefix+'\uf8ff'),limit(10)));return result.docs.map(item=>item.data()).filter(item=>item.uid!==uid);},
@@ -28,7 +28,7 @@ export function socialClient(db,uid){
 
 // Group summaries live under the group, separately from private day records and
 // day reactions. Membership requires an approved request or accepted invite.
-export function groupClient(db,uid){
+export function groupClient(db,uid,{notifyReaction=async()=>true}={}){
   const memberRef=(id,user=uid)=>doc(db,'friendGroups',id,'members',user);
   const indexRef=(id,user=uid)=>doc(db,'groupMemberships',user,'groups',id);
   const scoreRef=(id,user=uid)=>doc(db,'friendGroups',id,'scores',user);
@@ -66,7 +66,7 @@ export function groupClient(db,uid){
       for(let start=0;start<cleanup.length;start+=400){const next=writeBatch(db);for(const item of cleanup.slice(start,start+400))next.delete(item);await next.commit();}
     },
     async primary(id){await setDoc(prefs,{primaryGroupId:id,updatedAt:serverTimestamp()},{merge:true});},
-    async saveAppearance(value){await setDoc(prefs,{...solarAppearance(value),updatedAt:serverTimestamp()},{merge:true});},
+    async saveAppearance(value){const appearance=solarAppearance(value),version=crypto.randomUUID();await runTransaction(db,async tx=>{const previous=(await tx.get(prefs)).data();tx.set(prefs,{...appearance,...(appearance.vibes!==(previous?.vibes||'')?{vibesVersion:version}:previous?.vibesVersion?{vibesVersion:previous.vibesVersion}:{}),updatedAt:serverTimestamp()},{merge:true});});},
     async publish(ids,name,summary,days=[],appearance={}){
       for(const id of ids){
         const existing=await getDocs(query(collection(db,'friendGroups',id,'days'),where('uid','==',uid))),desired=new Map(days.map(day=>[uid+'~'+day.date,day]));
@@ -76,8 +76,10 @@ export function groupClient(db,uid){
         for(let start=0;start<mutations.length;start+=200){const batch=writeBatch(db);for(const mutation of mutations.slice(start,start+200)){if(mutation.value)batch.set(mutation.ref,mutation.value);else batch.delete(mutation.ref);}await batch.commit();}
       }
     },
-    async react(id,target,date,kind){if(kind!==null&&!REACTIONS.some(reaction=>reaction.id===kind))throw new Error('Choose a planet reaction.');const ref=doc(db,'friendGroups',id,'reactions',target+'~'+date+'~'+uid),batch=writeBatch(db);if(kind===null)batch.delete(ref);else {const own=await identity();batch.set(ref,{target,date,reactor:uid,username:own.username,kind,updatedAt:serverTimestamp()});}await batch.commit();},
+    async react(id,target,date,kind){if(kind!==null&&!REACTIONS.some(reaction=>reaction.id===kind))throw new Error('Choose a planet reaction.');const ref=doc(db,'friendGroups',id,'reactions',target+'~'+date+'~'+uid),batch=writeBatch(db);if(kind===null)batch.delete(ref);else {const own=await identity();batch.set(ref,{target,date,reactor:uid,username:own.username,kind,updatedAt:serverTimestamp()});}await batch.commit();if(kind!==null)return notifyReaction({scope:'day',group:id,target,date});},
     watchToday(id,date,receive,error){return onSnapshot(query(collection(db,'friendGroups',id,'days'),where('date','==',date)),snapshot=>receive(snapshot.docs.map(item=>item.data())),error);},
+    async reactVibes(id,target,version,kind){if(kind!==null&&!REACTIONS.some(reaction=>reaction.id===kind))throw new Error('Choose a planet reaction.');const ref=doc(db,'friendGroups',id,'vibeReactions',target+'~'+uid);if(kind===null){await writeBatch(db).delete(ref).commit();return;}const own=await identity();await setDoc(ref,{target,reactor:uid,username:own.username,version,kind,updatedAt:serverTimestamp()});return notifyReaction({scope:'vibes',group:id,target});},
+    watchVibesReactions(id,receive,error){return onSnapshot(collection(db,'friendGroups',id,'vibeReactions'),snapshot=>receive(snapshot.docs.map(item=>item.data())),error);},
     watchReactions(id,date,receive,error){return onSnapshot(query(collection(db,'friendGroups',id,'reactions'),where('date','==',date)),snapshot=>receive(snapshot.docs.map(item=>item.data())),error);},
     watchDay(id,target,date,receive,error){let day=null,reactions=[];const emit=()=>receive({day,reactions});const stops=[onSnapshot(doc(db,'friendGroups',id,'days',target+'~'+date),snapshot=>{day=snapshot.exists()?snapshot.data():null;emit();},error),onSnapshot(query(collection(db,'friendGroups',id,'reactions'),where('target','==',target),where('date','==',date)),snapshot=>{reactions=snapshot.docs.map(item=>item.data());emit();},error)];return ()=>stops.forEach(stop=>stop());},
     watch(receive,error){let groups=[],requests=[],invitations=[],primaryId=null,groupsLoaded=false,appearance=solarAppearance(),appearanceReady=false,ownedGroupId=null,active=true;

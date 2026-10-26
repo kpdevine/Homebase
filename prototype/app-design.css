@@ -188,6 +188,11 @@ textarea[data-notes],.nutrition-notes textarea[data-notes],.training-notes texta
 .training-checkins {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin:0 0 16px}
 .training-choice,.creatine-choice {display:grid;grid-template-columns:1fr 1fr;gap:6px;border:0;padding:0;margin:0;min-width:0}
 .alternate-workout-option {margin:0 0 16px;padding:12px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
+.solar-vibes-react {display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:36px}
+.solar-vibes-react .planet-emoji {width:26px;height:26px;object-fit:contain}
+#solar-vibes-dialog {width:380px;max-width:calc(100vw - 24px);height:fit-content}
+#solar-vibes-text {margin:12px 0 20px;padding:14px;border:1px solid var(--ui-line);background:var(--ui-inset);border-radius:5px;overflow-wrap:anywhere;white-space:pre-wrap;font:400 23px/1.4 var(--font-handwriting,var(--font-ui))}
+#solar-vibes-picker h3 {font:700 18px/1.4 var(--font-display)}
 .alternate-workout-option>button {width:100%;white-space:normal}
 #alternate-workout-form label {display:block;margin-bottom:8px;font:400 12px/1.4 var(--font-ui)}
 #alternate-workout-description {display:block;width:100%;min-height:90px;resize:vertical;font:400 14px/1.5 var(--font-ui)}
@@ -1075,13 +1080,13 @@ button {-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:tran
 .solar-rank-medal b {position:absolute;inset:4px 0 auto;text-align:center;font:700 11px/1.5 var(--font-ui);color:var(--ui-active)}
 .solar-rank-medal.rank-silver {--medal-metal:var(--ui-white);filter:drop-shadow(0 0 4px rgb(255 255 255 / .4))}
 .solar-rank-medal.rank-bronze {--medal-metal:rgb(218 155 106 / 1);filter:drop-shadow(0 0 4px rgb(218 155 106 / .4))}
-#solar-day-dialog .solar-reaction-chip {gap:14px;padding:12px}
-#solar-day-dialog .solar-reaction-chip>.planet-emoji {width:56px;height:56px;flex:0 0 56px;object-fit:contain;filter:drop-shadow(0 0 4px rgb(255 230 151 / .3))}
-#solar-day-dialog .reaction-people strong {font-size:12px;margin-bottom:6px}
-#solar-day-dialog .reaction-people small {font:700 20px/1.3 var(--font-handwriting);color:var(--ui-ink);padding-bottom:4px;overflow-wrap:anywhere}
-#solar-day-dialog .solar-reaction-picker {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-#solar-day-dialog .solar-reaction-picker button,.solar-avatar-picker button {position:relative;aspect-ratio:1/1;min-height:0;padding:0;gap:0;overflow:hidden;justify-content:center}
-#solar-day-dialog .solar-reaction-picker .planet-emoji,.solar-avatar-picker .planet-emoji {position:absolute;inset:2px;width:calc(100% - 4px);height:calc(100% - 4px);max-width:none;max-height:none;object-fit:contain;pointer-events:none}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-chip {gap:14px;padding:12px}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-chip>.planet-emoji {width:56px;height:56px;flex:0 0 56px;object-fit:contain;filter:drop-shadow(0 0 4px rgb(255 230 151 / .3))}
+:is(#solar-day-dialog,#solar-vibes-dialog) .reaction-people strong {font-size:12px;margin-bottom:6px}
+:is(#solar-day-dialog,#solar-vibes-dialog) .reaction-people small {font:700 20px/1.3 var(--font-handwriting);color:var(--ui-ink);padding-bottom:4px;overflow-wrap:anywhere}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-picker {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-picker button,.solar-avatar-picker button {position:relative;aspect-ratio:1/1;min-height:0;padding:0;gap:0;overflow:hidden;justify-content:center}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-picker .planet-emoji,.solar-avatar-picker .planet-emoji {position:absolute;inset:2px;width:calc(100% - 4px);height:calc(100% - 4px);max-width:none;max-height:none;object-fit:contain;pointer-events:none}
 @keyframes solar-day-invitation {0%,100% {filter:drop-shadow(0 0 2px rgb(255 255 255 / .25))}50% {filter:drop-shadow(0 0 7px rgb(255 241 198 / .85))}}
 html[data-motion=full] .solar-open-day.is-other .score-circle {animation:solar-day-invitation 2.6s ease-in-out infinite}
 .solar-open-day.is-other:hover .score-circle,.solar-open-day.is-other:focus-visible .score-circle {animation-play-state:paused;filter:drop-shadow(0 0 8px rgb(255 241 198 / .8))}

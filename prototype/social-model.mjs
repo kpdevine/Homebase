@@ -1,3 +1,5 @@
+import {REACTIONS} from './reaction-kinds.mjs';
+export {REACTIONS} from './reaction-kinds.mjs';
 import {addDays} from './model.mjs';
 import {summarizeDay,fullyLogged} from './scoring.mjs';
 export function username(value){const name=String(value||'').trim().toLowerCase();if(!/^[a-z][a-z0-9_]{2,19}$/.test(name))throw new Error('Use 3–20 letters, numbers or underscores, starting with a letter.');return name;}
@@ -22,35 +24,13 @@ export function solarDisplayedDay(member,today){
   return {date,label:current?'Today':'Yesterday',score:current?member.todayScore??null:member.yesterdayDate===date?member.yesterdayScore??null:null};
 }
 
-export const REACTIONS=[
-  {id:'happy',label:'Happy planet',short:'Happy'},
-  {id:'sad',label:'Sad planet',short:'Sad'},
-  {id:'party',label:'Celebration',short:'Party'},
-  {id:'fire',label:'On fire',short:'On fire'},
-  {id:'sun',label:'Cool sunshine',short:'Cool'},
-  {id:'love',label:'Love',short:'Love'},
-  {id:'wow',label:'Amazed',short:'Wow'},
-  {id:'sleepy',label:'Sleepy',short:'Sleepy'},
-  {id:'strong',label:'Feeling strong',short:'Strong'},
-  {id:'rocket',label:'Blastoff',short:'Blastoff'},
-  {id:'martian',label:'Friendly Martian',short:'Martian'},
-  {id:'distorted',label:'Distorted shock',short:'Shocked'},
-  {id:'laughing',label:'Laughing',short:'Laughing'},
-  {id:'crying',label:'Crying',short:'Crying'},
-  {id:'angry',label:'Frustrated',short:'Frustrated'},
-  {id:'thinking',label:'Thinking',short:'Thinking'},
-  {id:'wink',label:'Winking',short:'Wink'},
-  {id:'salute',label:'Saluting',short:'Salute'},
-  {id:'grateful',label:'Grateful',short:'Grateful'},
-  {id:'melting',label:'Melting',short:'Melting'},
-  {id:'nerd',label:'Feeling smart',short:'Smart'},
-  {id:'kiss',label:'Blowing a kiss',short:'Kiss'}
-];
-export function solarAppearance({planet='happy',vibes=''}={}) {
+export function solarAppearance({planet='happy',vibes='',vibesVersion}={}) {
   if(!REACTIONS.some(reaction=>reaction.id===planet))throw new Error('Choose a planet profile picture.');
   if(typeof vibes!=='string'||vibes.trim().length>160)throw new Error('Keep your current vibes to 160 characters.');
-  return {planet,vibes:vibes.trim()};
+  if(vibesVersion!==undefined&&(typeof vibesVersion!=='string'||!/^[A-Za-z0-9_-]{8,64}$/.test(vibesVersion)))throw new Error('Invalid vibes version.');
+  return {planet,vibes:vibes.trim(),...(vibesVersion!==undefined?{vibesVersion}:{})};
 }
+export function vibesReactions(reactions,target,version='legacy'){return reactions.filter(value=>value.target===target&&value.version===version);}
 export function solarMonthStats(members,month){
   const current=members.filter(member=>member.month===month&&Number.isFinite(member.monthScore)&&member.daysLogged>0);
   const logs=current.reduce((sum,member)=>sum+member.daysLogged,0);

@@ -5,12 +5,12 @@ export function mountReminders({cloud,preview}) {
   const supported='serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
   const installed=matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-  let subscription=null,registration=null,busy=false,stateTimer,refreshing=false;
+  let subscription=null,registration=null,busy=false,stateTimer,refreshing=false,workerChecked=false;
   const ownerKey='pocketplanet.push-owner.v1';
   function paint(message) {
     enable.hidden=!!subscription;disableButton.hidden=!subscription;
     enable.disabled=busy||preview||!supported||ios&&!installed||!reminderConfig.apiBase||!cloud.isEnabled()||!cloud.hasUser();disableButton.disabled=busy;
-    status.textContent=message||(preview?'Reminders are available in your personal workspace.':!supported?'This browser does not support push notifications.':ios&&!installed?'Add Pocket Planet to your Home Screen, then open it there to enable reminders.':!reminderConfig.apiBase?'The reminder service is being configured.':!cloud.hasUser()||!cloud.isEnabled()?'Sign in and enable cloud sync to use reminders.':subscription?'On for this device · after 10:30 p.m. local time, only if today is not logged.':Notification.permission==='denied'?'Notifications are blocked. Allow them in your device settings, then return here.':'Off for this device. Enable to receive one reminder after 10:30 p.m. local time when a check-in is missing.');
+    status.textContent=message||(preview?'Reminders are available in your personal workspace.':!supported?'This browser does not support push notifications.':ios&&!installed?'Add Pocket Planet to your Home Screen, then open it there to enable reminders.':!reminderConfig.apiBase?'The reminder service is being configured.':!cloud.hasUser()||!cloud.isEnabled()?'Sign in and enable cloud sync to use reminders.':subscription?'On for this device · daily reminder after 10:30 p.m. if unlogged, plus day-score and Current vibes reaction alerts.':Notification.permission==='denied'?'Notifications are blocked. Allow them in your device settings, then return here.':'Off for this device. Enable for day-score and Current vibes reaction alerts, plus a daily reminder after 10:30 p.m. local time if unlogged.');
   }
   async function call(path,body) {
     const session=await cloud.session();if(!session)throw new Error('Sign in to manage reminders.');
@@ -20,6 +20,7 @@ export function mountReminders({cloud,preview}) {
   async function discover() {
     if(!supported||preview)return;
     registration=await navigator.serviceWorker.getRegistration();subscription=await registration?.pushManager.getSubscription()||null;
+    if(registration&&!workerChecked){workerChecked=true;await registration.update().catch(()=>{});}
   }
   async function syncState() {
     if(preview||!reminderConfig.apiBase||!cloud.isEnabled()||cloud.status()!=='synced'||refreshing)return;
@@ -47,7 +48,7 @@ export function mountReminders({cloud,preview}) {
       subscription=subscription||await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
       await call('/subscribe',{subscription:subscription.toJSON(),timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});
       try{localStorage.setItem(ownerKey,session.uid);}catch{}
-      paint('On for this device · after 10:30 p.m. local time, only if today is not logged.');
+      paint('On for this device · daily reminder after 10:30 p.m. if unlogged, plus day-score and Current vibes reaction alerts.');
     }catch(error){if(subscription){try{await subscription.unsubscribe();}catch{}subscription=null;}paint(error.message);}
     finally{busy=false;enable.disabled=false;paint(status.textContent);}
   });

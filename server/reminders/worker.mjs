@@ -1,6 +1,7 @@
 import {createRemoteJWKSet,jwtVerify} from 'jose';
 import {buildPushPayload} from '@block65/webcrypto-web-push';
 import {localParts,reminderDate,validTimeZone,reminderDue,loggedFromRecord,validPushSubscription} from './policy.mjs';
+import {cloudReaction,deliverReaction,reactionRequest} from './reaction-events.mjs';
 
 const PROJECT='homebase-d3c6c';
 const ORIGINS=new Set(['https://pocketplanet.day','https://homebase-d3c6c.firebaseapp.com','https://homebase-d3c6c.web.app']);
@@ -31,7 +32,7 @@ async function deviceId(endpoint) {
   const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(endpoint));
   return [...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('');
 }
-export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,send=sendPush,now=()=>new Date()}={}) {
+export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,readReaction=cloudReaction,send=sendPush,now=()=>new Date()}={}) {
   return {
     async fetch(request,env) {
       const origin=request.headers.get('Origin'),url=new URL(request.url);
@@ -42,7 +43,7 @@ export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,s
       if(!ORIGINS.has(origin))return reply({error:'Origin not allowed.'},403);
       if(request.method==='OPTIONS')return reply(null,204);
       if(url.pathname==='/config'&&request.method==='GET')return reply({publicKey:env.VAPID_PUBLIC_KEY,timeZone:'device'});
-      if(request.method!=='POST'||!['/subscribe','/unsubscribe','/state'].includes(url.pathname))return reply({error:'Not found.'},404);
+      if(request.method!=='POST'||!['/subscribe','/unsubscribe','/state','/reaction'].includes(url.pathname))return reply({error:'Not found.'},404);
       if(!request.headers.get('Content-Type')?.startsWith('application/json'))return reply({error:'JSON required.'},415);
       if(Number(request.headers.get('Content-Length'))>8192)return reply({error:'Request too large.'},413);
       let uid,token;
@@ -51,6 +52,11 @@ export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,s
       try {
         const text=await request.text();if(text.length>8192)return reply({error:'Request too large.'},413);
         const body=JSON.parse(text),at=now();
+        if(url.pathname==='/reaction'){
+          let input;try{input=reactionRequest(body);}catch{return reply({error:'Invalid reaction event.'},400);}
+          try{const event=await readReaction(uid,token,input,at);if(event)await deliverReaction(event,env,{send,now:at});return reply({received:true});}
+          catch{return reply({error:'Reaction notification unavailable.'},503);}
+        }
         if(url.pathname==='/unsubscribe') {
           if(typeof body.endpoint!=='string')return reply({error:'Subscription required.'},400);
           await env.DB.prepare('DELETE FROM devices WHERE id=? AND uid=?').bind(await deviceId(body.endpoint),uid).run();
@@ -106,6 +112,7 @@ export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,s
         }catch(error){console.warn('Reminder delivery was not confirmed; not retrying to avoid duplicates.',{date,error:typeof error?.name==='string'?error.name:'Error'});}
       }
       await env.DB.prepare('DELETE FROM day_status WHERE date<?').bind(new Date(at.getTime()-3*86400000).toISOString().slice(0,10)).run();
+      await env.DB.prepare('DELETE FROM reaction_notifications WHERE created_at<?').bind(at.getTime()-40*86400000).run();
     },
   };
 }

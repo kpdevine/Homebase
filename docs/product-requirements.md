@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
+## October 25 Current vibes reactions and alerts
+
+Solar System members can react to nonblank Current vibes using the same planet picker, toggle behavior and names/counts as day scores. A new vibes text starts a new reaction version; picture-only edits retain the version. Authors can view reactions and cannot react to themselves. Immediate push alerts cover both day-score and Current vibes reactions on the recipient's registered devices. The backend verifies the saved reaction and membership using the reactor's Firebase token; it deduplicates alerts per reactor/status or day and limits bursts. Deletions do not notify. Notifications show the reactor and reaction, omit status text/private logs, and open Solar Systems when tapped. See [implementation and verification](october-25-reaction-notifications.md).
+
 ## October 25 daily reminder delivery
 
 The reminder transport must work in Cloudflare Workers and must not follow redirects with push credentials or encrypted payloads. Use manual redirect handling, with tests covering an actual encrypted request and a rejected redirect response. Retained console diagnostics distinguish push-service acceptance from rejection/uncertainty without logging keys, subscriptions or private daily content. The once-per-device/day attempt claim and 10:30 p.m. device-local eligibility remain unchanged. See [root cause and verification](october-25-daily-push-fix.md).

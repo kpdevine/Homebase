@@ -3,6 +3,7 @@ import {REACTIONS,solarAppearance} from './social-model.mjs';
 import {lateCheckInWindow} from './day-clock.mjs';
 import {REACTION_ASSETS} from './reaction-assets.mjs';
 import {watchSolarDateWindow} from './solar-date-window.mjs';
+import {mountVibesReactions} from './vibes-reactions-ui.mjs';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const planetEmoji=(id,label='',size='icon')=>`<img class="planet-emoji" src="${REACTION_ASSETS[id]?.[size]||REACTION_ASSETS.happy.icon}" alt="${esc(label)}" width="${size==='portrait'?320:160}" height="${size==='portrait'?320:160}" loading="eager" decoding="async" fetchpriority="${size==='portrait'?'high':'low'}">`;
 
@@ -40,6 +41,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   $('.solar-avatar-picker').onkeydown=event=>{const offset={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[event.key];if(!offset)return;event.preventDefault();chosenPlanet=REACTIONS[(REACTIONS.findIndex(reaction=>reaction.id===chosenPlanet)+offset+REACTIONS.length)%REACTIONS.length].id;paintPlanetChoice();profileDialog.querySelector(`[data-profile-planet="${chosenPlanet}"]`).focus();};
   $('#solar-profile-form').onsubmit=async event=>{event.preventDefault();const button=$('#solar-profile-save'),active=run;button.disabled=true;button.textContent='Saving…';$('#solar-profile-error').textContent='';try{await api().saveAppearance(solarAppearance({planet:chosenPlanet,vibes:$('#solar-vibes-input').value}));if(active!==run)return;profileDialog.close();message('Planet profile saved.');changed();}catch(error){if(active===run)$('#solar-profile-error').textContent=error.message;}finally{button.disabled=false;button.textContent='Save my planet';}};
   const api=()=>getClient()?.groups;
+  const vibesUI=mountVibesReactions({getApi:api,getUser,getPerson:uid=>{const person=members.find(row=>row.uid===uid);return person&&uid===getUser()?.uid?{...person,...state.appearance}:person;},changed,action,planetEmoji});
   let ratingStop=null,ratingKey='',yesterdayDays=[],yesterdayReady=false;
   function stopRatingWindow(){ratingStop?.();ratingStop=null;ratingKey='';yesterdayDays=[];yesterdayReady=false;ratingDays=new Map();ratingReactions=new Map();boardReactions=[];}
   let ratingDays=new Map(),ratingReactions=new Map();
@@ -63,7 +65,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     if(next){const active=run;boardStop=api().watchBoard(next,rows=>{if(active!==run||primary!==next)return;members=rows;loading=false;changed();},error=>{if(active===run){loading=false;message('Solar System could not connect. '+error.message);changed();}});}
   }
   function stopEvening(){eveningStop?.();eveningStop=null;eveningKey='';eveningDays=[];eveningLoading=false;eveningError=false;}
-  function reset(){stopEvening();stopRatingWindow();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
+  function reset(){vibesUI.reset();stopEvening();stopRatingWindow();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
   function connect(){reset();if(!api())return;const active=run;stop=api().watch(value=>{if(active!==run)return;state=value;watchPrimary();changed();},error=>{if(active===run)message('Solar Systems could not connect. '+error.message);});}
   $('#solar-create').onsubmit=event=>{event.preventDefault();action(async()=>{await api().create($('#solar-name').value);$('#solar-name').value='';});};
   $('#solar-search').onsubmit=event=>{event.preventDefault();action(async()=>{results=await api().search($('#solar-query').value);replace('#solar-results',results.length?'':'<li>No Solar Systems found.</li>');});};
@@ -97,7 +99,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-connected').hidden=!profile;$('#solar-title').textContent=group?.groupName||'Your Solar System';
     $('#solar-subtitle').hidden=!group;$('#solar-member-count').hidden=!group;
     $('#solar-member-count strong').textContent=loading?'—':members.length;$('#solar-member-count span').textContent=members.length===1?'member':'members';
-    watchRatingDays();paintEvening(ownLogged);
+    watchRatingDays();vibesUI.sync(primary);vibesUI.paint();paintEvening(ownLogged);
     const ownsSystem=!!state.ownedGroupId||state.groups.some(value=>value.owner===user?.uid);
     $('#solar-create').hidden=ownsSystem;
     $('#solar-rename').hidden=!owner;
@@ -124,7 +126,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
     const date=today(),yesterday=addDays(date,-1),scores=new Map(yesterdayDays.map(day=>[day.uid,day.score])),current=new Map((ratingDays.get(date)||[]).map(day=>[day.uid,day]));
     const datedMembers=members.map(member=>({...member,yesterdayDate:yesterday,yesterdayScore:yesterdayReady?scores.get(member.uid)??null:member.yesterdayDate===yesterday?member.yesterdayScore??null:null,todayDate:date,todayScore:current.get(member.uid)?.score??null,todayReviewComplete:current.get(member.uid)?.reviewComplete===true}));
-    return {members:datedMembers,primary,loading,reactions:boardReactions,owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
+    return {members:datedMembers,primary,loading,reactions:boardReactions,vibeReactions:vibesUI.reactions(),owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
   function paintDay(){
     if(!dayTarget)return;
@@ -144,6 +146,6 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     const active=run,system=primary;dayStop=api().watchDay(system,target,date,value=>{if(active!==run||system!==primary||target!==dayTarget||date!==dayDate)return;dayState=value;paintDay();},error=>{$('#solar-day-state').textContent='Could not load this day. '+error.message;});
   }
   $('#solar-day-prev').onclick=()=>openDay(dayTarget,addDays(dayDate,-1));$('#solar-day-next').onclick=()=>openDay(dayTarget,addDays(dayDate,1));
-  $('#solar-reaction-picker').onclick=event=>{const button=event.target.closest('[data-react]');if(!button)return;const system=primary,target=dayTarget,date=dayDate,kind=dayState.reactions.find(value=>value.reactor===getUser().uid)?.kind===button.dataset.react?null:button.dataset.react;action(async()=>{await api().react(system,target,date,kind);$('#solar-reaction-feedback').textContent=kind?'Reaction sent':'Reaction removed';});};
-  return {connect,reset,paint,openDay,openProfile,groupIds:()=>state.groups.map(group=>group.id),appearance:()=>solarAppearance(state.appearance),appearanceReady:()=>!!state.appearanceReady};
+  $('#solar-reaction-picker').onclick=event=>{const button=event.target.closest('[data-react]');if(!button)return;const system=primary,target=dayTarget,date=dayDate,kind=dayState.reactions.find(value=>value.reactor===getUser().uid)?.kind===button.dataset.react?null:button.dataset.react;action(async()=>{const notified=await api().react(system,target,date,kind);$('#solar-reaction-feedback').textContent=kind?notified===false?'Reaction saved. Notification could not be sent.':'Reaction sent':'Reaction removed';});};
+  return {connect,reset,paint,openDay,openProfile,openVibes:vibesUI.open,groupIds:()=>state.groups.map(group=>group.id),appearance:()=>solarAppearance(state.appearance),appearanceReady:()=>!!state.appearanceReady};
 }

@@ -48,11 +48,12 @@ service cloud.firestore {
     function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
     function validAppearance(data) {
       return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss']
-        && data.get('vibes','') is string && data.get('vibes','').size() <= 160;
+        && data.get('vibes','') is string && data.get('vibes','').size() <= 160
+        && data.get('vibesVersion','legacy-version') is string && data.get('vibesVersion','legacy-version').matches('[A-Za-z0-9_-]{8,64}');
     }
     function validSummary(uid) {
       return self(uid)
-        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes'])
+        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes','vibesVersion'])
         && validAppearance(request.resource.data)
         && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
         && request.resource.data.appDate is string && request.resource.data.appDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
@@ -65,7 +66,7 @@ service cloud.firestore {
     }
     match /socialScores/{uid} {
       allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
-      allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes']);
+      allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes','vibesVersion']);
     }
     function member(group,uid) {return exists(/databases/$(database)/documents/friendGroups/$(group)/members/$(uid)) && get(/databases/$(database)/documents/friendGroups/$(group)).data.get('deletedAt',null) == null;}
     function owner(group) {return signedIn() && get(/databases/$(database)/documents/friendGroups/$(group)).data.owner == request.auth.uid;}
@@ -139,6 +140,20 @@ service cloud.firestore {
           && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss'] && request.resource.data.updatedAt == request.time;
         allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
       }
+      match /vibeReactions/{id} {
+        allow read: if signedIn() && member(group,request.auth.uid);
+        allow create,update: if signedIn() && member(group,request.auth.uid)
+          && request.resource.data.keys().hasOnly(['target','reactor','username','version','kind','updatedAt'])
+          && self(request.resource.data.reactor) && request.resource.data.target != request.auth.uid
+          && member(group,request.resource.data.target)
+          && id == request.resource.data.target+'~'+request.auth.uid
+          && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
+          && get(/databases/$(database)/documents/friendGroups/$(group)/scores/$(request.resource.data.target)).data.get('vibes','').size() > 0
+          && request.resource.data.version == get(/databases/$(database)/documents/friendGroups/$(group)/scores/$(request.resource.data.target)).data.get('vibesVersion','legacy')
+          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss']
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
+      }
     }
     match /solarOwnership/{uid} {
       allow read: if self(uid);
@@ -183,7 +198,7 @@ service cloud.firestore {
     }
     match /socialPreferences/{uid} {
       allow read: if self(uid);
-      allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt','planet','vibes'])
+      allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt','planet','vibes','vibesVersion'])
         && validAppearance(request.resource.data)
         && (!request.resource.data.keys().hasAny(['primaryGroupId']) || (exists(/databases/$(database)/documents/socialPreferences/$(uid)) && request.resource.data.primaryGroupId == resource.data.get('primaryGroupId',''))
           || request.resource.data.primaryGroupId is string && existsAfter(/databases/$(database)/documents/friendGroups/$(request.resource.data.primaryGroupId)/members/$(uid)))

@@ -1259,6 +1259,7 @@ setInterval(refreshClock,15000);
 $('#motion-preview').innerHTML=circle(8)+'<span>LCD motion</span>';
 render();
 reveal($('#'+panelIds[view]));
+if(new URLSearchParams(location.search).get('open')==='solar')setView('friends');
 if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
 if(welcomeRequired)showDialog($('#welcome-dialog'));
 
