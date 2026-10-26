@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
+## October 25 daily reminder delivery
+
+The reminder transport must work in Cloudflare Workers and must not follow redirects with push credentials or encrypted payloads. Use manual redirect handling, with tests covering an actual encrypted request and a rejected redirect response. Retained console diagnostics distinguish push-service acceptance from rejection/uncertainty without logging keys, subscriptions or private daily content. The once-per-device/day attempt claim and 10:30 p.m. device-local eligibility remain unchanged. See [root cause and verification](october-25-daily-push-fix.md).
+
 ## October 25 alternate workout
 
 Training's No answer offers an optional **Log an alternate workout** button. A saved, nonblank description (up to 1,000 characters) replaces rest with an alternate workout worth exactly 5 points plus the tracked creatine point. It consumes no flex credit and adds no lifting volume or goal minutes. Users can switch back to rest or lifting; paused sets keep their IDs. Descriptions persist privately and appear in day and Training recaps. Historical changes replay weekly rest credits and reopen affected reviews. See [implementation and checks](october-25-alternate-workout.md).

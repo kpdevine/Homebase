@@ -1,0 +1,11 @@
+# Daily reminder transport fix — October 25
+
+The owner reported that immediate tests arrive but daily reminders do not. The immediate test helper runs in Node on the desktop; daily reminders run in Cloudflare Workers. They used the same subscriptions and VAPID keys but exercised different fetch implementations.
+
+The deployed daily transport used `redirect: 'error'`. Cloudflare's runtime throws a TypeError for that option before making the push request. An isolated remote preview reproduced the error for both registered devices. Changing the option to `manual` produced HTTP 201 from Apple's push service for both devices. Manual mode also prevents forwarding the encrypted push payload and VAPID authorization to a redirect destination.
+
+The production cron was present (`*/5 * * * *`). D1 showed both devices in America/Chicago and attempts for October 24 at 10:30 p.m., with that date's `logged` flag zero. Suppression and a missing cron were therefore not the explanation for that evening. Invocation metrics reported success because the scheduler caught the transport exception. Historical exception details were unavailable because Worker logs were disabled.
+
+The fix uses the supported redirect option and enables retained console diagnostics, with invocation logging disabled. Acceptance logs contain only date and HTTP status; failure logs contain date/error class or HTTP status. Subscriptions, keys, authorization headers and personal day content are not logged. The existing daily claim remains an attempt/deduplication marker, rather than proof of phone delivery; uncertain sends are still not repeated automatically. No notification schedule, permission, subscription, billing plan or daily quota was changed for the diagnostic pushes.
+
+Validation: six backend tests pass, including two new tests that build real encrypted payloads and check the Cloudflare-compatible redirect policy and rejection of redirects. The app suite has 262 tests, 261 passing and one emulator-only skip. The isolated Cloudflare preview confirmed encryption and then both Apple HTTP 201 responses; preview tooling is stopped after verification. Source and Worker configuration are published together. The next eligible automatic run remains 10:30 p.m. device-local time, subject to the normal logged-day check.

@@ -20,10 +20,12 @@ async function cloudLogged(uid,token,date) {
   if(document.fields?.format?.integerValue!=='1'||typeof document.fields?.payload?.stringValue!=='string')throw new Error('Unsupported saved record.');
   return {logged:loggedFromRecord(JSON.parse(document.fields.payload.stringValue)),version:Date.parse(document.updateTime)};
 }
-async function sendPush(subscription,message,env) {
+export async function sendPush(subscription,message,env,{fetcher=fetch}={}) {
   const payload=await buildPushPayload({data:JSON.stringify(message),options:{ttl:1800}},subscription,
     {subject:'https://pocketplanet.day',publicKey:env.VAPID_PUBLIC_KEY,privateKey:env.VAPID_PRIVATE_KEY});
-  return fetch(subscription.endpoint,{...payload,signal:AbortSignal.timeout(15000),redirect:'error'});
+  // workerd rejects redirect:'error' before sending. Manual also keeps the
+  // encrypted payload and VAPID authorization from following any redirect.
+  return fetcher(subscription.endpoint,{...payload,signal:AbortSignal.timeout(15000),redirect:'manual'});
 }
 async function deviceId(endpoint) {
   const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(endpoint));
@@ -100,7 +102,8 @@ export function createReminderWorker({verify=verifyUser,readLogged=cloudLogged,s
           const response=await send(JSON.parse(device.subscription),{title:'Time to log your day',body:'A quick check-in for Nutrition, Daily training, and your To-do list.',tag:`pocket-planet-log-${date}`,date,url:'https://pocketplanet.day/'},env);
           if(response.status===404||response.status===410)await env.DB.prepare('DELETE FROM devices WHERE id=?').bind(device.id).run();
           else if(!response.ok)console.warn('Reminder delivery rejected',{status:response.status});
-        }catch{console.warn('Reminder delivery was not confirmed; not retrying to avoid duplicates.');}
+          else console.info('Reminder accepted by push service',{date,status:response.status});
+        }catch(error){console.warn('Reminder delivery was not confirmed; not retrying to avoid duplicates.',{date,error:typeof error?.name==='string'?error.name:'Error'});}
       }
       await env.DB.prepare('DELETE FROM day_status WHERE date<?').bind(new Date(at.getTime()-3*86400000).toISOString().slice(0,10)).run();
     },

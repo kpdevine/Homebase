@@ -1,3 +1,7 @@
+## October 25 daily reminder fix
+
+The owner reported immediate push tests work but daily reminders never arrive. The deployed Worker deterministically throws on redirect:error before contacting Apple; Node tests bypassed this runtime difference. An isolated Cloudflare preview reproduced the exception, and manual redirect mode received Apple 201 for both registrations. Transport tests now build real encrypted payloads and enforce manual redirect handling. Six backend tests pass; the app suite remains 261 passing, one emulator-only skip. Worker console diagnostics are enabled without invocation metadata logging or private content. Deploy the matching reminder Worker; no Hosting or Firestore change is needed. See docs/october-25-daily-push-fix.md. Preserve unrelated local policy file changes.
+
 ## October 25 alternate workout
 
 Training → No now offers Log an alternate workout with a required description and explicit Save. A saved alternate earns exactly 5 plus the tracked creatine point, uses no flex rest credit, and appears in private recaps. Rest/lifting switches preserve drafts; historical edits replay rest credits and reopen affected reviews. Regular suite: 262 tests, 261 passed, one emulator-only skip. Phone/browser sample QA verified 5/6 points, rest fallback, validation, persistence and review. See docs/october-25-alternate-workout.md. Deliver source and matching Firebase Hosting through the usual workflow; preserve unrelated server/reminders/policy.mjs changes.
