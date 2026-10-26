@@ -23,7 +23,7 @@ export function mountReactionBubble({planetEmoji}){
   }
   function paint(){
     if(!config)return;title.textContent=config.title;const rows=config.rows||[],mine=rows.find(row=>row.reactor===config.user)?.kind;
-    counts.innerHTML=REACTIONS.map(kind=>{const people=rows.filter(row=>row.kind===kind.id),names=people.map(row=>'@'+row.username).join(', ');return people.length?`<span aria-label="${esc(kind.label+': '+names)}">${planetEmoji(kind.id)}<span class="reaction-bubble-people"><b>${esc(kind.short)}${people.length>1?' · '+people.length:''}</b><small>${esc(names)}</small></span></span>`:'';}).join('');
+    counts.innerHTML=REACTIONS.map(kind=>{const people=rows.filter(row=>row.kind===kind.id),names=people.map(row=>'@'+row.username).join(', ');return people.length?`<span aria-label="${esc(kind.label+': '+names)}">${planetEmoji(kind.id)}<span class="reaction-bubble-people"><small>${esc(names)}</small></span></span>`:'';}).join('');
     picker.hidden=!!config.own;for(const button of picker.children){button.setAttribute('aria-pressed',String(button.dataset.bubbleReact===mine));button.disabled=busy||config.loading||config.canReact===false;}
     details.hidden=!config.onDetails;status.textContent=config.loading?'Loading…':config.feedback||(config.own?(rows.length?'Your reactions':'No reactions yet'):'Tap again to remove');makeRoom();position();
   }
