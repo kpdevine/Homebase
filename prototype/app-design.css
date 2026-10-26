@@ -187,6 +187,12 @@ textarea[data-notes],.nutrition-notes textarea[data-notes],.training-notes texta
 .daily-training-card,.weekly-training {padding:16px;min-height:0;height:auto;overflow:visible}
 .training-checkins {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;margin:0 0 16px}
 .training-choice,.creatine-choice {display:grid;grid-template-columns:1fr 1fr;gap:6px;border:0;padding:0;margin:0;min-width:0}
+.alternate-workout-option {margin:0 0 16px;padding:12px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
+.alternate-workout-option>button {width:100%;white-space:normal}
+#alternate-workout-form label {display:block;margin-bottom:8px;font:400 12px/1.4 var(--font-ui)}
+#alternate-workout-description {display:block;width:100%;min-height:90px;resize:vertical;font:400 14px/1.5 var(--font-ui)}
+.alternate-workout-actions {display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+#alternate-workout-status {margin-bottom:0}
 .training-choice legend {font:400 11px/1.35 var(--font-ui);margin:0 0 9px;padding:0;min-height:15px}
 .training-choice label {position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;height:auto;padding:10px 6px;margin:0;color:var(--ui-ink);background:var(--lcd-_b5c5e333,#b5c5e333);border:1px solid var(--ui-line);border-radius:4px}
 .training-choice label span {font:400 12px var(--font-ui)}

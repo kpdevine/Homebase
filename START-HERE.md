@@ -1,3 +1,7 @@
+## October 25 alternate workout
+
+Training → No now offers Log an alternate workout with a required description and explicit Save. A saved alternate earns exactly 5 plus the tracked creatine point, uses no flex rest credit, and appears in private recaps. Rest/lifting switches preserve drafts; historical edits replay rest credits and reopen affected reviews. Regular suite: 262 tests, 261 passed, one emulator-only skip. Phone/browser sample QA verified 5/6 points, rest fallback, validation, persistence and review. See docs/october-25-alternate-workout.md. Deliver source and matching Firebase Hosting through the usual workflow; preserve unrelated server/reminders/policy.mjs changes.
+
 ## October 25 Solar System rating day
 
 The owner requested Yesterday until the member's review is complete, then Today, with an explicit label. The selected day also controls badges and reaction navigation. Shared day scores now include a member-protected boolean reviewComplete, and publication detects completion-only changes. Viewer-local midnight and the separate 1 a.m. check-in boundary are retained. Regular suite: 258 tests, 257 passed, one emulator-only skip; the Firestore emulator security suite passes separately. See docs/october-25-solar-reviewed-rating.md. Deploy Hosting and Firestore rules together through the usual GitHub/Firebase workflow; preserve unrelated server/reminders/policy.mjs changes.

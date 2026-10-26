@@ -36,6 +36,7 @@ export function nutritionScore(day){
 }
 export function trainingReady(day,entries=[]){
   const config=settingsForDay(day).training;
+  if(day.trainingMode==='alternate')return typeof day.alternateWorkout==='string'&&!!day.alternateWorkout.trim();
   const attendance=['training','rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
   return attendance&&(config.mode!=='other'||day.trainingMode!=='training'||typeof day.trainingMinutes==='number');
 }

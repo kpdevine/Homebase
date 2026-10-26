@@ -129,6 +129,7 @@ export function createStore(options = {}) {
   }
   function trainingScores() {return new Map([...days.values()].map(day=>[day.date,trainingProgress(day,loadWeek(day.date)).score]));}
   function restoreDraftTraining(day){if(day.draftTrainingEntries){entries.push(...day.draftTrainingEntries);delete day.draftTrainingEntries;}}
+  function pauseTraining(day){const draft=entries.filter(entry=>entry.date===day.date);if(draft.length){day.draftTrainingEntries=draft;for(let index=entries.length-1;index>=0;index--)if(entries[index].date===day.date)entries.splice(index,1);}}
   function startWorkout(day) {
     if(day.workoutPlan)return;
     const plan=workoutForDay(day,loadWeek(day.date));
@@ -355,14 +356,23 @@ export function createStore(options = {}) {
       const before=trainingScores(),day = writableDay(key),newPolicy=day.creatine===undefined;
       if(newPolicy)day.creatine=false;
       if(mode==='training'){restoreDraftTraining(day);startWorkout(day);}
-      else if(settingsForDay(day).training.mode==='gym'){const draft=entries.filter(entry=>entry.date===key);if(draft.length){day.draftTrainingEntries=draft;for(let index=entries.length-1;index>=0;index--)if(entries[index].date===key)entries.splice(index,1);}}
+      else if(settingsForDay(day).training.mode==='gym')pauseTraining(day);
       if (day.trainingMode !== mode || newPolicy) { day.trainingMode = mode; invalidateReview(day, 'training');reopenChangedTraining(before); }
+    },
+    setAlternateWorkout(key, description) {
+      if(typeof description!=='string'||!description.trim()||description.trim().length>1000)throw new RangeError('Describe your workout in 1–1000 characters.');
+      const before=trainingScores(),day=writableDay(key),text=description.trim();
+      if(day.trainingMode==='alternate'&&day.alternateWorkout===text)return;
+      pauseTraining(day);
+      if(day.creatine===undefined)day.creatine=false;
+      day.trainingMode='alternate';day.alternateWorkout=text;
+      invalidateReview(day,'training');reopenChangedTraining(before);
     },
     dayProgress(key) {
       const day = loadDay(key);
       const dailyEntries = this.loadTrainingDay(key);
       const ready = { nutrition: nutritionScore(day) !== null,
-        training: trainingReady(day,dailyEntries) && (['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) ? (settingsForDay(day).training.mode==='other'||dailyEntries.length === 0) : day.trainingMode === 'training'),
+        training: trainingReady(day,dailyEntries) && (['rest','unplanned-rest','rest-unclassified','alternate'].includes(day.trainingMode) ? (settingsForDay(day).training.mode==='other'||dailyEntries.length === 0) : day.trainingMode === 'training'),
         checklists: true, sentiments:sentimentReady(day),sleep:timeScore(day,'sleep')!==null,prayer:timeScore(day,'prayer')!==null };
       const sections = enabledSections(day).map(section => ({ ...section, ready: ready[section.id], reviewed: !!(ready[section.id]&&(day.reviewed[section.id]===true||section.id==='sentiments'&&day.reviewed.sentiments===undefined&&day.completedAt)) }));
       return { sections, reviewedCount: sections.filter(section => section.reviewed).length,
@@ -380,7 +390,7 @@ export function createStore(options = {}) {
       writableDay(key).completedAt = new Date().toISOString();
     },
   };
-  for (const method of ['updateTime','updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'updateGymEntry','removeGymEntry', 'setTrainingMode', 'setCreatine', 'confirmSection', 'completeDay']) {
+  for (const method of ['updateTime','updateFood','updateTrainingMinutes','updateRating', 'updateNotes', 'updateDayComment', 'updateBodyWeight', 'updateSentiments', 'toggleTask', 'addTask', 'editTask', 'editRoutine', 'removeTask', 'restoreTask', 'stopTemplate', 'setWeekTargets', 'addGymEntry', 'updateGymEntry','removeGymEntry', 'setTrainingMode', 'setAlternateWorkout', 'setCreatine', 'confirmSection', 'completeDay']) {
     const original = store[method];
     store[method] = (...args) => {
       const date=['removeGymEntry','updateGymEntry'].includes(method)?entries.find(entry=>entry.id===args[0])?.date:method==='stopTemplate'?args[1]:args[0];

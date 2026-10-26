@@ -40,7 +40,8 @@ export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
     }
     const policy=settingsForDay(current).training,other=policy.mode==='other';
     if(other&&current.trainingMode==='training')minutesTotal+=current.trainingMinutes||0;
-    const dailySets=other?0:useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest||current.trainingMode==='training';
+    const alternate=current.trainingMode==='alternate',alternateReady=alternate&&typeof current.alternateWorkout==='string'&&!!current.alternateWorkout.trim();
+    const dailySets=other?0:useful+nonUseful,rest=!dailySets&&REST_MODES.includes(current.trainingMode),logged=!!dailySets||rest||current.trainingMode==='training'||alternateReady;
     const goalsComplete=other?minutesTotal>=policy.minuteGoal*(7-policy.flexDays):target>0&&week.groups.every(group=>(totals.get(group.id)||0)>=group.target);
     const restCreditUsed=rest&&(other||target>0)&&!goalsComplete&&restCredits>0;
     const weighted=useful+nonUseful*.25;
@@ -48,9 +49,9 @@ export function trainingProgress(day, week={groups:GROUPS,entries:[],days:[]}) {
     // Missing field means a record saved before daily creatine tracking existed.
     const tracksCreatine=current.configuration?policy.creatine:typeof current.creatine==='boolean';
     const eligible=logged&&(!current.configuration||trainingReady(current,entries));
-    const score=!eligible?null:tracksCreatine?(other||target?Math.round((gymScore*.9+(current.creatine?1:0))*10)/10:(current.creatine?1:0)):gymScore;
+    const score=!eligible?null:alternate?5+(tracksCreatine&&current.creatine?1:0):tracksCreatine?(other||target?Math.round((gymScore*.9+(current.creatine?1:0))*10)/10:(current.creatine?1:0)):gymScore;
     if(restCreditUsed)restCredits--;
-    results.set(current.date,{score,gymScore,tracksCreatine,creatine:current.creatine,logged:eligible,excluded:logged&&!other&&!target&&!tracksCreatine,rest,restCreditUsed,restCredits,goalsComplete,dailySets,useful,nonUseful,weighted});
+    results.set(current.date,{score,gymScore:alternate?5:gymScore,alternate,tracksCreatine,creatine:current.creatine,logged:eligible,excluded:logged&&!alternate&&!other&&!target&&!tracksCreatine,rest,restCreditUsed,restCredits,goalsComplete,dailySets,useful,nonUseful,weighted});
   }
   const groups=week.groups.map(group=>{const actual=totals.get(group.id)||0;return {...group,actual,credited:Math.min(actual,group.target),remaining:Math.max(0,group.target-actual)};});
   const credited=groups.reduce((sum,group)=>sum+group.credited,0),actual=through.reduce((sum,entry)=>sum+entry.sets,0);

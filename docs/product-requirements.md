@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
+## October 25 alternate workout
+
+Training's No answer offers an optional **Log an alternate workout** button. A saved, nonblank description (up to 1,000 characters) replaces rest with an alternate workout worth exactly 5 points plus the tracked creatine point. It consumes no flex credit and adds no lifting volume or goal minutes. Users can switch back to rest or lifting; paused sets keep their IDs. Descriptions persist privately and appear in day and Training recaps. Historical changes replay weekly rest credits and reopen affected reviews. See [implementation and checks](october-25-alternate-workout.md).
+
 ## October 25 orbital meters
 
 The approved orbital meter replaces score-ring presentation throughout the app: continuous bright fills with a dark edge and soft glow, theme-aware rails, centered passive values including decimals, and closer digit spacing for 10. Visible “out of 10” captions are removed while accessible labels retain the scale. Editable controls use a larger planet that changes expression by whole-number score band; four new retro faces mix with seven existing reactions. Passive displays omit the handle. Weekly set targets retain their 0–20 range and scale the treatment accordingly.

@@ -1,3 +1,4 @@
+import {mountAlternateWorkout} from './alternate-training-ui.mjs';
 import {mountTimeLogs} from './time-logs-ui.mjs';
 import {mountViewport} from './viewport.mjs';
 import {mountUIShell} from './ui-shell.mjs';
@@ -52,7 +53,7 @@ let maxSaveTimer;
 let toastTimer;
 let undoAction = null;
 let pendingImport = null;
-let cloud=null,reminders=null,customization=null,uiShell=null,noteSaves=null,socialUI=null,cloudLabel='';
+let cloud=null,reminders=null,customization=null,uiShell=null,noteSaves=null,socialUI=null,alternateWorkoutUI=null,cloudLabel='';
 const clientId=Array.from(crypto.getRandomValues(new Uint8Array(8)),value=>value.toString(16).padStart(2,'0')).join('');
 let view = 'today';
 let selectedDate = appDateKey();
@@ -399,7 +400,7 @@ function renderGym() {
   $('#creatine-taken').checked=day.creatine===true;
   $('#creatine-taken').disabled=archivedDay();
   $('#creatine-status').textContent=day.creatine===true?'Taken':'Not taken yet';
-  const noLift=['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode);
+  const noLift=['rest','unplanned-rest','rest-unclassified','alternate'].includes(day.trainingMode);
   $$('[name="training-mode"]').forEach(input => { input.checked=input.value==='no'?noLift:day.trainingMode==='training';input.disabled=archivedDay(); });
   $('#gym-form').hidden=day.trainingMode!=='training';
   $('#training-mode-hint').hidden=!day.draftTrainingEntries?.length;
@@ -409,6 +410,8 @@ function renderGym() {
   const restReason=pace.goalsComplete?'All weekly goals met':pace.restCreditUsed?'Flexible rest credit used':'No flexible rest credits remaining';
   $('#training-pace').innerHTML=`${circle(pace.score??0,true)}<div>${day.trainingMode==='training'?`<span>${pace.useful} goal set${pace.useful===1?'':'s'} completed${pace.nonUseful?` · ${pace.nonUseful} non-goal set${pace.nonUseful===1?'':'s'}`:''}</span><small>${pace.target?`Daily target · ${pace.dailyTarget} sets`:'No weekly targets set.'}</small>`:''}${pace.rest?`<small>${restReason}</small>`:''}${creatineDetail}</div>`;
   if(pace.mode==='other')$('#training-pace').innerHTML=`${circle(pace.score??0,true)}<div>${pace.rest?`<small>${restReason}</small>`:day.trainingMode==='training'?`<span>${pace.minutes??'—'} / ${pace.minuteGoal} minutes</span>`:''}${creatineDetail}</div>`;
+  if(pace.alternate)$('#training-pace').innerHTML=`${circle(pace.score??0,true)}<div><span>Alternate workout</span><small>5 workout points · no flex credit used</small>${creatineDetail}</div>`;
+  alternateWorkoutUI?.paint();
   $('#daily-training-entries').hidden=noLift;
   $('#daily-training-entries').innerHTML = entries.length ? `<ul>${entries.map(entry => {const credit=pace.classifications.find(value=>value.id===entry.id);return `<li><span><strong>${escapeHtml(store.groupName(entry.date,entry.groupId))}</strong><small>${credit.useful} goal set${credit.useful===1?"":"s"}${credit.nonUseful?` · ${credit.nonUseful} non-goal set${credit.nonUseful===1?"":"s"}`:""}</small></span>${setEntryActions(entry)}</li>`;}).join('')}</ul>` : `<div class="training-empty"><strong>${noLift?'Rest day':day.trainingMode==='training'?'Gym set logging':'No sets logged.'}</strong><p>${noLift?'No sets recorded for this date.':'Your sets will appear here.'}</p></div>`;
   const total = week.entries.reduce((sum, entry) => sum + entry.sets, 0), target = week.groups.reduce((sum, group) => sum + group.target, 0);
@@ -505,7 +508,7 @@ function recapMarkup({final=false}={}) {
   const day=store.loadDay(selectedDate),recap=dailyRecap(day,store.loadTrainingDay(selectedDate),store.loadWeek(selectedDate));
   const status=recap.completed?'✓ '+recap.state:recap.state;
   if(!final&&view==='history'&&calendarFilter!=='all')return filteredRecapMarkup(day,recap);
-  const training=recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.mode==='other'?`${recap.training.minutes??'—'} min`:recap.training.sets+' sets'}</small>`:'—';
+  const training=recap.training.alternateWorkout?'Alternate workout':recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.mode==='other'?`${recap.training.minutes??'—'} min`:recap.training.sets+' sets'}</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
   const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
   return `
@@ -515,6 +518,7 @@ function recapMarkup({final=false}={}) {
     <div class="recap-metrics">${recap.sections.map(section=>`<button ${openSection(section.id)}><span>${escapeHtml(section.label)}</span><strong>${scoreText(section.score)}<small>${section.score===null?'':' / 10'}</small></strong></button>`).join('')}</div>
     ${!recap.hasActivity?`<div class="recap-empty"><strong>Nothing logged for this day.</strong><p>${archived?'This day is saved as a read-only summary.':'Open the day to add an entry.'}${recap.tasks.length?' Scheduled tasks appear below.':''}</p></div>`:''}
     ${settingsForDay(day).tabs.checklists&&recap.tasks.length?`<details class="recap-section" open><summary>To-do list <span>${recap.checklistLogged?`${recap.done} / ${recap.total} done`:'Not checked in'}</span></summary><ul class="recap-tasks">${recap.tasks.map(task=>taskLine(task)+task.children.map(child=>taskLine(child,true)).join('')).join('')}</ul></details>`:recap.checklistLogged?'<p class="recap-no-tasks">No tasks due · reviewed</p>':''}
+    ${settingsForDay(day).tabs.training&&recap.training.alternateWorkout?`<section class="recap-section recap-note"><h4>Alternate workout</h4><p>${escapeHtml(recap.training.alternateWorkout)}</p></section>`:''}
     ${settingsForDay(day).tabs.training&&recap.training.creatine!==undefined?`<p class="recap-creatine"><span>Daily creatine</span><strong>${recap.training.creatine?'✓ Taken':'Not taken'}</strong></p>`:''}
     ${settingsForDay(day).tabs.training&&recap.training.groups.length?`<section class="recap-section"><h4>Training <span>${recap.training.sets} sets</span></h4><ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets}</strong></li>`).join('')}</ul></section>`:''}
     ${recap.notes.filter(note=>settingsForDay(day).tabs[note.section]&&(!final||note.section!=='nutrition')).map(note=>`<section class="recap-section recap-note"><h4>${note.section==='nutrition'?'Nutrition':'Training'} notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}
@@ -523,7 +527,7 @@ function recapMarkup({final=false}={}) {
 function filteredRecapMarkup(day,recap) {
   const id=calendarFilter,label=categoryLabels[id],section=recap.sections.find(section=>section.id===id),value=section?.score??null;
   let detail='';
-  if(id==='training')detail=`<p class="filtered-training-total">${recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.mode==='other'?`${recap.training.minutes??'—'} minutes`:recap.training.sets+' total sets'}`:'No workout logged'}</p>${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
+  if(id==='training')detail=`<p class="filtered-training-total">${recap.training.alternateWorkout?'Alternate workout':recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.mode==='other'?`${recap.training.minutes??'—'} minutes`:recap.training.sets+' total sets'}`:'No workout logged'}</p>${recap.training.alternateWorkout?`<section class="recap-note"><h4>What you did</h4><p>${escapeHtml(recap.training.alternateWorkout)}</p></section>`:''}${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
   if(id==='nutrition')detail=recap.notes.filter(note=>note.section==='nutrition').map(note=>`<section class="recap-note"><h4>Nutrition notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('');
   if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span>${escapeHtml(task.name)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
   if(['sleep','prayer'].includes(id))detail=`<p>${escapeHtml(section?.detail||'No time logged.')}</p>`;
@@ -1248,6 +1252,7 @@ function refreshClock() {
 socialUI=mountSocial({getStore:()=>store,today:editableToday,getCloud:()=>cloud,showFriends:()=>setView('friends'),preview,scoreCircle:circle});
 customization=mountCustomization({getStore:()=>store,getDate:()=>selectedDate,today:editableToday,render,announce,preview,getStartup:()=>({cloudStatus:cloud?.status()||'loading',hasUser:cloud?.hasUser()||false,error:!!storageError})});
 uiShell=mountUIShell({getStore:()=>store,getDate:()=>selectedDate,getView:()=>view,onDeleteTask:()=>{if(!taskEdit)return;const {date,id}=taskEdit;closeDialog($('#task-dialog'));taskEdit=null;removeTaskFromDay(date,id);}});
+alternateWorkoutUI=mountAlternateWorkout({getStore:()=>store,getDate:()=>selectedDate,isArchived:archivedDay,render,announce});
 noteSaves=mountNoteSaves({save:()=>{flushSave();return !storageError&&!blockedSave;},getDate:()=>selectedDate,isEditable:()=>!archivedDay()});
 refreshClock();
 setInterval(refreshClock,15000);

@@ -52,7 +52,9 @@ export function validateSnapshot(value) {
     const occurrences=tasks.filter(task=>task.templateId).map(task=>task.templateId);
     assert(new Set(occurrences).size===occurrences.length && occurrences.every(id=>!skippedTemplates.includes(id)),'duplicate recurring occurrence.');
     assert(validScore(day.nutrition) && validScore(day.sampleOverall ?? null), 'rating.');
-    assert(day.trainingMode === null || ['training', 'rest', 'unplanned-rest', 'rest-unclassified'].includes(day.trainingMode), 'day type.');
+    assert(day.trainingMode === null || ['training', 'rest', 'unplanned-rest', 'rest-unclassified', 'alternate'].includes(day.trainingMode), 'day type.');
+    assert(day.alternateWorkout===undefined||typeof day.alternateWorkout==='string'&&day.alternateWorkout.length<=1000,'alternate workout.');
+    assert(day.trainingMode!=='alternate'||trainingReady(day),'alternate workout description.');
     assert(day.creatine===undefined||day.creatine===null||typeof day.creatine==='boolean','creatine check-in.');
     assert(day.reviewed && sectionIds.every(id => typeof day.reviewed[id] === 'boolean'), 'review state.');
     assert(validTimestamp(day.completedAt), 'completion timestamp.');
@@ -86,8 +88,8 @@ export function validateSnapshot(value) {
     assert(day.trainingMinutes===undefined||day.trainingMinutes===null||typeof day.trainingMinutes==='number'&&Number.isFinite(day.trainingMinutes)&&day.trainingMinutes>=0&&day.trainingMinutes<=1440,'training minutes.');
     assert(!day.reviewed.sentiments||sentimentReady(day),'required sentiment rating.');
     let draftTrainingEntries;
-    if(day.draftTrainingEntries!==undefined){assert(Array.isArray(day.draftTrainingEntries)&&day.draftTrainingEntries.length<=10000&&['rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode),'paused set entries.');draftTrainingEntries=day.draftTrainingEntries.map(entry=>{assert(entry&&validId(entry.id)&&!ids.has(entry.id)&&entry.date===day.date&&validGroup(entry.groupId)&&Number.isInteger(entry.sets)&&entry.sets>=1&&entry.sets<=100,'paused set entry.');ids.add(entry.id);return {id:entry.id,date:entry.date,groupId:entry.groupId,sets:entry.sets};});}
-    return { ...(draftTrainingEntries?{draftTrainingEntries}:{}),...Object.fromEntries(['sleep','prayer'].filter(id=>day[id]!==undefined).map(id=>[id,{minutes:day[id].minutes}])),...(configuration?{configuration}:{}),...(food?{food:{protein:food.protein,calories:food.calories}}:{}),...(day.trainingMinutes!==undefined?{trainingMinutes:day.trainingMinutes}:{}),date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
+    if(day.draftTrainingEntries!==undefined){assert(Array.isArray(day.draftTrainingEntries)&&day.draftTrainingEntries.length<=10000&&['rest','unplanned-rest','rest-unclassified','alternate'].includes(day.trainingMode),'paused set entries.');draftTrainingEntries=day.draftTrainingEntries.map(entry=>{assert(entry&&validId(entry.id)&&!ids.has(entry.id)&&entry.date===day.date&&validGroup(entry.groupId)&&Number.isInteger(entry.sets)&&entry.sets>=1&&entry.sets<=100,'paused set entry.');ids.add(entry.id);return {id:entry.id,date:entry.date,groupId:entry.groupId,sets:entry.sets};});}
+    return { ...(day.alternateWorkout!==undefined?{alternateWorkout:day.alternateWorkout}:{}),...(draftTrainingEntries?{draftTrainingEntries}:{}),...Object.fromEntries(['sleep','prayer'].filter(id=>day[id]!==undefined).map(id=>[id,{minutes:day[id].minutes}])),...(configuration?{configuration}:{}),...(food?{food:{protein:food.protein,calories:food.calories}}:{}),...(day.trainingMinutes!==undefined?{trainingMinutes:day.trainingMinutes}:{}),date: day.date, ...(day.creatine!==undefined?{creatine:day.creatine}:{}), tasks, checklistTouched, skippedTemplates:[...skippedTemplates], nutrition: day.nutrition, sampleOverall: day.sampleOverall ?? null, trainingMode: day.trainingMode, notes: { nutrition:notes.nutrition, training:notes.training }, comment, bodyWeight:bodyWeight?{value:bodyWeight.value,unit:bodyWeight.unit}:null, sentiments:{notes:sentiments.notes,rating:sentiments.rating}, reviewed, completedAt: day.completedAt,...(workoutPlan?{workoutPlan}:{}) };
   });
   const entries = value.entries.map(entry => {
     assert(entry && validId(entry.id) && !ids.has(entry.id), 'duplicate entry ID.'); ids.add(entry.id);
@@ -98,7 +100,7 @@ export function validateSnapshot(value) {
     const hasSets = settingsForDay(day).training.mode==='gym'&&entries.some(entry => entry.date === day.date);
     assert(!(day.trainingMode === 'rest' && hasSets), 'rest day with set entries.');
     assert(!hasSets || day.trainingMode === 'training', 'set entries without a training day.');
-    assert(!day.reviewed.training || ['training','rest','unplanned-rest','rest-unclassified'].includes(day.trainingMode) || hasSets, 'training review without a log.');
+    assert(!day.reviewed.training || ['training','rest','unplanned-rest','rest-unclassified','alternate'].includes(day.trainingMode) || hasSets, 'training review without a log.');
   }
   const weeks = new Set();
   const targets = value.targets.map(pair => {
