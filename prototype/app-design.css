@@ -989,7 +989,7 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-member-detail {display:flex;flex-direction:column;gap:8px;min-width:0}
 .solar-score-panel {display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:10px;padding:12px 9px;min-height:110px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
 .solar-yesterday,.solar-month {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-width:0}
-.solar-stat-label {font:400 9px/1.4 var(--font-ui);color:var(--ui-ink)}
+.solar-stat-label {font:700 9px/1.4 var(--font-ui);color:var(--ui-ink)}
 .leaderboard .solar-yesterday .score-circle {width:60px;height:60px;min-width:60px;filter:drop-shadow(0 0 4px rgb(255 255 255 / .25))}
 .leaderboard .solar-yesterday .score-circle>span {font-size:22px}
 .solar-yesterday .solar-open-day {min-height:0;min-width:0;padding:2px;display:grid;place-items:center}
@@ -1000,7 +1000,7 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-log-count {text-align:center;min-width:0}
 .solar-log-count strong {display:block;font:700 24px/1.2 var(--font-display);color:var(--ui-ink);margin-bottom:5px}
 .solar-log-count span {display:block;font:400 8px/1.45 var(--font-ui)}
-.solar-log-count .solar-consecutive-streak {display:block;margin:0 0 8px;font:700 10px/1.4 var(--font-ui);color:var(--ui-ink);text-shadow:0 0 4px #a16c12,0 0 10px rgb(255 197 54 / .85),0 0 18px rgb(255 187 32 / .45);overflow-wrap:anywhere}
+.solar-log-count .solar-consecutive-streak {position:relative;left:50%;display:block;width:max-content;margin:0 0 12px;font:700 clamp(11px,1.25vw,13px)/1.3 var(--font-ui);white-space:nowrap;color:var(--ui-ink);transform:translateX(-50%) rotate(-4deg);text-shadow:0 0 2px #fff0a6,0 0 5px #ffdf62,0 0 10px #ffca36,0 0 18px rgb(255 185 16 / .95);filter:drop-shadow(0 0 6px rgb(255 198 39 / .65))}
 .solar-log-count small {display:block;font:400 7px/1.5 var(--font-ui);color:var(--ui-muted);margin-top:7px}
 .solar-vibes {display:flex;align-items:center;gap:7px;min-height:38px;padding:8px 10px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-panel)}
 .solar-vibes p {flex:1;min-width:0;margin:0;font:400 11px/1.5 var(--font-ui);overflow-wrap:anywhere;white-space:pre-wrap;color:var(--ui-muted)}
