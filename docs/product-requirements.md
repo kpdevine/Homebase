@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
+## October 25 quick reactions and editable usernames
+
+Score and whole-vibes taps open a small anchored reaction bubble with every planet visible without scrolling. Use six columns normally and five on narrow phones so small-iPhone emojis remain readable. Keep badges at the top right of their target. My planet & vibes fits the text field, all planet choices and Save on one sheet, adapting to keyboard space. Solar Systems offers Change username: reserve an available valid name atomically, preserve the UID and all records, and release the old handle. Live friend and member names follow the public profile; pending membership requests remain acceptable after renaming. See [behavior and checks](october-25-quick-reactions-usernames.md). This supersedes the full reaction picker as the default score/vibes tap interaction.
+
 ## October 25 Current vibes reactions and alerts
 
 Solar System members can react to nonblank Current vibes using the same planet picker, toggle behavior and names/counts as day scores. A new vibes text starts a new reaction version; picture-only edits retain the version. Authors can view reactions and cannot react to themselves. Immediate push alerts cover both day-score and Current vibes reactions on the recipient's registered devices. The backend verifies the saved reaction and membership using the reactor's Firebase token; it deduplicates alerts per reactor/status or day and limits bursts. Deletions do not notify. Notifications show the reactor and reaction, omit status text/private logs, and open Solar Systems when tapped. See [implementation and verification](october-25-reaction-notifications.md).

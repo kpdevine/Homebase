@@ -11,11 +11,18 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if validProfile(request.resource.data) && request.resource.data.username == name
         && getAfter(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username == name;
+      allow delete: if self(resource.data.uid)
+        && get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username == name
+        && getAfter(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username != name;
     }
     match /publicProfiles/{uid} {
       allow read: if signedIn();
       allow create: if self(uid) && validProfile(request.resource.data) && request.resource.data.uid == uid
         && getAfter(/databases/$(database)/documents/handles/$(request.resource.data.username)).data.uid == uid;
+      allow update: if self(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['username'])
+        && request.resource.data.username is string && request.resource.data.username.matches('[a-z][a-z0-9_]{2,19}')
+        && getAfter(/databases/$(database)/documents/handles/$(request.resource.data.username)).data.uid == uid
+        && !existsAfter(/databases/$(database)/documents/handles/$(resource.data.username));
     }
     match /friendRequests/{id} {
       function participant() {return signedIn() && (resource.data.recipient == request.auth.uid || resource.data.requester == request.auth.uid);}
