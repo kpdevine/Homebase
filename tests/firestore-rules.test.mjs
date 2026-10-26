@@ -44,6 +44,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     assert.equal(await dana.profile(),null);await dana.claim('dana_planet');await eli.claim('eli_planet');assert.equal((await dana.search('eli'))[0].uid,'eli');
     await dana.request('eli');await eli.accept('dana~eli');
     const summary={appDate:'2026-10-21',month:'2026-10',yesterdayDate:'2026-10-20',yesterdayScore:9,monthScore:8.4,daysLogged:5,totalDaysLogged:40};
+    await assertSucceeds(dana.publish('dana_planet',{...summary,consecutiveStreak:5,streakEndDate:'2026-10-20'}));
+    for(const invalid of [{consecutiveStreak:41,streakEndDate:'2026-10-20'},{consecutiveStreak:3.5,streakEndDate:'2026-10-20'},{consecutiveStreak:5,streakEndDate:'2026-10-19'},{consecutiveStreak:0,streakEndDate:'2026-10-20'}])await assertFails(dana.publish('dana_planet',{...summary,...invalid}));
     await dana.publish('dana_planet',summary);
     assert.equal((await getDoc(doc(env.authenticatedContext('eli').firestore(),'socialScores','dana'))).data().daysLogged,5);
     let unwatch;

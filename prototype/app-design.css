@@ -1000,6 +1000,7 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-log-count {text-align:center;min-width:0}
 .solar-log-count strong {display:block;font:700 24px/1.2 var(--font-display);color:var(--ui-ink);margin-bottom:5px}
 .solar-log-count span {display:block;font:400 8px/1.45 var(--font-ui)}
+.solar-log-count .solar-consecutive-streak {display:block;margin:0 0 8px;font:700 10px/1.4 var(--font-ui);color:var(--ui-ink);text-shadow:0 0 4px #a16c12,0 0 10px rgb(255 197 54 / .85),0 0 18px rgb(255 187 32 / .45);overflow-wrap:anywhere}
 .solar-log-count small {display:block;font:400 7px/1.5 var(--font-ui);color:var(--ui-muted);margin-top:7px}
 .solar-vibes {display:flex;align-items:center;gap:7px;min-height:38px;padding:8px 10px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-panel)}
 .solar-vibes p {flex:1;min-width:0;margin:0;font:400 11px/1.5 var(--font-ui);overflow-wrap:anywhere;white-space:pre-wrap;color:var(--ui-muted)}

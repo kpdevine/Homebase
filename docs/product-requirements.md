@@ -1,5 +1,7 @@
 # Pocket Planet product requirements
 
+Solar Systems show a gold-glowing “N day consecutive streak!” line above each member's monthly logged-day block only for current logging streaks of at least three. Count consecutive fully logged dates across months, retain yesterday's streak while today is pending, and hide stale counts after a missed day. Share only the count and ending date with the normal member summary. See [validation](solar-consecutive-streak.md).
+
 Updated October 25, 2026. This is the current application specification; older design documents retain the planning history.
 
 ## Reaction and workout interaction refinements

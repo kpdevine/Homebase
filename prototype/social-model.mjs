@@ -9,8 +9,11 @@ export function leaderboardSummary(store,today){
   const yesterday=addDays(today,-1),month=today.slice(0,7),days=store.exportSnapshot().days.filter(day=>day.date<=today),logged=[];
   for(const day of days){const summary=summarizeDay(store.loadDay(day.date),store.loadTrainingDay(day.date),store.loadWeek(day.date));if(fullyLogged(summary)&&summary.score!==null)logged.push({date:day.date,score:summary.score});}
   const monthly=logged.filter(day=>day.date.startsWith(month));
-  return {appDate:today,month,yesterdayDate:yesterday,yesterdayScore:logged.find(day=>day.date===yesterday)?.score??null,monthScore:monthly.length?Math.round(monthly.reduce((sum,day)=>sum+day.score,0)/monthly.length*10)/10:null,daysLogged:monthly.length,totalDaysLogged:logged.length};
+  const dates=new Set(logged.map(day=>day.date)),end=dates.has(today)?today:yesterday;let date=end,consecutiveStreak=0;
+  while(consecutiveStreak<20000&&dates.has(date)){consecutiveStreak++;date=addDays(date,-1);}
+  return {appDate:today,month,yesterdayDate:yesterday,yesterdayScore:logged.find(day=>day.date===yesterday)?.score??null,monthScore:monthly.length?Math.round(monthly.reduce((sum,day)=>sum+day.score,0)/monthly.length*10)/10:null,daysLogged:monthly.length,totalDaysLogged:logged.length,consecutiveStreak,streakEndDate:consecutiveStreak?end:null};
 }
+export function solarStreakText(member,today){return Number.isInteger(member.consecutiveStreak)&&member.consecutiveStreak>=3&&[today,addDays(today,-1)].includes(member.streakEndDate)?`${member.consecutiveStreak} day consecutive streak!`:'';}
 export function rankLeaderboard(rows,month){return [...rows].sort((a,b)=>((b.month===month?b.monthScore:null)??-1)-((a.month===month?a.monthScore:null)??-1)||(b.month===month?b.daysLogged:0)-(a.month===month?a.daysLogged:0)||a.username.localeCompare(b.username));}
 export function monthlyRanks(rows,month){
   const ranked=rankLeaderboard(rows,month).filter(row=>row.month===month&&Number.isFinite(row.monthScore)&&row.daysLogged>0);

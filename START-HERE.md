@@ -1,3 +1,7 @@
+## Solar System consecutive streak
+
+The owner requested a gold-glowing “5 day consecutive streak!” line above days logged this month specifically in Solar Systems, shown only at three days and above. It uses consecutive fully logged dates, retains yesterday while today is pending, crosses months, and hides stale shared counts. Shared summary fields are backward-compatible and rule-validated. Checks: 267 regular tests passed, one emulator-only skip; expanded Firestore emulator suite passed. See docs/solar-consecutive-streak.md. Publish rules and Hosting together; preserve unrelated reminder policy changes.
+
 ## Reaction toggle and workout follow-up
 
 The owner requested second-tap dismissal, visible reaction authors, larger own-planet choices, no text/number selection highlighting, No workout today wording, and collapse-after-Save for alternate workouts. These are implemented and browser-checked, including actual score/vibes taps and separate sample workout saves. The disconnected Solar demo had a fake username changer; it is now disabled in preview mode with a live-app link, and the ignored fixture rejects fake renames. Real uniqueness transactions/rules are unchanged. Regular suite: 264 passed, one emulator-only skip. See docs/reaction-toggle-and-workout-polish.md. Publish Hosting only and preserve unrelated reminder policy changes.

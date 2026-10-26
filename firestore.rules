@@ -60,7 +60,7 @@ service cloud.firestore {
     }
     function validSummary(uid) {
       return self(uid)
-        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes','vibesVersion'])
+        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes','vibesVersion','consecutiveStreak','streakEndDate'])
         && validAppearance(request.resource.data)
         && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
         && request.resource.data.appDate is string && request.resource.data.appDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
@@ -69,6 +69,10 @@ service cloud.firestore {
         && score(request.resource.data.yesterdayScore) && score(request.resource.data.monthScore)
         && request.resource.data.daysLogged is int && request.resource.data.daysLogged >= 0 && request.resource.data.daysLogged <= 31
         && request.resource.data.totalDaysLogged is int && request.resource.data.totalDaysLogged >= request.resource.data.daysLogged && request.resource.data.totalDaysLogged <= 20000
+        && request.resource.data.get('consecutiveStreak',0) is int && request.resource.data.get('consecutiveStreak',0) >= 0
+        && request.resource.data.get('consecutiveStreak',0) <= request.resource.data.totalDaysLogged
+        && (request.resource.data.get('consecutiveStreak',0) == 0 && request.resource.data.get('streakEndDate',null) == null
+          || request.resource.data.get('consecutiveStreak',0) > 0 && request.resource.data.get('streakEndDate',null) in [request.resource.data.appDate,request.resource.data.yesterdayDate])
         && request.resource.data.updatedAt == request.time;
     }
     match /socialScores/{uid} {
