@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStore,addDays} from '../prototype/model.mjs';
 import {newUserSettings} from '../prototype/customization.mjs';
-import {leaderboardSummary,solarStreakText} from '../prototype/social-model.mjs';
+import {leaderboardSummary,solarStreakText,solarMemberStreak} from '../prototype/social-model.mjs';
 const today='2026-11-02';
 function setup(){const settings=newUserSettings();for(const id of Object.keys(settings.tabs))settings.tabs[id]=id==='nutrition';return createStore({seed:false,today,settings});}
 test('Solar consecutive logging streak crosses months and keeps yesterday until today is logged',()=>{
@@ -24,4 +24,11 @@ test('Solar streak label starts at three and hides stale, future and legacy valu
   assert.equal(solarStreakText({consecutiveStreak:3,streakEndDate:today},today),'3 day consecutive streak!');
   for(const end of [addDays(today,-2),addDays(today,1),null])assert.equal(solarStreakText({consecutiveStreak:5,streakEndDate:end},today),'');
   assert.equal(solarStreakText({},today),'');
+});
+test('every member can derive a streak from shared days before publishing the new summary fields',()=>{
+  const days=[];for(let offset=0;offset<7;offset++)days.push({uid:'friend',date:addDays(today,-offset),score:0});
+  days.push({uid:'other',date:today,score:9},{uid:'friend',date:addDays(today,1),score:10});
+  const friend=solarMemberStreak({uid:'friend'},days,today);assert.equal(friend.consecutiveStreak,7);assert.equal(solarStreakText(friend,today),'7 day consecutive streak!');
+  assert.equal(solarMemberStreak({uid:'other'},days,today).consecutiveStreak,1);
+  assert.equal(solarMemberStreak({uid:'friend',consecutiveStreak:70,streakEndDate:today},days,today).consecutiveStreak,70);
 });

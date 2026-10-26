@@ -1,5 +1,5 @@
 import {addDays} from './model.mjs';
-import {REACTIONS,solarAppearance} from './social-model.mjs';
+import {REACTIONS,solarAppearance,solarMemberStreak} from './social-model.mjs';
 import {lateCheckInWindow} from './day-clock.mjs';
 import {REACTION_ASSETS} from './reaction-assets.mjs';
 import {watchSolarDateWindow} from './solar-date-window.mjs';
@@ -47,6 +47,9 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
   const reactionBubble=mountReactionBubble({planetEmoji});
   const vibesUI=mountVibesReactions({getApi:api,getUser,getPerson:uid=>{const person=members.find(row=>row.uid===uid);return person&&uid===getUser()?.uid?{...person,...state.appearance}:person;},changed,bubble:reactionBubble});
   let quickStop=null,quickRun=0;
+  let streakStop=null,streakKey='',streakDays=[];
+  function stopStreaks(){streakStop?.();streakStop=null;streakKey='';streakDays=[];}
+  function watchStreaks(){const key=primary&&members.some(row=>!Number.isInteger(row.consecutiveStreak))?primary+'~'+today():'';if(key===streakKey)return;stopStreaks();if(!key)return;streakKey=key;const active=run;streakStop=api().watchStreakDays(primary,today(),rows=>{if(active!==run||key!==streakKey)return;streakDays=rows;changed();},()=>{});}
   let ratingStop=null,ratingKey='',yesterdayDays=[],yesterdayReady=false;
   function stopRatingWindow(){ratingStop?.();ratingStop=null;ratingKey='';yesterdayDays=[];yesterdayReady=false;ratingDays=new Map();ratingReactions=new Map();boardReactions=[];}
   let ratingDays=new Map(),ratingReactions=new Map();
@@ -70,7 +73,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     if(next){const active=run;boardStop=api().watchBoard(next,rows=>{if(active!==run||primary!==next)return;members=rows;loading=false;changed();},error=>{if(active===run){loading=false;message('Solar System could not connect. '+error.message);changed();}});}
   }
   function stopEvening(){eveningStop?.();eveningStop=null;eveningKey='';eveningDays=[];eveningLoading=false;eveningError=false;}
-  function reset(){reactionBubble.close();vibesUI.reset();stopEvening();stopRatingWindow();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
+  function reset(){stopStreaks();reactionBubble.close();vibesUI.reset();stopEvening();stopRatingWindow();managementAutoOpened=false;run++;renameGroup=null;renameName='';renaming=false;$('#solar-rename-name').value='';$('#solar-rename-name').disabled=false;$('#solar-rename-save').disabled=false;$('#solar-rename-save').textContent='Save name';$('#solar-rename-feedback').textContent='';stop?.();boardStop?.();dayStop?.();stop=boardStop=dayStop=null;state={groups:[],requests:[],invitations:[],primaryId:null};members=[];results=[];primary=null;dayTarget=null;loading=true;if(dayDialog.open)dayDialog.close();if(confirm.open)confirm.close();if(profileDialog.open)profileDialog.close();}
   function connect(){reset();if(!api())return;const active=run;stop=api().watch(value=>{if(active!==run)return;state=value;watchPrimary();changed();},error=>{if(active===run)message('Solar Systems could not connect. '+error.message);});}
   $('#solar-create').onsubmit=event=>{event.preventDefault();action(async()=>{await api().create($('#solar-name').value);$('#solar-name').value='';});};
   $('#solar-search').onsubmit=event=>{event.preventDefault();action(async()=>{results=await api().search($('#solar-query').value);replace('#solar-results',results.length?'':'<li>No Solar Systems found.</li>');});};
@@ -104,7 +107,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-connected').hidden=!profile;$('#solar-title').textContent=group?.groupName||'Your Solar System';
     $('#solar-subtitle').hidden=!group;$('#solar-member-count').hidden=!group;
     $('#solar-member-count strong').textContent=loading?'—':members.length;$('#solar-member-count span').textContent=members.length===1?'member':'members';
-    watchRatingDays();vibesUI.sync(primary);vibesUI.paint();paintEvening(ownLogged);
+    watchRatingDays();watchStreaks();vibesUI.sync(primary);vibesUI.paint();paintEvening(ownLogged);
     const ownsSystem=!!state.ownedGroupId||state.groups.some(value=>value.owner===user?.uid);
     $('#solar-create').hidden=ownsSystem;
     $('#solar-rename').hidden=!owner;
@@ -130,7 +133,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#delete-solar').hidden=!owner;
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
     const date=today(),yesterday=addDays(date,-1),scores=new Map(yesterdayDays.map(day=>[day.uid,day.score])),current=new Map((ratingDays.get(date)||[]).map(day=>[day.uid,day]));
-    const datedMembers=members.map(member=>({...member,yesterdayDate:yesterday,yesterdayScore:yesterdayReady?scores.get(member.uid)??null:member.yesterdayDate===yesterday?member.yesterdayScore??null:null,todayDate:date,todayScore:current.get(member.uid)?.score??null,todayReviewComplete:current.get(member.uid)?.reviewComplete===true}));
+    const datedMembers=members.map(member=>({...solarMemberStreak(member,streakDays,date),yesterdayDate:yesterday,yesterdayScore:yesterdayReady?scores.get(member.uid)??null:member.yesterdayDate===yesterday?member.yesterdayScore??null:null,todayDate:date,todayScore:current.get(member.uid)?.score??null,todayReviewComplete:current.get(member.uid)?.reviewComplete===true}));
     return {members:datedMembers,primary,loading,reactions:boardReactions,vibeReactions:vibesUI.reactions(),owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
   function paintDay(){

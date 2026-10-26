@@ -1,5 +1,7 @@
 ## Solar System consecutive streak
 
+Follow-up: streaks also derive from existing member-only shared days for members missing the new metadata, so they do not have to reopen the app first. Modern published counts preserve longer streaks. Rotation is now ±1.5° over 3.6s; phone labels use smaller type and right alignment to stay within the card. Both seven-day fallback and five-day published sample streaks fit at 320px width. Checks: 268 passed, one emulator-only skip; emulator query/security suite passed.
+
 The owner requested a gold-glowing “5 day consecutive streak!” line above days logged this month specifically in Solar Systems, shown only at three days and above. It uses consecutive fully logged dates, retains yesterday while today is pending, crosses months, and hides stale shared counts. Shared summary fields are backward-compatible and rule-validated. Checks: 267 regular tests passed, one emulator-only skip; expanded Firestore emulator suite passed. See docs/solar-consecutive-streak.md. Publish rules and Hosting together; preserve unrelated reminder policy changes.
 
 ## Reaction toggle and workout follow-up
