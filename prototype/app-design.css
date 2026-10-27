@@ -1003,8 +1003,8 @@ button.solar-profile-avatar:hover {border-color:var(--ui-light);box-shadow:0 0 9
 .solar-log-count .solar-consecutive-streak {position:relative;left:50%;display:block;width:max-content;margin:0 0 3px;font:700 clamp(11px,1.25vw,13px)/1.3 var(--font-ui);white-space:nowrap;color:var(--ui-ink);transform:translateX(-50%) rotate(-1.5deg);text-shadow:0 0 2px #fff0a6,0 0 5px #ffdf62,0 0 10px #ffca36,0 0 18px rgb(255 185 16 / .95);filter:drop-shadow(0 0 6px rgb(255 198 39 / .65));animation:solar-streak-rock 3.6s ease-in-out infinite}
 @keyframes solar-streak-rock {0%,100% {transform:translateX(-50%) rotate(-1.5deg)}50% {transform:translateX(-50%) rotate(1.5deg)}}
 @keyframes solar-streak-rock-phone {0%,100% {transform:translateX(-100%) rotate(-1.5deg)}50% {transform:translateX(-100%) rotate(1.5deg)}}
-@media(max-width:600px){.solar-log-count .solar-consecutive-streak {left:100%;font-size:9px;line-height:1.2;transform:translateX(-100%) rotate(-1.5deg);animation-name:solar-streak-rock-phone}}
-@media(max-width:350px){.solar-log-count .solar-consecutive-streak {font-size:8px}}
+@media(max-width:600px){.solar-log-count .solar-consecutive-streak {left:100%;font-size:7px;line-height:1.15;transform:translateX(-100%) rotate(-1.5deg);animation-name:solar-streak-rock-phone;text-shadow:0 0 2px #fff0a6,0 0 4px #ffdf62,0 0 8px #ffca36;filter:drop-shadow(0 0 3px rgb(255 198 39 / .65))}}
+@media(max-width:350px){.solar-log-count .solar-consecutive-streak {font-size:6.5px}}
 @media(prefers-reduced-motion:reduce){html:not([data-motion=full]) .solar-log-count .solar-consecutive-streak {animation:none}}
 html[data-motion=reduced] .solar-log-count .solar-consecutive-streak {animation:none}
 .solar-log-count small {display:block;font:400 7px/1.5 var(--font-ui);color:var(--ui-muted);margin-top:7px}
