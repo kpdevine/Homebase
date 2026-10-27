@@ -20,7 +20,9 @@ import { bindMeterDrag } from './meter-drag.mjs';
 import {drawOrbitalMeter,orbitalCircle} from './orbital-meter.mjs';
 import { buildAchievements,sortAchievements,firstAchievementUnlocks } from './achievements.mjs';
 import { achievementIcon } from './achievement-icons.mjs';
-import {needsWelcome,profileName} from './onboarding.mjs';
+import {needsWelcome,profileName,googleFirstName} from './onboarding.mjs';
+import {createAccountWorkspace} from './account-workspace.mjs';
+import {firebaseConfig} from './firebase-config.mjs';
 import {snapshotRecords} from './cloud-records.mjs';
 import {createRecordEdits} from './record-edits.mjs';
 import {workspaceBusy} from './interaction-guard.mjs';
@@ -107,11 +109,12 @@ $('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="ta
 $('.task-date-shortcuts').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-task-when="2" aria-pressed="false">Later this week</button>');
 $('.task-date-shortcuts').insertAdjacentHTML('afterend','<div id="task-week-options" class="task-week-options" role="group" aria-label="Choose a date later this week" hidden></div>');
 const expandedTasks = new Set(),autoExpandedTasksSeen=new Set();
-let displayName = 'Kieran';
+let displayName = preview?'Kieran':'Friend';
+let signedInUser=null,socialAccountUid=null,accountRestored=false,waitingForAccount=false;
 let preferences={},motionPreference='full';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
 if(profileName(preferences.name))displayName=profileName(preferences.name);
-const welcomeRequired=needsWelcome({preview,preferences,snapshot:loaded.snapshot,error:loaded.error});
+const welcomeRequired=!preview&&!loaded.error&&(!preferences.googleWelcomeSeen||needsWelcome({preview,preferences,snapshot:loaded.snapshot,error:loaded.error}));
 if(welcomeRequired)displayName='';
 let welcomeGoogleAttempt=!!preferences.welcomeGooglePending;
 motionPreference=setMotionPreference(preferences.motion);
@@ -123,8 +126,33 @@ const achievementNotified=new Set(Array.isArray(preferences.achievementNotified)
 for(const card of buildAchievements(store,editableToday()).cards)if(card.count&&(card.first<editableToday()||store.loadDay(card.first).completedAt))achievementNotified.add(card.id);
 const editsKey=`homebase.record-edits.v1${suffix}`;
 let initialSyncRecords=new Map();try{initialSyncRecords=snapshotRecords(store.exportSnapshot());}catch{}
-const recordEdits=createRecordEdits({records:initialSyncRecords,load:()=>JSON.parse(localStorage.getItem(editsKey)),save:value=>localStorage.setItem(editsKey,JSON.stringify(value))});
+let recordEdits=createRecordEdits({records:initialSyncRecords,load:()=>JSON.parse(localStorage.getItem(editsKey)),save:value=>localStorage.setItem(editsKey,JSON.stringify(value))});
 function captureRecordEdits(snapshot,at=Date.now()){try{recordEdits.capture(snapshotRecords(snapshot),at);}catch{/* Timestamp metadata must never prevent local saving. */}}
+function applyPreferences(saved) {
+  preferences=saved||{};displayName=profileName(preferences.name)||googleFirstName(signedInUser?.displayName);
+  motionPreference=setMotionPreference(preferences.motion);window.pocketTheme.apply(preferences.theme);
+}
+function restoreAccountPreferences() {
+  const account=store.getSettings().accountPreferences;
+  if(account){applyPreferences({...preferences,name:account.firstName,theme:account.theme,motion:account.motion,welcomed:true,googleWelcomeSeen:true});localStorage.setItem(preferencesKey,JSON.stringify(preferences));}
+}
+function saveAccountPreferences() {
+  if(!signedInUser||!accountRestored)return;
+  store.setAccountPreferences({firstName:profileName(displayName)||googleFirstName(signedInUser.displayName),theme:preferences.theme==='mars'?'mars':'blue',motion:motionPreference});
+}
+const accountWorkspaces=preview?null:createAccountWorkspace({storage:localStorage,project:firebaseConfig.projectId,
+  read:()=>({snapshot:store.exportSnapshot(),preferences,edits:JSON.parse(localStorage.getItem(editsKey)||'null')}),
+  fresh:()=>({snapshot:createStore({clientId,editableToday,today:editableToday(),seed:false,settings:newUserSettings()}).exportSnapshot(),preferences:{},edits:null}),
+  hasLegacyAccount:uid=>localStorage.getItem('homebase.cloud-enabled.v1.'+firebaseConfig.projectId+'.'+uid)==='true'||!!localStorage.getItem('homebase.cloud-base.v1.'+firebaseConfig.projectId+'.'+uid),
+  apply:workspace=>{
+    const snapshot=validateSnapshot(workspace.snapshot),nextStore=createStore({clientId,editableToday,snapshot,seed:false,onChange:queueSave});
+    localStorage.setItem(preferencesKey,JSON.stringify(workspace.preferences||{}));localStorage.setItem(editsKey,JSON.stringify(workspace.edits));
+    const raw=writeLocal(storage,snapshot);
+    store=nextStore;lastSavedRaw=raw;pendingSnapshot=null;storageError=null;blockedSave=false;
+    recordEdits=createRecordEdits({records:snapshotRecords(snapshot),load:()=>workspace.edits,save:value=>localStorage.setItem(editsKey,JSON.stringify(value))});
+    applyPreferences(workspace.preferences);restoreAccountPreferences();selectedDate=editableToday();calendarMonth=selectedDate;reviewSessionDate=null;expandedTasks.clear();achievementNotified.clear();view='today';render();
+  },
+});
 const dateFormat = (key, options) => new Intl.DateTimeFormat('en-US', { ...options, timeZone:'UTC' }).format(new Date(`${key}T12:00:00Z`));
 const shortDate = key => dateFormat(key, { month:'short', day:'numeric' });
 const longDate = key => dateFormat(key, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
@@ -1116,17 +1144,17 @@ $('#preferences-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#profile-name'), name = input.value.trim();
   if (!name) { input.setCustomValidity('Enter a name.'); input.reportValidity(); return; }
   const nextPreferences={...preferences,name,motion:motionPreference};
-  try {localStorage.setItem(preferencesKey,JSON.stringify(nextPreferences));preferences=nextPreferences;displayName=name;$('#save-name').textContent='✓ Saved';$('#save-name').classList.add('is-saved');$('#name-save-feedback').textContent=`Saved as ${name} on this device.`;}
+  try {localStorage.setItem(preferencesKey,JSON.stringify(nextPreferences));preferences=nextPreferences;displayName=name;saveAccountPreferences();$('#save-name').textContent='✓ Saved';$('#save-name').classList.add('is-saved');$('#name-save-feedback').textContent=`Saved as ${name}${signedInUser?' · syncing to your Google account':' on this device'}.`;}
   catch {$('#name-save-feedback').textContent='Could not save your name. Browser storage is unavailable.';$('#save-name').classList.remove('is-saved');}
   renderHeader();
 });
 $('#profile-name').addEventListener('input',event=>{event.target.setCustomValidity('');$('#save-name').textContent='Save name';$('#save-name').classList.remove('is-saved');$('#name-save-feedback').textContent='';});
-$$('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{const theme=button.dataset.themeChoice;try{const next={...preferences,theme};localStorage.setItem(preferencesKey,JSON.stringify(next));preferences=next;window.pocketTheme.apply(theme);renderThemeOptions();render();$('#theme-feedback').textContent='Theme saved on this device.';}catch{$('#theme-feedback').textContent='Theme could not be saved. Browser storage is unavailable.';}}));
+$$('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>{const theme=button.dataset.themeChoice;try{const next={...preferences,theme};localStorage.setItem(preferencesKey,JSON.stringify(next));preferences=next;window.pocketTheme.apply(theme);saveAccountPreferences();renderThemeOptions();render();$('#theme-feedback').textContent=signedInUser?'Theme saved · syncing to your Google account.':'Theme saved on this device.';}catch{$('#theme-feedback').textContent='Theme could not be saved. Browser storage is unavailable.';}}));
 function renderThemeOptions(){$$('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===document.documentElement.dataset.theme)));}
 function finishWelcome(name) {
   displayName=profileName(name)||'Friend';
   welcomeGoogleAttempt=false;
-  preferences={...preferences,name:displayName,welcomed:true,welcomeGooglePending:false};
+  preferences={...preferences,name:displayName,welcomed:true,googleWelcomeSeen:true,welcomeGooglePending:false};
   try {localStorage.setItem(preferencesKey,JSON.stringify(preferences));}catch{}
   closeDialog($('#welcome-dialog'));renderHeader();
 }
@@ -1137,6 +1165,7 @@ $('#welcome-form').addEventListener('submit',event=>{
   finishWelcome(name);
 });
 $('#welcome-name').addEventListener('input',event=>event.target.setCustomValidity(''));
+$('#welcome-local').addEventListener('click',()=>{$('#welcome-form').hidden=false;$('#welcome-local').hidden=true;$('#welcome-name').focus();});
 $('#welcome-google').addEventListener('click',()=>{
   welcomeGoogleAttempt=true;preferences={...preferences,welcomeGooglePending:true};
   try{localStorage.setItem(preferencesKey,JSON.stringify(preferences));}catch{}
@@ -1151,7 +1180,7 @@ function renderMotionSetting() {
 $('#motion-setting').addEventListener('change',event=>{
   motionPreference=setMotionPreference(event.target.value);renderMotionSetting();
   preferences={...preferences,name:displayName,motion:motionPreference};
-  try {localStorage.setItem(preferencesKey,JSON.stringify(preferences));$('#settings-message').textContent='Motion preference saved on this device.';}
+  try {localStorage.setItem(preferencesKey,JSON.stringify(preferences));saveAccountPreferences();$('#settings-message').textContent=signedInUser?'Motion saved · syncing to your Google account.':'Motion preference saved on this device.';}
   catch {$('#settings-message').textContent='Motion updated for this session. Browser storage is unavailable.';}
   if(document.documentElement.dataset.motion==='full'){$('#motion-preview').hidden=false;reveal($('#motion-preview'));}
 });
@@ -1264,6 +1293,14 @@ if (!loaded.snapshot && !loaded.error) queueSave(store.exportSnapshot());
 if(welcomeRequired)showDialog($('#welcome-dialog'));
 
 cloud=mountCloud({
+  autoSync:true,
+  prepareAccount:user=>{
+    const result=accountWorkspaces?.switchTo(user?.uid)||{};
+    waitingForAccount=!!user&&result.preferCloudOnFirstRead===true;
+    signedInUser=user;socialAccountUid=null;accountRestored=false;socialUI?.setUser(null);customization?.resetSetup();
+    if(user)for(const dialog of $$('dialog[open]'))dialog.close();
+    return result;
+  },
   preview,readLocal:()=>pendingSnapshot&&lastSavedRaw?JSON.parse(lastSavedRaw):store.exportSnapshot(),
   localEditTimes:records=>recordEdits.times(records),
   adoptEditTimes:(records,times)=>recordEdits.adopt(records,times),
@@ -1273,18 +1310,27 @@ cloud=mountCloud({
     if(storage.getItem(STORAGE_KEY)!==lastSavedRaw)throw new Error('Another local tab changed your records. Reload after downloading a backup.');
     const raw=writeLocal(storage,snapshot);
     store=createStore({clientId,editableToday,snapshot,seed:false,onChange:queueSave});lastSavedRaw=raw;pendingSnapshot=null;storageError=null;
-    render();
+    restoreAccountPreferences();render();
   },
   onUser:user=>{
-    socialUI?.setUser(user);
-    if(user&&($('#welcome-dialog').open||welcomeGoogleAttempt)) {
-      const name=typeof user.displayName==='string'?user.displayName.trim().slice(0,30):null;
-      if(name)finishWelcome(name);
-      else {$('#welcome-status').textContent='Signed in. Enter the name you want to use.';$('#welcome-google').hidden=true;}
-    }
+    signedInUser=user;
+    if(user)finishWelcome(store.getSettings().accountPreferences?.firstName||googleFirstName(user.displayName));
+    else if(!preview&&!preferences.googleWelcomeSeen&&!storageError){$('#welcome-form').hidden=true;$('#welcome-local').hidden=false;showDialog($('#welcome-dialog'));}
   },
   onStatus:state=>{
+    if(state.restored)waitingForAccount=false;
+    $('#main').inert=waitingForAccount;
+    if(state.restored&&signedInUser&&!accountRestored){
+      accountRestored=true;
+      try {
+        accountWorkspaces?.restored();restoreAccountPreferences();
+        if(!store.getSettings().accountPreferences)saveAccountPreferences();
+        render();
+      }catch(error){storageError=`Account preferences could not be saved. ${error.message}`;renderSaveStatus();}
+    }
     setTimeout(()=>customization?.offerSetup(),0);
+    // Let first-time module setup open before a possible username prompt.
+    if(state.status==='synced'&&signedInUser&&socialAccountUid!==signedInUser.uid){const user=signedInUser;socialAccountUid=user.uid;setTimeout(()=>{if(signedInUser?.uid===user.uid)socialUI?.setUser(user);},0);}
     cloudLabel=state.label;renderSaveStatus();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }

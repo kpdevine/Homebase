@@ -2,6 +2,10 @@ export function profileName(value) {
   return typeof value==='string'&&value.trim()&&value.trim().length<=30?value.trim():null;
 }
 
+export function googleFirstName(displayName) {
+  return profileName(typeof displayName==='string'?displayName.trim().split(/\s+/)[0].slice(0,30):null)||'Friend';
+}
+
 export function needsWelcome({preview,preferences={},snapshot,error}) {
   if(preview||error||preferences.welcomed||profileName(preferences.name)||snapshot?.settings?.setupComplete||snapshot?.settings?.tabsChosen)return false;
   // Keep established local workspaces intact, including older nameless installs.

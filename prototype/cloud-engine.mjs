@@ -1,15 +1,15 @@
 import {snapshotRecords,recordsSnapshot,recordChanges,reconcileRecords,acknowledgeOwnChanges,syncBatch} from './cloud-records.mjs';
 
-export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>true,loadBase=()=>null,saveBase=()=>{},localEditTimes=()=>new Map(),adoptEditTimes=()=>{},onState=()=>{},delay=900}) {
+export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>true,loadBase=()=>null,saveBase=()=>{},localEditTimes=()=>new Map(),adoptEditTimes=()=>{},onState=()=>{},delay=900,preferCloudOnFirstRead=false}) {
   let base=new Map(loadBase()||[]),remote=null,waiting=null,enabled=false,writing=false,inFlight=[],timer,closed=false,conflicts=[];
-  let remoteEditTimes=new Map();
+  let remoteEditTimes=new Map(),restored=false;
   function mergedTimes(merged,local,mine) {
     return new Map([...merged].flatMap(([id,payload])=>{
       const localAt=payload===local.get(id)?mine.get(id)||0:0,remoteAt=payload===remote.get(id)?remoteEditTimes.get(id)||0:0;
       const at=Math.max(localAt,remoteAt);return at?[[id,at]]:[];
     }));
   }
-  const emit=(status,message)=>{if(!closed)onState({status,message,conflicts:[...conflicts],remoteCount:remote?.size??0});};
+  const emit=(status,message)=>{if(!closed)onState({status,message,restored,conflicts:[...conflicts],remoteCount:remote?.size??0});};
   function remember(){saveBase([...base]);}
   function schedule(){clearTimeout(timer);if(enabled&&!writing&&!conflicts.length&&!waiting&&!closed)timer=setTimeout(flush,delay);}
   function receive(next,times=remoteEditTimes) {
@@ -21,6 +21,9 @@ export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>t
     waiting=null;
     try {
       const current=readLocal(),local=snapshotRecords(current);
+      // A new device/account starts with UI defaults, not competing edits.
+      // An empty cloud still keeps the fresh-account module defaults.
+      if(preferCloudOnFirstRead){if(remote.size)base=new Map(local);preferCloudOnFirstRead=false;}
       base=acknowledgeOwnChanges(base,remote,inFlight);
       if(inFlight.every(change=>(remote.get(change.id)??null)===change.after))inFlight=[];
       const mine=localEditTimes(local);
@@ -29,7 +32,7 @@ export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>t
       const merged=recordsSnapshot(result.merged,current.serial);
       if(recordChanges(local,result.merged).length)applyLocal(merged);
       adoptEditTimes(result.merged,mergedTimes(result.merged,local,mine));
-      base=new Map(remote);remember();
+      base=new Map(remote);remember();restored=true;
       if(recordChanges(base,snapshotRecords(readLocal())).length){emit('pending','Saved locally. Cloud changes are queued.');schedule();}
       else emit('synced','Saved locally and synced across your signed-in devices.');
     }catch(error){emit('error',error.message);}

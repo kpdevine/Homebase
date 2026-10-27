@@ -155,6 +155,10 @@ export function createStore(options = {}) {
     loadDay,
     exportSnapshot() { return structuredClone({ version: 2, days: [...days.values()], entries, targets: [...targets], templates, serial, ...(settings?{settings}:{}),...(groupCatalog.size?{groupCatalog:[...groupCatalog].map(([id,name])=>({id,name}))}:{}) }); },
     getSettings() {const config=normalizeSettings(settings||undefined);if(settings)config.training.groups=effectiveTargets(options.editableToday?.()||(today>=settings.effectiveFrom?today:settings.effectiveFrom)).groups;return config;},
+    setAccountPreferences(accountPreferences) {
+      settings=normalizeSettings({...normalizeSettings(settings||undefined),accountPreferences});
+      options.onChange?.(store.exportSnapshot());
+    },
     setSettings(value,key=today) {
       const next=normalizeSettings({...value,setupComplete:true,effectiveFrom:key});
       const previous=normalizeSettings(settings||undefined),changed=LOGGING_SECTIONS.filter(({id})=>previous.tabs[id]!==next.tabs[id]||id!=='checklists'&&JSON.stringify(previous[id])!==JSON.stringify(next[id])).map(({id})=>id);

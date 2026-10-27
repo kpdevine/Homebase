@@ -12,6 +12,8 @@ export function newUserSettings(){return normalizeSettings({...DEFAULT_SETTINGS,
 export function enabledSections(day){const tabs=settingsForDay(day).tabs;return LOGGING_SECTIONS.filter(section=>tabs[section.id]);}
 export function timeScore(day,id){const minutes=day[id]?.minutes;return minutes===null||minutes===undefined?null:Math.round(Math.min(10,minutes/settingsForDay(day)[id].goalMinutes*10)*10)/10;}
 export function normalizeSettings(input=DEFAULT_SETTINGS) {
+  const account=input.accountPreferences;
+  if(account!==undefined&&(!account||typeof account.firstName!=='string'||!account.firstName.trim()||account.firstName.trim().length>30||!['blue','mars'].includes(account.theme)||!['system','full','reduced'].includes(account.motion)))fail('Choose valid account preferences.');
   const n=input?.nutrition,t=input?.training,s=input?.sentiments,tasks=input?.tasks||{defaultDate:'today',expandSubtasks:false};
   const tabs=input?.tabs??legacyTabs,sleep=input?.sleep??{goalMinutes:480},prayer=input?.prayer??{goalMinutes:15};
   const moduleOrder=input?.moduleOrder??DEFAULT_MODULE_ORDER;
@@ -24,7 +26,7 @@ export function normalizeSettings(input=DEFAULT_SETTINGS) {
   if(typeof t.activity!=='string'||!t.activity.trim()||t.activity.trim().length>50||!Number.isInteger(t.minuteGoal)||t.minuteGoal<1||t.minuteGoal>1440||!Number.isInteger(t.flexDays)||t.flexDays<0||t.flexDays>7||typeof t.creatine!=='boolean')fail('Use a minute goal of 1–1440 and 0–7 flex days.');
   if(!Array.isArray(t.groups)||!t.groups.length||t.groups.length>24||new Set(t.groups.map(g=>g.id)).size!==t.groups.length||t.groups.some(g=>!g||typeof g.id!=='string'||!/^[a-z][a-z0-9_-]{0,49}$/.test(g.id)||typeof g.name!=='string'||!g.name.trim()||g.name.trim().length>50||!Number.isInteger(g.target)||g.target<0||g.target>20))fail('Use 1–24 unique training groups with whole targets from 0–20.');
   if(input.effectiveFrom!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(input.effectiveFrom))fail('Invalid settings date.');
-  return {moduleOrder:[...moduleOrder],tabsChosen:input.tabsChosen===true,tabs:{...tabs},sleep:{goalMinutes:sleep.goalMinutes},prayer:{goalMinutes:prayer.goalMinutes},tasks:{defaultDate:tasks.defaultDate,expandSubtasks:tasks.expandSubtasks},version:1,setupComplete:input.setupComplete===true,effectiveFrom:input.effectiveFrom||'0000-00-00',nutrition:{mode:n.mode,proteinGoal:n.proteinGoal,calorieGoal:n.calorieGoal},training:{mode:t.mode,activity:t.activity.trim(),minuteGoal:t.minuteGoal,flexDays:t.flexDays,creatine:t.creatine,groups:t.groups.map(g=>({id:g.id,name:g.name.trim(),target:g.target}))},sentiments:{rating:s.rating}};
+  return {...(account?{accountPreferences:{firstName:account.firstName.trim(),theme:account.theme,motion:account.motion}}:{}),moduleOrder:[...moduleOrder],tabsChosen:input.tabsChosen===true,tabs:{...tabs},sleep:{goalMinutes:sleep.goalMinutes},prayer:{goalMinutes:prayer.goalMinutes},tasks:{defaultDate:tasks.defaultDate,expandSubtasks:tasks.expandSubtasks},version:1,setupComplete:input.setupComplete===true,effectiveFrom:input.effectiveFrom||'0000-00-00',nutrition:{mode:n.mode,proteinGoal:n.proteinGoal,calorieGoal:n.calorieGoal},training:{mode:t.mode,activity:t.activity.trim(),minuteGoal:t.minuteGoal,flexDays:t.flexDays,creatine:t.creatine,groups:t.groups.map(g=>({id:g.id,name:g.name.trim(),target:g.target}))},sentiments:{rating:s.rating}};
 }
 export function settingsForDay(day){return day.configuration?normalizeSettings(day.configuration):normalizeSettings();}
 export function nutritionScore(day){

@@ -58,7 +58,7 @@ export function mountUIShell({getStore,getDate,getView,onDeleteTask}) {
   $('#task-editor-delete').addEventListener('click',onDeleteTask);
   $('#welcome-dialog .eyebrow').hidden=true;
   $('#welcome-title').textContent='Welcome to Pocket Planet';
-  $('#welcome-intro').textContent='Choose a name for this device, or sign in to sync your records.';
+  $('#welcome-intro').textContent='Sign in to restore your Pocket Planet. New here? Choose your settings after signing in.';
   $('#welcome-form .primary-button').innerHTML='Continue on this device';
   $('#sync-prompt>p').textContent='Use the same account to keep your tasks, ratings, training, and notes in sync across devices.';
   const duplicateSync=info.querySelector('.scoring-example');if(duplicateSync)duplicateSync.classList.add('scoring-worked-example');

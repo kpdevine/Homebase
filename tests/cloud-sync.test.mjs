@@ -54,12 +54,22 @@ test('bulk batches create routines before dependent days, delete routines last, 
   assert.deepEqual(syncBatch(changes).map(change=>change.id),['routine_a','day_2026-10-17','routine_old']);
   assert.equal(syncBatch(Array.from({length:401},(_,i)=>({id:`day_${i}`,before:null,after:'{}'}))).length,100);
 });
-function harness(snapshot=EMPTY_SNAPSHOT,{base=null,canApply=()=>true,commitHook}={}){
+function harness(snapshot=EMPTY_SNAPSHOT,{base=null,canApply=()=>true,commitHook,preferCloudOnFirstRead=false}={}){
   let local=structuredClone(snapshot),receive,state,remote=new Map(),commits=0,persisted;
-  const engine=createCloudEngine({readLocal:()=>structuredClone(local),applyLocal:value=>{local=value;},canApply,loadBase:()=>base,saveBase:value=>{persisted=value;},onState:value=>{state=value;},delay:1000000,
+  const engine=createCloudEngine({preferCloudOnFirstRead,readLocal:()=>structuredClone(local),applyLocal:value=>{local=value;},canApply,loadBase:()=>base,saveBase:value=>{persisted=value;},onState:value=>{state=value;},delay:1000000,
     transport:{subscribe:callback=>{receive=callback;return()=>{};},commit:async changes=>{commits++;if(commitHook)await commitHook(changes);for(const change of changes){if((remote.get(change.id)??null)!==change.before){const error=new Error('conflict');error.code='homebase/conflict';throw error;}if(change.after===null)remote.delete(change.id);else remote.set(change.id,change.after);}receive(new Map(remote));}}});
   return {engine,get local(){return local;},set local(value){local=value;},get state(){return state;},get commits(){return commits;},get persisted(){return persisted;},send:value=>{remote=new Map(value);receive(remote);}};
 }
+test('a fresh device restores saved cloud settings and records instead of uploading its defaults',async()=>{
+  const remote=fresh();remote.setSettings({...remote.getSettings(),tabsChosen:true,moduleOrder:['sleep','prayer','training','nutrition','checklists','sentiments']},date);remote.setAccountPreferences({firstName:'Alex',theme:'mars',motion:'reduced'});remote.updateRating(date,9);
+  const h=harness(make(other,1),{preferCloudOnFirstRead:true});h.engine.enable();h.send(snapshotRecords(remote.exportSnapshot()));
+  assert.equal(h.state.status,'synced');assert.equal(h.state.restored,true);assert.equal(h.commits,0);assert.equal(h.local.days.length,1);assert.equal(h.local.days[0].nutrition,9);assert.equal(h.local.settings.accountPreferences.firstName,'Alex');assert.equal(h.local.settings.moduleOrder[0],'sleep');h.engine.close();
+});
+test('a new cloud account keeps fresh defaults and uploads its chosen settings',async()=>{
+  const store=fresh();store.setSettings({...store.getSettings(),tabsChosen:true},date);
+  const h=harness(store.exportSnapshot(),{preferCloudOnFirstRead:true});h.engine.enable();h.send(new Map());assert.equal(h.state.restored,true);assert.equal(h.state.status,'pending');
+  await h.engine.flush();assert.equal(h.state.status,'synced');assert.equal(h.local.settings.tabsChosen,true);assert.equal(h.commits,1);h.engine.close();
+});
 test('sign-in alone uploads nothing; enabling sync uploads only changed records and receives updates',async()=>{
   const h=harness(make(date,8));h.send(new Map());assert.equal(h.commits,0);assert.equal(h.state.status,'ready');
   h.engine.enable();await h.engine.flush();assert.equal(h.commits,1);assert.equal(h.state.status,'synced');

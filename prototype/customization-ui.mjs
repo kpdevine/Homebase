@@ -100,5 +100,5 @@ export function mountCustomization({getStore,getDate,today,render,announce,previ
   function offerSetup(){if(setupOffered||document.querySelector('dialog[open]')||!needsLoggingSetup({snapshot:getStore().exportSnapshot(),preview,...getStartup()}))return;setupOffered=true;open();}
   document.addEventListener('close',()=>setTimeout(offerSetup,50),true);
   setTimeout(offerSetup,600);
-  return {paint,open,offerSetup};
+  return {paint,open,offerSetup,resetSetup:()=>{setupOffered=false;}};
 }
