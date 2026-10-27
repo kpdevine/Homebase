@@ -456,6 +456,11 @@ input[type=file]::file-selector-button {min-height:40px;margin-right:8px;padding
 .welcome-or {display:flex;justify-content:center;align-items:center;gap:12px;font-size:11px;margin:14px 0;color:var(--ui-muted)}
 .welcome-or::before,.welcome-or::after {content:'';height:1px;background:var(--ui-line-soft);flex:1}
 #welcome-status,#username-error {font-size:11px}
+/* Keep every welcome item in its own row, including the button focus outline. */
+#welcome-dialog[open] {display:grid;gap:16px}
+#welcome-dialog>h2,#welcome-dialog>p,#welcome-dialog>button,#welcome-dialog>#welcome-form {margin:0}
+#welcome-google {display:flex;align-items:center;justify-content:center}
+#welcome-dialog>[hidden] {display:none}
 /* Review stays in one place, with clear progress and one confirmation action. */
 .review-banner {position:static;display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 16px;padding:14px;border:1px solid var(--ui-line);border-radius:6px;background:var(--lcd-_b4c7e533,#b4c7e533);box-shadow:none}
 .review-banner>div:first-child {margin:0}
