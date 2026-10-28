@@ -16,7 +16,7 @@ export function validateSnapshot(value) {
   assert(Array.isArray(value.entries) && value.entries.length <= 100000, 'training entries.');
   assert(Array.isArray(value.targets) && value.targets.length <= 5000, 'weekly targets.');
   assert(Number.isSafeInteger(value.serial) && value.serial >= 0, 'record counter.');
-  const dates = new Set(), ids = new Set();
+  const dates = new Set(), ids = new Set(),historicalIds=new Set();
   const groupCatalog=value.groupCatalog??[];
   assert(Array.isArray(groupCatalog)&&groupCatalog.length<=1000&&new Set(groupCatalog.map(g=>g.id)).size===groupCatalog.length&&groupCatalog.every(g=>g&&typeof g.id==='string'&&/^[a-z][a-z0-9_-]{0,49}$/.test(g.id)&&typeof g.name==='string'&&g.name.length>0&&g.name.length<=50),'group catalog.');
   const settings=value.settings===undefined?undefined:normalizeSettings(value.settings);
@@ -30,17 +30,35 @@ export function validateSnapshot(value) {
     assert(template && validDate(template.startDate) && (template.endDate===null || validDate(template.endDate)),'recurrence dates.');
     assert(FREQUENCIES.includes(template.frequency) && Array.isArray(template.weekdays) && template.weekdays.every(day=>Number.isInteger(day)&&day>=1&&day<=7) && new Set(template.weekdays).size===template.weekdays.length && (template.frequency!=='custom'||template.weekdays.length>0),'recurrence frequency.');
     assert(Array.isArray(template.children)&&template.children.length<=20,'recurring subtasks.');
-    return {id:readId(template.id),name:readName(template.name),startDate:template.startDate,endDate:template.endDate,frequency:template.frequency,weekdays:[...template.weekdays],children:template.children.map(child=>({id:readId(child.id),name:readName(child.name)}))};
+    assert(template.dueOffset===undefined||Number.isInteger(template.dueOffset)&&Math.abs(template.dueOffset)<=3652059,'recurring due date.');
+    return {id:readId(template.id),name:readName(template.name),startDate:template.startDate,endDate:template.endDate,frequency:template.frequency,weekdays:[...template.weekdays],children:template.children.map(child=>({id:readId(child.id),name:readName(child.name)})),...(template.dueOffset!==undefined?{dueOffset:template.dueOffset}:{})};
   });
   const templateIds=new Set(templates.map(template=>template.id));
-  function readTask(task,child=false) {
+  function readTask(task,child=false,historical=false) {
     assert(task&&typeof task.done==='boolean','task values.');
-    const id=readId(task.id),name=readName(task.name),childrenValue=task.children??[];
+    if(historical){assert(validId(task.id),'historical task ID.');historicalIds.add(task.id);}
+    const id=historical?task.id:readId(task.id),name=readName(task.name),childrenValue=task.children??[];
     assert(Array.isArray(childrenValue)&&childrenValue.length<=(child?0:20),'nested subtasks.');
-    const children=childrenValue.map(item=>readTask(item,true));
+    const children=childrenValue.map(item=>readTask(item,true,historical));
+    assert(new Set(children.map(child=>child.id)).size===children.length&&children.every(child=>child.id!==id),'duplicate subtask ID.');
     assert(!children.length || task.done===children.every(item=>item.done),'parent completion must match subtasks.');
     assert(task.templateId===undefined || !child&&templateIds.has(task.templateId),'unknown recurring task.');
-    return {id,name,done:task.done,children,...(task.templateId?{templateId:task.templateId}:{})};
+    const dateFields={};
+    for(const key of ['dueDate','displayDate','completedOn','removedOn'])if(task[key]!==undefined){assert(!child&&(task[key]===null||validDate(task[key])),'task dates.');dateFields[key]=task[key];}
+    let taskEvents;
+    if(task.taskEvents!==undefined){
+      assert(!child&&!historical&&!task.templateId&&Array.isArray(task.taskEvents)&&task.taskEvents.length>0&&task.taskEvents.length<=20000,'task history.');
+      taskEvents=task.taskEvents.map((event,index)=>{
+        assert(event&&validDate(event.date)&&(!index||event.date>task.taskEvents[index-1].date)&&event.value?.id===id&&event.value.taskEvents===undefined&&!event.value.templateId,'task history event.');
+        return {date:event.date,value:readTask(event.value,false,true)};
+      });
+    }
+    const state={id,name,done:task.done,children,...dateFields,...(task.templateId?{templateId:task.templateId}:{})};
+    if(taskEvents){
+      assert(JSON.stringify(state)===JSON.stringify(taskEvents.at(-1).value),'latest task history state.');
+      assert(taskEvents.every(event=>!event.value.done||validDate(event.value.completedOn)&&event.value.completedOn<=event.date),'task completion date.');
+    }
+    return {...state,...(taskEvents?{taskEvents}:{})};
   }
   const days = value.days.map(day => {
     assert(day && validDate(day.date) && !dates.has(day.date), 'duplicate or invalid date.'); dates.add(day.date);
@@ -111,7 +129,7 @@ export function validateSnapshot(value) {
       return { id: group.id, name: group.name, target: group.target };
     })];
   });
-  const maxSerial = [...ids].reduce((max, id) => { const match = /^(?:task|gym|routine|child)-(\d+)$/.exec(id); return match ? Math.max(max, Number(match[1])) : max; }, 0);
+  const maxSerial = [...ids,...historicalIds].reduce((max, id) => { const match = /^(?:task|gym|routine|child)-(\d+)$/.exec(id); return match ? Math.max(max, Number(match[1])) : max; }, 0);
   assert(value.serial >= maxSerial, 'record counter would reuse an ID.');
   return { version: 2, days, entries, targets, templates, serial: value.serial,...(settings?{settings}:{}),...(groupCatalog.length?{groupCatalog:groupCatalog.map(({id,name})=>({id,name}))}:{}) };
 }

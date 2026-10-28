@@ -103,11 +103,9 @@ $('#set-entry-form').onsubmit=event=>{event.preventDefault();try{store.updateGym
 const notesDetails=document.createElement('section');notesDetails.className='panel training-notes-card';notesDetails.setAttribute('aria-labelledby','training-notes-title');
 notesDetails.innerHTML='<div class="panel-heading"><div><p class="eyebrow">OPTIONAL</p><h3 id="training-notes-title">Training notes</h3></div></div>';$('.training-notes').before(notesDetails);notesDetails.append($('.training-notes'));$('.training-notes>label').classList.add('sr-only');
 
-$('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button">+ Plan a task</button></div></section>');
+$('#checklists-view').insertAdjacentHTML('beforeend','<section class="panel later-plan" aria-labelledby="later-title"><div class="panel-heading"><div><p id="later-dates" class="eyebrow"></p><h3 id="later-title">Later This Week</h3></div><span id="later-count" class="count-pill"></span></div><ul id="later-tasks"></ul><div class="tomorrow-actions"><button id="add-later-task" class="quiet-button task-add-button" aria-label="Add task for later this week">+ Add task</button></div></section>');
 const todayTaskHeading=document.createElement('div');
 $('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="tasks-date" class="eyebrow"></p>';todayTaskHeading.append($('#tasks-title'));
-$('.task-date-shortcuts').insertAdjacentHTML('beforeend','<button type="button" class="quiet-button" data-task-when="2" aria-pressed="false">Later this week</button>');
-$('.task-date-shortcuts').insertAdjacentHTML('afterend','<div id="task-week-options" class="task-week-options" role="group" aria-label="Choose a date later this week" hidden></div>');
 const expandedTasks = new Set(),autoExpandedTasksSeen=new Set();
 let displayName = preview?'Kieran':'Friend';
 let signedInUser=null,socialAccountUid=null,accountRestored=false,waitingForAccount=false;
@@ -259,6 +257,19 @@ function renderHeader() {
     button.setAttribute('aria-selected', String(active)); button.tabIndex = active || ['history','achievements'].includes(view)&&button.dataset.tab==='today' ? 0 : -1;
   });
 }
+function taskDueBubble(task,date) {
+  if(!task.dueDate)return '';
+  const overdue=!task.done&&task.dueDate<date,today=task.dueDate===date;
+  const label=dateFormat(task.dueDate,{month:'short',day:'numeric',...(task.dueDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
+  return `<time class="task-date-bubble task-due-bubble${overdue?' is-overdue':today?' is-due-today':''}" datetime="${task.dueDate}" aria-label="${overdue?'Overdue':'Due'} ${longDate(task.dueDate)}">${overdue?'Overdue · '+label:today?'Due today':'Due '+label}</time>`;
+}
+function taskDateBubbles(task,date) {
+  const due=taskDueBubble(task,date);
+  if(!task.displayDate)return due;
+  const overdue=!task.done&&task.displayDate<date;
+  const label=dateFormat(task.displayDate,{month:'short',day:'numeric',...(task.displayDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
+  return due+`<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${task.displayDate}" aria-label="Planned work${overdue?' overdue':''} ${longDate(task.displayDate)}">Plan ${label}</time>`;
+}
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
   const taskHtml = editable => day.tasks.length ? orderedTasks(day.tasks).map(task => {
@@ -266,7 +277,7 @@ function renderTasks() {
     const children=task.children||[], expanded=expandedTasks.has(task.id), listId=`subtasks-${editable?'edit':'home'}-${task.id}`;
     const progress=taskProgress([task]);
     const editButton=child=>`<button class="edit-task" data-edit-task="${task.id}" ${child?`data-edit-child="${child.id}"`:''} aria-label="Edit ${escapeHtml(child?.name??task.name)}" title="Edit task">${icon('edit')}</button>`;
-    return `<li class="task-group"><div class="task-row"><label class="${children.length?'parent-task':''}" ${children.length?`data-expand-task="${task.id}"`:''}><input type="checkbox" data-task-id="${task.id}" ${task.done?'checked':''} ${children.length?'disabled':''}><span>${escapeHtml(task.name)}${task.templateId?'<small class="recurring-label">Repeats</small>':''}</span></label>${children.length?`<button class="expand-task" data-expand-task="${task.id}" aria-expanded="${expanded}" aria-controls="${listId}" aria-label="${expanded?'Collapse':'Expand'} ${escapeHtml(task.name)} subtasks"><span>${progress.done}/${progress.total}</span> ${expanded?'▾':'▸'}</button>`:''}${editButton()}${editable?`<button class="remove-task" data-remove-task="${task.id}" aria-label="Remove task${task.templateId?' for this day':''}: ${escapeHtml(task.name)}">×</button>`:''}</div>${children.length?`<ul id="${listId}" class="child-tasks" ${expanded?'':'hidden'}>${children.map(child=>`<li><label><input type="checkbox" data-task-id="${child.id}" ${child.done?'checked':''}><span>${escapeHtml(child.name)}</span></label>${editButton(child)}</li>`).join('')}</ul>`:''}</li>`;
+    return `<li class="task-group"><div class="task-row"><label class="${children.length?'parent-task':''}" ${children.length?`data-expand-task="${task.id}"`:''}><input type="checkbox" data-task-id="${task.id}" ${task.done?'checked':''} ${children.length?'disabled':''}><span class="task-name-line"><span>${escapeHtml(task.name)}</span>${taskDateBubbles(task,selectedDate)}${task.templateId?'<small class="recurring-label">Repeats</small>':''}</span></label>${children.length?`<button class="expand-task" data-expand-task="${task.id}" aria-expanded="${expanded}" aria-controls="${listId}" aria-label="${expanded?'Collapse':'Expand'} ${escapeHtml(task.name)} subtasks"><span>${progress.done}/${progress.total}</span> ${expanded?'▾':'▸'}</button>`:''}${editButton()}${editable?`<button class="remove-task" data-remove-task="${task.id}" aria-label="Remove task${task.templateId?' for this day':''}: ${escapeHtml(task.name)}">×</button>`:''}</div>${children.length?`<ul id="${listId}" class="child-tasks" ${expanded?'':'hidden'}>${children.map(child=>`<li><label><input type="checkbox" data-task-id="${child.id}" ${child.done?'checked':''}><span>${escapeHtml(child.name)}</span></label>${editButton(child)}</li>`).join('')}</ul>`:''}</li>`;
   }).join('') : '<li class="empty-tasks"><strong>No tasks yet.</strong><span>Add a task or a recurring routine.</span></li>';
   const scroll = $('.task-scroll').scrollTop;
   $('#overview-task-list').innerHTML = taskHtml(false);
@@ -284,11 +295,11 @@ function renderTasks() {
   const tomorrow=addDays(today,1),planned=orderedTasks(store.loadDay(tomorrow).tasks);
   $('#tomorrow-date').textContent=longDate(tomorrow);
   $('#tomorrow-count').textContent=`${planned.length} task${planned.length===1?'':'s'}`;
-  const plannedTask=(task,date)=>`<li class="planned-task"><span>${escapeHtml(task.name)}${task.templateId||task.children.length?`<small>${[task.templateId?'Repeats':'',task.children.length?`${task.children.length} subtask${task.children.length===1?'':'s'}`:''].filter(Boolean).join(' · ')}</small>`:''}</span><button class="edit-task" data-edit-planned="${task.id}" data-planned-date="${date}" aria-label="Edit ${escapeHtml(task.name)} for ${shortDate(date)}">${icon('edit')}</button></li>`;
+  const plannedTask=(task,date)=>`<li class="planned-task"><span><span class="task-name-line"><span>${escapeHtml(task.name)}</span>${taskDateBubbles(task,today)}</span>${task.templateId||task.children.length?`<small>${[task.templateId?'Repeats':'',task.children.length?`${task.children.length} subtask${task.children.length===1?'':'s'}`:''].filter(Boolean).join(' · ')}</small>`:''}</span><button class="edit-task" data-edit-planned="${task.id}" data-planned-date="${date}" aria-label="Edit ${escapeHtml(task.name)} for ${shortDate(date)}">${icon('edit')}</button></li>`;
   $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
   const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
   $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
-  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=store.loadDay(date).tasks.filter(task=>!task.templateId);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
+  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=store.loadDay(date).tasks.filter(task=>!task.templateId&&(!task._taskSource||task.displayDate===date));laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
   $('#later-count').textContent=String(laterCount);
   $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} task${planned.length===1?'':'s'} scheduled`);
 }
@@ -538,7 +549,7 @@ function recapMarkup({final=false}={}) {
   if(!final&&view==='history'&&calendarFilter!=='all')return filteredRecapMarkup(day,recap);
   const training=recap.training.alternateWorkout?'Alternate workout':recap.training.rest?`Rest<small> ${scoreText(recap.training.score)} / 10</small>`:recap.training.score!==null?`${scoreText(recap.training.score)}<small> / 10 · ${recap.training.mode==='other'?`${recap.training.minutes??'—'} min`:recap.training.sets+' sets'}</small>`:'—';
   const tasks=recap.checklistLogged?`${recap.done}<small> / ${recap.total}</small>`:recap.total?`—<small> / ${recap.total}</small>`:'—';
-  const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span></li>`;
+  const taskLine=(task,child=false)=>`<li class="${task.done?'is-done':''} ${child?'recap-child':''}"><span class="recap-check" aria-hidden="true">${task.done?'✓':'·'}</span><span class="task-name-line"><span><span class="sr-only">${task.done?'Completed: ':'Unfinished: '}</span>${escapeHtml(task.name)}</span>${taskDateBubbles(task,selectedDate)}</span></li>`;
   return `
     <div class="recap-score" role="group" aria-label="${recap.score===null?'No daily score yet':`Daily score ${scoreText(recap.score)} out of 10`}">
       ${circle(recap.score,true)}<div><span class="state-pill ${recap.completed?'complete':''}">${status}</span><p>${recap.logged} of ${recap.sections.length} logged <span>·</span> ${recap.reviewed} reviewed</p>${recap.provisional&&recap.score!==null?'<small>Provisional score</small>':''}</div>
@@ -557,7 +568,7 @@ function filteredRecapMarkup(day,recap) {
   let detail='';
   if(id==='training')detail=`<p class="filtered-training-total">${recap.training.alternateWorkout?'Alternate workout':recap.training.rest?'Rest day':day.trainingMode==='training'?`${recap.training.mode==='other'?`${recap.training.minutes??'—'} minutes`:recap.training.sets+' total sets'}`:'No workout logged'}</p>${recap.training.alternateWorkout?`<section class="recap-note"><h4>What you did</h4><p>${escapeHtml(recap.training.alternateWorkout)}</p></section>`:''}${recap.bodyWeight?`<p class="recap-body-weight"><span>Body weight</span><strong>${weightText(recap.bodyWeight)}</strong></p>`:''}${recap.training.groups.length?`<ul class="recap-training">${recap.training.groups.map(group=>`<li><span>${escapeHtml(store.groupName(selectedDate,group.id))}</span><strong>${group.sets} sets</strong></li>`).join('')}</ul>`:''}${recap.notes.filter(note=>note.section==='training').map(note=>`<section class="recap-note"><h4>Training notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('')}`;
   if(id==='nutrition')detail=recap.notes.filter(note=>note.section==='nutrition').map(note=>`<section class="recap-note"><h4>Nutrition notes</h4><p>${escapeHtml(note.text)}</p></section>`).join('');
-  if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span>${escapeHtml(task.name)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
+  if(id==='checklists')detail=`<p>${recap.done} / ${recap.total} actions completed${recap.checklistLogged?'':' · list not logged'}</p><ul class="recap-tasks">${recap.tasks.map(task=>`<li><span>${task.done?'✓':'·'}</span><span class="task-name-line"><span>${escapeHtml(task.name)}</span>${taskDateBubbles(task,selectedDate)}</span></li>${task.children.map(child=>`<li class="recap-child"><span>${child.done?'✓':'·'}</span><span>${escapeHtml(child.name)}</span></li>`).join('')}`).join('')}</ul>`;
   if(['sleep','prayer'].includes(id))detail=`<p>${escapeHtml(section?.detail||'No time logged.')}</p>`;
   if(id==='sentiments')detail=day.sentiments.notes.trim()?`<section class="recap-note"><h4>Sentiments</h4><p>${escapeHtml(day.sentiments.notes)}</p></section>`:'<p>No sentiments notes.</p>';
   return `<div class="recap-score">${circle(value,true)}<div><strong>${label}</strong><p>${value===null?'Not logged':day.reviewed[id]?'Reviewed':'Logged'}${id==='sentiments'&&value===null&&day.sentiments.notes.trim()?' · notes only':''}</p></div></div>${detail}`;
@@ -807,18 +818,20 @@ $$('[data-repeat-choice]').forEach(button=>button.addEventListener('click',()=>{
 $('#task-repeat').addEventListener('change',()=>{$('#task-frequency').value=$('#task-repeat').checked?'daily':'once';updateFrequency();});
 $('#task-frequency').addEventListener('change',updateFrequency);
 function renderTaskDate() {
-  const date=$('#task-date').value,today=editableToday();
-  taskComposeDate=date;
-  $('#task-start-date').textContent=date?longDate(date):'Choose a date';
-  $$('[data-task-when]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.taskWhen)===2?date>=addDays(today,2)&&date<=addDays(today,7):date===addDays(today,Number(button.dataset.taskWhen)))));
-  $('#task-week-options').hidden=!date||date<addDays(today,2)||date>addDays(today,7);$('#task-chosen-date').textContent=date?longDate(date):'Choose a day';
-  $('#task-week-options').innerHTML=Array.from({length:6},(_,index)=>{const key=addDays(today,index+2);return `<button type="button" class="quiet-button" data-task-date-choice="${key}" aria-pressed="${date===key}">${dateFormat(key,{weekday:'short'})+' '+Number(key.slice(-2))}</button>`;}).join('');
-  $('#task-submit').textContent=taskEdit?'Save changes':date===addDays(today,1)?'Add for tomorrow':'Add task';
+  const due=$('#task-due-date').value,today=editableToday();
+  const canPlan=!!due&&due!==today&&!taskEdit?.templateId;
+  $('.task-date-picker').hidden=!canPlan;
+  $('#task-date').disabled=!canPlan;
+  if(!canPlan)$('#task-date').value='';
+  const date=$('#task-date').value;
+  taskComposeDate=date||taskEdit?.date||selectedDate;
+  $('#task-start-date').textContent=longDate(taskComposeDate);
+  $('#task-submit').textContent=taskEdit?'Save changes':'Add task';
 }
 function renderTaskEditScope() {
   const recurring=!!taskEdit?.templateId,future=recurring&&$('[name="task-edit-scope"]:checked').value==='future';
   $('#task-edit-scope').hidden=!recurring;
-  $('.task-date-picker').hidden=recurring;
+  renderTaskDate();
   $('.task-schedule').hidden=!!taskEdit&&!future;
   $('#custom-weekdays').hidden=(!!taskEdit&&!future)||$('#task-frequency').value!=='custom';
   $('#task-frequency option[value="once"]').disabled=future;$('#task-repeat').disabled=future;updateFrequency();
@@ -829,18 +842,20 @@ function appendSubtaskField(child={name:''}) {
   const input=row.querySelector('textarea');input.value=child.name;if(child.id)input.dataset.childId=child.id;
   $('#subtask-inputs').append(row);refreshNoteCarets.add([input]);return input;
 }
-function openTaskComposer(trigger,date) {
-  if(date===undefined)date=selectedDate===editableToday()&&store.getSettings().tasks.defaultDate==='tomorrow'?addDays(selectedDate,1):selectedDate;
+function openTaskComposer(trigger) {
   taskEdit=null;$('#task-editor-delete').hidden=true;
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
-  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value=date;renderTaskDate();
+  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value='';$('#task-due-date').value=editableToday();renderTaskDate();
   $('#task-dialog-title').textContent='Add task';renderTaskEditScope();updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
 }
 function openTaskEditor(trigger,date,id,childId) {
   const task=store.loadDay(date).tasks.find(task=>task.id===id);if(!task)return;
-  openTaskComposer(trigger,date);taskEdit={date,id,templateId:task.templateId};
+  openTaskComposer(trigger);taskEdit={date,id,templateId:task.templateId,persistent:!!task._taskSource};
+  $('#task-date').value=task.displayDate===null?'':task.displayDate??date;
+  if(task.displayDate&&task.displayDate<$('#task-date').min)$('#task-date').min=task.displayDate;
+  $('#task-due-date').value=task.dueDate??editableToday();
   $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;$('#task-editor-delete').hidden=false;$('#task-editor-delete').textContent=task.templateId?'Remove this occurrence…':'Remove this task…';
   for(const child of task.children)appendSubtaskField(child);
   if(task.templateId) {
@@ -853,16 +868,14 @@ function openTaskEditor(trigger,date,id,childId) {
 }
 $$('[name="task-edit-scope"]').forEach(input=>input.addEventListener('change',()=>{renderTaskEditScope();fitTaskFields();}));
 for(const id of ['open-task-composer','overview-add-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget));
-for(const id of ['plan-tomorrow','add-tomorrow-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget,addDays(editableToday(),1)));
-$('#add-later-task').addEventListener('click',event=>openTaskComposer(event.currentTarget,addDays(editableToday(),2)));
+for(const id of ['plan-tomorrow','add-tomorrow-task','add-later-task'])$('#'+id).addEventListener('click',event=>openTaskComposer(event.currentTarget));
 for(const id of ['tomorrow-tasks','later-tasks'])$('#'+id).addEventListener('click',event=>{
   const edit=event.target.closest('[data-edit-planned]');if(edit){openTaskEditor(edit,edit.dataset.plannedDate,edit.dataset.editPlanned);return;}
   const date=event.target.closest('[data-view-task-date]');if(date){navigateDay(date.dataset.viewTaskDate);setView('checklists',true);}
 });
 $('#view-tomorrow').addEventListener('click',()=>{navigateDay(addDays(editableToday(),1));setView('checklists',true);});
-$$('[data-task-when]').forEach(button=>button.addEventListener('click',()=>{$('#task-date').value=addDays(editableToday(),Number(button.dataset.taskWhen));renderTaskDate();}));
 $('#task-date').addEventListener('change',renderTaskDate);
-$('#task-week-options').addEventListener('click',event=>{const button=event.target.closest('[data-task-date-choice]');if(button){$('#task-date').value=button.dataset.taskDateChoice;renderTaskDate();}});
+$('#task-due-date').addEventListener('change',renderTaskDate);
 $('#cancel-task').addEventListener('click',()=>closeDialog($('#task-dialog')));
 $('#add-subtask').addEventListener('click',()=>{
   if($$('[data-child-name]').length>=20){$('#task-composer-error').textContent='Use up to 20 subtasks.';return;}
@@ -881,13 +894,14 @@ $('#subtask-inputs').addEventListener('click',event=>{const button=event.target.
 $('#add-task-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#task-name');
   const frequency=$('#task-frequency').value;
-  const options={children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
+  if(!$('#task-due-date').reportValidity())return;
+  const options={dueDate:$('#task-due-date').value||null,displayDate:$('#task-date').value||null,children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
   if(!$('#task-date').checkValidity()){ $('#task-date').reportValidity();return; }
   const editing=!!taskEdit;
   try {
     let id;
     if(taskEdit) {
-      const changes={name:input.value,children:$$('[data-child-name]').map(field=>({id:field.dataset.childId||null,name:field.value})),date:taskComposeDate,recurrence:options.recurrence};
+      const changes={name:input.value,dueDate:options.dueDate,displayDate:options.displayDate,children:$$('[data-child-name]').map(field=>({id:field.dataset.childId||null,name:field.value})),date:taskEdit.persistent?taskEdit.date:taskComposeDate,recurrence:options.recurrence};
       id=taskEdit.templateId&&$('[name="task-edit-scope"]:checked').value==='future'?store.editRoutine(taskEdit.date,taskEdit.id,changes):store.editTask(taskEdit.date,taskEdit.id,changes);
     } else id=store.addTask(taskComposeDate,input.value,options);
     if(id&&options.children.length)expandedTasks.add(id);

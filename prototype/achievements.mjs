@@ -22,11 +22,17 @@ export function streakStats(dates,today,block=1) {
 export function buildAchievements(store,today) {
   const snapshot=store.exportSnapshot(),weeks=new Map();
   const weekFor=date=>{const key=sampleWeekStart(date);if(!weeks.has(key))weeks.set(key,store.loadWeek(date));return weeks.get(key);};
-  const records=snapshot.days.filter(day=>day.date<=today).sort((a,b)=>a.date.localeCompare(b.date)).map(day=>{
+  const records=snapshot.days.filter(day=>day.date<=today).sort((a,b)=>a.date.localeCompare(b.date)).map(record=>{
+    const day=store.loadDay(record.date);
     const week=weekFor(day.date);
     return {day,date:day.date,summary:summarizeDay(day,week.entries,week),training:trainingProgress(day,week)};
   });
   const completed=records.filter(record=>record.day.completedAt&&!record.summary.provisional);
+  const countedActions=new Set();
+  for(const record of completed){
+    const actions=record.day.tasks.flatMap(task=>task.children.length?task.children:[task]).filter(task=>task.done&&!countedActions.has(task.id));
+    record.newTaskActions=actions.length;for(const task of actions)countedActions.add(task.id);
+  }
   const score=(record,id)=>record.summary.sections.find(section=>section.id===id)?.score??null;
   const lifting=completed.filter(record=>record.training.dailySets>0&&!record.training.rest);
   const written=completed.filter(record=>record.day.sentiments.notes.trim());
@@ -56,7 +62,7 @@ export function buildAchievements(store,today) {
   daily('tasks-perfect','checklists','Clean slate','Complete every to-do action and finish the full day review.',actionable,record=>record.summary.done===record.summary.total,
     Math.max(0,...actionable.map(record=>record.summary.done/record.summary.total*10)),10);
   for(const target of [10,50,100,500,1000])
-    milestone(`tasks-${target}`,'checklists',`${target} things done`,`Check off ${target} actions across completed days. Subtasks count once; their parent adds no extra credit.`,completed,target,record=>record.summary.done,'actions');
+    milestone(`tasks-${target}`,'checklists',`${target} things done`,`Check off ${target} actions across completed days. Subtasks count once; their parent adds no extra credit.`,completed,target,record=>record.newTaskActions,'actions');
   daily('journal-day','sentiments','Put it into words','Write sentiments and finish the full day review.',written,()=>true,written.length,1,'days');
   for(const [target,title] of [[3,'Opening pages'],[10,'Ten chapters'],[30,'A month in words'],[100,'Your own anthology']])
     milestone(`journal-${target}`,'sentiments',title,`Write sentiments on ${target} completed days.`,written,target);

@@ -11,7 +11,9 @@ export function isDue(template, date) {
 }
 export function occurrence(template, date) {
   const id = `repeat-${template.id}-${date}`;
+  const dueDate=template.dueOffset===undefined?null:new Date(Date.parse(date+'T12:00:00Z')+template.dueOffset*86400000).toISOString().slice(0,10);
   return { id, name:template.name, done:false, templateId:template.id,
+    ...(dueDate?{dueDate}:{}),
     children:template.children.map(child => ({ id:`${id}-${child.id}`, name:child.name, done:false, children:[] })) };
 }
 export function taskProgress(tasks) {
