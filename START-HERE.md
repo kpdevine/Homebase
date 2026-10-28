@@ -2,6 +2,8 @@
 
 The owner approved publication with “push it” on October 27. The release adds a required Due date calendar (default today), an optional matching Plan to work calendar revealed for other deadlines, glowing inline deadline bubbles, persistent pending deadline tasks, dated state history, recurrence deadlines and backup/cloud preservation. Deliver the matching source to GitHub and app to Firebase Hosting. Checks: 297 passing, one emulator-only skip; no Firestore rule changes. See [task rebuild notes](docs/october-26-task-dates.md) and the updated task requirements. Preserve unrelated `server/reminders/policy.mjs` changes and existing experiment/output files.
 
+Published as `9b5b58a35a44e378b01976f1cca3af9705399c4c` on `codex/homebase-prototype`. Firebase Hosting completed successfully; all eleven changed app files returned HTTP 200 at `https://pocketplanet.day/` and matched the local release bytes. Only Hosting was deployed; existing Firestore rules and the reminder service were unchanged.
+
 ## Solar System consecutive streak
 
 Follow-up: streaks also derive from existing member-only shared days for members missing the new metadata, so they do not have to reopen the app first. Modern published counts preserve longer streaks. Rotation is now ±1.5° over 3.6s; phone labels use smaller type and right alignment to stay within the card. Both seven-day fallback and five-day published sample streaks fit at 320px width. Checks: 268 passed, one emulator-only skip; emulator query/security suite passed.
