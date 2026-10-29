@@ -53,6 +53,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const danaDb=env.authenticatedContext('dana').firestore(),eliDb=env.authenticatedContext('eli').firestore();
     await assertSucceeds(dana.groups.saveAppearance({planet:'martian',vibes:'Ready for a new orbit'}));
     assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().planet,'martian');
+    await assertSucceeds(dana.groups.saveAppearance({planet:'mogging',vibes:'Ready for a new orbit'}));
+    assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().planet,'mogging');
     await assertFails(getDoc(doc(eliDb,'socialPreferences','dana')));
     await assertFails(setDoc(doc(eliDb,'socialPreferences','dana'),{planet:'happy',vibes:'forged',updatedAt:serverTimestamp()}));
     const system=await assertSucceeds(dana.groups.create('Weekend Orbit'));
@@ -120,6 +122,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}],appearanceBefore));
     const oldVibesVersion=appearanceBefore.vibesVersion;
     assert.ok(oldVibesVersion);
+    await assertSucceeds(eli.groups.reactVibes(system.id,'dana',oldVibesVersion,'mogging'));
+    await listenUntil((cb,error)=>dana.groups.watchVibesReactions(system.id,cb,error),rows=>rows.some(row=>row.target==='dana'&&row.kind==='mogging'));
     await assertSucceeds(eli.groups.reactVibes(system.id,'dana',oldVibesVersion,'love'));
     await listenUntil((cb,error)=>dana.groups.watchVibesReactions(system.id,cb,error),rows=>rows.some(row=>row.target==='dana'&&row.kind==='love'));
     await assertFails(dana.groups.reactVibes(system.id,'dana',oldVibesVersion,'fire'));

@@ -44,6 +44,10 @@ export const REACTION_ASSETS={
     "icon": "./assets/reactions/optimized/melting-icon-39dac042529a.webp",
     "portrait": "./assets/reactions/optimized/melting-portrait-7992cf3b9daf.webp"
   },
+  "mogging": {
+    "icon": "./assets/reactions/optimized/mogging-icon-61c8760ed55b.webp",
+    "portrait": "./assets/reactions/optimized/mogging-portrait-70ee9612089e.webp"
+  },
   "nerd": {
     "icon": "./assets/reactions/optimized/nerd-icon-f8f915d48e9e.webp",
     "portrait": "./assets/reactions/optimized/nerd-portrait-2913c129feae.webp"

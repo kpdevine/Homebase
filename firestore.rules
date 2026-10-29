@@ -54,7 +54,7 @@ service cloud.firestore {
     }
     function score(value) {return value == null || value is number && value >= 0 && value <= 10;}
     function validAppearance(data) {
-      return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss']
+      return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss','mogging']
         && data.get('vibes','') is string && data.get('vibes','').size() <= 160
         && data.get('vibesVersion','legacy-version') is string && data.get('vibesVersion','legacy-version').matches('[A-Za-z0-9_-]{8,64}');
     }
@@ -148,7 +148,7 @@ service cloud.firestore {
           && id == request.resource.data.target+'~'+request.resource.data.date+'~'+request.auth.uid
           && exists(/databases/$(database)/documents/friendGroups/$(group)/days/$(request.resource.data.target+'~'+request.resource.data.date))
           && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
-          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss'] && request.resource.data.updatedAt == request.time;
+          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss','mogging'] && request.resource.data.updatedAt == request.time;
         allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
       }
       match /vibeReactions/{id} {
@@ -161,7 +161,7 @@ service cloud.firestore {
           && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(request.auth.uid)).data.username
           && get(/databases/$(database)/documents/friendGroups/$(group)/scores/$(request.resource.data.target)).data.get('vibes','').size() > 0
           && request.resource.data.version == get(/databases/$(database)/documents/friendGroups/$(group)/scores/$(request.resource.data.target)).data.get('vibesVersion','legacy')
-          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss']
+          && request.resource.data.kind in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss','mogging']
           && request.resource.data.updatedAt == request.time;
         allow delete: if signedIn() && member(group,request.auth.uid) && (self(resource.data.reactor) || owner(group));
       }

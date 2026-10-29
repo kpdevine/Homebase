@@ -54,3 +54,9 @@ test('expired recipient devices are removed, transient failures are bounded, and
   for(let index=1;index<25;index++)await deliverReaction({...event,version:'version-'+index},{DB},{send,now:at});
   assert.equal(DB.raw.prepare('SELECT COUNT(*) AS count FROM reaction_notifications').get().count,20);assert.equal(sent,21);
 });
+
+test('mogging saved reactions resolve their notification name',async()=>{
+  const data=fixture();data.reaction.kind=s('mogging');
+  const result=await cloudReaction('reactor','actor-token',input,at,{fetcher:reader(data)});
+  assert.equal(result.kind,'mogging');assert.equal(result.label,'Mogging');
+});

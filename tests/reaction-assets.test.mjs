@@ -6,7 +6,7 @@ import {REACTION_ASSETS} from '../prototype/reaction-assets.mjs';
 import {REACTIONS} from '../prototype/social-model.mjs';
 
 test('all planets have valid, small WebP variants with immutable content hashes',async()=>{
-  assert.equal(REACTIONS.length,22);
+  assert.equal(REACTIONS.length,23);
   assert.equal(Object.keys(REACTION_ASSETS).length,REACTIONS.length);
   let total=0;
   for(const {id} of REACTIONS)for(const kind of ['icon','portrait']){
@@ -15,5 +15,5 @@ test('all planets have valid, small WebP variants with immutable content hashes'
     assert.ok(path.includes(createHash('sha256').update(data).digest('hex').slice(0,12)));
     assert.ok(data.length<(kind==='icon'?30000:60000));total+=data.length;
   }
-  assert.ok(total<1000000,'all 22 icons and portraits stay below 1 MB combined');
+  assert.ok(total<1000000,'all 23 icons and portraits stay below 1 MB combined');
 });

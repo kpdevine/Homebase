@@ -29,3 +29,20 @@ The first four assets were initially prompted with blue/periwinkle cloud bands; 
 The owner requested keeping the thumbs-up and correcting its connected arm. Final `wink.png` uses this targeted edit:
 
 Use case: precise-object-edit. Edit this purple winking pixel Jupiter planet. Keep the thumbs-up, face, purple/pink bands, pixel style and transparent background unchanged. Correct ONLY the anatomy of the ring-arms: there must be exactly two connected arms each starting at a shoulder on a side of the planet and each ending in its own hand. The raised thumbs-up on viewer RIGHT must be attached to a complete arm that curves outward directly from the RIGHT side of the body to an elbow and then rises to the thumb hand. It must NOT continue down across the front of the body into the OTHER hand as a continuous strip: the lower-front hand belongs to the other arm wrapping from viewer LEFT and stops as a hand over the belly. Remove the false diagonal connector between the lower-front hand and raised thumbs-up arm. Make the two limb paths visually unambiguous. No extra detached planetary rings. Thick deep navy pixel outline. Preserve every other detail. Real alpha transparency.
+
+## Mogging Moon — October 29
+
+Approved source: `mogging.png`, copied from the final Moon draft v4. Built-in imagegen used existing wink/strong/thinking emojis as references; no CLI fallback. Silver cratered Moon, enlarged smug face, chiseled jaw, one jaw-pointing hand, no left arm, slightly crescent right contour, and right eye/brow contained inside the head. Code ID and accessible name: `mogging` / Mogging. This adds the 23rd reaction and portrait.
+
+Final edit prompt:
+
+Generation mode: built-in image_gen tool.
+Status: review draft only; not added to the app.
+
+Use case: precise-object-edit
+Asset type: Pocket Planet Moon mogging reaction emoji, draft v4.
+Input image: moon-mogging-v3.png is the EDIT TARGET.
+Primary request: fix ONLY the viewer-right eye and its eyebrow so the entire eye is fully inside the Moon's head, with a visible band of pale ivory Moon surface separating the eye and eyebrow from the exterior navy silhouette.
+In the current source, the viewer-right eye extends past the crescent contour into transparent space. Shift that complete smaller right eye and eyebrow inward (toward the viewer-left, the center of the face) enough to leave at least two chunky pixel-block widths of continuous light ivory Moon surface between all parts of that eye/brow and the outer head outline. If needed, slightly narrow that right eye to fit. Keep the same narrowed, smug mogging eye expression and original pixel design. Restore the original crescent outer contour where the eye formerly protruded: clean thick deep-navy stair-step outline without bulges, with transparent space outside. There must be no eyeball, pupil, eyelid or eyebrow outside or merged into the head's exterior outline.
+Preserve EVERYTHING ELSE: large left eye, facial proportions, chiseled jaw, puckered smug mouth, crater shapes and positions, two sparkles, cool ivory/silver/periwinkle palette, original slight crescent silhouette with its inward right cheek notch, no viewer-left arm, and the remaining lower-right hand pointing to the jaw. Do not restore the removed right-side crater lobes. Keep the chunky clean pixel-art rendering and thick navy stepped outlines. This is a local correction, not a redesign.
+Full single character on genuine alpha transparency; no text, no background, no frame, no watermark.

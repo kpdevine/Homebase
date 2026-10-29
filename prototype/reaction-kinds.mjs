@@ -20,5 +20,6 @@ export const REACTIONS=[
   {id:'grateful',label:'Grateful',short:'Grateful'},
   {id:'melting',label:'Melting',short:'Melting'},
   {id:'nerd',label:'Feeling smart',short:'Smart'},
-  {id:'kiss',label:'Blowing a kiss',short:'Kiss'}
+  {id:'kiss',label:'Blowing a kiss',short:'Kiss'},
+  {id:'mogging',label:'Mogging',short:'Mogging'}
 ];
