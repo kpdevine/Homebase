@@ -29,3 +29,31 @@ test('dates equal to today are not overdue and recaps retain the planned work da
   const store=createStore({seed:false});store.addTask('2026-10-27','Write outline',{dueDate:'2026-10-30',displayDate:'2026-10-27'});
   const recap=dailyRecap(store.loadDay('2026-10-27'));assert.equal(recap.tasks[0].displayDate,'2026-10-27');assert.equal(recap.tasks[0].dueDate,'2026-10-30');
 });
+
+test('legacy dated tasks show their assigned day as a plan without inventing a deadline',()=>{
+  const store=createStore({seed:false});store.addTask('2026-10-29','Existing task');
+  const snapshot=store.exportSnapshot();delete snapshot.days[0].tasks[0].dueDate;delete snapshot.days[0].tasks[0].displayDate;
+  const restored=createStore({seed:false,snapshot}),before=restored.exportSnapshot(),task=restored.loadDay('2026-10-29').tasks[0];
+  const markup=ui.taskDateBubbles(task,'2026-10-29','2026-10-29');
+  assert.match(markup,/>Plan 2026-10-29</);assert.doesNotMatch(markup,/task-due-bubble/);
+  assert.equal(dailyRecap(restored.loadDay('2026-10-29')).tasks[0].displayDate,'2026-10-29');
+  assert.deepEqual(restored.exportSnapshot(),before);
+});
+
+test('old recurring routines and future planning cards show the occurrence date',()=>{
+  const store=createStore({seed:false});store.addTask('2026-10-29','Existing routine',{recurrence:{frequency:'daily',weekdays:[]}});
+  const before=store.exportSnapshot(),occurrence=store.loadDay('2026-10-30').tasks[0];
+  const markup=ui.taskDateBubbles(occurrence,'2026-10-29','2026-10-30');
+  assert.match(markup,/>Plan 2026-10-30</);assert.doesNotMatch(markup,/is-overdue|task-due-bubble/);
+  assert.deepEqual(store.exportSnapshot(),before);
+});
+
+test('an explicitly blank planned date stays blank in lists and recaps',()=>{
+  const store=createStore({seed:false});store.addTask('2026-10-29','Deadline only',{dueDate:'2026-10-30',displayDate:null,children:['One']});
+  const task=store.loadDay('2026-10-29').tasks[0],recap=dailyRecap(store.loadDay('2026-10-29')).tasks[0];
+  for(const value of [task,recap]){
+    assert.equal(value.displayDate,null);
+    assert.doesNotMatch(ui.taskDateBubbles(value,'2026-10-29','2026-10-29'),/task-plan-bubble/);
+  }
+  assert.equal(recap.children[0].displayDate,undefined);
+});

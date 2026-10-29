@@ -1,3 +1,7 @@
+## October 29 existing-task bubble fix
+
+The owner reported date bubbles missing in their app. The deployed app matched the release, but its renderer skipped tasks and routines saved before the date fields existed. Legacy scheduled days now appear as Plan bubbles in Overview, task lists, planning cards and recaps. Explicitly unset plans stay unset; no deadline is invented and no saved records are rewritten. Entry asset URLs were updated so a reload requests the current task UI. Checks: 300 passing, one emulator-only skip. Deliver the corrective source and Hosting update through the existing release workflow; preserve unrelated reminder-policy edits and experiments.
+
 ## October 27 task rebuild — approved release
 
 The owner approved publication with “push it” on October 27. The release adds a required Due date calendar (default today), an optional matching Plan to work calendar revealed for other deadlines, glowing inline deadline bubbles, persistent pending deadline tasks, dated state history, recurrence deadlines and backup/cloud preservation. Deliver the matching source to GitHub and app to Firebase Hosting. Checks: 297 passing, one emulator-only skip; no Firestore rule changes. See [task rebuild notes](docs/october-26-task-dates.md) and the updated task requirements. Preserve unrelated `server/reminders/policy.mjs` changes and existing experiment/output files.
