@@ -113,7 +113,10 @@ export function createStore(options = {}) {
   function loadDay(key) {
     const day = structuredClone(days.get(key) || emptyDay(key));
     day.tasks=day.tasks.filter(task=>!task.taskEvents);
-    for(const [sourceDate,source] of days)for(const task of source.tasks)if(task.taskEvents){const visible=datedTaskForDay(task,sourceDate,key);if(visible)day.tasks.push(visible);}
+    for(const [sourceDate,source] of days)for(const task of source.tasks){
+      if(task.taskEvents){const visible=datedTaskForDay(task,sourceDate,key);if(visible)day.tasks.push(visible);}
+      else if(!task.templateId&&sourceDate<key&&!task.done&&(task.displayDate??sourceDate)<=key)day.tasks.push({...structuredClone(task),displayDate:task.displayDate===undefined?sourceDate:task.displayDate,_taskSource:sourceDate});
+    }
     if(!day.configuration&&settings&&key>=settings.effectiveFrom){day.configuration=structuredClone(settings);if(!days.has(key))day.creatine=false;}
     for (const template of templates) if (isDue(template,key) && !day.skippedTemplates.includes(template.id) && !day.tasks.some(task=>task.templateId===template.id)) day.tasks.push(occurrence(template,key));
     return day;
@@ -132,6 +135,7 @@ export function createStore(options = {}) {
   function saveDated(key,task,state) {
     const {_taskSource,...clean}=state;
     const sourceDate=[...days].find(([,day])=>day.tasks.includes(task))?.[0]??key;
+    if(!task.taskEvents)task.taskEvents=[{date:sourceDate,value:taskState(task)}];
     const before=new Map([...days.keys()].filter(date=>date>=key).map(date=>[date,JSON.stringify(datedTaskForDay(task,sourceDate,date))]));
     updateDatedTask(task,key,clean);
     for(const [date,value] of before)if(value!==JSON.stringify(datedTaskForDay(task,sourceDate,date)))invalidateReview(days.get(date),'checklists');
@@ -273,7 +277,7 @@ export function createStore(options = {}) {
         task=isDue(template,key)?occurrence(template,key):null;
       } else {
         task={id:nextId('task'),name:clean,done:false,children:children.map(name=>({id:nextId('task'),name:name.trim(),done:false,children:[]})),...dates};
-        if(dates.dueDate||dates.displayDate===null)task.taskEvents=[{date:key,value:taskState(task)}];
+        task.taskEvents=[{date:key,value:taskState(task)}];
       }
       const day=writableDay(key);
       if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
@@ -294,11 +298,19 @@ export function createStore(options = {}) {
       if(date!==key&&loadDay(date).tasks.length>=1000)throw new RangeError('Task limit reached for that day.');
       const next={...task,...dates,name:draft.name,children:draft.children.map(child=>({...child,id:child.id||nextId('task'),done:task.children.find(old=>old.id===child.id)?.done??false,children:[]}))};
       if(next.children.length)next.done=next.children.every(child=>child.done);
-      if(!task.templateId&&(task._taskSource||dates.dueDate||dates.displayDate===null)){
+      if(!task.templateId&&(task._taskSource||dates.displayDate!==undefined)){
         const source=datedSource(key,id);
         next.completedOn=next.done?(task.completedOn??key):null;
         if(source&&JSON.stringify({...taskState(task),completedOn:task.completedOn??null})===JSON.stringify(next))return id;
-        if(source){saveDated(key,source.task,next);return id;}
+        if(source){
+          const effectiveDate=date<key?date:key;
+          if(date<key){
+            if(!source.task.taskEvents)source.task.taskEvents=[{date:source.visible._taskSource,value:taskState(source.task)}];
+            source.task.taskEvents=source.task.taskEvents.filter(event=>event.date!==key);
+            if(next.done&&next.completedOn>effectiveDate)next.completedOn=effectiveDate;
+          }
+          saveDated(effectiveDate,source.task,next);return id;
+        }
         const owner=days.get(key)?.tasks.find(item=>item.id===id);
         // Promote a legacy dated task without changing its ID or checks.
         const canonical=taskState(task);canonical.taskEvents=[{date:key,value:taskState(task)}];
@@ -348,6 +360,7 @@ export function createStore(options = {}) {
     },
     restoreTask(key, task, index) {
       if(task?._taskSource){
+        if(loadDay(key).tasks.some(item=>item.id===task.id))throw new Error('Task already exists.');
         const canonical=days.get(task._taskSource)?.tasks.find(item=>item.id===task.id);
         if(!canonical)throw new Error('Task no longer exists.');
         saveDated(key,canonical,task);return;

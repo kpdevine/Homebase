@@ -271,7 +271,7 @@ function taskDateBubbles(task,date,scheduledDate) {
   if(!plannedDate)return due;
   const overdue=!task.done&&plannedDate<date;
   const label=dateFormat(plannedDate,{month:'short',day:'numeric',...(plannedDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
-  return due+`<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="Planned work${overdue?' overdue':''} ${longDate(plannedDate)}">Plan ${label}</time>`;
+  return due+`<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="Planned work${overdue?' overdue':''} ${longDate(plannedDate)}">Plan to do ${label}</time>`;
 }
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
@@ -351,6 +351,11 @@ function renderRating() {
   $('#rating-minus').disabled = score === 0; $('#rating-plus').disabled = score === 10;
 }
 function renderSentiments() {
+  if(memoDate!==selectedDate){memoDate=selectedDate;memoChoice=null;}
+  const hasMemo=!!store.loadDay(selectedDate).sentiments.notes.trim();
+  const choice=memoChoice??(hasMemo?'yes':'no');
+  document.querySelectorAll('[name="sentiments-memo"]').forEach(input=>input.checked=input.value===choice);
+  $('.sentiments-notes').hidden=choice!=='yes';
   const {rating}=store.loadDay(selectedDate).sentiments,input=$('#sentiments-rating'),meter=$('#sentiments-meter');
   if(document.activeElement!==input)input.value=rating===null?'':rating;
   drawScoreMeter(meter,rating,{immediate:sentimentPointer!==-1||document.activeElement===input});
@@ -365,6 +370,8 @@ function updateSentiments(changes) {
   store.updateSentiments(selectedDate,changes);
   renderSentiments();renderScore();renderReview();renderHeader();renderNotes();
 }
+let memoDate=null,memoChoice=null;
+document.querySelectorAll('[name="sentiments-memo"]').forEach(input=>input.addEventListener('change',()=>{memoChoice=input.value;renderSentiments();if(memoChoice==='yes')$('#sentiments-notes').focus();}));
 $('#sentiments-notes').addEventListener('input',event=>updateSentiments({notes:event.target.value}));
 $('#sentiments-rating').addEventListener('input',event=>{
   const input=event.target;input.setCustomValidity('');
@@ -662,6 +669,7 @@ function showFinalReview() {
   $('#final-review-content').innerHTML=recapMarkup({final:true});
   const sentiments=store.loadDay(selectedDate).sentiments;
   $('#final-sentiments-notes').value=sentiments.notes;
+  $('#final-vibes').hidden=!socialUI?.requiresVibes();$('#final-vibes-input').value='';$('#final-vibes-error').textContent='';
   renderFinalSentimentsState();
   showDialog($('#final-review-dialog'));
   refreshNoteCarets();
@@ -670,6 +678,7 @@ function renderFinalSentimentsState() {
   const day=store.loadDay(selectedDate),progress=store.dayProgress(selectedDate),rating=day.sentiments.rating;
   const meter=$('#final-sentiments-meter');
   $('.final-review-sentiments').hidden=!settingsForDay(day).tabs.sentiments;
+  $('.final-sentiments-writing').hidden=!day.sentiments.notes.trim();
   meter.closest('.final-sentiments-rating').hidden=settingsForDay(day).sentiments.rating==='hidden';
   drawScoreMeter(meter,rating,{immediate:finalSentimentPointer!==-1});
   meter.querySelector('.meter-number').innerHTML=scoreMarkup(rating);
@@ -677,9 +686,10 @@ function renderFinalSentimentsState() {
   meter.setAttribute('aria-valuenow',rating??0);
   meter.setAttribute('aria-valuetext',rating===null?'Not rated. Drag for a score from 0 to 10.':`${scoreText(rating)} out of 10`);
   $('#final-clear-sentiments-rating').disabled=rating===null;
-  $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete;
+  $('#final-vibes').hidden=!socialUI?.requiresVibes()||!!progress.completedAt;
+  $('#submit-day').disabled=!!progress.completedAt||!progress.canComplete||socialUI?.loggingReady()===false||completingDay;
   $('#submit-day').textContent=progress.completedAt?'✓ Day complete':'Complete entire day';
-  $('#final-review-intro').textContent=progress.completedAt?'This day is complete. You can update Sentiments below.':progress.sections.some(section=>section.id==='sentiments'&&!section.ready)?'Add the required sentiment rating to finish your day.':'All section reviews are confirmed. Take one last look.';
+  $('#final-review-intro').textContent=progress.completedAt?'This day is complete.':socialUI?.loggingReady()===false?'Checking your Solar System membership…':progress.sections.some(section=>section.id==='sentiments'&&!section.ready)?'Add the required sentiment rating to finish your day.':'All section reviews are confirmed. Take one last look.';
   $('#final-review-content').innerHTML=recapMarkup({final:true});
 }
 function updateRating(score, notify = false) {
@@ -821,8 +831,7 @@ $$('[data-repeat-choice]').forEach(button=>button.addEventListener('click',()=>{
 $('#task-repeat').addEventListener('change',()=>{$('#task-frequency').value=$('#task-repeat').checked?'daily':'once';updateFrequency();});
 $('#task-frequency').addEventListener('change',updateFrequency);
 function renderTaskDate() {
-  const due=$('#task-due-date').value,today=editableToday();
-  const canPlan=!!due&&due!==today&&!taskEdit?.templateId;
+  const canPlan=!taskEdit?.templateId;
   $('.task-date-picker').hidden=!canPlan;
   $('#task-date').disabled=!canPlan;
   if(!canPlan)$('#task-date').value='';
@@ -850,7 +859,7 @@ function openTaskComposer(trigger) {
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
-  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value='';$('#task-due-date').value=editableToday();renderTaskDate();
+  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value=selectedDate;$('#task-due-date').value='';renderTaskDate();
   $('#task-dialog-title').textContent='Add task';renderTaskEditScope();updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
 }
 function openTaskEditor(trigger,date,id,childId) {
@@ -858,7 +867,7 @@ function openTaskEditor(trigger,date,id,childId) {
   openTaskComposer(trigger);taskEdit={date,id,templateId:task.templateId,persistent:!!task._taskSource};
   $('#task-date').value=task.displayDate===null?'':task.displayDate??date;
   if(task.displayDate&&task.displayDate<$('#task-date').min)$('#task-date').min=task.displayDate;
-  $('#task-due-date').value=task.dueDate??editableToday();
+  $('#task-due-date').value=task.dueDate??'';
   $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;$('#task-editor-delete').hidden=false;$('#task-editor-delete').textContent=task.templateId?'Remove this occurrence…':'Remove this task…';
   for(const child of task.children)appendSubtaskField(child);
   if(task.templateId) {
@@ -898,7 +907,7 @@ $('#add-task-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#task-name');
   const frequency=$('#task-frequency').value;
   if(!$('#task-due-date').reportValidity())return;
-  const options={dueDate:$('#task-due-date').value||null,displayDate:$('#task-date').value||null,children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
+  const options={dueDate:$('#task-due-date').value||null,displayDate:$('#task-date').value||taskComposeDate,children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
   if(!$('#task-date').checkValidity()){ $('#task-date').reportValidity();return; }
   const editing=!!taskEdit;
   try {
@@ -1085,7 +1094,16 @@ $('#review-primary').addEventListener('click', () => {
   if(store.dayProgress(selectedDate).canComplete) { showFinalReview(); announce('All sections reviewed. Check the full-day summary before completing the day.'); }
   else announce(`${viewLabels[section.id]} review confirmed.`);
 });
-$('#submit-day').addEventListener('click',()=>{
+document.addEventListener('social-profile-change',()=>{if($('#final-review-dialog').open)renderFinalSentimentsState();});
+let completingDay=false;
+$('#submit-day').addEventListener('click',async()=>{
+  if(completingDay||socialUI?.loggingReady()===false)return;
+  if(socialUI?.requiresVibes()){
+    const input=$('#final-vibes-input');
+    if(!input.value.trim()){$('#final-vibes-error').textContent='Write your current vibes before logging your day.';input.focus();return;}
+    completingDay=true;$('#submit-day').disabled=true;
+    try{await socialUI.saveVibes(input.value);}catch(error){$('#final-vibes-error').textContent=error.message;return;}finally{completingDay=false;renderFinalSentimentsState();}
+  }
   const before=buildAchievements(store,editableToday());
   try { store.completeDay(selectedDate); }
   catch(error) { closeDialog($('#final-review-dialog'));render();announce(error.message);return; }

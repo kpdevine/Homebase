@@ -12,7 +12,7 @@ function surface(options={}){
  const client={signIn:async()=>observe({uid:'qa-user',displayName:'QA',email:'qa@example.com'}),signOut:async()=>observe(null),observeAuth:fn=>observe=fn,transport:()=>({subscribe:fn=>{remote=fn;return()=>{};},commit:async()=>{}})};
  Object.assign(globalThis,{document,localStorage,sessionStorage,window:{addEventListener(){}}});
  const cloud=mountCloud({preview:false,readLocal:()=>snapshot,applyLocal(){},canApply:()=>true,flushLocal:()=>true,onStatus(){},localEditTimes:()=>new Map(),adoptEditTimes(){},loadClient:async()=>client,...options});
- return {el,cloud,localStorage,sessionStorage,auth:user=>observe(user),ready:()=>remote(new Map())};
+ return {el,cloud,localStorage,sessionStorage,auth:user=>observe(user),ready:(records=new Map())=>remote(records),snapshot};
 }
 test('Google sign-in prompts to enable sync; declining keeps local data and re-sign-in prompts again',async()=>{
  const s=surface();await new Promise(resolve=>setImmediate(resolve));await s.cloud.signIn();
@@ -38,4 +38,21 @@ test('account-first sign-in prepares the workspace and enables sync without a se
 test('a failed account switch cannot start sync against the previous local records',async()=>{
  const s=surface({autoSync:true,prepareAccount:()=>{throw Error('Could not save offline records');}});await new Promise(resolve=>setImmediate(resolve));await s.cloud.signIn();
  assert.equal(s.cloud.isEnabled(),false);assert.equal(s.cloud.hasUser(),false);assert.equal(s.cloud.status(),'error');assert.match(s.el('cloud-status').textContent,/Could not save offline records/);
+});
+
+test('last successful sync persists per account and stays hidden from another signed-in account',async()=>{
+ const s=surface({autoSync:true});await new Promise(resolve=>setImmediate(resolve));await s.cloud.signIn();
+ try{
+ const storageKey=`homebase.cloud-last-synced.v1.${firebaseConfig.projectId}.qa-user`;
+ assert.equal(s.el('cloud-last-synced-time').textContent,'Not synced yet');assert.equal(s.localStorage.getItem(storageKey),null);
+ const {snapshotRecords}=await import('../prototype/cloud-records.mjs');s.ready(snapshotRecords(s.snapshot));const saved=Number(s.localStorage.getItem(storageKey));assert.ok(saved>0);
+ assert.equal(s.el('cloud-last-synced-time').dateTime,new Date(saved).toISOString());
+ s.auth({uid:'another-account'});assert.equal(s.el('cloud-last-synced-time').textContent,'Not synced yet');
+ s.auth({uid:'qa-user'});assert.equal(s.el('cloud-last-synced-time').dateTime,new Date(saved).toISOString());
+ s.auth(null);assert.equal(s.el('cloud-last-synced-time').textContent,'Sign in to sync');assert.equal(s.el('cloud-last-synced-time').dateTime,'');
+ }finally{s.auth(null);}
+});
+
+test('preview sync time explicitly describes local-only storage',()=>{
+ const s=surface({preview:true});assert.equal(s.el('cloud-last-synced-time').textContent,'Preview stays local');
 });

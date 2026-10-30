@@ -1,3 +1,7 @@
+## October 29 social and logging release — approved
+
+The owner approved “push all” after the UI refinements. Publish matching Hosting and Firestore rules from this checkout. Changes cover private Sentiments, required final-review vibes for Solar members, persistent planned tasks and penalties, public profiles and friend navigation, relationship actions, account-specific last-sync times, and coherent mobile social cards. Validation: 311 app checks pass, one normal emulator-only skip; expanded security emulator suite passes. Browser QA at 390px and 320px passes; physical iPhone/PWA rendering is unverified. See [release notes](docs/october-29-logging-profiles.md). Exclude unrelated reminder-policy edits, experiments and prior output files.
+
 ## October 29 Mogging Moon
 
 Glow follow-up: Mogging has a subtle stationary ivory/blue halo in Solar Systems portraits, pickers, badges, and reaction details. The shared renderer marks only this emoji; CSS applies an alpha-aware drop shadow without changing its artwork or layout. Browser QA confirmed the portrait and reaction picker receive the glow while another emoji keeps its normal filter. All 300 ordinary app checks pass; the existing emulator-only skip is unchanged. Hosting-only update; no rules or Worker changes.

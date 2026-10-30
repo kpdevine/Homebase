@@ -1,15 +1,15 @@
 import {snapshotRecords,recordsSnapshot,recordChanges,reconcileRecords,acknowledgeOwnChanges,syncBatch} from './cloud-records.mjs';
 
-export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>true,loadBase=()=>null,saveBase=()=>{},localEditTimes=()=>new Map(),adoptEditTimes=()=>{},onState=()=>{},delay=900,preferCloudOnFirstRead=false}) {
+export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>true,loadBase=()=>null,saveBase=()=>{},localEditTimes=()=>new Map(),adoptEditTimes=()=>{},onState=()=>{},delay=900,preferCloudOnFirstRead=false,now=Date.now}) {
   let base=new Map(loadBase()||[]),remote=null,waiting=null,enabled=false,writing=false,inFlight=[],timer,closed=false,conflicts=[];
-  let remoteEditTimes=new Map(),restored=false;
+  let remoteEditTimes=new Map(),restored=false,remoteConfirmedAt=null,lastSyncedAt=null;
   function mergedTimes(merged,local,mine) {
     return new Map([...merged].flatMap(([id,payload])=>{
       const localAt=payload===local.get(id)?mine.get(id)||0:0,remoteAt=payload===remote.get(id)?remoteEditTimes.get(id)||0:0;
       const at=Math.max(localAt,remoteAt);return at?[[id,at]]:[];
     }));
   }
-  const emit=(status,message)=>{if(!closed)onState({status,message,restored,conflicts:[...conflicts],remoteCount:remote?.size??0});};
+  const emit=(status,message)=>{if(closed)return;if(status==='synced'&&remoteConfirmedAt!==null)lastSyncedAt=Math.max(lastSyncedAt||0,remoteConfirmedAt);onState({status,message,restored,lastSyncedAt,conflicts:[...conflicts],remoteCount:remote?.size??0});};
   function remember(){saveBase([...base]);}
   function schedule(){clearTimeout(timer);if(enabled&&!writing&&!conflicts.length&&!waiting&&!closed)timer=setTimeout(flush,delay);}
   function receive(next,times=remoteEditTimes) {
@@ -56,7 +56,7 @@ export function createCloudEngine({transport,readLocal,applyLocal,canApply=()=>t
   }
   let stop=()=>{},subscriptionFailed=false;
   function subscribe(){
-    stop=transport.subscribe(receive,error=>{
+    stop=transport.subscribe((records,times)=>{remoteConfirmedAt=now();receive(records,times);},error=>{
       subscriptionFailed=true;remote=null;waiting=null;clearTimeout(timer);
       emit('error',`Local records are safe. ${error.message} Use Sync now to reconnect.`);
     });

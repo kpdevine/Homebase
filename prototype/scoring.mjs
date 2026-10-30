@@ -48,11 +48,13 @@ export function summarizeDay(day, trainingEntries = [], week) {
 
   const config=settingsForDay(day);
 
-  const {done,total} = taskProgress(day.tasks);
+  const eligible=day.tasks.filter(task=>!(task.displayDate??task.dueDate)||(task.displayDate??task.dueDate)<=day.date);
+  const {done,total} = taskProgress(eligible);
+  const pendingPlanned=eligible.some(task=>!task.done);
 
   const touched=day.checklistTouched??total>0;
 
-  const checklist = total && touched ? done / total * 10 : day.reviewed.checklists ? 10 : null;
+  const checklist = total && (touched||pendingPlanned) ? done / total * 10 : day.reviewed.checklists ? 10 : null;
 
   const nutrition=nutritionScore(day);
 
@@ -66,7 +68,7 @@ export function summarizeDay(day, trainingEntries = [], week) {
 
       detail:training.alternate?'Alternate workout · 5 points'+(training.tracksCreatine&&training.creatine?' + 1 creatine':''):training.mode==='other'?(training.rest?`Rest day · ${training.restCredits}/${training.restAllowance} credits left`:training.logged?`${training.minutes} / ${training.minuteGoal} minutes · ${training.activity}`:'Log training or rest'):training.logged&&!training.target?training.tracksCreatine?'Creatine only · no set targets':'No targets · not scored':training.rest?`${training.goalsComplete?'Goals met':training.restCreditUsed?'Flexible rest credit used':'No flexible rest credits remaining'} · ${training.restCredits}/${training.restAllowance} left`:training.logged?`${training.useful} goal set${training.useful===1?"":"s"}${training.nonUseful?` · ${training.nonUseful} non-goal set${training.nonUseful===1?"":"s"}`:""}`:'Answer lifting or rest' },
 
-    { id: 'checklists', label: 'To-do list', score: checklist, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
+    { id: 'checklists', label: 'To-do list', score: checklist, logged:touched||!!day.reviewed.checklists, detail: total ? `${done} of ${total} done${touched?'':' · not checked in'}` : day.reviewed.checklists ? 'No tasks due · reviewed' : 'No tasks yet' },
 
   ];
 

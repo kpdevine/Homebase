@@ -17,8 +17,8 @@ export function datedTaskForDay(task,sourceDate,date) {
   const event=task.taskEvents.filter(event=>event.date<=date).at(-1);
   if(!event)return null;
   const state=structuredClone(event.value),start=state.displayDate??sourceDate;
-  const carries=!!state.dueDate||state.displayDate===null;
-  if(date<start||!carries&&date!==start||state.removedOn&&date>=state.removedOn||state.done&&date>state.completedOn)return null;
+  const lastVisible=state.completedOn>start?state.completedOn:start;
+  if(date<start||state.removedOn&&date>=state.removedOn||state.done&&date>lastVisible)return null;
   return {...state,_taskSource:sourceDate};
 }
 export function updateDatedTask(task,date,state) {

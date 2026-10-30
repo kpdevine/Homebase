@@ -27,7 +27,7 @@ The root app starts empty and saves on this browser/device. [The synthetic previ
 - Read-only daily recaps with score/status, tasks and subtasks, dated training totals, and full handwritten notes. Category shortcuts and keyboard calendar navigation make earlier days easier to revisit.
 - Local persistence, backup export/import, storage recovery, and conflicting-tab protection. Version-1 backups migrate to version 2 without losing history.
 
-Daily score provisionally averages entered nutrition, checklist completion, automatic gym scoring, and an optional Sentiments rating. Gym uses weekly goals ÷ 5 as a fixed daily workout target, full credit for useful sets, quarter credit for extra sets, and two flexible rest credits. Subtasks count once; parents are not double-counted. Merely scheduled tasks do not create scores or streaks before a checklist check-in. A reviewed empty checklist counts as no tasks due. Settings explains the policy.
+Daily score provisionally averages entered nutrition, checklist completion, automatic gym scoring, and an optional Sentiments rating. Gym uses weekly goals ÷ 5 as a fixed daily workout target, full credit for useful sets, quarter credit for extra sets, and two flexible rest credits. Subtasks count once; parents are not double-counted. Unfinished tasks lower the daily task score on and after their planned date, every day until completed; future plans do not penalize earlier days. This penalty does not count as a check-in or create a logging streak. A reviewed empty checklist counts as no tasks due. Settings explains the policy.
 
 ## Development boundary
 
@@ -40,6 +40,6 @@ See [prototype guide](docs/prototype-guide.md), [app polish](docs/app-polish.md)
 
 ## Customize your planet
 
-The setup form and Settings → Tab settings configure vibes or protein/calorie goals, gym or minute-based training, custom set groups, flex rests, creatine tracking, task defaults, and sentiment ratings. Friends uses unique Google-account usernames and mutual requests. The leaderboard shows yesterday, monthly average, and logged-day counts; personal logs stay private.
+The setup form and Settings → Tab settings configure vibes or protein/calorie goals, gym or minute-based training, custom set groups, flex rests, creatine tracking, task defaults, and sentiment ratings. Friends uses unique Google-account usernames and mutual requests. Signed-in users can browse profiles, shared vibes, score summaries, streaks and friends lists before sending a request. Solar Systems show daily scores and reactions; personal logs stay private.
 
 Developer checks: `npm.cmd test`; with developer dependencies installed and Java 21+, `npm.cmd run test:rules` exercises social access against the local demo Firestore emulator. See [Firebase sync](docs/firebase-sync.md).

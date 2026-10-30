@@ -3,10 +3,13 @@ import {createCloudEngine} from './cloud-engine.mjs';
 
 export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onStatus,onUser=()=>{},prepareAccount=()=>({}),autoSync=false,beforeSignOut=async()=>{},localEditTimes,adoptEditTimes,loadClient=()=>import('./firebase-driver.mjs').then(module=>module.firebaseClient(firebaseConfig))}) {
   const el=id=>document.getElementById(id);
-  let client=null,engine=null,user=null,enabled=false,busy=false;
+  let client=null,engine=null,user=null,enabled=false,busy=false,lastSyncedAt=null;
   let state={status:preview?'preview':firebaseConfig?'loading':'unconfigured',message:preview?'Preview stays on this device. Open your personal workspace to use cloud sync.':firebaseConfig?'Connecting to Firebase…':'Firebase connection is being configured. Your records continue saving locally.',conflicts:[]};
   function paint() {
     el('cloud-status').textContent=state.message;
+    const syncedTime=el('cloud-last-synced-time');
+    syncedTime.textContent=lastSyncedAt?new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date(lastSyncedAt)):preview?'Preview stays local':user?'Not synced yet':'Sign in to sync';
+    syncedTime.dateTime=lastSyncedAt?new Date(lastSyncedAt).toISOString():'';
     el('cloud-account').textContent=user?`Signed in as ${user.email||'your Google account'}`:'';
     el('cloud-signin').hidden=!!user||preview;el('cloud-signin').disabled=!client||busy;
     el('cloud-enable').hidden=!user||enabled;el('cloud-enable').disabled=busy||!['ready','editing'].includes(state.status);
@@ -14,7 +17,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
     el('cloud-conflicts').hidden=state.status!=='conflict'||!state.conflicts.length;
     el('cloud-conflict-list').textContent=(state.conflicts||[]).map(id=>id.startsWith('day_')?`Day ${id.slice(4)}`:id.startsWith('targets_')?`Targets for ${id.slice(8)}`:'Recurring task').join(', ');
     el('cloud-sync-details').hidden=preview;
-    onStatus({enabled,status:state.status,restored:state.restored===true,canSignIn:!!client&&!busy&&!preview,message:state.message,label:preview?'Preview · saved separately':state.status==='synced'?'Saved · cloud synced':enabled?'Saved locally · '+({conflict:'sync conflict',offline:'cloud offline',error:'sync needs attention',editing:'updates waiting'}[state.status]||'syncing'):'Saved on this device'});
+    onStatus({enabled,status:state.status,lastSyncedAt,restored:state.restored===true,canSignIn:!!client&&!busy&&!preview,message:state.message,label:preview?'Preview · saved separately':state.status==='synced'?'Saved · cloud synced':enabled?'Saved locally · '+({conflict:'sync conflict',offline:'cloud offline',error:'sync needs attention',editing:'updates waiting'}[state.status]||'syncing'):'Saved on this device'});
   }
   const prompt=el('sync-prompt'),intentKey='pocketplanet.sync-signin-intent';
   let promptedUid=null;
@@ -23,7 +26,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
     el('sync-turn-on').disabled=!engine||!['ready','editing'].includes(state.status);
     el('sync-prompt-status').textContent=['ready','editing'].includes(state.status)?'':state.status==='loading'?'Connecting your account…':state.message;
   }
-  function setState(next){state=next;paint();paintPrompt();}
+  function setState(next){state=next;if(user&&Number.isFinite(next.lastSyncedAt)&&next.lastSyncedAt>0&&next.lastSyncedAt>(lastSyncedAt||0)){lastSyncedAt=next.lastSyncedAt;try{localStorage.setItem(key('last-synced'),String(lastSyncedAt));}catch{}}paint();paintPrompt();}
   function promptForSync(){
     if(!user||enabled||promptedUid===user.uid)return;
     try{if(localStorage.getItem(key('prompted'))==='true'&&sessionStorage.getItem(intentKey)!=='true')return;localStorage.setItem(key('prompted'),'true');}catch{}
@@ -37,7 +40,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
 
   function key(name){return `homebase.cloud-${name}.v1.${firebaseConfig.projectId}.${user.uid}`;}
   function observeUser(next) {
-    engine?.close();engine=null;enabled=false;closePrompt();
+    engine?.close();engine=null;enabled=false;lastSyncedAt=null;closePrompt();
     let account;
     try {
       if(!flushLocal())throw new Error('Resolve local saving before changing accounts.');
@@ -45,6 +48,7 @@ export function mountCloud({preview,readLocal,applyLocal,canApply,flushLocal,onS
     }catch(error){user=null;onUser(null);setState({status:'error',message:`Could not load this account. ${error.message}`,conflicts:[]});return;}
     onUser(user?{uid:user.uid,displayName:user.displayName}:null);
     if(!user){setState({status:'signed-out',message:'Sign in with Google to connect your personal records across devices.',conflicts:[]});return;}
+    try{const saved=Number(localStorage.getItem(key('last-synced')));if(Number.isFinite(saved)&&saved>0&&saved<=Date.now()+300000)lastSyncedAt=saved;}catch{}
     try {enabled=autoSync||localStorage.getItem(key('enabled'))==='true';if(autoSync)localStorage.setItem(key('enabled'),'true');}
     catch {setState({status:'error',message:'Browser storage is unavailable. Restore local saving before connecting cloud sync.',conflicts:[]});return;}
     const baseKey=key('base');let savedBase=null;

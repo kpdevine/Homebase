@@ -23,6 +23,13 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const score={uid:'alice',username:'alice_planet',appDate:'2026-10-21',month:'2026-10',yesterdayDate:'2026-10-20',yesterdayScore:9,monthScore:8.4,daysLogged:5,totalDaysLogged:40,updatedAt:serverTimestamp()};
     await assertSucceeds(setDoc(doc(a,'socialScores','alice'),score));await assertFails(getDoc(doc(b,'socialScores','alice')));await assertFails(getDoc(doc(guest,'socialScores','alice')));
     await assertFails(setDoc(doc(a,'socialScores','alice'),{...score,notes:'must never be public'}));await assertFails(setDoc(doc(a,'socialScores','alice'),{...score,monthScore:11}));await assertFails(setDoc(doc(b,'socialScores','alice'),score));
+    const sharedProfile={...score,planet:'happy',vibes:'A good day',consecutiveStreak:2,streakEndDate:score.appDate};
+    await assertSucceeds(setDoc(doc(a,'profileSummaries','alice'),sharedProfile));
+    await assertSucceeds(getDoc(doc(c,'profileSummaries','alice')));
+    await assertFails(getDoc(doc(guest,'profileSummaries','alice')));
+    await assertFails(setDoc(doc(b,'profileSummaries','alice'),sharedProfile));
+    await assertFails(setDoc(doc(a,'profileSummaries','alice'),{...sharedProfile,notes:'Private memo'}));
+    await assertFails(setDoc(doc(a,'profileSummaries','alice'),{...sharedProfile,planet:'unknown'}));
     const requestId='alice~bob',request=doc(a,'friendRequests',requestId);
     assert.equal((await assertSucceeds(getDoc(request))).exists(),false);
     await assertSucceeds(setDoc(request,{requester:'alice',recipient:'bob',status:'pending',createdAt:serverTimestamp(),updatedAt:serverTimestamp()}));
@@ -33,6 +40,8 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const unilateral=writeBatch(b);unilateral.update(doc(b,'friendRequests',requestId),{status:'accepted',updatedAt:serverTimestamp()});unilateral.set(doc(b,'friendships','alice','friends','bob'),friendship);await assertFails(unilateral.commit());
     const accepted=writeBatch(b);accepted.update(doc(b,'friendRequests',requestId),{status:'accepted',updatedAt:serverTimestamp()});accepted.set(doc(b,'friendships','alice','friends','bob'),friendship);accepted.set(doc(b,'friendships','bob','friends','alice'),{...friendship,owner:'bob',friend:'alice'});await assertSucceeds(accepted.commit());
     await assertSucceeds(getDoc(doc(b,'socialScores','alice')));await assertFails(getDoc(doc(c,'socialScores','alice')));await assertFails(getDoc(doc(b,'users','alice','records','settings')));
+    assert.equal((await assertSucceeds(getDocs(collection(c,'friendships','alice','friends')))).docs[0].id,'bob');
+    await assertFails(getDocs(collection(guest,'friendships','alice','friends')));
     await assertFails(setDoc(doc(b,'friendships','charlie','friends','alice'),{...friendship,owner:'charlie',friend:'alice'}));
     await assertSucceeds(deleteDoc(doc(b,'friendships','alice','friends','bob')));await assertFails(getDoc(doc(b,'socialScores','alice')));
     // Exercise the actual browser driver against the emulator, swapping only its
@@ -43,6 +52,11 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     const dana=socialClient(env.authenticatedContext('dana').firestore(),'dana'),eli=socialClient(env.authenticatedContext('eli').firestore(),'eli');
     assert.equal(await dana.profile(),null);await dana.claim('dana_planet');await eli.claim('eli_planet');assert.equal((await dana.search('eli'))[0].uid,'eli');
     await dana.request('eli');await eli.accept('dana~eli');
+    const {uid:ignoredUid,username:ignoredName,updatedAt:ignoredTimestamp,...publicSummary}=score;
+    await dana.publishProfile('dana_planet',publicSummary,{planet:'sun',vibes:'Hello from my orbit'});
+    const danaProfile=await socialClient(c,'charlie').viewProfile('dana');
+    assert.equal(danaProfile.planet,'sun');assert.equal(danaProfile.vibes,'Hello from my orbit');assert.equal(danaProfile.monthScore,8.4);assert.equal(danaProfile.friends[0].username,'eli_planet');
+    assert.equal((await socialClient(c,'charlie').viewProfile(danaProfile.friends[0].uid)).username,'eli_planet');
     const summary={appDate:'2026-10-21',month:'2026-10',yesterdayDate:'2026-10-20',yesterdayScore:9,monthScore:8.4,daysLogged:5,totalDaysLogged:40};
     await assertSucceeds(dana.publish('dana_planet',{...summary,consecutiveStreak:5,streakEndDate:'2026-10-20'}));
     for(const invalid of [{consecutiveStreak:41,streakEndDate:'2026-10-20'},{consecutiveStreak:3.5,streakEndDate:'2026-10-20'},{consecutiveStreak:5,streakEndDate:'2026-10-19'},{consecutiveStreak:0,streakEndDate:'2026-10-20'}])await assertFails(dana.publish('dana_planet',{...summary,...invalid}));
@@ -58,6 +72,10 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     await assertFails(getDoc(doc(eliDb,'socialPreferences','dana')));
     await assertFails(setDoc(doc(eliDb,'socialPreferences','dana'),{planet:'happy',vibes:'forged',updatedAt:serverTimestamp()}));
     const system=await assertSucceeds(dana.groups.create('Weekend Orbit'));
+    // A nonfriend can browse the profile and its system without accessing group logs.
+    assert.deepEqual((await socialClient(c,'charlie').viewProfile('dana')).solarSystems,[{id:system.id,name:'Weekend Orbit'}]);
+    await assertFails(getDocs(collection(guest,'groupMemberships','dana','groups')));
+    await assertFails(getDoc(doc(c,'friendGroups',system.id,'scores','dana')));
     await assert.rejects(dana.groups.create('Second Orbit'),/one Solar System/);
     await assertFails(setDoc(doc(danaDb,'solarOwnership','dana'),{owner:'dana',groupId:'another-group',createdAt:serverTimestamp()}));
     await assertFails(getDoc(doc(eliDb,'solarOwnership','dana')));
@@ -94,6 +112,7 @@ test('Firestore isolates private logs and limits social summaries to mutually ac
     assert.equal((await charlieClient.groups.search('new'))[0].name,'New Orbit');
     assert.deepEqual(await charlieClient.groups.search('weekend'),[]);
     assert.equal((await getDoc(doc(eliDb,'groupMemberships','eli','groups',system.id))).data().groupName,'Weekend Orbit');
+    assert.deepEqual((await charlieClient.viewProfile('dana')).solarSystems,[{id:system.id,name:'New Orbit'}]);
     assert.equal((await getDoc(doc(danaDb,'friendGroups',system.id))).data().owner,'dana');
     const invalidRename=writeBatch(danaDb);invalidRename.update(doc(danaDb,'friendGroups',system.id),{name:'x'.repeat(41)});invalidRename.update(doc(danaDb,'groupDirectory',system.id),{name:'x'.repeat(41),searchName:'x'.repeat(41)});await assertFails(invalidRename.commit());
     const forgedOwner=writeBatch(danaDb);forgedOwner.update(doc(danaDb,'friendGroups',system.id),{name:'Forged Orbit',owner:'eli'});forgedOwner.update(doc(danaDb,'groupDirectory',system.id),{name:'Forged Orbit',searchName:'forged orbit'});await assertFails(forgedOwner.commit());

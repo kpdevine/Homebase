@@ -17,7 +17,7 @@ test('daily, weekdays, weekly and selected-day schedules honor their start date'
 test('unopened recurring days remain unlogged and read-only, with independent occurrences',()=>{
   const store=createStore({seed:false});store.addTask(monday,'Daily',routine('daily'));
   const before=store.exportSnapshot(),tomorrow=addDays(monday,1),day=store.loadDay(tomorrow);
-  assert.equal(summary(store)(tomorrow).score,null);assert.equal(store.hasEntry(tomorrow),false);
+  assert.equal(summary(store)(tomorrow).score,0);assert.equal(store.hasEntry(tomorrow),false);
   assert.deepEqual(store.exportSnapshot(),before);
   store.toggleTask(tomorrow,day.tasks[0].id);
   assert.equal(summary(store)(tomorrow).score,10);assert.equal(store.loadDay(monday).tasks[0].done,false);

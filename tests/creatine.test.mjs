@@ -49,7 +49,7 @@ test('zero muscle goals leave only the single creatine point available',()=>{
 });
 test('projection begins before any logging and never invents nutrition or gym ratings',()=>{
  const store=fresh();store.addTask(monday,'One task');const summarize=()=>summarizeDay(store.loadDay(monday),[],store.loadWeek(monday));
- assert.equal(summarize().score,null);assert.deepEqual(taskScoreRange(summarize()),{score:10,low:0,projected:true});
- store.updateRating(monday,8);assert.deepEqual(taskScoreRange(summarize()),{score:9,low:4,projected:true});assert.equal(summarize().score,8);
+ assert.equal(summarize().score,0);assert.deepEqual(taskScoreRange(summarize()),{score:10,low:0,projected:true});
+ store.updateRating(monday,8);assert.deepEqual(taskScoreRange(summarize()),{score:9,low:4,projected:true});assert.equal(summarize().score,4);
  store.setTrainingMode(monday,'rest');assert.deepEqual(taskScoreRange(summarize()),{score:9,low:5.7,projected:true});
 });

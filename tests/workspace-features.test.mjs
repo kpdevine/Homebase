@@ -18,7 +18,7 @@ test('the previous seven calendar days remain editable, older logs are protected
   for(const edit of edits)assert.throws(edit,/summary only/);
   assert.deepEqual(store.exportSnapshot(),before);assert.equal(store.loadDay(old).nutrition,8);
   store.updateRating(addDays(today,-7),7);store.addTask(addDays(today,1),'Tomorrow');
-  assert.equal(store.loadDay(addDays(today,1)).tasks[0].name,'Tomorrow');
+  assert.equal(store.loadDay(addDays(today,1)).tasks.find(task=>task.name==='Tomorrow').name,'Tomorrow');
 });
 
 test('one-time tasks precede recurring tasks without changing their relative order or storage',()=>{
@@ -26,10 +26,10 @@ test('one-time tasks precede recurring tasks without changing their relative ord
   assert.deepEqual(orderedTasks(tasks).map(task=>task.id),['a','b','r1','r2']);assert.deepEqual(tasks,before);
 });
 
-test('planning tasks does not log the to-do list; working or explicitly reviewing does',()=>{
+test('planned tasks lower the score without checking in; working or reviewing checks in',()=>{
   const store=fresh();store.updateRating(today,8);const id=store.addTask(today,'One task');
-  assert.equal(summary(store).sections.find(section=>section.id==='checklists').score,null);
-  assert.equal(summary(store).score,8);assert.equal(taskScoreRange(summary(store)).projected,true);
+  assert.equal(summary(store).sections.find(section=>section.id==='checklists').score,0);
+  assert.equal(summary(store).score,4);assert.equal(taskScoreRange(summary(store)).projected,true);
   store.removeTask(today,id);const next=store.addTask(today,'Another task');
   assert.equal(summary(store).logged,1);
   store.confirmSection(today,'checklists');assert.equal(summary(store).sections[2].score,0);

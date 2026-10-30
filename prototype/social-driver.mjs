@@ -7,6 +7,14 @@ export function socialClient(db,uid,options={}){
     uid,
     groups:groupClient(db,uid,options),
     async profile(){const snapshot=await getDoc(profile);return snapshot.exists()?snapshot.data():null;},
+    async viewProfile(user){
+      const [identity,summary,links,memberships]=await Promise.all([getDoc(doc(db,'publicProfiles',user)),getDoc(doc(db,'profileSummaries',user)),getDocs(collection(db,'friendships',user,'friends')),getDocs(collection(db,'groupMemberships',user,'groups'))]);
+      if(!identity.exists())return null;
+      const friends=await Promise.all(links.docs.map(async link=>{const person=await getDoc(doc(db,'publicProfiles',link.id));return person.exists()?{uid:link.id,username:person.data().username}:null;}));
+      const systems=await Promise.all(memberships.docs.map(async membership=>{const entry=await getDoc(doc(db,'groupDirectory',membership.id));return entry.exists()?{id:membership.id,name:entry.data().name}:null;}));
+      return {...summary.data(),...identity.data(),solarSystems:systems.filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name)),friends:friends.filter(Boolean).sort((a,b)=>a.username.localeCompare(b.username))};
+    },
+    async publishProfile(name,summary,appearance){await setDoc(doc(db,'profileSummaries',uid),{uid,username:name,...summary,...solarAppearance(appearance),updatedAt:serverTimestamp()});},
     watchProfile(receive,error){return onSnapshot(profile,snapshot=>receive(snapshot.exists()?snapshot.data():null),error);},
     async rename(value){const name=username(value),handle=doc(db,'handles',name);return runTransaction(db,async tx=>{const [own,existing]=await Promise.all([tx.get(profile),tx.get(handle)]);if(!own.exists())throw new Error('Choose a username first.');const previous=own.data();if(previous.username===name)return previous;if(existing.exists())throw new Error('That username is taken. Try another.');tx.set(handle,{uid,username:name,createdAt:serverTimestamp()});tx.update(profile,{username:name});tx.delete(doc(db,'handles',previous.username));return {...previous,username:name};});},
     async claim(value){const name=username(value),handle=doc(db,'handles',name);return runTransaction(db,async tx=>{const [existing,own]=await Promise.all([tx.get(handle),tx.get(profile)]);if(own.exists())return own.data();if(existing.exists())throw new Error('That username is taken. Try another.');const data={uid,username:name,createdAt:serverTimestamp()};tx.set(handle,data);tx.set(profile,data);return {uid,username:name};});},

@@ -111,7 +111,7 @@ test('invalid imports reject inconsistent records and cannot corrupt saved data'
 test('task deletion can be undone without duplicating IDs or changing other dates', () => {
   const store=createStore();const day=store.loadDay(DEMO_TODAY);const other=store.loadDay(addDays(DEMO_TODAY,-1));
   const removed=store.removeTask(DEMO_TODAY,day.tasks[1].id);
-  assert.equal(store.loadDay(DEMO_TODAY).tasks.length,3);
+  assert.equal(store.loadDay(DEMO_TODAY).tasks.length,day.tasks.length-1);
   store.restoreTask(DEMO_TODAY,removed.task,removed.index);
   assert.deepEqual(store.loadDay(DEMO_TODAY).tasks,day.tasks);
   assert.deepEqual(store.loadDay(addDays(DEMO_TODAY,-1)),other);

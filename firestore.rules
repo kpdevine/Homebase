@@ -39,7 +39,7 @@ service cloud.firestore {
         && request.resource.data.status == 'accepted' && request.resource.data.updatedAt == request.time;
     }
     match /friendships/{owner}/friends/{friend} {
-      allow read: if self(owner);
+      allow read: if signedIn();
       function accepted() {
         let data=request.resource.data;
         let invitation=getAfter(/databases/$(database)/documents/friendRequests/$(data.requestId)).data;
@@ -78,6 +78,11 @@ service cloud.firestore {
     match /socialScores/{uid} {
       allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
       allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes','vibesVersion']);
+    }
+    // Browseable profiles expose only the validated shared summary and appearance.
+    match /profileSummaries/{uid} {
+      allow read: if signedIn();
+      allow create, update: if validSummary(uid);
     }
     function member(group,uid) {return exists(/databases/$(database)/documents/friendGroups/$(group)/members/$(uid)) && get(/databases/$(database)/documents/friendGroups/$(group)).data.get('deletedAt',null) == null;}
     function owner(group) {return signedIn() && get(/databases/$(database)/documents/friendGroups/$(group)).data.owner == request.auth.uid;}
@@ -186,7 +191,8 @@ service cloud.firestore {
         && request.resource.data.ownerUsername == groupData(group).ownerUsername && request.resource.data.createdAt == request.time;
     }
     match /groupMemberships/{uid}/groups/{group} {
-      allow read: if self(uid);
+      // Profile visitors can see system membership; scores and logs keep their own protections.
+      allow read: if signedIn();
       allow create: if mayAdmit(group,uid) && request.resource.data.keys().hasOnly(['groupId','groupName','owner','ownerUsername','joinedAt'])
         && request.resource.data.groupId == group && request.resource.data.groupName == groupData(group).name
         && request.resource.data.owner == groupData(group).owner && request.resource.data.ownerUsername == groupData(group).ownerUsername

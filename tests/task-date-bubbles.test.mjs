@@ -14,7 +14,7 @@ const bubbles=task=>ui.taskDateBubbles(task,'2026-10-27');
 
 test('due and planned work dates have separate labeled bubbles and absent plans add no bubble',()=>{
   const markup=bubbles({dueDate:'2026-10-30',displayDate:'2026-10-28',done:false});
-  assert.match(markup,/task-due-bubble/);assert.match(markup,/task-plan-bubble/);assert.match(markup,/>Due 2026-10-30</);assert.match(markup,/>Plan 2026-10-28</);
+  assert.match(markup,/task-due-bubble/);assert.match(markup,/task-plan-bubble/);assert.match(markup,/>Due 2026-10-30</);assert.match(markup,/>Plan to do 2026-10-28</);
   assert.doesNotMatch(bubbles({dueDate:'2026-10-30',displayDate:null}),/task-plan-bubble/);
 });
 test('past due and planned dates get the overdue state only while unfinished',()=>{
@@ -32,10 +32,10 @@ test('dates equal to today are not overdue and recaps retain the planned work da
 
 test('legacy dated tasks show their assigned day as a plan without inventing a deadline',()=>{
   const store=createStore({seed:false});store.addTask('2026-10-29','Existing task');
-  const snapshot=store.exportSnapshot();delete snapshot.days[0].tasks[0].dueDate;delete snapshot.days[0].tasks[0].displayDate;
+  const snapshot=store.exportSnapshot();delete snapshot.days[0].tasks[0].taskEvents;delete snapshot.days[0].tasks[0].dueDate;delete snapshot.days[0].tasks[0].displayDate;
   const restored=createStore({seed:false,snapshot}),before=restored.exportSnapshot(),task=restored.loadDay('2026-10-29').tasks[0];
   const markup=ui.taskDateBubbles(task,'2026-10-29','2026-10-29');
-  assert.match(markup,/>Plan 2026-10-29</);assert.doesNotMatch(markup,/task-due-bubble/);
+  assert.match(markup,/>Plan to do 2026-10-29</);assert.doesNotMatch(markup,/task-due-bubble/);
   assert.equal(dailyRecap(restored.loadDay('2026-10-29')).tasks[0].displayDate,'2026-10-29');
   assert.deepEqual(restored.exportSnapshot(),before);
 });
@@ -44,7 +44,7 @@ test('old recurring routines and future planning cards show the occurrence date'
   const store=createStore({seed:false});store.addTask('2026-10-29','Existing routine',{recurrence:{frequency:'daily',weekdays:[]}});
   const before=store.exportSnapshot(),occurrence=store.loadDay('2026-10-30').tasks[0];
   const markup=ui.taskDateBubbles(occurrence,'2026-10-29','2026-10-30');
-  assert.match(markup,/>Plan 2026-10-30</);assert.doesNotMatch(markup,/is-overdue|task-due-bubble/);
+  assert.match(markup,/>Plan to do 2026-10-30</);assert.doesNotMatch(markup,/is-overdue|task-due-bubble/);
   assert.deepEqual(store.exportSnapshot(),before);
 });
 

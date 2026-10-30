@@ -1381,3 +1381,289 @@ input,textarea,[contenteditable]:not([contenteditable=false]),[contenteditable]:
 #task-dialog .repeat-choices button {min-height:44px;padding:8px 6px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-small);font:400 11px/1.3 var(--font-ui);background:var(--ui-inset);color:var(--ui-ink)}
 #task-dialog .repeat-choices button[aria-pressed='true'] {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-light);box-shadow:inset 0 -2px var(--ui-light)}
 #task-dialog #add-subtask {min-height:44px;padding:8px 12px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-small);font:400 11px/1.3 var(--font-ui)}
+/* Logging dialogs always fit their viewport, including narrow phones. */
+dialog { box-sizing:border-box; max-width:calc(100vw - 24px); overflow-x:hidden; }
+dialog *, dialog *::before, dialog *::after { box-sizing:border-box; min-width:0; }
+dialog input,dialog textarea,dialog select { max-width:100%; }
+dialog p,dialog label,dialog legend,dialog h2,dialog h3 { overflow-wrap:anywhere; }
+.sentiments-editor { display:flex!important; flex-direction:column; gap:20px; }
+.sentiments-editor > * { width:100%; }
+.sentiments-editor .sentiments-rating { order:-1; }
+.sentiments-editor [hidden] { display:none!important; }
+.profile-actions { display:flex;flex-wrap:wrap;gap:8px; }
+
+dialog,dialog#task-dialog,.customize-dialog,.username-dialog,.final-review-dialog,.scoring-dialog,.weight-history-dialog {overflow-x:hidden!important} dialog .final-sentiments-writing[hidden] {display:none!important} dialog fieldset,dialog .dialog-heading {max-width:100%} dialog .dialog-heading h2 {flex-shrink:1} .friend-results li {flex-wrap:wrap} .solar-you-flag {white-space:nowrap}
+
+#user-profile-dialog {max-width:600px;padding:24px}
+#user-profile-dialog .dialog-heading {padding-bottom:16px;margin-bottom:22px;border-bottom:1px solid var(--ui-line-soft)}
+#user-profile-dialog .dialog-heading .eyebrow {font-size:9px;margin:0 0 5px}
+#user-profile-dialog .dialog-heading h2 {font-size:21px}
+.public-profile-card {display:grid;gap:22px}
+.public-profile-hero {display:grid;grid-template-columns:112px minmax(0,1fr);gap:22px;align-items:center}
+.public-profile-planet {position:relative;display:grid;place-items:center;aspect-ratio:1;border:1px solid var(--ui-line);border-radius:12px;background:radial-gradient(circle at 50% 40%,var(--ui-light),var(--ui-inset) 75%);box-shadow:inset 0 1px 0 var(--ui-light),0 5px 14px rgb(15 30 65 / .12)}
+.public-profile-planet .planet-emoji {width:88%;height:88%;object-fit:contain}
+.public-profile-identity .eyebrow {font-size:8px;margin:0 0 8px;line-height:1.6}
+.profile-username,#friend-list [data-view-profile],#friends-handle,#friend-results>li>strong,#friend-requests strong,#friend-list strong,#solar-member-list strong,#solar-invites strong {font-family:var(--font-handwriting);text-transform:none;letter-spacing:0}
+#friend-list [data-view-profile],#friends-handle,#friend-results>li>strong,#friend-requests strong,#solar-member-list strong,#solar-invites strong {font-size:20px;line-height:1.3}
+.public-profile-identity .profile-username {font:700 clamp(26px,4vw,36px)/1.2 var(--font-handwriting);overflow-wrap:anywhere;margin:0 0 12px}
+.profile-relationship {display:inline-flex;align-items:center;min-height:30px;padding:5px 10px;border:1px solid var(--ui-line);border-radius:20px;background:var(--ui-inset);font:400 10px/1.4 var(--font-ui);color:var(--ui-ink)}
+.profile-actions .primary-button {display:inline-flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 14px;font-size:11px}
+.public-profile-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:14px 0;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-inset)}
+.public-profile-stat {display:grid;grid-template-rows:80px auto;gap:8px;justify-items:center;text-align:center;padding:0 6px}
+.public-profile-stat+.public-profile-stat {border-left:1px solid var(--ui-line-soft)}
+.profile-stat-value {display:grid;place-items:center;align-self:stretch;width:100%;min-width:0}
+.profile-stat-value>strong {font:700 38px/1 var(--font-display);color:var(--ui-ink)}
+.profile-stat-value strong small {display:block;font:400 9px/1.5 var(--font-ui);margin-top:6px}
+.public-profile-stat>span {font:400 10px/1.5 var(--font-ui);color:var(--ui-muted)}
+.profile-stat-meter .score-circle {width:80px;height:80px}
+.public-profile-stat.has-streak .profile-stat-value>strong {text-shadow:0 0 8px rgb(255 213 96 / .85),0 0 16px rgb(255 213 96 / .35)}
+.public-profile-vibes-panel {position:relative;padding:17px 18px 18px;border:1px solid var(--ui-line);border-left:3px solid var(--ui-active);border-radius:7px;background:var(--ui-inset);box-shadow:inset 0 1px 0 var(--ui-light),0 3px 8px rgb(15 30 65 / .06)}
+#user-profile-dialog .public-profile-vibes-panel h4 {font:400 9px/1.5 var(--font-ui);color:var(--ui-muted);letter-spacing:.08em;margin:0 0 8px}
+#user-profile-dialog .public-profile-vibes {font:400 25px/1.4 var(--font-handwriting);white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ui-ink);margin:0}
+.public-profile-friends {margin-top:24px;padding-top:18px;border-top:1px solid var(--ui-line-soft)}
+.profile-friends-heading {display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.profile-friends-heading h3 {font-size:18px}
+.profile-friends-heading .count-pill {min-height:26px;min-width:28px;padding:4px 7px;border:1px solid var(--ui-line-soft);border-radius:5px;background:var(--ui-inset);color:var(--ui-ink);font:700 15px/1 var(--font-display);box-shadow:none}
+.profile-friend-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0;margin:0;list-style:none}
+.profile-friend-grid li {min-width:0}
+.profile-friend-grid button {display:flex;align-items:center;justify-content:space-between;gap:5px;width:100%;height:100%;min-height:54px;padding:10px;border:1px solid var(--ui-line-soft);border-radius:6px;background:var(--ui-inset);color:var(--ui-ink);text-align:left}
+.profile-friend-grid button:hover {border-color:var(--ui-active);background:var(--ui-light)}
+.profile-friend-grid .profile-username {font:700 20px/1.25 var(--font-handwriting);overflow-wrap:anywhere}
+.profile-friend-arrow {font:400 14px/1 var(--font-ui);color:var(--ui-muted);flex-shrink:0}
+.profile-friends-empty {padding:10px 0}
+.public-profile-system {display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--ui-light);border-radius:7px;background:color-mix(in srgb,var(--ui-inset) 60%,transparent);box-shadow:inset 0 0 5px color-mix(in srgb,var(--ui-light) 25%,transparent),0 0 7px color-mix(in srgb,var(--ui-light) 55%,transparent),0 0 18px color-mix(in srgb,var(--ui-light) 25%,transparent)}
+.profile-orbit-symbol {font:400 30px/1 var(--font-ui);color:var(--ui-muted);flex-shrink:0}
+#user-profile-dialog .public-profile-system .eyebrow {margin:0 0 3px;font:400 8px/1.4 var(--font-ui);color:var(--ui-muted);letter-spacing:.06em}
+#user-profile-dialog .public-profile-system p {margin:0;font:700 20px/1.3 var(--font-handwriting);color:var(--ui-ink);overflow-wrap:anywhere}
+/* Friend management uses the same inset surfaces and handwritten names as profiles. */
+#friend-manager {border-radius:10px;padding:20px;background:var(--ui-bg);box-shadow:inset 0 1px 0 var(--ui-light)}
+#friend-manager>summary {padding:0 30px 0 0;min-height:56px}
+#friend-manager>summary>.panel-heading {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left}
+#friend-manager>summary>.panel-heading .eyebrow {display:block;font-size:8px;letter-spacing:.07em;margin-bottom:4px}
+#friend-manager>summary h2 {font-size:21px}
+#friend-manager>summary #friends-handle {width:auto;max-width:100%;text-align:left;font:700 24px/1.3 var(--font-handwriting);overflow-wrap:anywhere}
+#friend-manager[open]>summary {padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--ui-line-soft)}
+#friend-manager .friend-management-section {padding:0 0 18px;margin:0 0 18px;border-bottom:1px solid var(--ui-line-soft)}
+#friend-manager h3 {font:700 17px/1.3 var(--font-display);justify-content:flex-start;gap:10px;margin:0 0 12px}
+#friend-manager h3 .count-pill {min-height:26px;min-width:28px;padding:4px 7px;border:1px solid var(--ui-line-soft);border-radius:5px;background:var(--ui-inset);color:var(--ui-ink);font:700 15px/1 var(--font-display);box-shadow:none}
+#friend-list.profile-friend-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+#friend-list .manage-friend-tile {display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;border:1px solid var(--ui-line-soft);border-radius:7px;background:var(--ui-inset);overflow:hidden}
+#friend-list .manage-friend-open {display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:54px;margin:0;padding:12px 10px;border:0;border-radius:0;background:transparent;color:var(--ui-ink);text-align:left;flex:1}
+#friend-list .manage-friend-open .profile-username {font:700 22px/1.25 var(--font-handwriting);overflow-wrap:anywhere}
+#friend-list .manage-friend-open:hover {background:var(--ui-light)}
+#friend-list .manage-friend-remove {min-height:32px;margin:0;padding:6px 10px;border:0;border-top:1px solid var(--ui-line-soft);border-radius:0;background:transparent;color:var(--ui-muted);font:400 9px/1.4 var(--font-ui);text-align:left}
+#friend-list .manage-friend-remove:hover {background:var(--ui-bg);color:var(--ui-ink)}
+#friend-list .friend-empty {grid-column:1/-1;padding:14px;border:1px dashed var(--ui-line-soft);border-radius:7px}
+#friend-search-form {padding:16px;margin:0 0 14px;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-inset);box-shadow:inset 0 1px 0 var(--ui-light)}
+#friend-search-form input {background:var(--ui-bg)}
+#friend-results>li,#friend-requests>li:not(.friend-empty) {padding:12px;margin:0 0 8px;gap:10px;border:1px solid var(--ui-line-soft);border-radius:7px;background:var(--ui-inset)}
+#friend-results>li {display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
+#friend-results .quiet-button {font-size:10px;padding:9px 10px}
+#friend-manager>#friends-state:empty {display:none}
+#friend-requests,#friend-results {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;list-style:none}
+#friend-requests>li.friend-request-card,#friend-results>li.friend-search-card {display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;min-width:0;margin:0;padding:16px;border:1px solid var(--ui-line-soft);border-radius:8px;background:var(--ui-inset);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 50%,transparent)}
+#friend-requests .request-profile-link {position:relative;display:block;width:100%;min-height:48px;padding:4px 20px;border:0;background:transparent;color:var(--ui-ink);text-align:center}
+#friend-requests .request-profile-link:hover {background:color-mix(in srgb,var(--ui-light) 30%,transparent);border-radius:5px}
+#friend-requests .request-profile-link .profile-username,#friend-results>li.friend-search-card>.profile-username {display:block;width:100%;margin:0;font:700 28px/1.3 var(--font-handwriting);text-align:center;text-transform:none;overflow-wrap:anywhere}
+#friend-requests .request-profile-link .profile-friend-arrow {position:absolute;right:0;top:50%;transform:translateY(-50%)}
+#friend-requests .request-direction {display:block;text-align:center;margin:0 0 5px;font:400 10px/1.5 var(--font-ui);color:var(--ui-muted)}
+.friend-request-actions {display:flex;justify-content:center;gap:8px;margin-top:auto;padding-top:6px;width:100%}
+#friend-manager .friend-request-actions button {flex:1;min-width:0;min-height:40px;padding:8px;font:400 10px/1.35 var(--font-ui)}
+#friend-requests>.friend-empty {grid-column:1/-1}
+.public-profile-stat {grid-template-rows:104px auto}
+.profile-stat-value {position:relative;padding-top:20px}
+.profile-month-name {position:absolute;inset:0 0 auto;text-align:center;font:700 12px/1.4 var(--font-ui);color:var(--ui-ink)}
+@media(max-width:420px){
+  #user-profile-dialog {padding:18px 14px}
+  .public-profile-hero {grid-template-columns:88px minmax(0,1fr);gap:16px}
+  .public-profile-identity .eyebrow {font-size:7px}
+  .public-profile-identity .profile-username {font-size:27px}
+  .public-profile-stat {grid-template-rows:86px auto;padding:0 4px}
+  .profile-stat-meter .score-circle {width:64px;height:64px}
+  .profile-stat-value>strong {font-size:30px}
+  .public-profile-stat>span {font-size:8px}
+  .profile-friend-grid {gap:6px}
+  .profile-friend-grid button {padding:9px 7px}
+  .profile-friend-grid .profile-username {font-size:18px}
+  #user-profile-dialog .public-profile-vibes {font-size:23px}
+  .public-profile-vibes-panel {padding:14px}
+  #friend-manager {padding:16px}
+  #friend-list .manage-friend-open {padding:10px 7px}
+  #friend-list .manage-friend-open .profile-username {font-size:18px}
+  #friend-results>li {grid-template-columns:repeat(2,minmax(0,1fr))}
+  #friend-results>li>strong {grid-column:1/-1}
+  #friend-requests,#friend-results {grid-template-columns:minmax(0,1fr)}
+  #friend-requests>li.friend-request-card,#friend-results>li.friend-search-card {padding:14px}
+  .profile-month-name {font-size:10px}
+}
+#final-vibes {padding:16px 0;border-top:1px solid var(--ui-line-soft)}
+#final-vibes-input {width:100%;min-height:100px;font:400 20px/1.3 var(--font-handwriting)}
+.final-sentiments-body:has(.final-sentiments-writing[hidden]) {grid-template-columns:1fr}
+
+/* Shared finishing details across profile and orbit management. */
+.public-profile-stats {border-left:3px solid var(--ui-active);border-radius:7px;box-shadow:inset 0 1px 0 var(--ui-light),0 3px 8px rgb(15 30 65 / .06)}
+.leaderboard .solar-person-name .leaderboard-user-name[data-single-line=true] {white-space:nowrap;overflow-wrap:normal;word-break:normal}
+.leaderboard .solar-person-name .leaderboard-user-name.name-needs-wrap {white-space:normal;overflow-wrap:anywhere}
+#friend-manager>summary {padding:8px 32px;min-height:76px}
+#friend-manager>summary>.panel-heading {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+#friend-manager>summary #friends-handle {width:100%;text-align:center}
+#friend-manager>summary .eyebrow {display:none}
+#friend-requests {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#friend-requests>li.friend-request-card {padding:10px;gap:3px;min-height:84px}
+#friend-requests .request-profile-link {min-height:36px;padding:2px 12px}
+#friend-requests .request-profile-link .profile-username {font-size:22px;line-height:1.25}
+#friend-requests .request-direction {font-size:8px;margin:0}
+#friend-manager #friend-requests .friend-request-actions {padding-top:4px;gap:5px}
+#friend-manager #friend-requests .friend-request-actions button {min-height:32px;padding:6px;font-size:9px}
+#friend-requests [data-cancel-friend] {border:1px solid var(--ui-line);background:var(--ui-bg);color:var(--ui-ink);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 45%,transparent)}
+#friend-requests [data-cancel-friend]:hover {background:var(--ui-active);border-color:var(--ui-active);color:var(--ui-light)}
+details>summary::after,details[open]>summary::after {content:'';display:block;box-sizing:border-box;width:8px;height:8px;flex:0 0 8px;margin-left:auto;margin-right:5px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);font-size:0}
+details[open]>summary::after {transform:rotate(225deg)}
+.friends-board>summary::after,.weight-entry-editor>summary::after {width:8px;height:8px;transform:translateY(-70%) rotate(45deg)}
+.friends-board[open]>summary::after,.weight-entry-editor[open]>summary::after {transform:translateY(-20%) rotate(225deg)}
+#solar-manage {padding:18px;margin-top:20px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-bg);box-shadow:inset 0 1px 0 var(--ui-light)}
+#solar-manage>summary {position:relative;justify-content:center;padding:8px 28px;min-height:52px;font:700 19px/1.3 var(--font-display);text-align:center;background:transparent;border-radius:0}
+#solar-manage>summary::after {position:absolute;right:5px;top:50%;margin:0;transform:translateY(-70%) rotate(45deg)}
+#solar-manage[open]>summary::after {transform:translateY(-20%) rotate(225deg)}
+#solar-manage[open]>summary {padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--ui-line-soft)}
+#solar-manage .solar-forms {display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:16px 0}
+#solar-manage .solar-forms form {padding:16px;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-inset);box-shadow:inset 0 1px 0 var(--ui-light)}
+#solar-manage .solar-forms form[hidden] {display:none}
+#solar-manage .solar-forms label {display:block;margin-bottom:10px;font:700 13px/1.4 var(--font-display)}
+#solar-manage input {background:var(--ui-bg);font-size:16px}
+#solar-manage :is(#solar-name,#solar-rename-name,#solar-query) {font:700 22px/1.35 var(--font-handwriting);letter-spacing:0}
+#solar-manage :is(#solar-name,#solar-rename-name,#solar-query)::placeholder {font:400 20px/1.35 var(--font-handwriting)}
+#solar-manage h3 {font:700 17px/1.3 var(--font-display);margin:20px 0 12px}
+#solar-member-list,#solar-invites {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;list-style:none;margin:0;padding:0}
+#solar-member-list>li,#solar-invites>li {display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;padding:10px;margin:0;border:1px solid var(--ui-line-soft);border-radius:7px;background:var(--ui-inset);text-align:center}
+#solar-member-list .solar-member-profile-link {position:relative;display:block;min-height:40px;padding:2px 12px;border:0;background:transparent;color:var(--ui-ink);text-align:center}
+#solar-member-list .profile-username,#solar-invites strong {font:700 22px/1.3 var(--font-handwriting);overflow-wrap:anywhere;text-align:center}
+#solar-member-list .profile-friend-arrow {position:absolute;right:0;top:50%;transform:translateY(-50%)}
+#solar-member-list .text-button,#solar-member-list small,#solar-invites button {min-height:28px;padding:5px;font:400 9px/1.3 var(--font-ui);text-align:center}
+#solar-requests>li,#solar-results>li {padding:14px;margin-bottom:8px;border:1px solid var(--ui-line-soft);border-radius:7px;background:var(--ui-inset)}
+#leave-solar,#delete-solar {width:100%;margin-top:14px;padding:10px;border:1px solid var(--ui-line);border-radius:5px;background:var(--ui-inset)}
+.solar-member-cards {gap:16px}
+.leaderboard .solar-member-card,.leaderboard .solar-member-card.is-you {grid-template-columns:120px minmax(0,1fr);gap:16px;padding:16px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-bg);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 65%,transparent)}
+.leaderboard .solar-member-card.is-you {border-color:var(--ui-active)}
+.solar-member-card>.solar-person {gap:6px;align-self:start}
+.solar-member-card .solar-profile-avatar {border-radius:10px;background:radial-gradient(circle at 50% 40%,var(--ui-light),var(--ui-inset) 78%);box-shadow:inset 0 1px 0 var(--ui-light)}
+.solar-member-card .solar-person-name {padding:3px 0 0;min-height:36px;border:0;background:transparent}
+.solar-member-card .solar-member-checkin {padding:4px;min-height:24px;text-align:center;font-size:8px;border-radius:5px}
+.solar-member-card .solar-score-panel {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:16px 6px;min-height:160px;border:1px solid var(--ui-line-soft);border-radius:7px;background:var(--ui-inset);align-self:stretch}
+.solar-member-card .solar-other-scores {display:contents}
+.solar-member-card .solar-yesterday,.solar-member-card .solar-month,.solar-member-card .solar-log-count {min-width:0;padding:0 8px}
+.solar-member-card .solar-month,.solar-member-card .solar-log-count {border-left:1px solid var(--ui-line-soft)}
+.solar-member-card .solar-log-count {align-self:center}
+.solar-member-card .solar-vibes {gap:10px;padding:12px 14px;border:1px solid var(--ui-line);border-left:3px solid var(--ui-active);border-radius:7px;background:var(--ui-inset);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 70%,transparent)}
+.solar-vibes-label {display:block;margin-bottom:6px;font:400 8px/1.4 var(--font-ui);letter-spacing:.06em;color:var(--ui-muted);text-transform:uppercase}
+.solar-member-card .solar-vibes-copy {font-size:22px;line-height:1.35}
+.solar-member-card .solar-vibes-surface {padding:0}
+.solar-member-card .solar-log-count .solar-consecutive-streak {font-size:9px;line-height:1.3}
+@media(max-width:420px){
+  #friend-requests>li.friend-request-card {padding:8px 6px}
+  #friend-requests .request-profile-link .profile-username {font-size:18px}
+  #friend-requests .request-profile-link {padding-inline:8px}
+  #friend-manager #friend-requests .friend-request-actions {flex-direction:column}
+  #solar-manage {padding:14px}
+  #solar-manage>summary {font-size:16px;padding-inline:20px}
+  #solar-member-list .profile-username,#solar-invites strong {font-size:18px}
+  .leaderboard .solar-member-card,.leaderboard .solar-member-card.is-you {grid-template-columns:82px minmax(0,1fr);gap:10px;padding:12px}
+  .solar-member-card .solar-score-panel {padding:12px 2px;min-height:142px}
+  .solar-member-card .solar-yesterday,.solar-member-card .solar-month,.solar-member-card .solar-log-count {padding-inline:4px}
+  .solar-member-card .solar-log-count .solar-consecutive-streak {font-size:6.5px}
+  .solar-member-card .solar-vibes {padding:11px}
+  .solar-member-card .solar-vibes-copy {font-size:20px}
+  .solar-member-card .solar-member-checkin {font-size:7px}
+}
+@media(max-width:350px){
+  .leaderboard .solar-member-card,.leaderboard .solar-member-card.is-you {grid-template-columns:72px minmax(0,1fr);gap:8px;padding:10px}
+  .solar-member-card .solar-score-panel {padding-inline:0}
+  .solar-member-card .solar-yesterday,.solar-member-card .solar-month,.solar-member-card .solar-log-count {padding-inline:2px}
+  .leaderboard .solar-member-card .solar-yesterday .score-circle,.leaderboard .solar-member-card .solar-month .score-circle {width:36px;height:36px;min-width:36px}
+  .leaderboard .solar-member-card .score-circle>span {font-size:14px}
+}
+
+#solar-invites>.solar-invites-empty {grid-column:1/-1;padding:12px;text-align:left;font:400 11px/1.5 var(--font-ui);color:var(--ui-muted)}
+
+#solar-rename-save.is-saved,#solar-rename-save.is-saved:hover {background:var(--ui-active);color:var(--ui-light);border-color:var(--ui-active);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 20%,transparent)}
+#friend-manager>summary #friends-handle {display:none}
+.profile-actions :is(.primary-button,.profile-cancel-request,.profile-remove-request) {display:inline-flex;align-items:center;justify-content:space-between;gap:16px;min-height:44px;min-width:152px;padding:10px 14px;border-radius:4px;font:700 11px/1.35 var(--font-ui)}
+.profile-actions :is(.profile-cancel-request,.profile-remove-request) {border:1px solid var(--ui-line-soft);background:color-mix(in srgb,var(--ui-active) 12%,var(--ui-inset));color:var(--ui-ink);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 35%,transparent)}
+.profile-actions :is(.profile-cancel-request,.profile-remove-request):hover {background:var(--ui-inset);border-color:var(--ui-line)}
+.public-profile-hero>.profile-actions {grid-column:1/-1;align-items:center;gap:10px;width:100%;margin-top:-8px}
+.profile-actions :is(.profile-cancel-request,.profile-remove-request) {flex:0 0 108px;width:108px;min-width:108px;min-height:32px;height:32px;margin-left:auto;padding:6px 8px;font-size:10px;justify-content:center}
+.profile-relationship.is-friend {min-height:30px;border-color:var(--ui-active);background:color-mix(in srgb,var(--ui-active) 85%,var(--ui-inset));color:var(--ui-light);font-weight:700;box-shadow:0 0 7px color-mix(in srgb,var(--ui-light) 30%,transparent)}
+#profile-remove-friend-dialog .composer-actions button,#friend-manager .friend-request-actions button {font-weight:700}
+#cloud-last-synced {padding:9px 12px;border:1px solid var(--ui-line-soft);border-radius:5px;background:var(--ui-inset);font:400 11px/1.5 var(--font-ui)}
+#cloud-last-synced-time {font-weight:700;color:var(--ui-ink)}
+.solar-member-card .solar-log-count .solar-consecutive-streak {
+  position:relative;left:auto;display:block;width:100%;max-width:140px;margin:0 auto 10px;padding:8px 4px 7px;
+  border:1px solid color-mix(in srgb,#ffe69a 85%,var(--ui-line));border-radius:7px;
+  background:linear-gradient(145deg,rgb(255 220 100 / .22),rgb(255 220 100 / .05));
+  box-shadow:inset 0 0 8px rgb(255 225 125 / .2),0 0 7px rgb(255 210 70 / .35);
+  color:var(--ui-ink);text-align:center;white-space:normal;transform:none;
+  text-shadow:0 0 3px #fff5bb,0 0 8px #ffdb57,0 0 16px rgb(255 190 40 / .7);
+  filter:none;animation:solar-streak-celebrate 4s ease-in-out infinite;
+}
+.solar-consecutive-streak>b {display:block;font:700 15px/1.1 var(--font-display);letter-spacing:.02em}
+.solar-log-count .solar-consecutive-streak .streak-caption {display:block;margin-top:4px;font:700 8px/1.3 var(--font-ui);color:var(--ui-ink)}
+.solar-consecutive-streak::before,.solar-consecutive-streak::after {content:'';position:absolute;top:-5px;width:9px;height:9px;background:#fff1a4;clip-path:polygon(50% 0,62% 37%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 37%);filter:drop-shadow(0 0 4px #ffdc59)}
+.solar-consecutive-streak::before {left:8px}
+.solar-consecutive-streak::after {right:8px;top:auto;bottom:-5px;width:7px;height:7px}
+@keyframes solar-streak-celebrate {0%,100%{transform:rotate(-1.5deg);box-shadow:inset 0 0 8px rgb(255 225 125 / .2),0 0 7px rgb(255 210 70 / .35)}50%{transform:rotate(1.5deg);box-shadow:inset 0 0 10px rgb(255 225 125 / .3),0 0 12px rgb(255 210 70 / .55)}}
+html[data-motion=reduced] .solar-member-card .solar-log-count .solar-consecutive-streak {animation:none}
+@media(prefers-reduced-motion:reduce){html:not([data-motion=full]) .solar-member-card .solar-log-count .solar-consecutive-streak {animation:none}}
+/* Keep the section title in the same place regardless of reaction badges. */
+.solar-member-card .solar-vibes>.solar-vibes-label {margin:0 0 9px;line-height:1.4;font-size:10px}
+.solar-member-card .solar-vibes>p {padding:0}
+.solar-member-card .solar-stat-label {font:700 13px/1.4 var(--font-ui)}
+.solar-member-card .solar-stat-caption {font:400 11px/1.4 var(--font-ui);color:var(--ui-muted);text-align:center}
+.solar-member-card .solar-day-hint,.solar-member-card .solar-vibes-surface>small {font:400 10px/1.4 var(--font-ui)}
+.solar-member-card .solar-log-count strong {font-size:34px}
+.solar-member-card .solar-log-count>span:not(.solar-consecutive-streak) {font-size:11px;line-height:1.4}
+.solar-member-card .solar-log-count small {font-size:10px;line-height:1.4}
+.solar-member-card .solar-log-count .solar-consecutive-streak {font-size:10px}
+.public-profile-stat>span {font-size:12px}
+.profile-month-name {font-size:14px}
+.profile-stat-value strong small {font-size:11px}
+/* Use the same disclosure artwork instead of rotated text or border glyphs. */
+details>summary::after,details[open]>summary::after {
+  content:'';display:block;width:14px;height:14px;flex:0 0 14px;border:0;border-radius:0;
+  background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px 14px no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px 14px no-repeat;
+  transform:none;
+}
+details[open]>summary::after {transform:rotate(180deg)}
+#friend-manager,#solar-manage {padding:18px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-bg);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ui-light) 65%,transparent)}
+#friend-manager>summary,#solar-manage>summary {position:relative;display:flex;align-items:center;justify-content:center;min-height:76px;padding:12px 32px;margin:0;border:0;border-radius:0;background:transparent;text-align:center}
+#friend-manager>summary h2,#solar-manage>summary {font:700 20px/1.3 var(--font-display);text-transform:uppercase;letter-spacing:0}
+#friend-manager[open]>summary,#solar-manage[open]>summary {padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--ui-line-soft)}
+#friend-manager>summary::after,#solar-manage>summary::after,.weight-entry-editor>summary::after {position:absolute;right:6px;top:50%;margin:0;width:14px;height:14px;transform:translateY(-50%)}
+#friend-manager[open]>summary::after,#solar-manage[open]>summary::after,.weight-entry-editor[open]>summary::after {transform:translateY(-50%) rotate(180deg)}
+.solar-member-card .solar-vibes>.solar-vibes-label,#user-profile-dialog .public-profile-vibes-panel h4 {font:700 11px/1.4 var(--font-ui);letter-spacing:.07em;color:var(--ui-ink);margin:0 0 9px;text-transform:uppercase}
+@media(max-width:600px) and (min-width:421px){
+  .solar-member-card .solar-stat-label {font-size:11px}
+  .solar-member-card .solar-stat-caption,.solar-member-card .solar-log-count>span:not(.solar-consecutive-streak),.solar-member-card .solar-log-count small,.solar-member-card .solar-day-hint {font-size:9px}
+  .solar-member-card .solar-log-count .solar-consecutive-streak {font-size:8px}
+}
+@media(max-width:420px){
+  .solar-member-card>.solar-person {grid-column:1/-1;grid-row:1;display:grid;grid-template-columns:82px minmax(0,1fr);gap:4px 14px;align-items:center}
+  .solar-member-card .solar-profile-avatar {grid-column:1;grid-row:1/3}
+  .solar-member-card .solar-person-name {grid-column:2;grid-row:1;min-height:40px;padding:0}
+  .leaderboard .solar-person-name .leaderboard-user-name {font-size:22px}
+  .solar-member-card .solar-member-checkin {grid-column:2;grid-row:2;justify-self:center;font-size:9px;padding:5px 9px}
+  .solar-member-card .solar-score-panel {grid-column:1/-1;grid-row:2;min-height:150px;padding:14px 4px}
+  .solar-member-card .solar-vibes {grid-column:1/-1;grid-row:3}
+  .solar-member-card .solar-stat-label {font-size:12px}
+  .solar-member-card .solar-stat-caption,.solar-member-card .solar-log-count>span:not(.solar-consecutive-streak),.solar-member-card .solar-log-count small,.solar-member-card .solar-day-hint {font-size:10px}
+  .solar-member-card .solar-log-count .solar-consecutive-streak {font-size:8px;left:auto;transform:none;animation-name:solar-streak-celebrate}
+  .solar-member-card .solar-log-count strong {font-size:30px}
+  .public-profile-stat>span {font-size:10px}
+  .profile-month-name {font-size:12px}
+}
+@media(max-width:350px){
+  .profile-friend-grid button {position:relative;justify-content:center;padding:16px 5px 10px;text-align:center}
+  .profile-friend-grid .profile-username {font-size:16px;line-height:1.3}
+  .profile-friend-grid .profile-friend-arrow {position:absolute;top:5px;right:5px;font-size:10px}
+}

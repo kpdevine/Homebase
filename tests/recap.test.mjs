@@ -10,7 +10,7 @@ test('an untouched scheduled day stays unlogged when opened in a recap',()=>{
   const store=createStore({seed:false});
   store.addTask(date,'Get ready for bed',{children:['Brush teeth','Shower'],recurrence:{frequency:'daily',weekdays:[]}});
   const before=store.exportSnapshot(),result=recap(store,addDays(date,1));
-  assert.equal(result.score,null);assert.equal(result.hasActivity,false);assert.equal(result.checklistLogged,false);
+  assert.equal(result.score,0);assert.equal(result.hasActivity,false);assert.equal(result.checklistLogged,false);
   assert.equal(result.total,2);assert.equal(result.state,'Not logged');assert.equal(result.tasks[0].children.length,2);
   assert.deepEqual(store.exportSnapshot(),before);
 });

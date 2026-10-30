@@ -91,7 +91,7 @@ test('task changes do not rewrite another day and returned records are detached'
   day.tasks[0].name = 'External mutation';
   assert.notEqual(store.loadDay(DEMO_TODAY).tasks[0].name, day.tasks[0].name);
   store.addTask('2027-01-01', '  A new intention  ');
-  assert.equal(store.loadDay('2027-01-01').tasks[0].name, 'A new intention');
+  assert.equal(store.loadDay('2027-01-01').tasks.find(task=>task.name==='A new intention').name, 'A new intention');
   assert.throws(() => store.addTask(DEMO_TODAY, '  '), RangeError);
   assert.throws(() => store.addTask(DEMO_TODAY, 'a'.repeat(101)), RangeError);
 });
@@ -187,5 +187,5 @@ test('starting a new store resets session changes', () => {
   first.addTask(DEMO_TODAY, 'Only in this session');
   const reset = createStore();
   assert.equal(reset.loadDay(DEMO_TODAY).nutrition, 7);
-  assert.equal(reset.loadDay(DEMO_TODAY).tasks.length, 4);
+  assert.equal(reset.loadDay(DEMO_TODAY).tasks.some(task=>task.name==='Only in this session'), false);
 });

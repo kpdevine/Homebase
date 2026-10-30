@@ -20,10 +20,10 @@ test('due-only tasks stay visible through overdue days and stop after completion
   assert.equal(s.exportSnapshot().days.flatMap(day=>day.tasks).length,1);validateSnapshot(s.exportSnapshot());
 });
 
-test('planned deadline tasks start on the planned day; legacy tasks retain their single day',()=>{
+test('planned deadline tasks start on the planned day; tasks without expiration carry forward',()=>{
   const s=fresh();s.addTask(next,'Prepare notes',{dueDate:later,displayDate:next});
   assert.equal(s.loadDay(start).tasks.length,0);assert.equal(task(s,next).name,'Prepare notes');assert.equal(task(s,later).name,'Prepare notes');
-  s.addTask(start,'Legacy');assert.equal(s.loadDay(next).tasks.some(task=>task.name==='Legacy'),false);
+  s.addTask(start,'Legacy');assert.equal(s.loadDay(next).tasks.some(task=>task.name==='Legacy'),true);
 });
 
 test('Any day without a deadline also stays visible until completed',()=>{
@@ -121,6 +121,6 @@ test('editing or moving other tasks and routines never saves a carried projectio
   s.editRoutine(next,routine.id,{name:'New daily',children:[],recurrence:{frequency:'daily',weekdays:[]}});
   const snapshot=s.exportSnapshot();validateSnapshot(snapshot);
   assert.equal(snapshot.days.flatMap(day=>day.tasks).filter(task=>task.name==='Deadline').length,1);
-  assert.equal(task(s,later).name,'Moved');
+  assert.equal(s.loadDay(later).tasks.find(task=>task.id===ordinary).name,'Moved');
   assert.equal(s.loadDay(later).tasks.filter(task=>task.name==='Deadline').length,1);
 });

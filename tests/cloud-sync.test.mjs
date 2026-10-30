@@ -7,6 +7,19 @@ const date='2026-10-17',other='2026-10-18';
 const fresh=()=>createStore({seed:false});
 const make=(day,rating)=>{const store=fresh();store.updateRating(day,rating);return store.exportSnapshot();};
 
+test('last sync time advances only with a server-confirmed synchronized snapshot',async()=>{
+  const store=fresh(),states=[];let receive,clock=1000;
+  const engine=createCloudEngine({transport:{subscribe(fn){receive=fn;return()=>{};},async commit(){}},readLocal:()=>store.exportSnapshot(),applyLocal(){},onState:state=>states.push(state),now:()=>clock,delay:60000});
+  try{
+    engine.enable();assert.equal(states.at(-1).lastSyncedAt,null);
+    receive(snapshotRecords(store.exportSnapshot()));assert.equal(states.at(-1).lastSyncedAt,1000);
+    clock=2000;await engine.flush();assert.equal(states.at(-1).lastSyncedAt,1000,'a no-op timer is not a new sync');
+    store.updateRating(date,8);engine.changed();assert.equal(states.at(-1).lastSyncedAt,1000);
+    await engine.flush();assert.equal(states.at(-1).lastSyncedAt,1000,'sending writes still waits for listener confirmation');
+    clock=3000;receive(snapshotRecords(store.exportSnapshot()));assert.equal(states.at(-1).status,'synced');assert.equal(states.at(-1).lastSyncedAt,3000);
+  }finally{engine.close();}
+});
+
 test('cloud documents round-trip full daily records, training, routines and zero targets',()=>{
   const store=fresh();store.updateRating(date,8.75);store.addGymEntry(date,'chest',5);store.updateSentiments(date,{notes:'A good day',rating:0});
   store.addTask(date,'Bedtime',{children:['Brush teeth'],recurrence:{frequency:'daily',weekdays:[]}});
