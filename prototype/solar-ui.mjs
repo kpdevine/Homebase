@@ -6,7 +6,7 @@ import {watchSolarDateWindow} from './solar-date-window.mjs';
 import {mountVibesReactions} from './vibes-reactions-ui.mjs';
 import {mountReactionBubble} from './reaction-bubble.mjs';
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export const planetEmoji=(id,label='',size='icon')=>`<img class="planet-emoji" src="${REACTION_ASSETS[id]?.[size]||REACTION_ASSETS.happy.icon}" alt="${esc(label)}" width="${size==='portrait'?320:160}" height="${size==='portrait'?320:160}" loading="eager" decoding="async" fetchpriority="${size==='portrait'?'high':'low'}">`;
+export const planetEmoji=(id,label='',size='icon')=>`<img class="planet-emoji${id==='mogging'?' planet-emoji-mogging':''}" src="${REACTION_ASSETS[id]?.[size]||REACTION_ASSETS.happy.icon}" alt="${esc(label)}" width="${size==='portrait'?320:160}" height="${size==='portrait'?320:160}" loading="eager" decoding="async" fetchpriority="${size==='portrait'?'high':'low'}">`;
 
 export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today,checkInDate=today,changed,action,message,scoreCircle}) {
   const $=s=>document.querySelector(s),replace=(id,html)=>{if($(id).innerHTML!==html)$(id).innerHTML=html;};

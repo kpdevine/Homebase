@@ -889,7 +889,8 @@ html[data-motion=reduced] button {transition:none}
 .solar-reaction-picker {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
 .solar-reaction-picker button {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:70px;padding:5px 1px;border:1px solid var(--ui-line-soft);border-radius:4px;background:var(--ui-inset);color:var(--ui-ink)}
 .solar-reaction-picker button[aria-pressed=true] {border-color:var(--ui-gold);background:var(--ui-active);color:var(--ui-white);box-shadow:inset 0 -2px var(--ui-gold),0 0 8px rgb(255 230 151 / .3)}
-.planet-emoji {display:block;width:44px;height:44px;object-fit:contain;image-rendering:pixelated;filter:none}
+.planet-emoji {display:block;width:44px;height:44px;object-fit:contain;image-rendering:pixelated;filter:var(--planet-glow,none)}
+.planet-emoji-mogging {--planet-glow:drop-shadow(0 0 2px rgb(255 255 238 / .28)) drop-shadow(0 0 5px rgb(210 225 255 / .22))}
 .solar-reaction-picker small {font:400 9px/1.25 var(--font-ui);overflow-wrap:anywhere}
 .solar-reaction-counts {display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0}
 .solar-reaction-chip {display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 3px;background:var(--ui-inset);border:1px solid var(--ui-line);border-radius:20px;font-size:12px}
@@ -1084,7 +1085,7 @@ button {-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:tran
 .solar-rank-medal.rank-silver {--medal-metal:var(--ui-white);filter:drop-shadow(0 0 4px rgb(255 255 255 / .4))}
 .solar-rank-medal.rank-bronze {--medal-metal:rgb(218 155 106 / 1);filter:drop-shadow(0 0 4px rgb(218 155 106 / .4))}
 :is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-chip {gap:14px;padding:12px}
-:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-chip>.planet-emoji {width:56px;height:56px;flex:0 0 56px;object-fit:contain;filter:drop-shadow(0 0 4px rgb(255 230 151 / .3))}
+:is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-chip>.planet-emoji {width:56px;height:56px;flex:0 0 56px;object-fit:contain;filter:var(--planet-glow,drop-shadow(0 0 4px rgb(255 230 151 / .3)))}
 :is(#solar-day-dialog,#solar-vibes-dialog) .reaction-people strong {font-size:12px;margin-bottom:6px}
 :is(#solar-day-dialog,#solar-vibes-dialog) .reaction-people small {font:700 20px/1.3 var(--font-handwriting);color:var(--ui-ink);padding-bottom:4px;overflow-wrap:anywhere}
 :is(#solar-day-dialog,#solar-vibes-dialog) .solar-reaction-picker {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
