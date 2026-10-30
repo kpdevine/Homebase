@@ -29,3 +29,5 @@ Settings displays the last successful server-confirmed sync time in the device's
 Isolated browser previews at 390px and 320px verify mobile profile layout, matching relationship-button sizing/placement, working request cancellation, nonfriend navigation, removal confirmation/Keep friend, and the three-column grid. Physical iPhone Safari and installed-app rendering were not available for testing. The demo runs with `node scripts/serve-social-preview.mjs`; its `/phone-preview?width=390` and `width=320` routes use fictional records and no Firebase connection.
 
 Publish source to `codex/homebase-prototype` and deploy Hosting plus Firestore rules to `homebase-d3c6c`. Exclude the pre-existing reminder-policy edit, experiments and unrelated output files.
+
+Published app commit `07a6941` to the existing GitHub branch. Firebase reported successful Hosting and Firestore-rule release for `homebase-d3c6c`; all 14 changed public app files from https://pocketplanet.day/ matched the local release bytes. Verification details are saved locally in `output/oct29-live-release-verification.json`. The reminder Worker and unrelated working-tree files were not included.

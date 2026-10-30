@@ -1,6 +1,9 @@
-## October 29 social and logging release — approved
+## October 29 social and logging release — published
 
-The owner approved “push all” after the UI refinements. Publish matching Hosting and Firestore rules from this checkout. Changes cover private Sentiments, required final-review vibes for Solar members, persistent planned tasks and penalties, public profiles and friend navigation, relationship actions, account-specific last-sync times, and coherent mobile social cards. Validation: 311 app checks pass, one normal emulator-only skip; expanded security emulator suite passes. Browser QA at 390px and 320px passes; physical iPhone/PWA rendering is unverified. See [release notes](docs/october-29-logging-profiles.md). Exclude unrelated reminder-policy edits, experiments and prior output files.
+Published app commit `07a6941` to GitHub branch `codex/homebase-prototype` and Firebase Hosting at https://pocketplanet.day/. Matching Firestore rules compiled and released successfully. All 14 changed public app files matched local release hashes. Validation: 311 app checks pass; the separate security emulator suite passes. Mobile browser QA at 390px and 320px passed; physical iPhone/PWA behavior was not tested. The unrelated reminder-policy edit remains local.
+
+
+The owner approved “push all” after the UI refinements and explicitly confirmed the production Hosting/Firestore deployment. Changes cover private Sentiments, required final-review vibes for Solar members, persistent planned tasks and penalties, public profiles and friend navigation, relationship actions, account-specific last-sync times, and coherent mobile social cards. Validation: 311 app checks pass, one normal emulator-only skip; expanded security emulator suite passes. Browser QA at 390px and 320px passes; physical iPhone/PWA rendering is unverified. See [release notes](docs/october-29-logging-profiles.md). Exclude unrelated reminder-policy edits, experiments and prior output files.
 
 ## October 29 Mogging Moon
 
