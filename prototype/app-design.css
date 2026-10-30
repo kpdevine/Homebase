@@ -1271,9 +1271,6 @@ input,textarea,[contenteditable]:not([contenteditable=false]),[contenteditable]:
 .solar-vibes-badges>span {position:relative;display:inline-block;width:26px;height:26px;background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:50%;box-shadow:0 1px 5px rgb(0 0 0 / .2)}
 .solar-vibes-badges .planet-emoji {width:100%;height:100%;object-fit:contain}
 .solar-vibes-badges b {position:absolute;right:-3px;bottom:-2px;padding:1px 2px;background:var(--ui-active);color:var(--ui-light);border-radius:3px;font:700 8px/1 var(--font-ui)}
-.solar-vibes-surface:has(.solar-vibes-badges:not(:empty)) {display:grid;gap:5px;padding-top:6px}
-.solar-vibes-surface:has(.solar-vibes-badges:not(:empty)) .solar-vibes-badges {position:static;grid-row:1;justify-self:end;margin-top:-18px;min-width:0}
-.solar-vibes-surface:has(.solar-vibes-badges:not(:empty)) .solar-vibes-copy {grid-row:2}
 .solar-vibes .solar-vibes-edit {position:absolute;right:8px;bottom:1px;padding:3px;min-height:26px}
 .solar-vibes>p {padding:12px}
 .solar-reaction-orbit {top:-5px;right:-8px;bottom:auto;left:auto}
@@ -1667,3 +1664,28 @@ details[open]>summary::after {transform:rotate(180deg)}
   .profile-friend-grid .profile-username {font-size:16px;line-height:1.3}
   .profile-friend-grid .profile-friend-arrow {position:absolute;top:5px;right:5px;font-size:10px}
 }
+/* A dedicated header row keeps reactions at the section's top right on iOS,
+   even when the badges wrap or the handwritten status spans several lines. */
+.solar-member-card .solar-vibes-heading {display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0;margin-bottom:9px}
+.solar-member-card .solar-vibes-heading>.solar-vibes-label {flex:0 0 auto;margin:2px 0 0;font:700 11px/1.4 var(--font-ui);letter-spacing:.07em;color:var(--ui-ink);text-transform:uppercase}
+.solar-member-card .solar-vibes-heading>.solar-vibes-badges {position:static;display:flex;flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start;gap:3px;max-width:calc(100% - 110px);min-width:0;min-height:0;margin:-3px 0 0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;appearance:none;-webkit-appearance:none;pointer-events:auto;cursor:pointer}
+.solar-member-card .solar-vibes-heading .solar-vibes-badges>span {flex:0 0 26px}
+.profile-friend-grid button {position:relative;justify-content:center;text-align:center;padding-inline:14px}
+.profile-friend-grid .profile-username {display:block;width:100%;text-align:center}
+.profile-friend-grid .profile-friend-arrow {position:absolute;right:6px;top:7px;font-size:10px}
+#friend-list .manage-friend-open {position:relative;justify-content:center;text-align:center;padding-inline:14px}
+#friend-list .manage-friend-open .profile-username {display:block;width:100%;text-align:center}
+#friend-list .manage-friend-open .profile-friend-arrow {position:absolute;right:6px;top:7px}
+.solar-member-card .solar-person-name {width:100%;align-items:center;justify-content:center;text-align:center}
+.leaderboard .solar-person-name .leaderboard-user-name {text-align:center;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+.friends-view>.leaderboard {padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.friends-view>#solar-connected {order:1;width:100%;min-width:0}
+.friends-view>#friend-manager {order:2}
+.friends-view>#solar-connected>#solar-manage {margin-top:0}
+.short-username,.short-username .profile-username {white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;text-align:center;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+.profile-friend-grid button,#friend-list .manage-friend-open,#solar-member-list .solar-member-profile-link,.request-profile-link {min-width:0;max-width:100%;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+.profile-friend-grid button {padding-inline:5px}
+#friend-list .manage-friend-open {padding-inline:5px}
+#solar-member-list .solar-member-profile-link {padding-inline:4px}
+#solar-member-list .solar-member-profile-link .profile-username {display:block;width:100%;text-align:center}
+#solar-member-list .solar-member-profile-link .profile-friend-arrow {top:2px;right:0;transform:none;font-size:9px}

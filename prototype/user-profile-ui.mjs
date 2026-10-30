@@ -1,6 +1,7 @@
 import {solarAppearance} from './social-model.mjs';
 import {localDateKey} from './day-clock.mjs';
 import {addDays} from './model.mjs';
+import {fitShortUsernames} from './username-layout.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -9,6 +10,8 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
   dialog.id='user-profile-dialog';dialog.setAttribute('aria-labelledby','user-profile-title');
   dialog.innerHTML='<div class="dialog-heading"><div><p class="eyebrow">POCKET PLANET</p><h2 id="user-profile-title">Planet profile</h2></div><button type="button" class="icon-button" aria-label="Close profile" data-close-profile>×</button></div><div id="user-profile-content" aria-live="polite"></div>';
   document.body.append(dialog);
+  const nameObserver=new ResizeObserver(()=>requestAnimationFrame(()=>fitShortUsernames(dialog)));nameObserver.observe(dialog);
+  document.fonts.ready.then(()=>fitShortUsernames(dialog));document.fonts.addEventListener('loadingdone',()=>fitShortUsernames(dialog));
   const content=dialog.querySelector('#user-profile-content');let serial=0,target=null,targetName='';
   const relationships=new Map();
   const removeDialog=document.createElement('dialog');removeDialog.id='profile-remove-friend-dialog';removeDialog.setAttribute('aria-labelledby','profile-remove-title');
@@ -69,6 +72,7 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
       // Use optimistic relationship state only for this immediate render; later
       // profile visits use the live watcher, including friendships accepted elsewhere.
       relationships.delete(uid);
+      requestAnimationFrame(()=>fitShortUsernames(dialog));
     }catch(error){if(run===serial)content.textContent=error.message;}
   }
   document.addEventListener('click',event=>{const button=event.target.closest('[data-view-profile]');if(button)open(button.dataset.viewProfile);});
