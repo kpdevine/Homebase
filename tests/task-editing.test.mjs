@@ -15,9 +15,9 @@ test('editing task names and subtasks preserves completed actions and reopens on
   const edited=s.loadDay(monday);assert.equal(edited.tasks[0].children[0].done,true);assert.equal(edited.tasks[0].children[1].done,false);assert.equal(edited.tasks[0].done,false);assert.equal(edited.reviewed.checklists,false);
   s.editTask(monday,id,{name:'Bedtime',children:[{id:task.children[0].id,name:'Brush teeth'}]});assert.equal(s.loadDay(monday).tasks[0].done,true);validateSnapshot(s.exportSnapshot());
 });
-test('moving a task keeps IDs and checks without logging a previously untouched destination',()=>{
+test('changing the plan for a completed task preserves its actual completion day',()=>{
   const s=fresh(),id=s.addTask(monday,'Read');s.toggleTask(monday,id);const task=s.loadDay(monday).tasks[0];
-  s.editTask(monday,id,{...changes(task),date:tuesday});assert.equal(s.loadDay(monday).tasks.length,0);assert.equal(s.loadDay(tuesday).tasks[0].id,id);assert.equal(s.loadDay(tuesday).tasks[0].done,true);assert.equal(s.loadDay(tuesday).checklistTouched,false);validateSnapshot(s.exportSnapshot());
+  s.editTask(monday,id,{...changes(task),date:tuesday});assert.equal(s.loadDay(monday).tasks[0].id,id);assert.equal(s.loadDay(monday).tasks[0].done,true);assert.equal(s.loadDay(tuesday).tasks.length,0);assert.equal(s.loadDay(tuesday).checklistTouched,false);validateSnapshot(s.exportSnapshot());
 });
 test('one-day recurring edits do not change the routine or other occurrences',()=>{
   const s=fresh();s.addTask(monday,'Bedtime',{children:['Teeth'],recurrence:daily});const task=s.loadDay(tuesday).tasks[0],before=s.loadTemplates();

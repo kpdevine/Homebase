@@ -3,8 +3,8 @@
   const params=new URLSearchParams(location.search);
   const demo=params.get('preview')==='1'&&params.get('opening')==='1';
   if(!/iPhone|iPod/.test(navigator.userAgent)&&!demo)return;
-  const root=document.documentElement,ringDuration=720,exitDuration=320;
-  let ready=false,imageReady=false,imageFailed=false,image,started=Date.now(),imageShown=started;
+  const root=document.documentElement,ringDuration=400,exitDuration=180;
+  let ready=false,imageReady=false,imageFailed=false,image,started=Date.now();
   let hiding,cleanup,deadline,hiddenAt=null,active=false;
   let motion='full';
   try{motion=JSON.parse(localStorage.getItem('homebase.preferences.v1'+(params.get('preview')==='1'?'.preview':'')))?.motion||'full';}catch{}
@@ -18,28 +18,25 @@
     cleanup=setTimeout(remove,root.dataset.launchMotion==='reduced'?0:exitDuration);
   }
   function settle(){
-    if(!active||!ready||!imageReady)return;
+    if(!active||!ready)return;
     clearTimeout(hiding);
-    // A slow asset still gets its complete ring; reentry uses the same interval.
-    hiding=setTimeout(finish,Math.max(0,started+ringDuration-Date.now(),imageShown+ringDuration-Date.now()));
+    // Decorative assets never extend the wait once the app is ready.
+    hiding=setTimeout(finish,root.dataset.launchMotion==='reduced'?0:Math.max(0,started+ringDuration-Date.now()));
   }
   function reveal(){
     if(!active||!imageReady)return;
-    imageShown=Date.now();
     root.dataset.launchImage=imageFailed?'unavailable':'ready';
     settle();
   }
   function show(){
     clear();started=Date.now();active=true;delete root.dataset.launchImage;
     root.dataset.phoneLaunch='show';
-    // Flush the prior ring state so Replay also works while an opening is visible.
-    void root.offsetWidth;
     if(image&&image.getAttribute('src')!==mascotSource()){
       imageReady=false;imageFailed=false;image.src=mascotSource();
     }
     reveal();
     // Neither a failed render nor a missing asset can leave a permanent cover.
-    deadline=setTimeout(finish,2200);
+    deadline=setTimeout(finish,1400);
   }
   show();
   document.addEventListener('DOMContentLoaded',()=>{

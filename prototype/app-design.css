@@ -1690,3 +1690,6 @@ details[open]>summary::after {transform:rotate(180deg)}
 #solar-member-list .solar-member-profile-link {padding-inline:4px}
 #solar-member-list .solar-member-profile-link .profile-username {display:block;width:100%;text-align:center}
 #solar-member-list .solar-member-profile-link .profile-friend-arrow {top:2px;right:0;transform:none;font-size:9px}
+
+/* Keep the page within its scroll bounds, including standalone iPhone mode. */
+html,body {overscroll-behavior-y:none}

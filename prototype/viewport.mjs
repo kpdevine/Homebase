@@ -1,7 +1,9 @@
+import {mountScrollBoundary} from './scroll-boundary.mjs';
 // Keep modal editors inside the visible viewport when a mobile keyboard pans
 // or resizes it. Scroll the dialog itself, never the page behind the editor.
 export function mountViewport({window,document}) {
   let frame;
+  const stopScrollBoundary=mountScrollBoundary({window,document});
   function revealEditor(){
     const field=document.activeElement;
     if(!field?.matches('textarea,input:not([type=checkbox]):not([type=radio]),[contenteditable=true]'))return;
@@ -22,5 +24,5 @@ export function mountViewport({window,document}) {
   window.addEventListener('resize',update);
   document.addEventListener('focusin',update);
   update();
-  return ()=>{window.cancelAnimationFrame(frame);window.visualViewport?.removeEventListener('resize',update);window.visualViewport?.removeEventListener('scroll',update);window.removeEventListener('resize',update);document.removeEventListener('focusin',update);};
+  return ()=>{stopScrollBoundary();window.cancelAnimationFrame(frame);window.visualViewport?.removeEventListener('resize',update);window.visualViewport?.removeEventListener('scroll',update);window.removeEventListener('resize',update);document.removeEventListener('focusin',update);};
 }

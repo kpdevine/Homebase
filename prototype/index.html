@@ -15,13 +15,13 @@
   <link rel="preload" href="./assets/fonts/KieranHandwriting-Entry.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/RadioDisplay-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./legacy-ui.css?v=local-design-review">
-  <link rel="stylesheet" href="./app-design.css?v=20261030-profile-data">
-  <link rel="stylesheet" href="./phone-launch.css?v=20261021-ring-opening">
+  <link rel="stylesheet" href="./app-design.css?v=20261030-fast-profiles-plans">
+  <link rel="stylesheet" href="./phone-launch.css?v=20261030-smooth-opening">
   <link rel="stylesheet" href="./assets/themes/palette-0b8332424785.css">
   <script src="./assets/themes/theme-90e47f648a8e.js"></script>
   <link rel="stylesheet" href="./orbital-meter.css?v=20261025">
-  <script src="./phone-launch.js?v=20261021-ring-opening"></script>
-  <script type="module" src="./app.mjs?v=20261030-profile-data"></script>
+  <script src="./phone-launch.js?v=20261030-smooth-opening"></script>
+  <script type="module" src="./app.mjs?v=20261030-fast-profiles-plans"></script>
 </head>
 <body>
   <div class="phone-launch" aria-hidden="true"><div class="phone-launch-content"><img id="phone-launch-mascot" class="phone-launch-mascot" width="184" height="184" alt=""><svg class="phone-launch-ring" viewBox="0 0 220 220" aria-hidden="true"><circle class="phone-launch-ring-track" cx="110" cy="110" r="102"/><circle class="phone-launch-ring-fill" cx="110" cy="110" r="102" pathLength="1"/></svg></div></div>
@@ -112,8 +112,7 @@
     <form id="add-task-form" class="task-composer">
       <fieldset id="task-edit-scope" class="task-edit-scope" hidden><legend>Apply changes to</legend><label><input type="radio" name="task-edit-scope" value="day" checked><span>Only this day</span></label><label><input type="radio" name="task-edit-scope" value="future"><span>This day & future</span></label><p>Earlier days keep their original task and completion history.</p></fieldset>
       <label for="task-name">Task name</label><div class="task-writing-field"><textarea id="task-name" class="handwriting-input" rows="1" maxlength="100" placeholder="Task name" required autocomplete="off"></textarea></div>
-      <div class="task-calendar-field"><label for="task-due-date">Expiration date (optional)</label><input id="task-due-date" class="task-calendar-input" type="date"></div>
-      <div class="task-calendar-field task-date-picker" hidden><label for="task-date">Plan to do <small>(defaults to selected day)</small></label><input id="task-date" class="task-calendar-input" type="date" aria-describedby="task-plan-hint"><p id="task-plan-hint" class="hint">Unfinished tasks stay on your list and reduce the score each day from the planned date. No penalty before then.</p></div>
+      <div class="task-calendar-field task-date-picker" hidden><label for="task-date">Plan to do by <small>(defaults to selected day)</small></label><input id="task-date" class="task-calendar-input" type="date" aria-describedby="task-plan-hint"><p id="task-plan-hint" class="hint">Tasks stay visible every day until completed. No score penalty before the planned day; overdue after that day.</p></div>
       <div class="task-schedule"><label class="repeat-toggle"><input id="task-repeat" type="checkbox"><span>Repeat this task</span></label><div id="repeat-options" hidden><label for="task-frequency">How often?</label><select id="task-frequency"><option value="once">One time</option><option value="daily">Every day</option><option value="weekdays">Weekdays · Monday–Friday</option><option value="weekly">Weekly · same day</option><option value="custom">Selected days</option></select><p>Starts <span id="task-start-date"></span></p></div></div>
       <fieldset id="custom-weekdays" class="weekday-choices" hidden><legend>Repeat on</legend><label><input type="checkbox" name="repeat-day" value="1"><span>Mon</span></label><label><input type="checkbox" name="repeat-day" value="2"><span>Tue</span></label><label><input type="checkbox" name="repeat-day" value="3"><span>Wed</span></label><label><input type="checkbox" name="repeat-day" value="4"><span>Thu</span></label><label><input type="checkbox" name="repeat-day" value="5"><span>Fri</span></label><label><input type="checkbox" name="repeat-day" value="6"><span>Sat</span></label><label><input type="checkbox" name="repeat-day" value="7"><span>Sun</span></label></fieldset>
       <div class="subtask-editor"><span class="composer-label">Subtasks <small>(optional)</small></span><p>Complete each subtask to finish the parent task.</p><div id="subtask-inputs"></div><button id="add-subtask" class="quiet-button" type="button">+ Add subtask</button></div>

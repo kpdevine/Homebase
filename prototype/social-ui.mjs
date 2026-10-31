@@ -29,11 +29,12 @@ export function mountSocial({getStore,today:appToday,getCloud,showFriends,previe
   document.addEventListener('close',()=>setTimeout(prompt,80),true);
   async function action(work){if(busy)return;busy=true;message('Updating…');paint();try{await work();message('');}catch(error){message(error.code==='permission-denied'?'Could not access friends. Please reconnect and try again.':error.message);}finally{busy=false;paint();}}
   const solarUI=mountSolarSystems({getClient:()=>client,getUser:()=>user,getProfile:()=>profile,getFriends:()=>data.friends,today,checkInDate:appToday,changed:()=>{paint();publish();},action,message,scoreCircle});
-  const profilesUI=mountUserProfiles({getClient:()=>client,getUser:()=>user,getFriends:()=>data.friends,getOutgoing:()=>data.outgoing,getIncoming:()=>data.incoming,planetEmoji,scoreCircle,ownSummary:()=>leaderboardSummary(getStore(),today()),ownAppearance:()=>solarUI.appearance()});
+  let knownProfiles=new Map();
+  const profilesUI=mountUserProfiles({getKnownProfile:uid=>knownProfiles.get(uid),getClient:()=>client,getUser:()=>user,getFriends:()=>data.friends,getOutgoing:()=>data.outgoing,getIncoming:()=>data.incoming,planetEmoji,scoreCircle,ownSummary:()=>leaderboardSummary(getStore(),today()),ownAppearance:()=>solarUI.appearance()});
   $('.solar-toolbar').insertAdjacentHTML('beforeend','<button id="change-username" type="button" class="quiet-button" hidden>Change username</button><a id="username-live-link" href="https://pocketplanet.day/?open=solar" class="text-button" hidden>Change your real username on Pocket Planet ↗</a>');
   $('#change-username').onclick=()=>{if(!profile||preview)return;$('#username-title').textContent='Change username';$('#new-username').value=profile.username;$('#username-error').textContent='';$('#claim-username').textContent='Save username';$('#cancel-username').hidden=false;dialog.showModal();$('#new-username').select();};
   async function setUser(next){
-    const run=++epoch;profilesUI.reset();solarUI.reset();stop?.();stop=null;client=null;profile=null;user=next;data={incoming:[],outgoing:[],friends:[]};searchResults=[];searchSerial++;$('#friend-results').innerHTML='';lastPublished='';needsUsername=false;removeId=null;if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();paint();if(!user)return;
+    const run=++epoch;profilesUI.reset();knownProfiles.clear();solarUI.reset();stop?.();stop=null;client=null;profile=null;user=next;data={incoming:[],outgoing:[],friends:[]};searchResults=[];searchSerial++;$('#friend-results').innerHTML='';lastPublished='';needsUsername=false;removeId=null;if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();paint();if(!user)return;
     // Auth callbacks can run before mountCloud returns its controller.
     await Promise.resolve();client=getCloud()?.social();if(!client)return;
     try{const own=await client.profile();if(run!==epoch)return;profile=own;needsUsername=!own;prompt();if(own)startWatch();paint();publish();}catch(error){if(run===epoch)message('Friends could not connect. Open Friends to retry. '+error.message);}
@@ -55,6 +56,7 @@ export function mountSocial({getStore,today:appToday,getCloud,showFriends,previe
     const system=solarUI.paint({ownLogged:sharedDays(getStore(),appToday()).some(day=>day.date===appToday())});
     const ownToday=sharedDays(getStore(),date).find(day=>day.date===date);
     const rows=rankLeaderboard(system.members.map(member=>member.uid===user?.uid?{...member,...own,todayDate:date,todayScore:ownToday?.score??null,todayReviewComplete:ownToday?.reviewComplete===true}:member),month);
+    knownProfiles=new Map(system.members.filter(member=>member.username).map(member=>[member.uid,{...member,solarSystems:system.name?[{id:system.primary,name:system.name}]:undefined}]));
     const ranks=monthlyRanks(rows,month);
     rows.sort((a,b)=>Number(b.uid===user?.uid)-Number(a.uid===user?.uid));
     const rowsHtml=rows.length?rows.map(row=>{

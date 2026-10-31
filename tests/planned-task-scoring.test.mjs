@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createStore,addDays} from '../prototype/model.mjs';
 import {summarizeDay,fullyLogged} from '../prototype/scoring.mjs';
+import {orderedTasks} from '../prototype/tasks.mjs';
 import {validateSnapshot} from '../prototype/persistence.mjs';
 import {snapshotRecords,recordsSnapshot} from '../prototype/cloud-records.mjs';
 
@@ -50,6 +51,39 @@ test('a planned task can move earlier or later without a stale future event brin
   assert.equal(store.loadDay(start).tasks[0].name,'Moved earlier');
   assert.equal(store.loadDay(planned).tasks[0].displayDate,start);
   store.editTask(start,id,{name:'Moved later',date:planned});
-  assert.equal(store.loadDay(start).tasks.length,0);assert.equal(store.loadDay(planned).tasks[0].name,'Moved later');
+  assert.equal(store.loadDay(start).tasks[0].name,'Moved later');assert.equal(store.loadDay(planned).tasks[0].name,'Moved later');
   validateSnapshot(store.exportSnapshot());
+});
+
+ test('future plans are visible immediately and can be completed before their planned day',()=>{
+   const store=createStore({seed:false}),id=store.addTask(start,'Early finish',{displayDate:planned});
+   assert.equal(store.loadDay(start).tasks[0].id,id);
+   store.toggleTask(start,id);
+   assert.equal(store.loadDay(start).tasks[0].done,true);
+   assert.equal(store.loadDay(addDays(start,1)).tasks.length,0);
+   assert.equal(store.loadDay(planned).tasks.length,0);
+ });
+ test('existing future plans load today and completion does not resurrect them on the original day',()=>{
+   const source=createStore({seed:false}),id=source.addTask(planned,'Existing future plan');
+   const store=createStore({seed:false,snapshot:source.exportSnapshot(),editableToday:()=>start});
+   assert.equal(store.loadDay(start).tasks[0].id,id);
+   assert.equal(store.loadDay(addDays(start,-1)).tasks.length,0);
+   store.toggleTask(start,id);
+   assert.equal(store.loadDay(planned).tasks.length,0);
+   validateSnapshot(store.exportSnapshot());
+ });
+
+test('tasks sort by earliest plan with undated tasks last without mutating the list',()=>{
+ const tasks=[{id:'none',displayDate:null},{id:'later',displayDate:'2026-11-01'},{id:'late',displayDate:'2026-10-20'},{id:'soon',displayDate:'2026-10-30'}];
+ assert.deepEqual(orderedTasks(tasks).map(task=>task.id),['late','soon','later','none']);
+ assert.equal(tasks[0].id,'none');
+});
+
+test('legacy future tasks become visible today without losing their planned date',()=>{
+ const source=createStore({seed:false});source.addTask(planned,'Legacy future');
+ const snapshot=source.exportSnapshot();delete snapshot.days[0].tasks[0].taskEvents;delete snapshot.days[0].tasks[0].displayDate;
+ const store=createStore({seed:false,snapshot,editableToday:()=>start});
+ assert.equal(store.loadDay(start).tasks[0].displayDate,planned);
+ assert.equal(score(store,start).total,0);
+ validateSnapshot(store.exportSnapshot());
 });

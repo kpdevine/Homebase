@@ -5,8 +5,8 @@ export function validTaskDate(value) {
 export function taskDates(value, fallback) {
   const dueDate=value.dueDate??null;
   const displayDate=value.displayDate===undefined?fallback:value.displayDate;
-  if(dueDate!==null&&!validTaskDate(dueDate))throw new RangeError('Choose a valid due date.');
-  if(displayDate!==null&&!validTaskDate(displayDate))throw new RangeError('Choose a valid plan-to-work date, or leave it blank.');
+  if(dueDate!==null&&!validTaskDate(dueDate))throw new RangeError('Choose a valid plan-to-do-by date.');
+  if(displayDate!==null&&!validTaskDate(displayDate))throw new RangeError('Choose a valid plan-to-do-by date, or leave it blank.');
   return {dueDate,displayDate};
 }
 export function taskState(task) {
@@ -17,8 +17,8 @@ export function datedTaskForDay(task,sourceDate,date) {
   const event=task.taskEvents.filter(event=>event.date<=date).at(-1);
   if(!event)return null;
   const state=structuredClone(event.value),start=state.displayDate??sourceDate;
-  const lastVisible=state.completedOn>start?state.completedOn:start;
-  if(date<start||state.removedOn&&date>=state.removedOn||state.done&&date>lastVisible)return null;
+  const lastVisible=state.completedOn??start;
+  if(state.removedOn&&date>=state.removedOn||state.done&&date>lastVisible)return null;
   return {...state,_taskSource:sourceDate};
 }
 export function updateDatedTask(task,date,state) {

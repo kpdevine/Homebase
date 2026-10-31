@@ -257,21 +257,12 @@ function renderHeader() {
     button.setAttribute('aria-selected', String(active)); button.tabIndex = active || ['history','achievements'].includes(view)&&button.dataset.tab==='today' ? 0 : -1;
   });
 }
-function taskDueBubble(task,date) {
-  if(!task.dueDate)return '';
-  const overdue=!task.done&&task.dueDate<date,today=task.dueDate===date;
-  const label=dateFormat(task.dueDate,{month:'short',day:'numeric',...(task.dueDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
-  return `<time class="task-date-bubble task-due-bubble${overdue?' is-overdue':today?' is-due-today':''}" datetime="${task.dueDate}" aria-label="${overdue?'Overdue':'Due'} ${longDate(task.dueDate)}">${overdue?'Overdue · '+label:today?'Due today':'Due '+label}</time>`;
-}
 function taskDateBubbles(task,date,scheduledDate) {
-  const due=taskDueBubble(task,date);
-  // Pre-deadline tasks already belong to a calendar day. Expose that plan
-  // without inventing a deadline or rewriting the saved task/routine.
-  const plannedDate=task.displayDate===undefined?scheduledDate:task.displayDate;
-  if(!plannedDate)return due;
+  const plannedDate=task.displayDate??task.dueDate??(task.displayDate===undefined?scheduledDate:null);
+  if(!plannedDate)return '';
   const overdue=!task.done&&plannedDate<date;
   const label=dateFormat(plannedDate,{month:'short',day:'numeric',...(plannedDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
-  return due+`<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="Planned work${overdue?' overdue':''} ${longDate(plannedDate)}">Plan to do ${label}</time>`;
+  return `<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="${overdue?'Overdue, planned by':'Plan to do by'} ${longDate(plannedDate)}">${overdue?'Overdue':'Plan to do by '+label}</time>`;
 }
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
@@ -302,7 +293,7 @@ function renderTasks() {
   $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
   const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
   $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
-  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=store.loadDay(date).tasks.filter(task=>!task.templateId&&(!task._taskSource||task.displayDate===date));laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
+  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks).filter(task=>!task.templateId&&(!task._taskSource||task.displayDate===date));laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
   $('#later-count').textContent=String(laterCount);
   $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} task${planned.length===1?'':'s'} scheduled`);
 }
@@ -859,15 +850,14 @@ function openTaskComposer(trigger) {
   taskComposerTrigger=trigger;
   $('#add-task-form').reset();$('#subtask-inputs').innerHTML='';$('#task-composer-error').textContent='';
   $('#task-name').style.height='';
-  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value=selectedDate;$('#task-due-date').value='';renderTaskDate();
+  $('#task-date').min=addDays(editableToday(),-7);$('#task-date').max=addDays(editableToday(),7);$('#task-date').value=selectedDate;renderTaskDate();
   $('#task-dialog-title').textContent='Add task';renderTaskEditScope();updateFrequency();showDialog($('#task-dialog'));$('#task-name').focus();fitTaskFields();
 }
 function openTaskEditor(trigger,date,id,childId) {
   const task=store.loadDay(date).tasks.find(task=>task.id===id);if(!task)return;
   openTaskComposer(trigger);taskEdit={date,id,templateId:task.templateId,persistent:!!task._taskSource};
-  $('#task-date').value=task.displayDate===null?'':task.displayDate??date;
+  $('#task-date').value=task.displayDate??task.dueDate??'';
   if(task.displayDate&&task.displayDate<$('#task-date').min)$('#task-date').min=task.displayDate;
-  $('#task-due-date').value=task.dueDate??'';
   $('#task-dialog-title').textContent='Edit task';$('#task-name').value=task.name;$('#task-editor-delete').hidden=false;$('#task-editor-delete').textContent=task.templateId?'Remove this occurrence…':'Remove this task…';
   for(const child of task.children)appendSubtaskField(child);
   if(task.templateId) {
@@ -887,7 +877,6 @@ for(const id of ['tomorrow-tasks','later-tasks'])$('#'+id).addEventListener('cli
 });
 $('#view-tomorrow').addEventListener('click',()=>{navigateDay(addDays(editableToday(),1));setView('checklists',true);});
 $('#task-date').addEventListener('change',renderTaskDate);
-$('#task-due-date').addEventListener('change',renderTaskDate);
 $('#cancel-task').addEventListener('click',()=>closeDialog($('#task-dialog')));
 $('#add-subtask').addEventListener('click',()=>{
   if($$('[data-child-name]').length>=20){$('#task-composer-error').textContent='Use up to 20 subtasks.';return;}
@@ -906,8 +895,7 @@ $('#subtask-inputs').addEventListener('click',event=>{const button=event.target.
 $('#add-task-form').addEventListener('submit', event => {
   event.preventDefault(); const input = $('#task-name');
   const frequency=$('#task-frequency').value;
-  if(!$('#task-due-date').reportValidity())return;
-  const options={dueDate:$('#task-due-date').value||null,displayDate:$('#task-date').value||taskComposeDate,children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
+  const options={dueDate:null,displayDate:$('#task-date').value||null,children:$$('[data-child-name]').map(input=>input.value),recurrence:frequency==='once'?null:{frequency,weekdays:$$('[name="repeat-day"]:checked').map(input=>Number(input.value))}};
   if(!$('#task-date').checkValidity()){ $('#task-date').reportValidity();return; }
   const editing=!!taskEdit;
   try {
@@ -915,7 +903,7 @@ $('#add-task-form').addEventListener('submit', event => {
     if(taskEdit) {
       const changes={name:input.value,dueDate:options.dueDate,displayDate:options.displayDate,children:$$('[data-child-name]').map(field=>({id:field.dataset.childId||null,name:field.value})),date:taskEdit.persistent?taskEdit.date:taskComposeDate,recurrence:options.recurrence};
       id=taskEdit.templateId&&$('[name="task-edit-scope"]:checked').value==='future'?store.editRoutine(taskEdit.date,taskEdit.id,changes):store.editTask(taskEdit.date,taskEdit.id,changes);
-    } else id=store.addTask(taskComposeDate,input.value,options);
+    } else id=store.addTask(frequency==='once'?(selectedDate<editableToday()?selectedDate:editableToday()):taskComposeDate,input.value,options);
     if(id&&options.children.length)expandedTasks.add(id);
   }
   catch(error){$('#task-composer-error').textContent=error.message;return;}

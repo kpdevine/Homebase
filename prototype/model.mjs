@@ -110,12 +110,23 @@ export function createStore(options = {}) {
     for (const [key, groups] of snapshot.targets) targets.set(key, groups);
     entries.push(...snapshot.entries); templates.push(...snapshot.templates); serial = snapshot.serial;
   }
+  // Older versions stored new future plans on their planned day. Make pending
+  // plans available from today without adding copies or changing earlier history.
+  if(options.editableToday)for(const day of days.values())for(const task of day.tasks){
+    const now=options.editableToday();
+    if(!task.templateId&&!task.taskEvents&&!task.done&&day.date>now){
+      task.displayDate=task.displayDate===undefined?day.date:task.displayDate;
+      task.taskEvents=[{date:now,value:taskState(task)}];
+    }
+    const first=task.taskEvents?.[0];
+    if(first&&first.date>now&&!first.value.done&&!first.value.removedOn)first.date=now;
+  }
   function loadDay(key) {
     const day = structuredClone(days.get(key) || emptyDay(key));
     day.tasks=day.tasks.filter(task=>!task.taskEvents);
     for(const [sourceDate,source] of days)for(const task of source.tasks){
       if(task.taskEvents){const visible=datedTaskForDay(task,sourceDate,key);if(visible)day.tasks.push(visible);}
-      else if(!task.templateId&&sourceDate<key&&!task.done&&(task.displayDate??sourceDate)<=key)day.tasks.push({...structuredClone(task),displayDate:task.displayDate===undefined?sourceDate:task.displayDate,_taskSource:sourceDate});
+      else if(!task.templateId&&sourceDate<key&&!task.done)day.tasks.push({...structuredClone(task),displayDate:task.displayDate===undefined?sourceDate:task.displayDate,_taskSource:sourceDate});
     }
     if(!day.configuration&&settings&&key>=settings.effectiveFrom){day.configuration=structuredClone(settings);if(!days.has(key))day.creatine=false;}
     for (const template of templates) if (isDue(template,key) && !day.skippedTemplates.includes(template.id) && !day.tasks.some(task=>task.templateId===template.id)) day.tasks.push(occurrence(template,key));

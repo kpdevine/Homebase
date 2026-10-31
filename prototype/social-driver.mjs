@@ -12,10 +12,10 @@ export function socialClient(db,uid,options={}){
     async viewProfile(user){
       const [identity,summary,links,memberships,legacy,appearance]=await Promise.all([getDoc(doc(db,'publicProfiles',user)),getDoc(doc(db,'profileSummaries',user)),getDocs(collection(db,'friendships',user,'friends')),getDocs(collection(db,'groupMemberships',user,'groups')),getDoc(doc(db,'socialScores',user)),getDoc(doc(db,'socialPreferences',user))]);
       if(!identity.exists())return null;
-      const friends=await Promise.all(links.docs.map(async link=>{const person=await getDoc(doc(db,'publicProfiles',link.id));return person.exists()?{uid:link.id,username:person.data().username}:null;}));
-      const systems=await Promise.all(memberships.docs.map(async membership=>{const entry=await getDoc(doc(db,'groupDirectory',membership.id));return entry.exists()?{id:membership.id,name:entry.data().name}:null;}));
+      const friendsPromise=Promise.all(links.docs.map(async link=>{const person=await getDoc(doc(db,'publicProfiles',link.id));return person.exists()?{uid:link.id,username:person.data().username}:null;}));
+      const systemsPromise=Promise.all(memberships.docs.map(async membership=>{const entry=await getDoc(doc(db,'groupDirectory',membership.id));return entry.exists()?{id:membership.id,name:entry.data().name}:null;}));
+      const [friends,systems,ownMemberships]=await Promise.all([friendsPromise,systemsPromise,user===uid?memberships:getDocs(collection(db,'groupMemberships',uid,'groups'))]);
       const solarSystems=systems.filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name));
-      const ownMemberships=user===uid?memberships:await getDocs(collection(db,'groupMemberships',uid,'groups'));
       const sharedIds=solarSystems.filter(system=>ownMemberships.docs.some(entry=>entry.id===system.id)).map(system=>system.id);
       const refs=sharedIds.map(group=>doc(db,'friendGroups',group,'scores',user));
       const shared=await Promise.allSettled(refs.map(ref=>getDoc(ref)));

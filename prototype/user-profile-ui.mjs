@@ -5,7 +5,7 @@ import {fitShortUsernames} from './username-layout.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getIncoming,planetEmoji,scoreCircle,ownSummary,ownAppearance}){
+export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getIncoming,planetEmoji,scoreCircle,ownSummary,ownAppearance,getKnownProfile=()=>null}){
   const dialog=document.createElement('dialog');
   dialog.id='user-profile-dialog';dialog.setAttribute('aria-labelledby','user-profile-title');
   dialog.innerHTML='<div class="dialog-heading"><div><p class="eyebrow">POCKET PLANET</p><h2 id="user-profile-title">Planet profile</h2></div><button type="button" class="icon-button" aria-label="Close profile" data-close-profile>×</button></div><div id="user-profile-content" aria-live="polite"></div>';
@@ -13,7 +13,7 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
   const nameObserver=new ResizeObserver(()=>requestAnimationFrame(()=>fitShortUsernames(dialog)));nameObserver.observe(dialog);
   document.fonts.ready.then(()=>fitShortUsernames(dialog));document.fonts.addEventListener('loadingdone',()=>fitShortUsernames(dialog));
   const content=dialog.querySelector('#user-profile-content');let serial=0,target=null,targetName='';
-  const relationships=new Map();
+  const relationships=new Map(),cache=new Map(),pending=new Map();
   const removeDialog=document.createElement('dialog');removeDialog.id='profile-remove-friend-dialog';removeDialog.setAttribute('aria-labelledby','profile-remove-title');
   removeDialog.innerHTML='<div class="dialog-heading"><h2 id="profile-remove-title">Are you sure?</h2></div><p id="profile-remove-description"></p><p id="profile-remove-error" role="alert"></p><div class="composer-actions"><button type="button" class="quiet-button" data-profile-keep>Keep friend</button><button type="button" class="primary-button" data-profile-confirm-remove>Remove friend</button></div>';
   document.body.append(removeDialog);let removal=null;
@@ -41,11 +41,21 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
   async function open(uid){
     const client=getClient();if(!client)return;
     const run=++serial,account=getUser()?.uid;target=uid;
-    content.textContent='Loading profile…';if(!dialog.open)dialog.showModal();
+    const cached=cache.get(uid),known=getKnownProfile(uid);
+    const immediate=cached?{...cached,...known,friends:cached.friends}:known;
+    if(immediate)renderProfile(uid,immediate,account);else content.textContent='Loading profile...';
+    if(!dialog.open)dialog.showModal();
     try{
-      const person=await client.viewProfile(uid);
+      let request=pending.get(uid);
+      if(!request){request=client.viewProfile(uid);pending.set(uid,request);request.finally(()=>{if(pending.get(uid)===request)pending.delete(uid);}).catch(()=>{});}
+      const person=await request;
       if(run!==serial||account!==getUser()?.uid)return;
       if(!person)throw new Error('This profile is no longer available.');
+      cache.set(uid,person);renderProfile(uid,person,account);
+      relationships.delete(uid);
+    }catch(error){if(run===serial){if(!immediate)content.textContent=error.message;else{const message=document.createElement('p');message.className='hint';message.textContent='Showing previously loaded details. Could not refresh this profile.';content.append(message);}}}
+  }
+  function renderProfile(uid,person,account){
       targetName=person.username;
       const row=uid===account?{...person,...ownSummary(),...ownAppearance()}:person;
       const appearance=solarAppearance({planet:row.planet||'happy',vibes:row.vibes||''});
@@ -67,13 +77,9 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
         </div>
         <section class="public-profile-vibes-panel" aria-labelledby="profile-vibes-title"><h4 id="profile-vibes-title" class="eyebrow">CURRENT VIBES</h4><p class="public-profile-vibes">${esc(row.vibes===undefined?'Not shared yet.':appearance.vibes||'No vibes shared yet.')}</p></section>
       </article>
-      <section class="public-profile-friends" aria-labelledby="profile-friends-title"><div class="profile-friends-heading"><h3 id="profile-friends-title">Friends</h3><span class="count-pill" aria-label="${person.friends.length} friends">${person.friends.length}</span></div>
-      ${person.friends.length?`<ul class="profile-friend-grid">${person.friends.map(friend=>`<li><button type="button" data-view-profile="${esc(friend.uid)}"><span class="profile-username">@${esc(friend.username)}</span><span class="profile-friend-arrow" aria-hidden="true">↗</span></button></li>`).join('')}</ul>`:'<p class="hint profile-friends-empty">No friends yet.</p>'}</section>`;
-      // Use optimistic relationship state only for this immediate render; later
-      // profile visits use the live watcher, including friendships accepted elsewhere.
-      relationships.delete(uid);
+      <section class="public-profile-friends" aria-labelledby="profile-friends-title"><div class="profile-friends-heading"><h3 id="profile-friends-title">Friends</h3><span class="count-pill" aria-label="${person.friends?.length??'...'} friends">${person.friends?.length??'...'}</span></div>
+      ${person.friends?.length?`<ul class="profile-friend-grid">${person.friends.map(friend=>`<li><button type="button" data-view-profile="${esc(friend.uid)}"><span class="profile-username">@${esc(friend.username)}</span><span class="profile-friend-arrow" aria-hidden="true">↗</span></button></li>`).join('')}</ul>`:`<p class="hint profile-friends-empty">${person.friends?'No friends yet.':'Loading friends...'}</p>`}</section>`;
       requestAnimationFrame(()=>fitShortUsernames(dialog));
-    }catch(error){if(run===serial)content.textContent=error.message;}
   }
   document.addEventListener('click',event=>{const button=event.target.closest('[data-view-profile]');if(button)open(button.dataset.viewProfile);});
   content.addEventListener('click',async event=>{
@@ -94,5 +100,5 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
     try{await getClient().request(uid);if(run===serial&&account===getUser()?.uid){relationships.set(uid,{friend:false,sent:{id:account+'~'+uid}});await open(uid);}}
     catch(error){if(run===serial){button.disabled=false;button.textContent='Retry friend request';const message=document.createElement('p');message.textContent=error.message;message.setAttribute('role','alert');content.append(message);}}
   });
-  return {open,reset(){serial++;target=null;removal=null;relationships.clear();if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();}};
+  return {open,reset(){serial++;target=null;removal=null;relationships.clear();cache.clear();pending.clear();if(removeDialog.open)removeDialog.close();if(dialog.open)dialog.close();}};
 }

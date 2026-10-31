@@ -7,18 +7,18 @@ html[data-phone-launch] .phone-launch {
   pointer-events:none;opacity:1;
 }
 .phone-launch::before {content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,var(--lcd-_142b6f10,#142b6f10) 0 1px,transparent 1px 3px);box-shadow:inset 0 0 25px var(--lcd-_18366020,#18366020)}
-.phone-launch-content {position:relative;display:grid;place-items:center;width:min(228px,62vw);aspect-ratio:1;opacity:0;will-change:transform}
+.phone-launch-content {position:relative;display:grid;place-items:center;width:min(228px,62vw);aspect-ratio:1;opacity:0;will-change:transform,opacity}
 .phone-launch-mascot {display:block;width:81%;height:81%;object-fit:contain;image-rendering:auto;filter:brightness(.84)}
 .phone-launch-ring {position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke-width:2.5}
 .phone-launch-ring-track {stroke:var(--lcd-_233d7440,#233d7440)}
 .phone-launch-ring-fill {stroke:var(--lcd-_c3e7ff,#c3e7ff);stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transform:rotate(105deg);transform-origin:110px 110px}
 html[data-launch-image='ready'] .phone-launch-content {opacity:1}
-html[data-launch-image='ready'] .phone-launch-ring-fill {animation:planet-ring-loading 720ms cubic-bezier(.3,.05,.3,1) both}
-html[data-phone-launch='leaving'] .phone-launch-content {animation:planet-slide-away 320ms cubic-bezier(.5,0,.8,.45) both}
-html[data-phone-launch='leaving'] .phone-launch {animation:planet-backdrop-away 320ms linear both}
+html[data-launch-image='ready'] .phone-launch-ring-fill {animation:planet-ring-loading 400ms cubic-bezier(.2,.6,.35,1) both}
+html[data-phone-launch='leaving'] .phone-launch-content {animation:planet-slide-away 180ms cubic-bezier(.2,.7,.3,1) both}
+html[data-phone-launch='leaving'] .phone-launch {animation:planet-backdrop-away 180ms ease-out both}
 @keyframes planet-ring-loading {from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-@keyframes planet-slide-away {from{transform:translateX(0)}to{transform:translateX(var(--launch-exit,calc(50vw + 130px)))}}
-@keyframes planet-backdrop-away {0%,65%{opacity:1}100%{opacity:0}}
+@keyframes planet-slide-away {from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-12px) scale(.97);opacity:0}}
+@keyframes planet-backdrop-away {from{opacity:1}to{opacity:0}}
 html[data-launch-motion='reduced'] .phone-launch,
 html[data-launch-motion='reduced'] .phone-launch-content,
 html[data-launch-motion='reduced'] .phone-launch-ring-fill {animation:none}

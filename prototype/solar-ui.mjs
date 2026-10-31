@@ -136,7 +136,7 @@ export function mountSolarSystems({getClient,getUser,getProfile,getFriends,today
     $('#solar-edit-profile').disabled=!profile||!state.appearanceReady;
     const date=today(),yesterday=addDays(date,-1),scores=new Map(yesterdayDays.map(day=>[day.uid,day.score])),current=new Map((ratingDays.get(date)||[]).map(day=>[day.uid,day]));
     const datedMembers=members.map(member=>({...solarMemberStreak(member,streakDays,date),yesterdayDate:yesterday,yesterdayScore:yesterdayReady?scores.get(member.uid)??null:member.yesterdayDate===yesterday?member.yesterdayScore??null:null,todayDate:date,todayScore:current.get(member.uid)?.score??null,todayReviewComplete:current.get(member.uid)?.reviewComplete===true}));
-    return {members:datedMembers,primary,loading,reactions:boardReactions,vibeReactions:vibesUI.reactions(),owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
+    return {members:datedMembers,name:group?.name,primary,loading,reactions:boardReactions,vibeReactions:vibesUI.reactions(),owner:group?.owner,appearance:state.appearance,appearanceReady:state.appearanceReady,ownLogged,evening:eveningKey?{loading:eveningLoading,error:eveningError,logged:eveningDays.map(day=>day.uid)}:null,ids:state.groups.map(group=>group.id)};
   }
   function paintDay(){
     if(!dayTarget)return;
