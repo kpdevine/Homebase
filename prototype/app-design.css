@@ -1682,6 +1682,7 @@ details[open]>summary::after {transform:rotate(180deg)}
 .friends-view>#solar-connected {order:1;width:100%;min-width:0}
 .friends-view>#friend-manager {order:2}
 .friends-view>#solar-connected>#solar-manage {margin-top:0}
+.profile-unknown-planet {font:700 40px/1 var(--font-display);color:var(--ui-muted)}
 .short-username,.short-username .profile-username {white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;text-align:center;text-size-adjust:100%;-webkit-text-size-adjust:100%}
 .profile-friend-grid button,#friend-list .manage-friend-open,#solar-member-list .solar-member-profile-link,.request-profile-link {min-width:0;max-width:100%;text-size-adjust:100%;-webkit-text-size-adjust:100%}
 .profile-friend-grid button {padding-inline:5px}

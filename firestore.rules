@@ -76,7 +76,8 @@ service cloud.firestore {
         && request.resource.data.updatedAt == request.time;
     }
     match /socialScores/{uid} {
-      allow read: if self(uid) || signedIn() && exists(/databases/$(database)/documents/friendships/$(uid)/friends/$(request.auth.uid));
+      // Validated profile aggregates; private logs are stored under /users.
+      allow read: if signedIn();
       allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes','vibesVersion']);
     }
     // Browseable profiles expose only the validated shared summary and appearance.
@@ -214,7 +215,8 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(request.resource.data.userId))));
     }
     match /socialPreferences/{uid} {
-      allow read: if self(uid);
+      // Only planet, shared vibes, selected system and update metadata are allowed here.
+      allow read: if signedIn();
       allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt','planet','vibes','vibesVersion'])
         && validAppearance(request.resource.data)
         && (!request.resource.data.keys().hasAny(['primaryGroupId']) || (exists(/databases/$(database)/documents/socialPreferences/$(uid)) && request.resource.data.primaryGroupId == resource.data.get('primaryGroupId',''))

@@ -1,5 +1,7 @@
 import {collection,doc,getDoc,getDocs,query,where,orderBy,startAt,endAt,limit,onSnapshot,runTransaction,writeBatch,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
 import {username,groupName,REACTIONS,solarAppearance} from './social-model.mjs';
+import {profileDetails} from './profile-data.mjs';
+import {localDateKey} from './day-clock.mjs';
 
 export function socialClient(db,uid,options={}){
   const profile=doc(db,'publicProfiles',uid);
@@ -8,11 +10,23 @@ export function socialClient(db,uid,options={}){
     groups:groupClient(db,uid,options),
     async profile(){const snapshot=await getDoc(profile);return snapshot.exists()?snapshot.data():null;},
     async viewProfile(user){
-      const [identity,summary,links,memberships]=await Promise.all([getDoc(doc(db,'publicProfiles',user)),getDoc(doc(db,'profileSummaries',user)),getDocs(collection(db,'friendships',user,'friends')),getDocs(collection(db,'groupMemberships',user,'groups'))]);
+      const [identity,summary,links,memberships,legacy,appearance]=await Promise.all([getDoc(doc(db,'publicProfiles',user)),getDoc(doc(db,'profileSummaries',user)),getDocs(collection(db,'friendships',user,'friends')),getDocs(collection(db,'groupMemberships',user,'groups')),getDoc(doc(db,'socialScores',user)),getDoc(doc(db,'socialPreferences',user))]);
       if(!identity.exists())return null;
       const friends=await Promise.all(links.docs.map(async link=>{const person=await getDoc(doc(db,'publicProfiles',link.id));return person.exists()?{uid:link.id,username:person.data().username}:null;}));
       const systems=await Promise.all(memberships.docs.map(async membership=>{const entry=await getDoc(doc(db,'groupDirectory',membership.id));return entry.exists()?{id:membership.id,name:entry.data().name}:null;}));
-      return {...summary.data(),...identity.data(),solarSystems:systems.filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name)),friends:friends.filter(Boolean).sort((a,b)=>a.username.localeCompare(b.username))};
+      const solarSystems=systems.filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name));
+      const ownMemberships=user===uid?memberships:await getDocs(collection(db,'groupMemberships',uid,'groups'));
+      const sharedIds=solarSystems.filter(system=>ownMemberships.docs.some(entry=>entry.id===system.id)).map(system=>system.id);
+      const refs=sharedIds.map(group=>doc(db,'friendGroups',group,'scores',user));
+      const shared=await Promise.allSettled(refs.map(ref=>getDoc(ref)));
+      const sources=[...shared.filter(result=>result.status==='fulfilled').map(result=>result.value.data()),legacy.data(),summary.data()];
+      const liveIdentity={...identity.data(),uid:user},today=localDateKey();
+      let row=profileDetails(liveIdentity,sources,today,undefined,appearance.data());
+      if(!row.streakAvailable&&sharedIds.length){
+        const days=await getDocs(query(collection(db,'friendGroups',sharedIds[0],'days'),where('uid','==',user)));
+        row=profileDetails(liveIdentity,sources,today,days.docs.map(day=>day.data()),appearance.data());
+      }
+      return {...row,solarSystems,friends:friends.filter(Boolean).sort((a,b)=>a.username.localeCompare(b.username))};
     },
     async publishProfile(name,summary,appearance){await setDoc(doc(db,'profileSummaries',uid),{uid,username:name,...summary,...solarAppearance(appearance),updatedAt:serverTimestamp()});},
     watchProfile(receive,error){return onSnapshot(profile,snapshot=>receive(snapshot.exists()?snapshot.data():null),error);},

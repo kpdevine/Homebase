@@ -52,10 +52,10 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
       const today=localDateKey(),currentMonth=today.slice(0,7);
       const monthly=row.month===currentMonth?row.monthScore??null:null;
       const monthName=new Intl.DateTimeFormat('en-US',{month:'long',timeZone:'UTC'}).format(new Date(today+'T12:00:00Z'));
-      const streak=[today,addDays(today,-1)].includes(row.streakEndDate)?row.consecutiveStreak||0:0;
+      const streak=Number.isInteger(row.consecutiveStreak)?([today,addDays(today,-1)].includes(row.streakEndDate)?row.consecutiveStreak:0):null;
       content.innerHTML=`<article class="public-profile-card">
         <header class="public-profile-hero">
-          <div class="public-profile-planet">${planetEmoji(appearance.planet,'@'+row.username+' planet','portrait')}</div>
+          <div class="public-profile-planet">${row.planet?planetEmoji(appearance.planet,'@'+row.username+' planet','portrait'):'<span class="profile-unknown-planet" aria-label="Profile picture not shared yet">?</span>'}</div>
           <div class="public-profile-identity"><p class="eyebrow">${uid===account?'YOUR LITTLE CORNER OF THE UNIVERSE':'A LITTLE PLANET IN YOUR ORBIT'}</p><h3 class="profile-username">@${esc(row.username)}</h3></div>
           <div class="profile-actions">${requestButton(uid)}</div>
         </header>
@@ -63,9 +63,9 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
         <div class="public-profile-stats" aria-label="Profile statistics">
           <div class="public-profile-stat"><div class="profile-stat-value profile-stat-meter" role="img" aria-label="${monthName} average: ${monthly===null?'not logged':monthly+' out of 10'}"><span class="profile-month-name">${monthName}</span>${scoreCircle(monthly,true)}</div><span>Month average</span></div>
           <div class="public-profile-stat"><div class="profile-stat-value"><strong>${row.totalDaysLogged??'—'}</strong></div><span>Total days logged</span></div>
-          <div class="public-profile-stat ${streak>=3?'has-streak':''}"><div class="profile-stat-value"><strong>${streak}<small>days</small></strong></div><span>Current streak</span></div>
+          <div class="public-profile-stat ${streak>=3?'has-streak':''}"><div class="profile-stat-value"><strong>${streak??'—'}<small>days</small></strong></div><span>Current streak</span></div>
         </div>
-        <section class="public-profile-vibes-panel" aria-labelledby="profile-vibes-title"><h4 id="profile-vibes-title" class="eyebrow">CURRENT VIBES</h4><p class="public-profile-vibes">${esc(appearance.vibes||'No vibes shared yet.')}</p></section>
+        <section class="public-profile-vibes-panel" aria-labelledby="profile-vibes-title"><h4 id="profile-vibes-title" class="eyebrow">CURRENT VIBES</h4><p class="public-profile-vibes">${esc(row.vibes===undefined?'Not shared yet.':appearance.vibes||'No vibes shared yet.')}</p></section>
       </article>
       <section class="public-profile-friends" aria-labelledby="profile-friends-title"><div class="profile-friends-heading"><h3 id="profile-friends-title">Friends</h3><span class="count-pill" aria-label="${person.friends.length} friends">${person.friends.length}</span></div>
       ${person.friends.length?`<ul class="profile-friend-grid">${person.friends.map(friend=>`<li><button type="button" data-view-profile="${esc(friend.uid)}"><span class="profile-username">@${esc(friend.username)}</span><span class="profile-friend-arrow" aria-hidden="true">↗</span></button></li>`).join('')}</ul>`:'<p class="hint profile-friends-empty">No friends yet.</p>'}</section>`;
