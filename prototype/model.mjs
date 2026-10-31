@@ -186,6 +186,7 @@ export function createStore(options = {}) {
       return {id:child.id||null,name:child.name.trim()};
     })};
   }
+  const taskCreationDate=()=>options.editableToday?.()??options.today??null;
   const planningLimit=()=>options.editableToday?addDays(options.editableToday(),7):null;
   function validatePlannedDate(date,previous) {
     if(!date||date===previous)return;
@@ -290,6 +291,8 @@ export function createStore(options = {}) {
         task={id:nextId('task'),name:clean,done:false,children:children.map(name=>({id:nextId('task'),name:name.trim(),done:false,children:[]})),...dates};
         task.taskEvents=[{date:key,value:taskState(task)}];
       }
+      const created=taskCreationDate()??key;
+      if(task?.taskEvents&&key>created){key=created;task.taskEvents[0].date=created;}
       const day=writableDay(key);
       if(task && !day.tasks.some(item=>item.id===task.id)) day.tasks.push(task);
       if(task) invalidateReview(day,'checklists');

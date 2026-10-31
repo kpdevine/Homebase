@@ -87,3 +87,23 @@ test('legacy future tasks become visible today without losing their planned date
  assert.equal(score(store,start).total,0);
  validateSnapshot(store.exportSnapshot());
 });
+
+test('a task created for a future planned day appears every day from creation, even through the model API',()=>{
+ const store=createStore({seed:false,editableToday:()=>start});
+ const id=store.addTask(planned,'Visible until finished');
+ for(let offset=0;offset<8;offset++){
+   const date=addDays(start,offset);assert.equal(store.loadDay(date).tasks.find(task=>task.id===id)?.done,false);
+   assert.equal(score(store,date).total,date<planned?0:1);
+ }
+ store.toggleTask(addDays(planned,3),id);
+ assert.equal(store.loadDay(addDays(planned,4)).tasks.length,0);
+ const restored=createStore({seed:false,snapshot:recordsSnapshot(snapshotRecords(store.exportSnapshot())),editableToday:()=>addDays(planned,4)});
+ assert.equal(restored.loadDay(addDays(planned,4)).tasks.length,0);
+});
+test('undated tasks remain visible without contributing a score penalty',()=>{
+ const store=createStore({seed:false});const id=store.addTask(start,'Any time',{displayDate:null});
+ for(let offset=0;offset<5;offset++){
+   const date=addDays(start,offset);store.updateRating(date,8);
+   assert.equal(store.loadDay(date).tasks[0].id,id);assert.equal(score(store,date).total,0);assert.equal(score(store,date).score,8);
+ }
+});

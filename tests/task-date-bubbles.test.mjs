@@ -14,8 +14,8 @@ const bubbles=task=>ui.taskDateBubbles(task,'2026-10-27');
 
 test('one plan-to-do-by bubble replaces separate deadline and planning labels',()=>{
   const markup=bubbles({dueDate:'2026-10-30',displayDate:'2026-10-28',done:false});
-  assert.match(markup,/>Plan to do by 2026-10-28</);assert.doesNotMatch(markup,/task-due-bubble/);
-  assert.match(bubbles({dueDate:'2026-10-30',displayDate:null}),/>Plan to do by 2026-10-30</);
+  assert.match(markup,/>Plan to do 2026-10-28</);assert.doesNotMatch(markup,/task-due-bubble/);
+  assert.match(bubbles({dueDate:'2026-10-30',displayDate:null}),/>Plan to do 2026-10-30</);
 });
 test('unfinished plans show only Overdue after the planned day',()=>{
   const task={displayDate:'2026-10-26',done:false};
@@ -34,7 +34,7 @@ test('legacy dated tasks show their assigned day as a plan without inventing a d
   const snapshot=store.exportSnapshot();delete snapshot.days[0].tasks[0].taskEvents;delete snapshot.days[0].tasks[0].dueDate;delete snapshot.days[0].tasks[0].displayDate;
   const restored=createStore({seed:false,snapshot}),before=restored.exportSnapshot(),task=restored.loadDay('2026-10-29').tasks[0];
   const markup=ui.taskDateBubbles(task,'2026-10-29','2026-10-29');
-  assert.match(markup,/>Plan to do by 2026-10-29</);assert.doesNotMatch(markup,/task-due-bubble/);
+  assert.match(markup,/>Plan to do 2026-10-29</);assert.doesNotMatch(markup,/task-due-bubble/);
   assert.equal(dailyRecap(restored.loadDay('2026-10-29')).tasks[0].displayDate,'2026-10-29');
   assert.deepEqual(restored.exportSnapshot(),before);
 });
@@ -43,7 +43,7 @@ test('old recurring routines and future planning cards show the occurrence date'
   const store=createStore({seed:false});store.addTask('2026-10-29','Existing routine',{recurrence:{frequency:'daily',weekdays:[]}});
   const before=store.exportSnapshot(),occurrence=store.loadDay('2026-10-30').tasks[0];
   const markup=ui.taskDateBubbles(occurrence,'2026-10-29','2026-10-30');
-  assert.match(markup,/>Plan to do by 2026-10-30</);assert.doesNotMatch(markup,/is-overdue|task-due-bubble/);
+  assert.match(markup,/>Plan to do 2026-10-30</);assert.doesNotMatch(markup,/is-overdue|task-due-bubble/);
   assert.deepEqual(store.exportSnapshot(),before);
 });
 
@@ -52,7 +52,7 @@ test('legacy deadlines provide the plan-by label while stored dates remain compa
   const task=store.loadDay('2026-10-29').tasks[0],recap=dailyRecap(store.loadDay('2026-10-29')).tasks[0];
   for(const value of [task,recap]){
     assert.equal(value.displayDate,null);
-    assert.match(ui.taskDateBubbles(value,'2026-10-29','2026-10-29'),/>Plan to do by 2026-10-30</);
+    assert.match(ui.taskDateBubbles(value,'2026-10-29','2026-10-29'),/>Plan to do 2026-10-30</);
   }
   assert.equal(recap.children[0].displayDate,undefined);
 });

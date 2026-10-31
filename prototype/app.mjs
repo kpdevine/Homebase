@@ -262,7 +262,7 @@ function taskDateBubbles(task,date,scheduledDate) {
   if(!plannedDate)return '';
   const overdue=!task.done&&plannedDate<date;
   const label=dateFormat(plannedDate,{month:'short',day:'numeric',...(plannedDate.slice(0,4)!==date.slice(0,4)?{year:'numeric'}:{})});
-  return `<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="${overdue?'Overdue, planned by':'Plan to do by'} ${longDate(plannedDate)}">${overdue?'Overdue':'Plan to do by '+label}</time>`;
+  return `<time class="task-date-bubble task-plan-bubble${overdue?' is-overdue':''}" datetime="${plannedDate}" aria-label="${overdue?'Overdue, planned for':'Plan to do'} ${longDate(plannedDate)}">${overdue?'Overdue':'Plan to do '+label}</time>`;
 }
 function renderTasks() {
   const day = store.loadDay(selectedDate), {done,total}=taskProgress(day.tasks);
@@ -293,7 +293,7 @@ function renderTasks() {
   $('#tomorrow-tasks').innerHTML=planned.length?planned.map(task=>plannedTask(task,tomorrow)).join(''):'<li class="tomorrow-empty">A clear page for tomorrow.</li>';
   const laterDates=Array.from({length:6},(_,index)=>addDays(today,index+2));let laterCount=0;
   $('#later-dates').textContent=`${shortDate(laterDates[0])} – ${shortDate(laterDates.at(-1))}`;
-  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks).filter(task=>!task.templateId&&(!task._taskSource||task.displayDate===date));laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
+  $('#later-tasks').innerHTML=laterDates.map(date=>{const tasks=orderedTasks(store.loadDay(date).tasks).filter(task=>!task.templateId);laterCount+=tasks.length;return `<li class="planning-date"><button class="text-button" data-view-task-date="${date}">${dateFormat(date,{weekday:'short',month:'short',day:'numeric'})} →</button><ul>${tasks.length?tasks.map(task=>plannedTask(task,date)).join(''):'<li class="planning-empty">No tasks planned</li>'}</ul></li>`;}).join('');
   $('#later-count').textContent=String(laterCount);
   $('#plan-tomorrow').setAttribute('aria-label',`Plan tomorrow · ${planned.length} task${planned.length===1?'':'s'} scheduled`);
 }

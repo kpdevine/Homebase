@@ -48,7 +48,10 @@ export function summarizeDay(day, trainingEntries = [], week) {
 
   const config=settingsForDay(day);
 
-  const eligible=day.tasks.filter(task=>!(task.displayDate??task.dueDate)||(task.displayDate??task.dueDate)<=day.date);
+  const eligible=day.tasks.filter(task=>{
+    const planned=task.displayDate===undefined?(task.dueDate??day.date):(task.displayDate??task.dueDate??null);
+    return planned!==null&&planned<=day.date;
+  });
   const {done,total} = taskProgress(eligible);
   const pendingPlanned=eligible.some(task=>!task.done);
 

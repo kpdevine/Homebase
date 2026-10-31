@@ -48,3 +48,15 @@ test('a review retained across the app-day boundary never replaces the heading w
   assert.equal(ui.node('#tasks-title').textContent,'TO-DO LIST');
   assert.equal(ui.node('#tasks-date').textContent,'Full date 2026-10-20');
 });
+
+test('all daily lists and later-week previews keep unfinished tasks beyond their planned day',()=>{
+ const ui=screen('2026-10-21');
+ const task={id:'carry-task',name:'Keep until completed',done:false,children:[],displayDate:'2026-10-20',_taskSource:'2026-10-20'};
+ Object.assign(ui.context,{settingsForDay:()=>({tasks:{expandSubtasks:false}}),autoExpandedTasksSeen:new Set(),expandedTasks:new Set(),icon:()=>'',taskDateBubbles:()=>''});
+ ui.context.store.loadDay=()=>({tasks:[task],completedAt:null});ui.tasks();
+ for(const selector of ['#overview-task-list','#task-list','#tomorrow-tasks'])assert.match(ui.node(selector).innerHTML,/Keep until completed/);
+ assert.equal((ui.node('#later-tasks').innerHTML.match(/>Keep until completed</g)||[]).length,6);
+ ui.context.store.loadDay=date=>({tasks:date==='2026-10-21'?[{...task,done:true}]:[],completedAt:null});ui.tasks();
+ assert.doesNotMatch(ui.node('#tomorrow-tasks').innerHTML,/Keep until completed/);
+ assert.doesNotMatch(ui.node('#later-tasks').innerHTML,/Keep until completed/);
+});

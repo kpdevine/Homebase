@@ -5,8 +5,8 @@ export function validTaskDate(value) {
 export function taskDates(value, fallback) {
   const dueDate=value.dueDate??null;
   const displayDate=value.displayDate===undefined?fallback:value.displayDate;
-  if(dueDate!==null&&!validTaskDate(dueDate))throw new RangeError('Choose a valid plan-to-do-by date.');
-  if(displayDate!==null&&!validTaskDate(displayDate))throw new RangeError('Choose a valid plan-to-do-by date, or leave it blank.');
+  if(dueDate!==null&&!validTaskDate(dueDate))throw new RangeError('Choose a valid plan-to-do date.');
+  if(displayDate!==null&&!validTaskDate(displayDate))throw new RangeError('Choose a valid plan-to-do date, or leave it blank.');
   return {dueDate,displayDate};
 }
 export function taskState(task) {

@@ -9,3 +9,7 @@ The task editor now has one Plan to do by field. Unfinished one-time tasks appea
 Page overscroll is disabled in CSS, with an edge-only touch guard for Safari. Nested scrolling and pinch gestures remain available.
 
 Validation: full Node suite and integrated browser checks of profile details, task labels and task editor. No physical iPhone testing was available.
+
+## Follow-up: continuous task visibility
+
+The only visible task date is now labeled Plan to do. All later-week preview lists include pending carryover tasks instead of filtering them to their planned day. The store also uses creation time when adding a one-time task through a future calendar day. Tasks with an explicitly blank plan remain visible but are excluded from task score totals. Regression coverage exercises the actual daily and later-week render paths, future-date creation, completion, cloud round trips and score eligibility before/on/after the plan.
