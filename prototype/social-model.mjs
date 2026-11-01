@@ -1,3 +1,4 @@
+import {validTaskDate} from './task-dates.mjs';
 import {REACTIONS} from './reaction-kinds.mjs';
 export {REACTIONS} from './reaction-kinds.mjs';
 import {addDays} from './model.mjs';
@@ -33,11 +34,21 @@ export function solarDisplayedDay(member,today){
   return {date,label:current?'Today':'Yesterday',score:current?member.todayScore??null:member.yesterdayDate===date?member.yesterdayScore??null:null};
 }
 
-export function solarAppearance({planet='happy',vibes='',vibesVersion}={}) {
+export function solarAppearance({planet='happy',vibes='',vibesVersion,vibesDate}={}) {
   if(!REACTIONS.some(reaction=>reaction.id===planet))throw new Error('Choose a planet profile picture.');
   if(typeof vibes!=='string'||vibes.trim().length>160)throw new Error('Keep your current vibes to 160 characters.');
   if(vibesVersion!==undefined&&(typeof vibesVersion!=='string'||!/^[A-Za-z0-9_-]{8,64}$/.test(vibesVersion)))throw new Error('Invalid vibes version.');
-  return {planet,vibes:vibes.trim(),...(vibesVersion!==undefined?{vibesVersion}:{})};
+  if(vibesDate!==undefined&&!validTaskDate(vibesDate))throw new Error('Choose a valid day for your vibes.');
+  return {planet,vibes:vibes.trim(),...(vibesDate!==undefined?{vibesDate}:{}),...(vibesVersion!==undefined?{vibesVersion}:{})};
+}
+// Keep an avatar-only edit attached to the original day. A day submission
+// explicitly dates the entry even when its text matches yesterday's.
+export function datedAppearance(previous,value,date,today){
+  const next=solarAppearance(value),vibesDate=date??(next.vibes!==(previous?.vibes||'')?today:previous?.vibesDate);
+  return solarAppearance({...next,...(vibesDate?{vibesDate}:{})});
+}
+export function vibesDateLabel(appearance){
+  return validTaskDate(appearance?.vibesDate)?new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}).format(new Date(appearance.vibesDate+'T12:00:00Z')):'Date not recorded';
 }
 export function vibesReactions(reactions,target,version='legacy'){return reactions.filter(value=>value.target===target&&value.version===version);}
 export function solarMonthStats(members,month){

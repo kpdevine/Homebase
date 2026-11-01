@@ -47,7 +47,7 @@ test('Firestore isolates private logs and validates browseable profile summaries
     // Exercise the actual browser driver against the emulator, swapping only its
     // CDN import for the identical local SDK API so Node can load it.
     const {pathToFileURL}=await import('node:url');
-    const source=(await readFile(new URL('../prototype/social-driver.mjs',import.meta.url),'utf8')).replace('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js',pathToFileURL(require.resolve('firebase/firestore')).href).replace('./social-model.mjs',new URL('../prototype/social-model.mjs',import.meta.url).href).replace('./profile-data.mjs',new URL('../prototype/profile-data.mjs',import.meta.url).href).replace('./day-clock.mjs',new URL('../prototype/day-clock.mjs',import.meta.url).href);
+    const source=(await readFile(new URL('../prototype/social-driver.mjs',import.meta.url),'utf8')).replace('https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js',pathToFileURL(require.resolve('firebase/firestore')).href).replace('./social-logging.mjs',new URL('../prototype/social-logging.mjs',import.meta.url).href).replace('./social-model.mjs',new URL('../prototype/social-model.mjs',import.meta.url).href).replace('./profile-data.mjs',new URL('../prototype/profile-data.mjs',import.meta.url).href).replace('./day-clock.mjs',new URL('../prototype/day-clock.mjs',import.meta.url).href);
     const {socialClient}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
     const dana=socialClient(env.authenticatedContext('dana').firestore(),'dana'),eli=socialClient(env.authenticatedContext('eli').firestore(),'eli');
     assert.equal(await dana.profile(),null);await dana.claim('dana_planet');await eli.claim('eli_planet');assert.equal((await dana.search('eli'))[0].uid,'eli');
@@ -145,6 +145,12 @@ test('Firestore isolates private logs and validates browseable profile summaries
     await listenUntil((cb,error)=>dana.groups.watchDay(system.id,'dana','2026-10-20',cb,error),value=>value.day?.score===9&&value.reactions.some(reaction=>reaction.kind==='fire'));
     await listenUntil((cb,error)=>dana.groups.watchReactions(system.id,'2026-10-20',cb,error),value=>value.some(reaction=>reaction.target==='dana'&&reaction.kind==='fire'));
     await listenUntil((cb,error)=>eli.groups.watchStreakDays(system.id,'2026-10-21',cb,error),rows=>rows.some(row=>row.uid==='dana'&&row.date==='2026-10-20'));
+    await assertSucceeds(dana.groups.saveAppearance({planet:'happy',vibes:'Daily vibes'},{date:'2026-10-20'}));
+    assert.equal((await getDoc(doc(danaDb,'socialPreferences','dana'))).data().vibesDate,'2026-10-20');
+    await assertSucceeds(dana.publishProfile('dana_planet',summary,{planet:'happy',vibes:'Daily vibes',vibesDate:'2026-10-20'}));
+    assert.equal((await eli.viewProfile('dana')).vibesDate,'2026-10-20');
+    await assertFails(setDoc(doc(danaDb,'socialPreferences','dana'),{vibesDate:123,updatedAt:serverTimestamp()},{merge:true}));
+    await assertFails(setDoc(doc(danaDb,'socialPreferences','dana'),{vibesDate:'not-a-date',updatedAt:serverTimestamp()},{merge:true}));
     const appearanceBefore=(await getDoc(doc(danaDb,'socialPreferences','dana'))).data();
     await assertSucceeds(dana.groups.publish([system.id],'dana_planet',summary,[{date:'2026-10-20',score:9}],appearanceBefore));
     const oldVibesVersion=appearanceBefore.vibesVersion;

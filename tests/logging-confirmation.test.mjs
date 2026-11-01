@@ -5,11 +5,11 @@ import vm from 'node:vm';
 
 const source=await readFile(new URL('../prototype/app.mjs',import.meta.url),'utf8');
 const handler=source.slice(source.indexOf('let completingDay=false;'),source.indexOf('function updateFinalSentiments('));
-function confirmation({member=true,ready=true,vibes='',save=async()=>{}}={}){
+function confirmation({member=true,ready=true,vibes='',save=async()=>{},afterSaveReady=ready}={}){
   const nodes=new Map(),calls=[];
   const $=selector=>{if(!nodes.has(selector))nodes.set(selector,{value:'',textContent:'',disabled:false,focus(){calls.push('focus');},addEventListener(type,fn){this.click=fn;}});return nodes.get(selector);};
   $('#final-vibes-input').value=vibes;
-  const context={$,socialUI:{requiresVibes:()=>member,loggingReady:()=>ready,saveVibes:async value=>{calls.push(['save',value]);await save();}},store:{completeDay(){calls.push('complete');}},selectedDate:'2026-10-29',editableToday:()=> '2026-10-29',buildAchievements:()=>[],firstAchievementUnlocks:()=>[],achievementNotified:new Set(),preferences:{},preferencesKey:'preview',localStorage:{setItem(){}},renderFinalSentimentsState(){},render(){},closeDialog(){},setView(){},announce(){},celebrateDayCompletion(){},queueAchievementCelebration(){},shortDate:String};
+  const context={$,socialUI:{requiresVibes:()=>member,loggingReady:()=>ready,saveVibes:async (value,date)=>{calls.push(['save',value,date]);await save();ready=afterSaveReady;}},store:{completeDay(){calls.push('complete');}},selectedDate:'2026-10-29',editableToday:()=> '2026-10-29',buildAchievements:()=>[],firstAchievementUnlocks:()=>[],achievementNotified:new Set(),preferences:{},preferencesKey:'preview',localStorage:{setItem(){}},renderFinalSentimentsState(){},render(){},closeDialog(){},setView(){},announce(){},celebrateDayCompletion(){},queueAchievementCelebration(){},shortDate:String};
   vm.createContext(context);vm.runInContext(handler,context);
   return {$,calls,click:()=>$('#submit-day').click()};
 }
@@ -28,9 +28,14 @@ test('logging waits for vibes persistence and ignores a second confirmation whil
   let release;const saving=new Promise(resolve=>{release=resolve;});
   const check=confirmation({vibes:'A good day',save:()=>saving}),pending=check.click();
   await check.click();assert.equal(check.calls.length,1);assert.equal(check.calls.includes('complete'),false);
-  release();await pending;assert.deepEqual(check.calls,[['save','A good day'],'complete']);
+  release();await pending;assert.deepEqual(check.calls,[['save','A good day','2026-10-29'],'complete']);
 });
 
 test('someone outside a Solar System can complete a day without shared vibes',async()=>{
   const check=confirmation({member:false});await check.click();assert.deepEqual(check.calls,['complete']);
+});
+
+test('membership or account becoming unknown while vibes save cannot complete the day',async()=>{
+ const check=confirmation({vibes:'A good day',afterSaveReady:false});await check.click();
+ assert.equal(check.calls.includes('complete'),false);assert.match(check.$('#final-vibes-error').textContent,/account or Solar System changed/);
 });

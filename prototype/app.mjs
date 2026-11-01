@@ -1090,7 +1090,8 @@ $('#submit-day').addEventListener('click',async()=>{
     const input=$('#final-vibes-input');
     if(!input.value.trim()){$('#final-vibes-error').textContent='Write your current vibes before logging your day.';input.focus();return;}
     completingDay=true;$('#submit-day').disabled=true;
-    try{await socialUI.saveVibes(input.value);}catch(error){$('#final-vibes-error').textContent=error.message;return;}finally{completingDay=false;renderFinalSentimentsState();}
+    const submissionDate=selectedDate;
+    try{await socialUI.saveVibes(input.value,submissionDate);if(submissionDate!==selectedDate||socialUI.loggingReady()===false)throw new Error('Your account or Solar System changed. Review your day again.');}catch(error){$('#final-vibes-error').textContent=error.message;return;}finally{completingDay=false;renderFinalSentimentsState();}
   }
   const before=buildAchievements(store,editableToday());
   try { store.completeDay(selectedDate); }
@@ -1354,7 +1355,7 @@ cloud=mountCloud({
     setTimeout(()=>customization?.offerSetup(),0);
     // Let first-time module setup open before a possible username prompt.
     if(state.status==='synced'&&signedInUser&&socialAccountUid!==signedInUser.uid){const user=signedInUser;socialAccountUid=user.uid;setTimeout(()=>{if(signedInUser?.uid===user.uid)socialUI?.setUser(user);},0);}
-    cloudLabel=state.label;renderSaveStatus();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
+    cloudLabel=state.label;renderSaveStatus();if($('#final-review-dialog').open)renderFinalSentimentsState();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }
 });

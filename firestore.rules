@@ -56,11 +56,12 @@ service cloud.firestore {
     function validAppearance(data) {
       return data.get('planet','happy') in ['happy','sad','party','fire','sun','love','wow','sleepy','strong','rocket','martian','distorted','laughing','crying','angry','thinking','wink','salute','grateful','melting','nerd','kiss','mogging']
         && data.get('vibes','') is string && data.get('vibes','').size() <= 160
+        && (!data.keys().hasAny(['vibesDate']) || data.vibesDate is string && data.vibesDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))
         && data.get('vibesVersion','legacy-version') is string && data.get('vibesVersion','legacy-version').matches('[A-Za-z0-9_-]{8,64}');
     }
     function validSummary(uid) {
       return self(uid)
-        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes','vibesVersion','consecutiveStreak','streakEndDate'])
+        && request.resource.data.keys().hasOnly(['uid','username','appDate','month','yesterdayDate','yesterdayScore','monthScore','daysLogged','totalDaysLogged','updatedAt','planet','vibes','vibesVersion','vibesDate','consecutiveStreak','streakEndDate'])
         && validAppearance(request.resource.data)
         && request.resource.data.uid == uid && request.resource.data.username == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.username
         && request.resource.data.appDate is string && request.resource.data.appDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
@@ -78,7 +79,7 @@ service cloud.firestore {
     match /socialScores/{uid} {
       // Validated profile aggregates; private logs are stored under /users.
       allow read: if signedIn();
-      allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes','vibesVersion']);
+      allow create, update: if validSummary(uid) && !request.resource.data.keys().hasAny(['planet','vibes','vibesVersion','vibesDate']);
     }
     // Browseable profiles expose only the validated shared summary and appearance.
     match /profileSummaries/{uid} {
@@ -217,7 +218,7 @@ service cloud.firestore {
     match /socialPreferences/{uid} {
       // Only planet, shared vibes, selected system and update metadata are allowed here.
       allow read: if signedIn();
-      allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt','planet','vibes','vibesVersion'])
+      allow create,update: if self(uid) && request.resource.data.keys().hasOnly(['primaryGroupId','updatedAt','planet','vibes','vibesVersion','vibesDate'])
         && validAppearance(request.resource.data)
         && (!request.resource.data.keys().hasAny(['primaryGroupId']) || (exists(/databases/$(database)/documents/socialPreferences/$(uid)) && request.resource.data.primaryGroupId == resource.data.get('primaryGroupId',''))
           || request.resource.data.primaryGroupId is string && existsAfter(/databases/$(database)/documents/friendGroups/$(request.resource.data.primaryGroupId)/members/$(uid)))

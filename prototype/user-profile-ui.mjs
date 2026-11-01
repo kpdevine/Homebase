@@ -1,4 +1,4 @@
-import {solarAppearance} from './social-model.mjs';
+import {solarAppearance,vibesDateLabel} from './social-model.mjs';
 import {localDateKey} from './day-clock.mjs';
 import {addDays} from './model.mjs';
 import {fitShortUsernames} from './username-layout.mjs';
@@ -75,7 +75,7 @@ export function mountUserProfiles({getClient,getUser,getFriends,getOutgoing,getI
           <div class="public-profile-stat"><div class="profile-stat-value"><strong>${row.totalDaysLogged??'—'}</strong></div><span>Total days logged</span></div>
           <div class="public-profile-stat ${streak>=3?'has-streak':''}"><div class="profile-stat-value"><strong>${streak??'—'}<small>days</small></strong></div><span>Current streak</span></div>
         </div>
-        <section class="public-profile-vibes-panel" aria-labelledby="profile-vibes-title"><h4 id="profile-vibes-title" class="eyebrow">CURRENT VIBES</h4><p class="public-profile-vibes">${esc(row.vibes===undefined?'Not shared yet.':appearance.vibes||'No vibes shared yet.')}</p></section>
+        <section class="public-profile-vibes-panel" aria-labelledby="profile-vibes-title"><h4 id="profile-vibes-title" class="eyebrow">CURRENT VIBES${row.vibes?`<span class="solar-vibes-date">${esc(vibesDateLabel(row))}</span>`:''}</h4><p class="public-profile-vibes">${esc(row.vibes===undefined?'Not shared yet.':appearance.vibes||'No vibes shared yet.')}</p></section>
       </article>
       <section class="public-profile-friends" aria-labelledby="profile-friends-title"><div class="profile-friends-heading"><h3 id="profile-friends-title">Friends</h3><span class="count-pill" aria-label="${person.friends?.length??'...'} friends">${person.friends?.length??'...'}</span></div>
       ${person.friends?.length?`<ul class="profile-friend-grid">${person.friends.map(friend=>`<li><button type="button" data-view-profile="${esc(friend.uid)}"><span class="profile-username">@${esc(friend.username)}</span><span class="profile-friend-arrow" aria-hidden="true">↗</span></button></li>`).join('')}</ul>`:`<p class="hint profile-friends-empty">${person.friends?'No friends yet.':'Loading friends...'}</p>`}</section>`;

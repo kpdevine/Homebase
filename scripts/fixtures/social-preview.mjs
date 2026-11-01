@@ -1,5 +1,5 @@
 import {addDays} from '/model.mjs';
-import {leaderboardSummary,sharedDays,solarAppearance} from '/social-model.mjs';
+import {leaderboardSummary,sharedDays,solarAppearance,datedAppearance} from '/social-model.mjs';
 
 export function createSocialPreview(store,today){
   const date=today(),month=date.slice(0,7),yesterday=addDays(date,-1),uid='demo-me';
@@ -7,7 +7,7 @@ export function createSocialPreview(store,today){
   const savedKey='pocket-planet.social-demo.v1';
   let saved;try{saved=JSON.parse(localStorage.getItem(savedKey)||'null');}catch{}
   if(saved?.groupName)group.groupName=saved.groupName;
-  let appearance=saved?.appearance||{planet:'happy',vibes:'Making room for the small wins today.',vibesVersion:'sample-you-v1'};
+  let appearance=saved?.appearance||{planet:'happy',vibes:'Making room for the small wins today.',vibesVersion:'sample-you-v1',vibesDate:yesterday};
   let outgoing=saved?.outgoing||[],friendIds=saved?.friendIds||['avery','milo'];
   if(!saved){
     const start=addDays(date,-7);
@@ -26,7 +26,7 @@ export function createSocialPreview(store,today){
     {uid:'milo',username:'milo',planet:'strong',vibes:'Back to the gym. A little stronger every week.',monthScore:8.7,daysLogged:21,totalDaysLogged:86,consecutiveStreak:5},
     {uid:'leo',username:'leo',planet:'mogging',vibes:'Taking it one day at a time.',monthScore:8.1,daysLogged:19,totalDaysLogged:74,consecutiveStreak:3},
     {uid:'nina',username:'nina',planet:'party',vibes:'Finished a big project! Time to celebrate.',monthScore:9.5,daysLogged:25,totalDaysLogged:164,consecutiveStreak:8}
-  ].map((person,index)=>({...person,month,appDate:date,streakEndDate:yesterday,yesterdayDate:yesterday,yesterdayScore:8+index*.4,vibesVersion:'sample-'+person.uid+'-v1'}));
+  ].map((person,index)=>({...person,month,appDate:date,streakEndDate:yesterday,yesterdayDate:yesterday,yesterdayScore:8+index*.4,vibesVersion:'sample-'+person.uid+'-v1',vibesDate:index===1?date:yesterday}));
   const graph={avery:[uid,'milo','nina'],milo:[uid,'avery','leo'],leo:['milo','nina'],nina:['avery','leo']};
   const listeners=new Set(),reactions=[{target:'avery',date:yesterday,reactor:'milo',username:'milo',kind:'fire'}];
   let vibeRows=[{target:'avery',reactor:'milo',username:'milo',version:'sample-avery-v1',kind:'love'}];
@@ -47,7 +47,7 @@ export function createSocialPreview(store,today){
     watchReactions:(id,day,receive)=>subscribe(()=>reactions.filter(row=>row.date===day),receive),
     watchVibesReactions:(id,receive)=>subscribe(()=>vibeRows,receive),
     watchDay:(id,target,day,receive)=>subscribe(()=>({day:days(day).find(row=>row.uid===target)||null,reactions:reactions.filter(row=>row.date===day&&row.target===target)}),receive),
-    async saveAppearance(value){const next=solarAppearance(value);appearance={...next,vibesVersion:next.vibes===appearance.vibes?appearance.vibesVersion:'sample-'+crypto.randomUUID()};emit();},
+    async saveAppearance(value,{date:forDate}={}){const next=datedAppearance(appearance,value,forDate,today());appearance={...next,vibesVersion:next.vibes===appearance.vibes&&next.vibesDate===appearance.vibesDate?appearance.vibesVersion:'sample-'+crypto.randomUUID()};emit();},
     async react(id,target,day,kind){const index=reactions.findIndex(row=>row.target===target&&row.date===day&&row.reactor===uid);if(index>=0)reactions.splice(index,1);if(kind)reactions.push({target,date:day,reactor:uid,username:own.username,kind});emit();return true;},
     async reactVibes(id,target,version,kind){vibeRows=vibeRows.filter(row=>row.target!==target||row.reactor!==uid);if(kind)vibeRows.push({target,version,reactor:uid,username:own.username,kind});emit();return true;},
     async rename(id,name){group.groupName=name.trim();emit();return group.groupName;},

@@ -1,5 +1,6 @@
+import {membershipSnapshotReady} from './social-logging.mjs';
 import {collection,doc,getDoc,getDocs,query,where,orderBy,startAt,endAt,limit,onSnapshot,runTransaction,writeBatch,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
-import {username,groupName,REACTIONS,solarAppearance} from './social-model.mjs';
+import {username,groupName,REACTIONS,solarAppearance,datedAppearance} from './social-model.mjs';
 import {profileDetails} from './profile-data.mjs';
 import {localDateKey} from './day-clock.mjs';
 
@@ -90,7 +91,7 @@ export function groupClient(db,uid,{notifyReaction=async()=>true}={}){
       for(let start=0;start<cleanup.length;start+=400){const next=writeBatch(db);for(const item of cleanup.slice(start,start+400))next.delete(item);await next.commit();}
     },
     async primary(id){await setDoc(prefs,{primaryGroupId:id,updatedAt:serverTimestamp()},{merge:true});},
-    async saveAppearance(value){const appearance=solarAppearance(value),version=crypto.randomUUID();await runTransaction(db,async tx=>{const previous=(await tx.get(prefs)).data();tx.set(prefs,{...appearance,...(appearance.vibes!==(previous?.vibes||'')?{vibesVersion:version}:previous?.vibesVersion?{vibesVersion:previous.vibesVersion}:{}),updatedAt:serverTimestamp()},{merge:true});});},
+    async saveAppearance(value,{date}={}){solarAppearance(value);const version=crypto.randomUUID();await runTransaction(db,async tx=>{const previous=(await tx.get(prefs)).data(),appearance=datedAppearance(previous,value,date,localDateKey());tx.set(prefs,{...appearance,...(appearance.vibes!==(previous?.vibes||'')||appearance.vibesDate!==previous?.vibesDate?{vibesVersion:version}:previous?.vibesVersion?{vibesVersion:previous.vibesVersion}:{}),updatedAt:serverTimestamp()},{merge:true});});},
     async publish(ids,name,summary,days=[],appearance={}){
       for(const id of ids){
         const existing=await getDocs(query(collection(db,'friendGroups',id,'days'),where('uid','==',uid))),desired=new Map(days.map(day=>[uid+'~'+day.date,day]));
@@ -115,7 +116,7 @@ export function groupClient(db,uid,{notifyReaction=async()=>true}={}){
       const watchNames=()=>{if(!active)return;const ids=new Set([...groups,...requests,...invitations].map(item=>item.groupId||item.id));for(const [id,entry] of nameStops)if(!ids.has(id)){nameStops.delete(id);entry.stop();names.delete(id);}for(const id of ids)if(!nameStops.has(id)){const entry={stop:()=>{}};nameStops.set(id,entry);entry.stop=onSnapshot(doc(db,'friendGroups',id),snapshot=>{if(!active||nameStops.get(id)!==entry)return;names.set(id,snapshot.data()?.name);emit();},error);}};
       const stops=[
       onSnapshot(doc(db,'solarOwnership',uid),snapshot=>{ownedGroupId=snapshot.data()?.groupId||null;emit();},error),
-      onSnapshot(collection(db,'groupMemberships',uid,'groups'),snapshot=>{groups=snapshot.docs.map(item=>({id:item.id,...item.data()}));groupsLoaded=true;watchNames();emit();},error),
+      onSnapshot(collection(db,'groupMemberships',uid,'groups'),{includeMetadataChanges:true},snapshot=>{groups=snapshot.docs.map(item=>({id:item.id,...item.data()}));groupsLoaded=membershipSnapshotReady(snapshot);watchNames();emit();},error),
       onSnapshot(query(collection(db,'groupRequests'),where('owner','==',uid)),snapshot=>{requests=snapshot.docs.map(item=>({id:item.id,...item.data()}));watchNames();emit();},error),
       onSnapshot(query(collection(db,'groupRequests'),where('userId','==',uid)),snapshot=>{invitations=snapshot.docs.map(item=>({id:item.id,...item.data()}));watchNames();emit();},error),
       onSnapshot(prefs,snapshot=>{const data=snapshot.data();primaryId=data?.primaryGroupId||null;appearance=solarAppearance(data);appearanceReady=true;emit();},error)];return ()=>{active=false;stops.forEach(stop=>stop());nameStops.forEach(entry=>entry.stop());nameStops.clear();};
