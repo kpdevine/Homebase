@@ -5,7 +5,9 @@ import {solarAppearance,datedAppearance,vibesDateLabel} from '../prototype/socia
 const ready={authReady:true,cloudHasUser:true,user:{uid:'me'},profile:{uid:'me'},membershipReady:true,appearanceReady:true,groupIds:['orbit']};
 test('day completion waits for authentication, account handoff, membership and appearance',()=>{
  assert.equal(socialLoggingReady(ready),true);
- for(const changes of [{authReady:false},{user:null},{profile:null},{membershipReady:false},{appearanceReady:false},{needsUsername:true}])assert.equal(socialLoggingReady({...ready,...changes}),false);
+ assert.equal(socialLoggingReady({...ready,profile:null}),true,'known members do not wait for the public profile lookup');
+ assert.equal(socialLoggingReady({...ready,profile:null,groupIds:[]}),false);
+ for(const changes of [{authReady:false},{user:null},{membershipReady:false},{appearanceReady:false},{needsUsername:true}])assert.equal(socialLoggingReady({...ready,...changes}),false);
  assert.equal(socialLoggingReady({authReady:true}),true);
  assert.equal(socialLoggingReady({...ready,groupIds:[],appearanceReady:false}),true);
  assert.equal(socialLoggingReady({...ready,needsUsername:true,profile:null,groupIds:[]}),true);

@@ -36,7 +36,7 @@ export function solarDisplayedDay(member,today){
 
 export function solarAppearance({planet='happy',vibes='',vibesVersion,vibesDate}={}) {
   if(!REACTIONS.some(reaction=>reaction.id===planet))throw new Error('Choose a planet profile picture.');
-  if(typeof vibes!=='string'||vibes.trim().length>160)throw new Error('Keep your current vibes to 160 characters.');
+  if(typeof vibes!=='string'||vibes.trim().length>246)throw new Error('Keep your current vibes to 246 characters.');
   if(vibesVersion!==undefined&&(typeof vibesVersion!=='string'||!/^[A-Za-z0-9_-]{8,64}$/.test(vibesVersion)))throw new Error('Invalid vibes version.');
   if(vibesDate!==undefined&&!validTaskDate(vibesDate))throw new Error('Choose a valid day for your vibes.');
   return {planet,vibes:vibes.trim(),...(vibesDate!==undefined?{vibesDate}:{}),...(vibesVersion!==undefined?{vibesVersion}:{})};

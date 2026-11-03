@@ -6,7 +6,8 @@ test('planet profiles accept the existing emoji set and bounded optional message
   assert.deepEqual(solarAppearance(),{planet:'happy',vibes:''});
   for(const {id} of REACTIONS)assert.deepEqual(solarAppearance({planet:id,vibes:'  Good day  '}),{planet:id,vibes:'Good day'});
   assert.throws(()=>solarAppearance({planet:'unrecognized'}));
-  for(const vibes of [null,{},'x'.repeat(161)])assert.throws(()=>solarAppearance({vibes}));
+  assert.equal(solarAppearance({vibes:'x'.repeat(246)}).vibes.length,246);
+  for(const vibes of [null,{},'x'.repeat(247)])assert.throws(()=>solarAppearance({vibes}));
 });
 
 test('monthly medals follow current scores and logged-day tie breaks, excluding unlogged or stale rows',()=>{

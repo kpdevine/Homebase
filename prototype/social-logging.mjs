@@ -3,7 +3,7 @@ export function socialLoggingReady({preview=false,authReady=false,cloudHasUser=f
   if(!preview&&!authReady)return false;
   if(!user)return !cloudHasUser;
   if(needsUsername)return membershipReady&&groupIds.length===0;
-  return !!profile&&membershipReady&&(!groupIds.length||appearanceReady);
+  return membershipReady&&(groupIds.length?appearanceReady:!!profile);
 }
 
 export function membershipSnapshotReady(snapshot){

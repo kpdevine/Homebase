@@ -108,7 +108,7 @@ const todayTaskHeading=document.createElement('div');
 $('#tasks-title').before(todayTaskHeading);todayTaskHeading.innerHTML='<p id="tasks-date" class="eyebrow"></p>';todayTaskHeading.append($('#tasks-title'));
 const expandedTasks = new Set(),autoExpandedTasksSeen=new Set();
 let displayName = preview?'Kieran':'Friend';
-let signedInUser=null,socialAccountUid=null,accountRestored=false,waitingForAccount=false;
+let signedInUser=null,accountRestored=false,waitingForAccount=false;
 let preferences={},motionPreference='full';
 try {const saved=JSON.parse(localStorage.getItem(preferencesKey));if(saved&&typeof saved==='object'&&!Array.isArray(saved))preferences=saved;}catch{}
 if(profileName(preferences.name))displayName=profileName(preferences.name);
@@ -1321,7 +1321,7 @@ cloud=mountCloud({
   prepareAccount:user=>{
     const result=accountWorkspaces?.switchTo(user?.uid)||{};
     waitingForAccount=!!user&&result.preferCloudOnFirstRead===true;
-    signedInUser=user;socialAccountUid=null;accountRestored=false;socialUI?.setUser(null);customization?.resetSetup();
+    signedInUser=user;accountRestored=false;socialUI?.setUser(null);customization?.resetSetup();
     if(user)for(const dialog of $$('dialog[open]'))dialog.close();
     return result;
   },
@@ -1337,7 +1337,7 @@ cloud=mountCloud({
     restoreAccountPreferences();render();
   },
   onUser:user=>{
-    signedInUser=user;
+    signedInUser=user;socialUI?.setUser(user);
     if(user)finishWelcome(store.getSettings().accountPreferences?.firstName||googleFirstName(user.displayName));
     else if(!preview&&!preferences.googleWelcomeSeen&&!storageError){$('#welcome-form').hidden=true;$('#welcome-local').hidden=false;showDialog($('#welcome-dialog'));}
   },
@@ -1353,8 +1353,6 @@ cloud=mountCloud({
       }catch(error){storageError=`Account preferences could not be saved. ${error.message}`;renderSaveStatus();}
     }
     setTimeout(()=>customization?.offerSetup(),0);
-    // Let first-time module setup open before a possible username prompt.
-    if(state.status==='synced'&&signedInUser&&socialAccountUid!==signedInUser.uid){const user=signedInUser;socialAccountUid=user.uid;setTimeout(()=>{if(signedInUser?.uid===user.uid)socialUI?.setUser(user);},0);}
     cloudLabel=state.label;renderSaveStatus();if($('#final-review-dialog').open)renderFinalSentimentsState();if(state.status==='synced')setTimeout(()=>socialUI?.publish(),0);reminders?.changed();$('#welcome-google').disabled=!state.canSignIn;
     if($('#welcome-dialog').open&&(welcomeGoogleAttempt||['offline','error'].includes(state.status)))$('#welcome-status').textContent=state.message;
   }

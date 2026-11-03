@@ -100,7 +100,10 @@ test('Firestore isolates private logs and validates browseable profile summaries
     assert.equal((await getDoc(doc(eliDb,'friendGroups',system.id,'scores','dana'))).data().vibes,'Ready for a new orbit');
     await assertFails(setDoc(doc(danaDb,'socialScores','dana'),{uid:'dana',username:'dana_planet',...summary,vibes:'group-only message',updatedAt:serverTimestamp()}));
     await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'scores','dana'),{uid:'dana',username:'dana_planet',...summary,planet:'invalid',updatedAt:serverTimestamp()}));
-    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'scores','dana'),{uid:'dana',username:'dana_planet',...summary,vibes:'x'.repeat(161),updatedAt:serverTimestamp()}));
+    await assertFails(setDoc(doc(danaDb,'friendGroups',system.id,'scores','dana'),{uid:'dana',username:'dana_planet',...summary,vibes:'x'.repeat(247),updatedAt:serverTimestamp()}));
+    await assertSucceeds(dana.groups.saveAppearance({planet:'happy',vibes:'x'.repeat(246)}));
+    await assertSucceeds(dana.publishProfile('dana_planet',summary,{planet:'happy',vibes:'x'.repeat(246)}));
+    await assertFails(setDoc(doc(danaDb,'socialPreferences','dana'),{vibes:'x'.repeat(247),updatedAt:serverTimestamp()},{merge:true}));
     assert.equal((await assertSucceeds(getDoc(doc(eliDb,'friendGroups',system.id,'days','dana~2026-10-20')))).data().score,9);
     await assertSucceeds(eli.groups.react(system.id,'dana','2026-10-20','fire'));
     async function listenUntil(subscribe,match){let stop;try{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Solar System listener timed out')),5000);stop=subscribe(value=>{if(match(value)){clearTimeout(timer);resolve();}},error=>{clearTimeout(timer);reject(error);});});}finally{stop?.();}}
